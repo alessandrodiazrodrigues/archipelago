@@ -1,0 +1,749 @@
+/* =================== LAYOUT PRINCIPAL DO SISTEMA =================== */
+
+/* === RESET E BASE === */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+body {
+    font-family: var(--font-family);
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+/* === CLASSES DE UTILIDADE === */
+.hidden {
+    display: none !important;
+}
+
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+
+.container {
+    width: 100%;
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 var(--space-md);
+}
+
+/* === MODAL DE AUTENTICAÇÃO === */
+.modal-auth {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: var(--bg-overlay);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: var(--z-modal);
+    backdrop-filter: blur(4px);
+}
+
+.auth-container {
+    background: var(--card);
+    padding: var(--space-2xl);
+    border-radius: var(--rounded-xl);
+    text-align: center;
+    color: var(--text-white);
+    max-width: 400px;
+    width: 90%;
+    box-shadow: var(--shadow-xl);
+    animation: fadeInScale 0.3s ease-out;
+}
+
+@keyframes fadeInScale {
+    from {
+        opacity: 0;
+        transform: scale(0.95) translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
+}
+
+.auth-container h1 {
+    margin-bottom: var(--space-sm);
+    font-size: var(--text-2xl);
+    font-weight: 700;
+    color: var(--text-white);
+}
+
+.auth-container p {
+    margin-bottom: var(--space-lg);
+    opacity: 0.8;
+    font-size: var(--text-base);
+}
+
+.auth-container input {
+    width: 100%;
+    padding: var(--space-lg);
+    margin: var(--space-lg) 0;
+    border: 1px solid var(--border-light);
+    border-radius: var(--rounded-lg);
+    background: rgba(255, 255, 255, 0.1);
+    color: var(--text-white);
+    font-size: var(--text-lg);
+    text-align: center;
+    letter-spacing: 2px;
+    font-weight: 600;
+    backdrop-filter: blur(10px);
+    transition: var(--transition-normal);
+}
+
+.auth-container input:focus {
+    outline: none;
+    border-color: var(--btn-primary);
+    background: rgba(255, 255, 255, 0.15);
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.auth-container input::placeholder {
+    color: rgba(255, 255, 255, 0.5);
+    letter-spacing: normal;
+}
+
+.auth-container button {
+    width: 100%;
+    padding: var(--space-lg);
+    background: var(--btn-primary);
+    color: white;
+    border: none;
+    border-radius: var(--rounded-lg);
+    font-size: var(--text-base);
+    font-weight: 600;
+    cursor: pointer;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    transition: var(--transition-normal);
+}
+
+.auth-container button:hover {
+    background: var(--btn-primary-hover);
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-lg);
+}
+
+.auth-container button:active {
+    transform: translateY(0);
+}
+
+.error-msg {
+    color: var(--error);
+    margin-top: var(--space-sm);
+    font-size: var(--text-sm);
+    font-weight: 500;
+    padding: var(--space-sm);
+    background: var(--error-light);
+    border-radius: var(--rounded);
+    border: 1px solid var(--error);
+}
+
+/* === HEADER === */
+.header {
+    background: var(--nav-header);
+    color: var(--text-white);
+    padding: var(--space-lg) var(--space-xl);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: var(--shadow-md);
+    position: sticky;
+    top: 0;
+    z-index: var(--z-sticky);
+    backdrop-filter: blur(10px);
+    min-height: var(--header-height);
+}
+
+.header-left {
+    display: flex;
+    align-items: center;
+    gap: var(--space-lg);
+    justify-content: flex-start; /* CORREÇÃO: FORÇAR À ESQUERDA */
+}
+
+.hamburger {
+    font-size: var(--text-2xl);
+    cursor: pointer;
+    padding: var(--space-sm);
+    border-radius: var(--rounded);
+    transition: var(--transition-fast);
+    user-select: none;
+    text-align: left; /* CORREÇÃO: ALINHAMENTO À ESQUERDA */
+    margin-right: var(--space-md); /* CORREÇÃO: ESPAÇAMENTO ESPECÍFICO */
+}
+
+.hamburger:hover {
+    background: rgba(255, 255, 255, 0.1);
+    transform: scale(1.05);
+}
+
+.header h1 {
+    font-size: var(--text-xl);
+    font-weight: 700;
+    letter-spacing: -0.025em;
+}
+
+.header-right {
+    display: flex;
+    align-items: center;
+    gap: var(--space-lg);
+}
+
+.header #timer,
+.header #updateTimer {
+    font-size: var(--text-sm);
+    opacity: 0.8;
+    padding: var(--space-sm) var(--space-md);
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: var(--rounded-full);
+    font-weight: 500;
+}
+
+.header button {
+    padding: var(--space-sm) var(--space-md);
+    background: var(--btn-primary);
+    color: white;
+    border: none;
+    border-radius: var(--rounded);
+    font-size: var(--text-sm);
+    font-weight: 600;
+    cursor: pointer;
+    transition: var(--transition-normal);
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+}
+
+.header button:hover {
+    background: var(--btn-primary-hover);
+    transform: translateY(-1px);
+    box-shadow: var(--shadow);
+}
+
+/* === MENU LATERAL === */
+.side-menu {
+    position: fixed;
+    top: 0;
+    left: calc(-1 * var(--sidebar-width));
+    width: var(--sidebar-width);
+    height: 100vh;
+    background: var(--nav-sidebar);
+    transition: left var(--transition-normal);
+    z-index: var(--z-modal);
+    display: flex;
+    flex-direction: column;
+    box-shadow: var(--shadow-xl);
+}
+
+.side-menu.open {
+    left: 0;
+}
+
+.menu-header {
+    padding: var(--space-xl);
+    border-bottom: 1px solid var(--border-light);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    min-height: var(--header-height);
+}
+
+.menu-header h2 {
+    color: var(--text-white);
+    font-size: var(--text-lg);
+    font-weight: 600;
+}
+
+.menu-close {
+    background: none;
+    border: none;
+    color: var(--text-white);
+    font-size: var(--text-2xl);
+    cursor: pointer;
+    padding: var(--space-sm);
+    border-radius: var(--rounded);
+    transition: var(--transition-fast);
+}
+
+.menu-close:hover {
+    background: rgba(255, 255, 255, 0.1);
+    transform: rotate(90deg);
+}
+
+.menu-items {
+    flex: 1;
+    padding: var(--space-lg) 0;
+    overflow-y: auto;
+}
+
+.side-menu-item {
+    display: flex;
+    align-items: center;
+    padding: var(--space-lg) var(--space-xl);
+    color: var(--text-white);
+    text-decoration: none;
+    transition: var(--transition-fast);
+    font-weight: 500;
+    border-left: 3px solid transparent;
+}
+
+.side-menu-item:hover {
+    background: rgba(255, 255, 255, 0.05);
+    border-left-color: rgba(255, 255, 255, 0.3);
+}
+
+.side-menu-item.active {
+    background: rgba(59, 130, 246, 0.1);
+    border-left-color: var(--btn-primary);
+    color: var(--btn-primary);
+}
+
+.side-menu-item span:first-child {
+    font-size: var(--text-lg);
+    margin-right: var(--space-md);
+    width: 24px;
+    text-align: center;
+}
+
+.menu-footer {
+    padding: var(--space-xl);
+    border-top: 1px solid var(--border-light);
+}
+
+.menu-divider {
+    height: 1px;
+    background: var(--border-light);
+    margin: var(--space-lg) 0;
+}
+
+.menu-footer button,
+.menu-config,
+.menu-qr,
+.menu-admin {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    padding: var(--space-md) var(--space-lg);
+    margin: var(--space-xs) 0;
+    background: rgba(255, 255, 255, 0.05);
+    color: var(--text-white);
+    border: 1px solid var(--border-light);
+    border-radius: var(--rounded-lg);
+    cursor: pointer;
+    font-size: var(--text-sm);
+    font-weight: 500;
+    text-decoration: none;
+    transition: var(--transition-normal);
+}
+
+.menu-footer button:hover,
+.menu-config:hover,
+.menu-qr:hover,
+.menu-admin:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.3);
+    transform: translateY(-1px);
+}
+
+.menu-footer span:first-child {
+    margin-right: var(--space-md);
+    font-size: var(--text-base);
+}
+
+/* === OVERLAY DO MENU === */
+.menu-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: calc(var(--z-modal) - 1);
+    opacity: 0;
+    visibility: hidden;
+    transition: var(--transition-normal);
+    backdrop-filter: blur(2px);
+}
+
+.menu-overlay.show {
+    opacity: 1;
+    visibility: visible;
+}
+
+/* === MAIN CONTENT === */
+.main-content {
+    max-width: 1600px;
+    margin: var(--space-xl) auto;
+    padding: 0 var(--space-xl);
+    min-height: calc(100vh - var(--header-height) - 200px);
+}
+
+.section-leitos {
+    width: 100%;
+}
+
+.leitos-header {
+    margin-bottom: var(--space-2xl);
+}
+
+.leitos-header h2 {
+    font-size: var(--text-3xl);
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: var(--space-lg);
+    text-align: center;
+}
+
+.hospital-selector {
+    display: flex;
+    gap: var(--space-lg);
+    margin-bottom: var(--space-xl);
+    padding: var(--space-xl);
+    background: var(--nav-header);
+    border-radius: var(--rounded-xl);
+    box-shadow: var(--shadow-md);
+}
+
+.hospital-btn {
+    flex: 1;
+    padding: var(--space-md) var(--space-lg);
+    background: var(--btn-primary);
+    color: white;
+    border: none;
+    border-radius: var(--rounded-lg);
+    cursor: pointer;
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: var(--text-sm);
+    letter-spacing: 0.5px;
+    transition: var(--transition-normal);
+    position: relative;
+    overflow: hidden;
+}
+
+.hospital-btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+    transition: var(--transition-normal);
+}
+
+.hospital-btn:hover::before {
+    left: 100%;
+}
+
+.hospital-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-lg);
+}
+
+.hospital-btn.active {
+    background: white;
+    color: var(--nav-header);
+    box-shadow: var(--shadow);
+}
+
+.hospital-btn.active:hover {
+    background: #f8fafc;
+}
+
+.filter-controls {
+    display: flex;
+    gap: var(--space-md);
+    justify-content: center;
+    margin-bottom: var(--space-xl);
+}
+
+.filter-controls select {
+    padding: var(--space-sm) var(--space-md);
+    border: 1px solid var(--border);
+    border-radius: var(--rounded-lg);
+    background: white;
+    font-size: var(--text-sm);
+    font-weight: 500;
+    cursor: pointer;
+    transition: var(--transition-normal);
+}
+
+.filter-controls select:focus {
+    outline: none;
+    border-color: var(--btn-primary);
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+/* === FOOTER === */
+.footer {
+    text-align: center;
+    padding: var(--space-2xl) var(--space-xl);
+    margin-top: var(--space-2xl);
+    border-top: 1px solid #e5e7eb;
+    color: var(--text-secondary);
+    font-size: var(--text-sm);
+    background: var(--bg-light);
+}
+
+.footer p {
+    margin: var(--space-sm) 0;
+    line-height: 1.6;
+}
+
+.footer p:last-child {
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+/* === ESTADOS DO BODY === */
+body.menu-open {
+    overflow: hidden;
+}
+
+/* =================== RESPONSIVIDADE MOBILE CORRIGIDA =================== */
+@media (max-width: 768px) {
+    /* HEADER MOBILE CORRIGIDO */
+    .header {
+        padding: var(--space-md) var(--space-lg);
+        flex-direction: row !important; /* CORREÇÃO: MANTER EM LINHA */
+        gap: var(--space-md);
+        min-height: auto;
+        align-items: center !important;
+        justify-content: space-between !important;
+    }
+    
+    /* HEADER LEFT - HAMBÚRGUER À ESQUERDA */
+    .header-left {
+        display: flex !important;
+        align-items: center !important;
+        gap: var(--space-sm) !important;
+        justify-content: flex-start !important;
+        flex: none !important;
+        width: auto !important;
+    }
+    
+    /* HAMBÚRGUER ESPECÍFICO MOBILE */
+    .hamburger {
+        font-size: var(--text-xl) !important;
+        padding: var(--space-xs) !important;
+        margin: 0 !important;
+        text-align: left !important;
+        align-self: flex-start !important;
+        order: 1 !important;
+    }
+    
+    /* TÍTULO MOBILE */
+    .header h1 {
+        font-size: var(--text-base) !important;
+        order: 2 !important;
+        margin-left: var(--space-sm) !important;
+    }
+    
+    /* HEADER RIGHT MOBILE */
+    .header-right {
+        display: flex !important;
+        align-items: center !important;
+        gap: var(--space-sm) !important;
+        justify-content: flex-end !important;
+        flex: 1 !important;
+        max-width: none !important;
+    }
+    
+    .header #timer,
+    .header #updateTimer {
+        font-size: var(--text-xs) !important;
+        padding: var(--space-xs) var(--space-sm) !important;
+    }
+    
+    .header button {
+        font-size: var(--text-xs) !important;
+        padding: var(--space-xs) var(--space-sm) !important;
+    }
+    
+    /* HOSPITAL SELECTOR MOBILE */
+    .hospital-selector {
+        flex-direction: column;
+        padding: var(--space-lg);
+        gap: var(--space-sm);
+    }
+    
+    .hospital-btn {
+        width: 100%;
+        padding: var(--space-md) var(--space-lg);
+        font-size: var(--text-sm);
+    }
+    
+    /* MENU LATERAL MOBILE */
+    .side-menu {
+        width: 100% !important;
+        left: -100% !important;
+    }
+    
+    .side-menu.open {
+        left: 0 !important;
+    }
+    
+    .menu-items {
+        padding: var(--space-md) 0;
+    }
+    
+    .side-menu-item {
+        padding: var(--space-md) var(--space-lg);
+        font-size: var(--text-sm);
+    }
+    
+    /* CONTEÚDO PRINCIPAL MOBILE */
+    .main-content {
+        margin: var(--space-lg) auto;
+        padding: 0 var(--space-lg);
+    }
+    
+    .leitos-header h2 {
+        font-size: var(--text-xl);
+    }
+    
+    .filter-controls {
+        flex-direction: column;
+        align-items: center;
+        gap: var(--space-sm);
+    }
+    
+    /* FOOTER MOBILE */
+    .footer {
+        padding: var(--space-xl) var(--space-lg);
+        font-size: var(--text-xs);
+    }
+}
+
+/* MOBILE PEQUENO */
+@media (max-width: 480px) {
+    .auth-container {
+        padding: var(--space-xl);
+        width: 95%;
+    }
+    
+    .auth-container input {
+        font-size: var(--text-base);
+        padding: var(--space-md);
+    }
+    
+    /* HEADER AINDA MAIS COMPACTO */
+    .header {
+        padding: var(--space-sm) var(--space-md);
+    }
+    
+    .hamburger {
+        font-size: var(--text-lg) !important;
+        padding: var(--space-xs) !important;
+    }
+    
+    .header h1 {
+        font-size: var(--text-sm) !important;
+    }
+    
+    .header #timer,
+    .header #updateTimer {
+        display: none; /* OCULTAR TIMER EM TELAS MUITO PEQUENAS */
+    }
+    
+    .header button {
+        padding: var(--space-xs) !important;
+        font-size: 10px !important;
+    }
+    
+    .hospital-selector {
+        padding: var(--space-md);
+    }
+    
+    .main-content {
+        padding: 0 var(--space-md);
+    }
+}
+
+/* === ANIMAÇÕES E EFEITOS === */
+@keyframes slideInRight {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+}
+
+.loading {
+    animation: pulse 1.5s ease-in-out infinite;
+}
+
+/* === SCROLL PERSONALIZADO === */
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--bg-light);
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--border);
+    border-radius: var(--rounded-full);
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--text-secondary);
+}
+
+/* === ACESSIBILIDADE === */
+@media (prefers-reduced-motion: reduce) {
+    * {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}
+
+@media (prefers-contrast: high) {
+    .header {
+        border-bottom: 2px solid currentColor;
+    }
+    
+    .hospital-btn {
+        border: 2px solid currentColor;
+    }
+    
+    .side-menu-item {
+        border-left-width: 4px;
+    }
+}

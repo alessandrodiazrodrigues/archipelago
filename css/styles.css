@@ -1,0 +1,267 @@
+/* =================== VARIÁVEIS GLOBAIS - 55 CORES PANTONE =================== */
+:root {
+    /* Cores do Sistema */
+    --nav-header: #1a1f2e;
+    --nav-sidebar: #1a1f2e;
+    --bg-primary: #ffffff;
+    --card: #1a1f2e;
+    --text-white: #ffffff;
+    --border: #334155;
+    
+    /* Status */
+    --status-vago: #16a34a;
+    --status-uso: #fbbf24;
+    --destaque: #8FD3F4;
+    
+    /* Concessões (13 cores) */
+    --conc-transicao: #007A53;
+    --conc-aplicacao: #582C83;
+    --conc-fisioterapia: #009639;
+    --conc-fonoaudiologia: #FF671F;
+    --conc-aspiracao: #2E1A47;
+    --conc-banho: #8FD3F4;
+    --conc-curativos: #00BFB3;
+    --conc-oxigenoterapia: #64A70B;
+    --conc-recarga: #00AEEF;
+    --conc-nutricional-com: #FFC72C;
+    --conc-nutricional-sem: #F4E285;
+    --conc-clister: #E8927C;
+    --conc-picc: #E03C31;
+    
+    /* Linhas de Cuidado (19 cores) */
+    --linha-assiste: #ED0A72;
+    --linha-aps: #007A33;
+    --linha-paliativos: #00B5A2;
+    --linha-ico: #A6192E;
+    --linha-oncologia: #6A1B9A;
+    --linha-pediatria: #5A646B;
+    --linha-auto-gastro: #5C5EBE;
+    --linha-auto-neuro-desm: #00AEEF;
+    --linha-auto-neuro-musc: #00263A;
+    --linha-auto-reumato: #582D40;
+    --linha-vida-leve: #FFB81C;
+    --linha-card: #C8102E;
+    --linha-endocrino: #582C83;
+    --linha-geriatria: #FF6F1D;
+    --linha-melhor: #556F44;
+    --linha-neurologia: #0072CE;
+    --linha-pneumologia: #E35205;
+    --linha-pos-bariatrica: #003C57;
+    --linha-reumatologia: #5A0020;
+    
+    /* Timeline */
+    --ouro: #fbbf24;
+    --r2: #3b82f6;
+    --r3: #8b5cf6;
+}
+
+/* =================== ESTILOS BASE =================== */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: var(--bg-primary);
+    color: #333;
+}
+
+/* =================== AUTENTICAÇÃO =================== */
+.modal-auth {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.9);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+}
+
+.auth-container {
+    background: var(--card);
+    padding: 40px;
+    border-radius: 12px;
+    text-align: center;
+    color: var(--text-white);
+    max-width: 400px;
+    width: 90%;
+}
+
+.auth-container h1 {
+    margin-bottom: 10px;
+}
+
+.auth-container input {
+    width: 100%;
+    padding: 15px;
+    margin: 20px 0;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: rgba(255,255,255,0.1);
+    color: var(--text-white);
+    font-size: 18px;
+    text-align: center;
+    letter-spacing: 2px;
+}
+
+.auth-container button {
+    width: 100%;
+    padding: 15px;
+    background: #3b82f6;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 16px;
+    cursor: pointer;
+    text-transform: uppercase;
+}
+
+.error-msg {
+    color: #ef4444;
+    margin-top: 10px;
+    font-size: 14px;
+}
+
+/* =================== HEADER =================== */
+header {
+    background: var(--nav-header);
+    color: var(--text-white);
+    padding: 15px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.header-left {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.hamburger {
+    font-size: 24px;
+    cursor: pointer;
+}
+
+.header-right {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+#timer {
+    font-size: 14px;
+    opacity: 0.8;
+}
+
+/* =================== MENU LATERAL =================== */
+.side-menu {
+    position: fixed;
+    top: 0;
+    left: -280px;
+    width: 280px;
+    height: 100%;
+    background: var(--nav-sidebar);
+    transition: left 0.3s;
+    z-index: 1000;
+    display: flex;
+    flex-direction: column;
+}
+
+.side-menu.open {
+    left: 0;
+}
+
+.side-menu .close-btn {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    background: none;
+    border: none;
+    color: var(--text-white);
+    font-size: 24px;
+    cursor: pointer;
+}
+
+.menu-items {
+    flex: 1;
+    padding: 60px 0;
+}
+
+.menu-items a {
+    display: block;
+    padding: 20px;
+    color: var(--text-white);
+    text-decoration: none;
+    transition: background 0.3s;
+}
+
+.menu-items a:hover {
+    background: rgba(255,255,255,0.1);
+}
+
+.menu-footer {
+    padding: 20px;
+    border-top: 1px solid var(--border);
+}
+
+.menu-footer button {
+    width: 100%;
+    padding: 12px;
+    margin: 5px 0;
+    background: rgba(255,255,255,0.1);
+    color: var(--text-white);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+/* =================== MAIN CONTENT =================== */
+main {
+    max-width: 1600px;
+    margin: 20px auto;
+    padding: 0 20px;
+}
+
+.hospital-selector {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 30px;
+    padding: 20px;
+    background: var(--nav-header);
+    border-radius: 12px;
+}
+
+.hospital-btn {
+    flex: 1;
+    padding: 12px 20px;
+    background: #3b82f6;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    text-transform: uppercase;
+    transition: all 0.3s;
+}
+
+.hospital-btn.active {
+    background: white;
+    color: #0a2b52;
+}
+
+/* =================== FOOTER =================== */
+footer {
+    text-align: center;
+    padding: 30px 20px;
+    margin-top: 50px;
+    border-top: 1px solid #e5e7eb;
+    color: #666;
+    font-size: 14px;
+}

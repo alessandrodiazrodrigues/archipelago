@@ -1,0 +1,121 @@
+/* =================== CARDS GRID =================== */
+.cards-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
+    gap: 20px;
+}
+
+.card {
+    background: var(--card);
+    border-radius: 12px;
+    padding: 20px;
+    color: var(--text-white);
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+
+/* Layout 3x3 dos campos */
+.card-row {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 15px;
+    margin-bottom: 15px;
+}
+
+.card-field {
+    text-align: left;
+}
+
+.field-label {
+    font-size: 11px;
+    color: #ffffff;
+    background: #60a5fa;
+    padding: 4px 8px;
+    border-radius: 4px;
+    display: inline-block;
+    margin-bottom: 5px;
+    text-transform: uppercase;
+    font-weight: 600;
+}
+
+.field-value {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-white);
+}
+
+/* Badge do Leito */
+.leito-badge {
+    background: var(--status-vago);
+    color: white;
+    padding: 10px;
+    border-radius: 6px;
+    text-align: center;
+    font-weight: 700;
+    text-transform: uppercase;
+}
+
+.leito-badge.ocupado {
+    background: var(--status-uso);
+    color: black;
+}
+
+/* Previsão de Alta */
+.previsao-alta {
+    background: var(--destaque);
+    color: black;
+    padding: 8px;
+    border-radius: 6px;
+    text-align: center;
+    font-weight: 700;
+}
+
+/* Seções de Concessões e Linhas */
+.card-section {
+    margin-bottom: 15px;
+}
+
+.section-title {
+    font-size: 11px;
+    color: #ffffff;
+    background: #60a5fa;
+    padding: 8px;
+    border-radius: 4px;
+    margin-bottom: 10px;
+    text-transform: uppercase;
+    font-weight: 700;
+}
+
+.chips-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+}
+
+.chip {
+    font-size: 10px;
+    background: rgba(96, 165, 250, 0.1);
+    border: 1px solid rgba(96, 165, 250, 0.3);
+    color: #60a5fa;
+    padding: 3px 8px;
+    border-radius: 12px;
+    font-weight: 600;
+}
+
+/* Botão Admitir/Atualizar */
+.card-actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 15px;
+}
+
+.btn-action {
+    padding: 10px 20px;
+    background: #3b82f6;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 600;
+    text-transform: uppercase;
+}
