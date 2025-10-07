@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Archipelago Dashboard</title>
+    
+    <!-- CSS MODULAR -->
+    <link rel="stylesheet" href="css/variables.css">
+    <link rel="stylesheet" href="css/layout.css">
+    <link rel="stylesheet" href="css/cards.css">
+    <link rel="stylesheet" href="css/modals.css">
+    <link rel="stylesheet" href="css/dashboards.css">
+    
+    <!-- BIBLIOTECAS EXTERNAS -->
+    <!-- Chart.js para gráficos -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <!-- QRCode.js OBRIGATÓRIA - Necessária para gerar QR Codes -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+</head>
+<body>
+    <!-- =================== MODAL DE AUTENTICAÇÃO =================== -->
+    <div id="authModal" class="modal-auth">
+        <div class="auth-container">
+            <h1>Archipelago Dashboard</h1>
+            <p>Digite a senha de acesso:</p>
+            <input type="password" id="authPassword" placeholder="Senha" maxlength="6">
+            <button onclick="authenticate()">Entrar</button>
+            <div id="authError" class="error-msg hidden">Senha incorreta</div>
+        </div>
+    </div>
+
+    <!-- =================== HEADER PRINCIPAL =================== -->
+    <header id="mainHeader" class="header hidden">
+        <div class="header-left">
+            <span class="hamburger" onclick="toggleMenu()">☰</span>
+            <h1>Archipelago Dashboard</h1>
+        </div>
+        <div class="header-right">
+            <div id="updateTimer">Próxima atualização em: 4:00</div>
+            <button onclick="updateData()">Atualizar</button>
+        </div>
+    </header>
+
+    <!-- =================== MENU LATERAL =================== -->
+    <aside id="sideMenu" class="side-menu">
+        <div class="menu-header">
+            <h2>Menu</h2>
+            <button class="menu-close" onclick="toggleMenu()">×</button>
+        </div>
+        
+        <nav class="menu-items">
+            <a href="#" class="side-menu-item active" data-tab="leitos" onclick="setActiveTab('leitos')">
+                Leitos
+            </a>
+            <a href="#" class="side-menu-item" data-tab="dash1" onclick="setActiveTab('dash1')">
+                Dashboard Hospitalar
+            </a>
+            <a href="#" class="side-menu-item" data-tab="dash2" onclick="setActiveTab('dash2')">
+                Dashboard Executivo
+            </a>
+        </nav>
+        
+        <div class="menu-footer">
+            <div class="menu-divider"></div>
+            <a href="#" class="menu-qr" onclick="openQRCodes()">
+                <span>📱</span> Gerar QR Codes
+            </a>
+        </div>
+    </aside>
+
+    <!-- OVERLAY DO MENU -->
+    <div class="menu-overlay" id="menuOverlay" onclick="toggleMenu()"></div>
+
+    <!-- =================== CONTEÚDO PRINCIPAL =================== -->
+    <main id="mainContent" class="main-content hidden">
+        
+        <!-- SEÇÃO DE LEITOS -->
+        <section id="leitosView" class="section-leitos">
+            <div class="leitos-header">
+                <h2>Gestão de Leitos Hospitalares</h2>
+                
+                <!-- SELETOR DE HOSPITAL -->
+                <div class="hospital-selector" id="hospitalSelector">
+                    <button class="hospital-btn active" data-hospital="H1" onclick="selectHospital('H1')">Neomater</button>
+                    <button class="hospital-btn" data-hospital="H2" onclick="selectHospital('H2')">Cruz Azul</button>
+                    <button class="hospital-btn" data-hospital="H3" onclick="selectHospital('H3')">Santa Marcelina</button>
+                    <button class="hospital-btn" data-hospital="H4" onclick="selectHospital('H4')">Santa Clara</button>
+                </div>
+            </div>
+            
+            <!-- CONTAINER DOS CARDS -->
+            <div id="cardsContainer" class="cards-grid"></div>
+        </section>
+
+        <!-- DASHBOARD HOSPITALAR -->
+        <section id="dash1" class="hidden">
+            <div id="dashHospitalarContent"></div>
+        </section>
+
+        <!-- DASHBOARD EXECUTIVO -->
+        <section id="dash2" class="hidden">
+            <div id="dashExecutivoContent"></div>
+        </section>
+        
+    </main>
+
+    <!-- =================== FOOTER =================== -->
+    <footer id="mainFooter" class="footer hidden">
+        <p>Sistema em versão BETA - não pode ser usado como única fonte de referência</p>
+        <p>Para decisões críticas, consulte sempre fontes adicionais e profissionais qualificados</p>
+        <p><strong>Desenvolvido por: Alessandro Rodrigues - Versão V5.0 - Dezembro/2024</strong></p>
+    </footer>
+
+    <!-- =================== MODAL DE PACIENTE =================== -->
+    <div id="patientModal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modalTitle">Admitir Paciente</h2>
+                <button class="modal-close" onclick="closeModal()">×</button>
+            </div>
+            <div class="modal-body">
+                <form id="patientForm">
+                    <!-- Formulário gerado dinamicamente pelo cards.js -->
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-cancel" onclick="closeModal()">Cancelar</button>
+                <button class="btn-save" onclick="savePatient()">Salvar</button>
+                <button class="btn-alta" onclick="darAlta()" style="display:none;">Alta</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- =================== SCRIPTS MODULARES =================== -->
+    
+    <!-- Scripts Core -->
+    <script src="js/app.js"></script>
+    <script src="js/api.js"></script>
+    
+    <!-- Scripts de Dashboards -->
+    <script src="js/dashboards/charts-config.js"></script>
+    <script src="js/dashboards/dashboard-hospital.js"></script>
+    <script src="js/dashboards/dashboard-executive.js"></script>
+    
+    <!-- Scripts de Interface -->
+    <script src="js/cards.js"></script>
+    
+    <!-- Scripts de Funcionalidades - QRCode.js DEVE vir APÓS a biblioteca -->
+    <script src="js/qrcode.js"></script>
+    <script src="js/admin.js"></script>
+    <script src="js/main.js"></script>
+    
+    <!-- =================== INICIALIZAÇÃO =================== -->
+    <script>
+        // Verificar se QRCode.js foi carregada
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('🚀 Archipelago Dashboard V5.0 - Inicializando...');
+            
+            // Verificar biblioteca QRCode
+            if (typeof QRCode !== 'undefined') {
+                console.log('✅ QRCode.js carregada com sucesso');
+            } else {
+                console.warn('⚠️ QRCode.js não encontrada - QR Codes podem não funcionar');
+            }
+            
+            // Inicialização normal do sistema
+            setTimeout(() => {
+                if (typeof window.initApp === 'function') {
+                    window.initApp();
+                    console.log('✅ Sistema inicializado com sucesso');
+                } else {
+                    console.error('❌ initApp não encontrada');
+                    // Retry
+                    setTimeout(() => {
+                        if (typeof window.initApp === 'function') {
+                            window.initApp();
+                            console.log('✅ Sistema inicializado após retry');
+                        }
+                    }, 1000);
+                }
+            }, 200);
+        });
+        
+        // Log de informações importantes
+        console.log('📱 QR Codes apontam para: https://qrcode-seven-gamma.vercel.app');
+        console.log('🖨️ Impressão configurada: 12 QR codes por A4 (3x4)');
+    </script>
+    
+    <!-- =================== CSS BASE =================== -->
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+        
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            color: white;
+            min-height: 100vh;
+        }
+        
+        .hidden {
+            display: none !important;
+        }
+        
+        /* Modal de autenticação */
+        .modal-auth {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(15, 23, 42, 0.95);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10000;
+        }
+        
+        .auth-container {
+            background: #1e293b;
+            padding: 40px;
+            border-radius: 16px;
+            text-align: center;
+            max-width: 400px;
+            width: 90%;
+        }
+        
+        .auth-container h1 {
+            margin: 0 0 20px;
+            color: #60a5fa;
+        }
+        
+        .auth-container input {
+            width: 100%;
+            padding: 12px;
+            margin: 10px 0;
+            border: 1px solid #334155;
+            background: #0f172a;
+            color: white;
+            border-radius: 8px;
+            font-size: 16px;
+        }
+        
+        .auth-container button {
+            width: 100%;
+            padding: 12px;
+            background: #3b82f6;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        
+        .auth-container button:hover {
+            background: #2563eb;
+        }
+        
+        .error-msg {
+            color: #ef4444;
+            margin-top: 10px;
+            font-size: 14px;
+        }
+        
+        /* Responsividade */
+        @media (max-width: 768px) {
+            .header {
+                flex-direction: column;
+                gap: 10px;
+                padding: 10px;
+            }
+            
+            .side-menu {
+                width: 100%;
+                left: -100%;
+            }
+            
+            .side-menu.open {
+                left: 0;
+            }
+            
+            .hospital-selector {
+                flex-direction: column;
+                gap: 10px;
+            }
+            
+            .hospital-btn {
+                width: 100%;
+            }
+        }
+    </style>
+</body>
+</html>
