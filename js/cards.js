@@ -234,14 +234,15 @@ function createCard(leito, hospitalNome) {
                 <div style="color: #ffffff; font-weight: 600; font-size: 12px; line-height: 1.2;">${hospitalNome}</div>
             </div>
             
-            <div style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; padding: 10px; min-height: 50px; display: flex; flex-direction: column; justify-content: center;">
-                <div style="font-size: 10px; color: rgba(255,255,255,0.7); font-weight: 600; text-transform: uppercase; margin-bottom: 3px;">ID</div>
-                <div style="color: #ffffff; font-weight: 600; font-size: 12px; line-height: 1.2;">${idSequencial}</div>
+            <div style="min-height: 50px; display: flex; align-items: center; justify-content: center;">
+                <div class="leito-badge ${isVago ? '' : 'ocupado'}" style="background: ${leitoBgColor}; color: ${leitoTextColor}; width: 100%; padding: 15px 8px; border-radius: 8px; font-weight: 700; text-transform: uppercase; text-align: center; font-size: 12px; letter-spacing: 1px;">
+                    ${leitoPersonalizado}
+                </div>
             </div>
             
             <div style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; padding: 10px; min-height: 50px; display: flex; flex-direction: column; justify-content: center;">
-                <div style="font-size: 10px; color: rgba(255,255,255,0.7); font-weight: 600; text-transform: uppercase; margin-bottom: 3px;">LEITO</div>
-                <div style="color: #ffffff; font-weight: 600; font-size: 12px; line-height: 1.2;">${leitoPersonalizado}</div>
+                <div style="font-size: 10px; color: rgba(255,255,255,0.7); font-weight: 600; text-transform: uppercase; margin-bottom: 3px;">TIPO</div>
+                <div style="color: #ffffff; font-weight: 600; font-size: 12px; line-height: 1.2;">${leito.tipo === 'UTI' ? 'UTI' : 'ENF/APTO'}</div>
             </div>
         </div>
 
@@ -429,6 +430,8 @@ function createModalOverlay() {
 
 // *** CORREÇÃO 2 + 3: FORMULÁRIO DE ADMISSÃO CORRIGIDO COM LAYOUT 3 COLUNAS + CAMPO IDENTIFICAÇÃO PRIMEIRO ***
 function createAdmissaoForm(hospitalNome, leitoNumero) {
+    const idSequencial = String(leitoNumero).padStart(2, '0');
+    
     return `
         <div class="modal-content" style="background: #1a1f2e; border-radius: 12px; padding: 30px; max-width: 700px; width: 95%; max-height: 90vh; overflow-y: auto; color: #ffffff;">
             <h2 style="margin: 0 0 20px 0; text-align: center; color: #60a5fa; font-size: 24px; font-weight: 700; text-transform: uppercase;">
@@ -436,7 +439,7 @@ function createAdmissaoForm(hospitalNome, leitoNumero) {
             </h2>
             
             <div style="text-align: center; margin-bottom: 30px; padding: 15px; background: rgba(96,165,250,0.1); border-radius: 8px;">
-                <strong>Hospital:</strong> ${hospitalNome} | <strong>Leito:</strong> ${leitoNumero}
+                <strong>Hospital:</strong> ${hospitalNome} | <strong>ID:</strong> ${idSequencial} | <strong>Leito:</strong> ${leitoNumero}
             </div>
             
             <!-- CORREÇÃO 3: CAMPO IDENTIFICAÇÃO PRIMEIRO E OBRIGATÓRIO -->
@@ -453,8 +456,8 @@ function createAdmissaoForm(hospitalNome, leitoNumero) {
             <!-- CORREÇÃO 2: LAYOUT 3 COLUNAS IGUAL AOS CARDS -->
             <div class="form-grid-3-cols" style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; margin-bottom: 20px;">
                 <div>
-                    <label style="display: block; margin-bottom: 5px; color: #e2e8f0; font-weight: 600;">NOME COMPLETO</label>
-                    <input id="admNome" type="text" placeholder="Nome completo do paciente" style="width: 100%; padding: 12px; background: #374151; color: #ffffff; border: 1px solid rgba(255,255,255,0.3); border-radius: 6px; font-size: 14px;">
+                    <label style="display: block; margin-bottom: 5px; color: #e2e8f0; font-weight: 600;">INICIAIS</label>
+                    <input id="admNome" type="text" placeholder="Ex: J S M" maxlength="10" style="width: 100%; padding: 12px; background: #374151; color: #ffffff; border: 1px solid rgba(255,255,255,0.3); border-radius: 6px; font-size: 14px;">
                 </div>
                 <div>
                     <label style="display: block; margin-bottom: 5px; color: #e2e8f0; font-weight: 600;">MATRÍCULA</label>
@@ -552,6 +555,10 @@ function createAdmissaoForm(hospitalNome, leitoNumero) {
 function createAtualizacaoForm(hospitalNome, leitoNumero, dadosLeito) {
     const tempoInternacao = dadosLeito?.admAt ? calcularTempoInternacao(dadosLeito.admAt) : '';
     const iniciais = dadosLeito?.nome ? getIniciais(dadosLeito.nome) : '';
+    const idSequencial = String(leitoNumero).padStart(2, '0');
+    const leitoPersonalizado = (dadosLeito?.identificacaoLeito && dadosLeito.identificacaoLeito.trim()) 
+        ? dadosLeito.identificacaoLeito.trim().toUpperCase()
+        : `LEITO ${leitoNumero}`;
     
     // Arrays diretos - sem processamento
     const concessoesAtuais = Array.isArray(dadosLeito?.concessoes) ? dadosLeito.concessoes : [];
@@ -566,7 +573,7 @@ function createAtualizacaoForm(hospitalNome, leitoNumero, dadosLeito) {
             </h2>
             
             <div style="text-align: center; margin-bottom: 30px; padding: 15px; background: rgba(96,165,250,0.1); border-radius: 8px;">
-                <strong>Hospital:</strong> ${hospitalNome} | <strong>Leito:</strong> ${leitoNumero}
+                <strong>Hospital:</strong> ${hospitalNome} | <strong>ID:</strong> ${idSequencial} | <strong>Leito:</strong> ${leitoPersonalizado}
             </div>
             
             <!-- CORREÇÃO 3: CAMPO IDENTIFICAÇÃO PRIMEIRO E OBRIGATÓRIO -->
