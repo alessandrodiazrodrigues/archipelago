@@ -1,6 +1,6 @@
-// =================== APP.JS - ARQUIVO PRINCIPAL CORRIGIDO ===================
+// =================== APP.JS - ARQUIVO PRINCIPAL CORRIGIDO V3.1 ===================
 
-// =================== CONFIGURAÇÕES GLOBAIS ===================
+// =================== CONFIGURAÇÕES GLOBAIS V3.1 ===================
 window.CONFIG = {
     AUTH_PASSWORD: '170284',
     ADM_EMAIL: 'cvcalessandro@gmail.com',
@@ -8,10 +8,11 @@ window.CONFIG = {
     REFRESH_INTERVAL: 240000, // 4 minutos
     QR_TIMEOUT: 120000, // 2 minutos
     HOSPITAIS: {
-        H1: { nome: "Neomater", leitos: 13, ativo: true },
-        H2: { nome: "Cruz Azul", leitos: 16, ativo: true },
-        H3: { nome: "Santa Marcelina", leitos: 7, ativo: true },
-        H4: { nome: "Santa Clara", leitos: 13, ativo: true }
+        // *** CORREÇÃO V3.1: ATUALIZAR 49→66 leitos (H1:10, H2:36, H3:13, H4:7) ***
+        H1: { nome: "Neomater", leitos: 10, ativo: true },
+        H2: { nome: "Cruz Azul", leitos: 36, ativo: true },
+        H3: { nome: "Santa Marcelina", leitos: 13, ativo: true },
+        H4: { nome: "Santa Clara", leitos: 7, ativo: true }
     }
 };
 
@@ -215,11 +216,11 @@ window.authenticate = function() {
 
 // =================== INICIALIZAÇÃO DO SISTEMA (CORRIGIDA COM BLOQUEIO) ===================
 window.initSystem = async function() {
-    logInfo('Inicializando sistema Archipelago Dashboard V3.0...');
+    logInfo('Inicializando sistema Archipelago Dashboard V3.1...');
     
     try {
         // *** FASE 1: LOADING INICIAL ***
-        showLoading(null, 'Inicializando sistema...');
+        showLoading(null, 'Inicializando sistema V3.1...');
         await delay(800);
         
         // *** FASE 2: TESTAR API ***
@@ -231,7 +232,7 @@ window.initSystem = async function() {
         
         // *** FASE 3: CARREGAR DADOS DOS HOSPITAIS ***
         if (window.loadHospitalData) {
-            showLoading(null, 'Carregando dados dos hospitais...');
+            showLoading(null, 'Carregando dados dos 66 leitos...');
             await window.loadHospitalData();
             await delay(800);
         }
@@ -250,7 +251,7 @@ window.initSystem = async function() {
         
         // *** FASE 6: CARREGAR NEOMATER AUTOMATICAMENTE ***
         if (window.renderCards) {
-            showLoading(null, 'Carregando leitos do Neomater...');
+            showLoading(null, 'Carregando 10 leitos do Neomater...');
             await delay(600);
             window.renderCards();
             await delay(400);
@@ -258,10 +259,10 @@ window.initSystem = async function() {
         
         // *** FINALIZAR: REMOVER LOADING E LIBERAR SISTEMA ***
         hideLoading();
-        logSuccess('✅ Sistema inicializado com sucesso! Neomater carregado.');
+        logSuccess('✅ Sistema V3.1 inicializado! Configuração: 66 leitos (H1:10, H2:36, H3:13, H4:7)');
         
     } catch (error) {
-        logError('Erro na inicialização:', error);
+        logError('Erro na inicialização V3.1:', error);
         hideLoading();
         alert('Erro ao inicializar o sistema. Verifique a conexão e tente recarregar a página.');
         
@@ -332,7 +333,7 @@ window.setActiveTab = function(tab) {
         if (tab === 'leitos' && window.renderCards) {
             // Se não há dados, mostrar loading e carregar
             if (!window.hospitalData || Object.keys(window.hospitalData).length === 0) {
-                showLoading(null, 'Carregando dados dos hospitais...');
+                showLoading(null, 'Carregando dados dos 66 leitos...');
                 if (window.loadHospitalData) {
                     window.loadHospitalData().then(() => {
                         setTimeout(() => {
@@ -392,10 +393,10 @@ window.updateData = async function() {
         return;
     }
     
-    logInfo('Iniciando atualização manual de dados...');
+    logInfo('Iniciando atualização manual de dados V3.1...');
     
     try {
-        showLoading(null, 'Atualizando dados...');
+        showLoading(null, 'Atualizando 66 leitos...');
         
         // Carregar dados dos hospitais
         if (window.loadHospitalData) {
@@ -414,10 +415,10 @@ window.updateData = async function() {
         }
         
         hideLoading();
-        logSuccess('Dados atualizados com sucesso');
+        logSuccess('Dados V3.1 atualizados com sucesso');
         
     } catch (error) {
-        logError('Erro na atualização:', error);
+        logError('Erro na atualização V3.1:', error);
         hideLoading();
         alert('Erro ao atualizar dados. Verifique a conexão com a internet.');
     }
@@ -451,14 +452,15 @@ window.selectHospital = function(hospitalId) {
     
     // *** RE-RENDERIZAR CARDS COM LOADING ***
     if (window.renderCards) {
-        showLoading(null, `Carregando leitos do ${CONFIG.HOSPITAIS[hospitalId].nome}...`);
+        const hospitalConfig = CONFIG.HOSPITAIS[hospitalId];
+        showLoading(null, `Carregando ${hospitalConfig.leitos} leitos do ${hospitalConfig.nome}...`);
         setTimeout(() => {
             window.renderCards();
             hideLoading();
         }, 800);
     }
     
-    logSuccess(`Hospital selecionado: ${CONFIG.HOSPITAIS[hospitalId].nome}`);
+    logSuccess(`Hospital selecionado: ${CONFIG.HOSPITAIS[hospitalId].nome} (${CONFIG.HOSPITAIS[hospitalId].leitos} leitos)`);
 };
 
 // =================== FUNÇÕES DE CONFIGURAÇÃO ===================
@@ -505,7 +507,7 @@ window.darAlta = function() {
 
 // =================== INICIALIZAÇÃO DO APP (CORRIGIDA) ===================
 window.initApp = async function() {
-    logInfo('🏥 Archipelago Dashboard V3.0 - Iniciando aplicação...');
+    logInfo('🏥 Archipelago Dashboard V3.1 - Iniciando aplicação...');
     
     // Verificar autenticação
     if (window.checkAuthentication()) {
@@ -532,7 +534,7 @@ window.initApp = async function() {
         }
     }
     
-    logSuccess('🚀 App inicializado e pronto para uso');
+    logSuccess('🚀 App V3.1 inicializado e pronto para uso');
 };
 
 // =================== GERENCIAR CORES (Para integração com Admin) ===================
@@ -620,4 +622,7 @@ window.startTimer = function() {
     logInfo('Timer de atualização iniciado (4 minutos)');
 };
 
-logSuccess('📋 App.js carregado - Sistema com loading bloqueante implementado');
+// =================== LOG DE INICIALIZAÇÃO V3.1 ===================
+logSuccess('📋 App.js V3.1 carregado - CORREÇÃO IMPLEMENTADA:');
+logSuccess('🏥 Hospitais atualizados: H1:10, H2:36, H3:13, H4:7 leitos (66 total)');
+logSuccess('✅ Sistema com loading bloqueante implementado');
