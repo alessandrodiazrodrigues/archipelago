@@ -159,7 +159,7 @@ function getBadgeIsolamento(isolamento) {
     return getBadgeIsolamento('NÃO ISOLAMENTO'); // Fallback
 }
 
-// =================== CRIAR CARD INDIVIDUAL V3.1 ===================
+// =================== CRIAR CARD INDIVIDUAL V3.1 COM IDENTIFICAÇÃO DO LEITO ===================
 function createCard(leito, hospitalNome) {
     const card = document.createElement('div');
     card.className = 'card';
@@ -220,7 +220,10 @@ function createCard(leito, hospitalNome) {
     
     const numeroLeito = leito.leito || leito.numero || 'N/A';
     
-    // HTML do Card V3.1 (layout 3x3 mantido + isolamento no rodapé)
+    // *** CORREÇÃO: EXIBIR IDENTIFICAÇÃO DO LEITO NO CARD ***
+    const leitoDisplay = identificacaoLeito ? `${identificacaoLeito}` : `LEITO ${numeroLeito}`;
+    
+    // HTML do Card V3.1 (layout 3x3 mantido + isolamento no rodapé + identificação do leito)
     card.innerHTML = `
         <div class="card-row-1" style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 12px;">
             <div style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; padding: 10px; min-height: 50px; display: flex; flex-direction: column; justify-content: center;">
@@ -230,7 +233,7 @@ function createCard(leito, hospitalNome) {
             
             <div style="min-height: 50px; display: flex; align-items: center; justify-content: center;">
                 <div class="leito-badge ${isVago ? '' : 'ocupado'}" style="background: ${leitoBgColor}; color: ${leitoTextColor}; width: 100%; padding: 15px 8px; border-radius: 8px; font-weight: 700; text-transform: uppercase; text-align: center; font-size: 12px; letter-spacing: 1px;">
-                    LEITO ${numeroLeito}
+                    ${leitoDisplay}
                 </div>
             </div>
             
@@ -299,7 +302,7 @@ function createCard(leito, hospitalNome) {
         </div>
 
         <div style="margin-bottom: 15px;">
-            <div style="display: flex; justify-content: flex-start; align-items: center; gap: 30px; margin-bottom: 12px;">
+            <div style="display: flex; justify-content: flex-start; align-items: center; gap: 15px; margin-bottom: 12px; flex-wrap: wrap;">
                 <div>
                     <div style="font-size: 10px; color: rgba(255,255,255,0.7); font-weight: 600; text-transform: uppercase; margin-bottom: 3px;">ADMISSÃO</div>
                     <div style="color: #ffffff; font-weight: 600; font-size: 11px;">${admissao ? formatarDataHora(admissao) : '—'}</div>
@@ -313,11 +316,11 @@ function createCard(leito, hospitalNome) {
                 ` : ''}
                 
                 ${!isVago ? `
-                <div style="display: flex; align-items: center; gap: 6px;">
+                <div style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">
                     <div style="background: ${badgeIsolamento.cor}; color: ${badgeIsolamento.textoCor}; padding: 4px 8px; border-radius: 12px; font-size: 9px; font-weight: 700; text-transform: uppercase; display: flex; align-items: center; gap: 4px;">
                         ${badgeIsolamento.icone} ${badgeIsolamento.texto}
                     </div>
-                    ${identificacaoLeito ? `<div style="background: rgba(96,165,250,0.2); color: #60a5fa; padding: 4px 8px; border-radius: 8px; font-size: 9px; font-weight: 600;">ID: ${identificacaoLeito}</div>` : ''}
+                    ${identificacaoLeito ? `<div style="background: rgba(96,165,250,0.2); color: #60a5fa; padding: 4px 8px; border-radius: 8px; font-size: 9px; font-weight: 600; text-transform: uppercase;">ID: ${identificacaoLeito}</div>` : ''}
                 </div>
                 ` : ''}
             </div>
@@ -529,13 +532,13 @@ function createAdmissaoForm(hospitalNome, leitoNumero) {
                         IDENTIFICAÇÃO DO LEITO (OPCIONAL)
                     </div>
                 </div>
-                <input id="admIdentificacaoLeito" type="text" placeholder="Ex: A1, UTI-5, ENF12 (máx. 6 caracteres)" maxlength="6" style="width: 100%; padding: 12px; background: #374151; color: #ffffff; border: 1px solid rgba(255,255,255,0.3); border-radius: 6px; font-size: 14px;">
+                <input id="admIdentificacaoLeito" type="text" placeholder="Ex: NEO1, UTI-5, ENF12 (máx. 6 caracteres)" maxlength="6" style="width: 100%; padding: 12px; background: #374151; color: #ffffff; border: 1px solid rgba(255,255,255,0.3); border-radius: 6px; font-size: 14px;">
                 <div style="font-size: 11px; color: rgba(255,255,255,0.6); margin-top: 5px;">Campo alfanumérico com até 6 caracteres</div>
             </div>
             
             <div style="display: flex; justify-content: flex-end; gap: 12px; padding: 20px; border-top: 1px solid rgba(255,255,255,0.1);">
                 <button class="btn-cancelar" style="padding: 12px 30px; background: rgba(255,255,255,0.1); color: #ffffff; border: 1px solid rgba(255,255,255,0.2); border-radius: 8px; font-weight: 600; text-transform: uppercase; cursor: pointer;">CANCELAR</button>
-                <button class="btn-salvar" style="padding: 12px 30px; background: #3b82f6; color: #ffffff; border: none; border-radius: 8px; font-weight: 600; text-transform: uppercase; cursor: pointer;">SALVAR</button>
+                <button class="btn-salvar" style="padding: 12px 30px; background: #3b82f6; color: #ffffff; border: none; border-radius: 8px; font-weight: 600; text-transform: uppercase; cursor: pointer;">SALVAR V3.1</button>
             </div>
         </div>
     `;
@@ -663,7 +666,7 @@ function createAtualizacaoForm(hospitalNome, leitoNumero, dadosLeito) {
                         IDENTIFICAÇÃO DO LEITO
                     </div>
                 </div>
-                <input id="updIdentificacaoLeito" type="text" value="${identificacaoAtual}" placeholder="Ex: A1, UTI-5, ENF12 (máx. 6 caracteres)" maxlength="6" style="width: 100%; padding: 12px; background: #374151; color: #ffffff; border: 1px solid rgba(255,255,255,0.3); border-radius: 6px; font-size: 14px;">
+                <input id="updIdentificacaoLeito" type="text" value="${identificacaoAtual}" placeholder="Ex: NEO1, UTI-5, ENF12 (máx. 6 caracteres)" maxlength="6" style="width: 100%; padding: 12px; background: #374151; color: #ffffff; border: 1px solid rgba(255,255,255,0.3); border-radius: 6px; font-size: 14px;">
                 <div style="font-size: 11px; color: rgba(255,255,255,0.6); margin-top: 5px;">Campo alfanumérico com até 6 caracteres</div>
             </div>
             
@@ -677,7 +680,7 @@ function createAtualizacaoForm(hospitalNome, leitoNumero, dadosLeito) {
                 <button class="btn-alta" style="padding: 12px 30px; background: #ef4444; color: #ffffff; border: none; border-radius: 8px; font-weight: 600; text-transform: uppercase; cursor: pointer;">ALTA</button>
                 <div style="display: flex; gap: 12px;">
                     <button class="btn-cancelar" style="padding: 12px 30px; background: rgba(255,255,255,0.1); color: #ffffff; border: 1px solid rgba(255,255,255,0.2); border-radius: 8px; font-weight: 600; text-transform: uppercase; cursor: pointer;">CANCELAR</button>
-                    <button class="btn-salvar" style="padding: 12px 30px; background: #3b82f6; color: #ffffff; border: none; border-radius: 8px; font-weight: 600; text-transform: uppercase; cursor: pointer;">SALVAR</button>
+                    <button class="btn-salvar" style="padding: 12px 30px; background: #3b82f6; color: #ffffff; border: none; border-radius: 8px; font-weight: 600; text-transform: uppercase; cursor: pointer;">SALVAR V3.1</button>
                 </div>
             </div>
         </div>
@@ -1548,6 +1551,7 @@ document.addEventListener('DOMContentLoaded', function() {
     logInfo('  • Campo idade: dropdown 14-115 anos (mobile)');
     logInfo('  • Cards exibem APENAS INICIAIS');
     logInfo('  • Badge isolamento no rodapé dos cards');
+    logInfo('  • CORREÇÃO: Campo IDENTIFICAÇÃO DO LEITO exibido nos cards');
     logInfo('  • Performance otimizada V3.1');
     logInfo('  • Validação automática AS/AT');
     logInfo('  • Layout 3x3 mobile FORÇADO');
@@ -1590,3 +1594,5 @@ logInfo('✅ Cards exibem APENAS INICIAIS');
 logInfo('✅ Badge isolamento no rodapé (máxima visibilidade)');
 logInfo('✅ Campos AS (isolamento) e AT (identificação) integrados');
 logInfo('✅ Formulários com layout 3 colunas corrigido');
+logInfo('✅ CORREÇÃO CRÍTICA: Campo IDENTIFICAÇÃO DO LEITO exibido nos cards');
+logInfo('✅ Sistema de exibição: Se há identificação personalizada, mostra ela; senão mostra LEITO + número');
