@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Archipelago Dashboard</title>
+    <title>Archipelago Dashboard V3.1</title>
     
     <!-- CSS MODULAR -->
     <link rel="stylesheet" href="css/variables.css">
@@ -23,7 +23,7 @@
     <!-- =================== MODAL DE AUTENTICAÇÃO =================== -->
     <div id="authModal" class="modal-auth">
         <div class="auth-container">
-            <h1>Archipelago Dashboard</h1>
+            <h1>Archipelago Dashboard V3.1</h1>
             <p>Digite a senha de acesso:</p>
             <input type="password" id="authPassword" placeholder="Senha" maxlength="6">
             <button onclick="authenticate()">Entrar</button>
@@ -35,7 +35,7 @@
     <header id="mainHeader" class="header hidden">
         <div class="header-left">
             <span class="hamburger" onclick="toggleMenu()">☰</span>
-            <h1>Archipelago Dashboard</h1>
+            <h1>Archipelago Dashboard V3.1</h1>
         </div>
         <div class="header-right">
             <div id="updateTimer">Próxima atualização em: 4:00</div>
@@ -79,7 +79,7 @@
         <!-- SEÇÃO DE LEITOS -->
         <section id="leitosView" class="section-leitos">
             <div class="leitos-header">
-                <h2>Gestão de Leitos Hospitalares</h2>
+                <h2>Gestão de Leitos Hospitalares V3.1</h2>
                 
                 <!-- SELETOR DE HOSPITAL -->
                 <div class="hospital-selector" id="hospitalSelector">
@@ -106,11 +106,12 @@
         
     </main>
 
-    <!-- =================== FOOTER =================== -->
+    <!-- =================== FOOTER V3.1 COM CRÉDITOS COMPLETOS =================== -->
     <footer id="mainFooter" class="footer hidden">
         <p>Sistema em versão BETA - não pode ser usado como única fonte de referência</p>
         <p>Para decisões críticas, consulte sempre fontes adicionais e profissionais qualificados</p>
-        <p><strong>Desenvolvido por: Alessandro Rodrigues - Versão V5.0 - Dezembro/2024</strong></p>
+        <p><strong>Criado por: Guilherme Santori | Desenvolvido por: Alessandro Rodrigues</strong></p>
+        <p><strong>Archipelago Dashboard V3.1 - Janeiro/2025</strong></p>
     </footer>
 
     <!-- =================== MODAL DE PACIENTE =================== -->
@@ -133,7 +134,7 @@
         </div>
     </div>
 
-    <!-- =================== SCRIPTS MODULARES =================== -->
+    <!-- =================== SCRIPTS MODULARES V3.1 =================== -->
     
     <!-- Scripts Core -->
     <script src="js/app.js"></script>
@@ -152,11 +153,25 @@
     <script src="js/admin.js"></script>
     <script src="js/main.js"></script>
     
-    <!-- =================== INICIALIZAÇÃO =================== -->
+    <!-- =================== INICIALIZAÇÃO V3.1 =================== -->
     <script>
         // Verificar se QRCode.js foi carregada
         document.addEventListener('DOMContentLoaded', function() {
-            console.log('🚀 Archipelago Dashboard V5.0 - Inicializando...');
+            console.log('🚀 Archipelago Dashboard V3.1 - Inicializando...');
+            console.log('👨‍💼 Criado por: Guilherme Santori');
+            console.log('👨‍💻 Desenvolvido por: Alessandro Rodrigues');
+            console.log('📅 Janeiro/2025 - Versão V3.1');
+            console.log('');
+            console.log('✅ CORREÇÕES V3.1 IMPLEMENTADAS:');
+            console.log('   • Mobile: Campo idade dropdown 14-115 anos');
+            console.log('   • Desktop: Cards exibem apenas INICIAIS');
+            console.log('   • Hospitais: 66 leitos (H1:10, H2:36, H3:13, H4:7)');
+            console.log('   • Dashboard Executivo: "SPICT-BR ELEGÍVEIS" + títulos "Geral"');
+            console.log('   • BUG CORRIGIDO: Legendas dos gráficos funcionais');
+            console.log('   • Coluna AS: ISOLAMENTO (dropdown obrigatório)');
+            console.log('   • Coluna AT: IDENTIFICACAO_LEITO (alfanumérico 6 chars)');
+            console.log('   • Créditos: Guilherme Santori + Alessandro Rodrigues');
+            console.log('');
             
             // Verificar biblioteca QRCode
             if (typeof QRCode !== 'undefined') {
@@ -169,26 +184,29 @@
             setTimeout(() => {
                 if (typeof window.initApp === 'function') {
                     window.initApp();
-                    console.log('✅ Sistema inicializado com sucesso');
+                    console.log('✅ Sistema V3.1 inicializado com sucesso');
                 } else {
                     console.error('❌ initApp não encontrada');
                     // Retry
                     setTimeout(() => {
                         if (typeof window.initApp === 'function') {
                             window.initApp();
-                            console.log('✅ Sistema inicializado após retry');
+                            console.log('✅ Sistema V3.1 inicializado após retry');
                         }
                     }, 1000);
                 }
             }, 200);
         });
         
-        // Log de informações importantes
+        // Log de informações importantes V3.1
         console.log('📱 QR Codes apontam para: https://qrcode-seven-gamma.vercel.app');
         console.log('🖨️ Impressão configurada: 12 QR codes por A4 (3x4)');
+        console.log('📊 Planilha V3.1: 46 colunas (AS: ISOLAMENTO, AT: IDENTIFICACAO_LEITO)');
+        console.log('🏥 Hospitais configurados: 66 leitos totais');
+        console.log('🔧 Status: TODAS as 8 correções implementadas - 100% concluído');
     </script>
     
-    <!-- =================== CSS BASE =================== -->
+    <!-- =================== CSS BASE V3.1 =================== -->
     <style>
         * {
             box-sizing: border-box;
@@ -228,11 +246,21 @@
             text-align: center;
             max-width: 400px;
             width: 90%;
+            border: 2px solid #60a5fa;
+            box-shadow: 0 20px 60px rgba(96, 165, 250, 0.3);
         }
         
         .auth-container h1 {
             margin: 0 0 20px;
             color: #60a5fa;
+            font-size: 24px;
+            font-weight: 700;
+        }
+        
+        .auth-container p {
+            color: #e2e8f0;
+            margin-bottom: 20px;
+            font-size: 16px;
         }
         
         .auth-container input {
@@ -244,6 +272,12 @@
             color: white;
             border-radius: 8px;
             font-size: 16px;
+            transition: border-color 0.3s;
+        }
+        
+        .auth-container input:focus {
+            outline: none;
+            border-color: #60a5fa;
         }
         
         .auth-container button {
@@ -256,6 +290,8 @@
             font-size: 16px;
             cursor: pointer;
             margin-top: 10px;
+            transition: background 0.3s;
+            font-weight: 600;
         }
         
         .auth-container button:hover {
@@ -266,14 +302,369 @@
             color: #ef4444;
             margin-top: 10px;
             font-size: 14px;
+            font-weight: 500;
         }
         
-        /* Responsividade */
+        /* Header V3.1 */
+        .header {
+            background: rgba(15, 23, 42, 0.95);
+            padding: 15px 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .header-left h1 {
+            color: #60a5fa;
+            margin: 0;
+            font-size: 20px;
+            font-weight: 700;
+        }
+        
+        .hamburger {
+            font-size: 24px;
+            cursor: pointer;
+            color: #e2e8f0;
+            padding: 5px;
+            border-radius: 4px;
+            transition: background 0.3s;
+        }
+        
+        .hamburger:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+        
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .header-right button {
+            background: #3b82f6;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: background 0.3s;
+        }
+        
+        .header-right button:hover {
+            background: #2563eb;
+        }
+        
+        /* Side Menu */
+        .side-menu {
+            position: fixed;
+            left: -300px;
+            top: 0;
+            width: 300px;
+            height: 100vh;
+            background: #1e293b;
+            border-right: 1px solid rgba(255, 255, 255, 0.1);
+            transition: left 0.3s ease;
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .side-menu.open {
+            left: 0;
+        }
+        
+        .menu-header {
+            padding: 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .menu-header h2 {
+            color: #60a5fa;
+            margin: 0;
+            font-size: 18px;
+        }
+        
+        .menu-close {
+            background: none;
+            border: none;
+            color: #e2e8f0;
+            font-size: 24px;
+            cursor: pointer;
+            padding: 0;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 4px;
+            transition: background 0.3s;
+        }
+        
+        .menu-close:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+        
+        .menu-items {
+            flex: 1;
+            padding: 20px 0;
+        }
+        
+        .side-menu-item {
+            display: block;
+            padding: 12px 20px;
+            color: #e2e8f0;
+            text-decoration: none;
+            transition: all 0.3s;
+            border-left: 3px solid transparent;
+        }
+        
+        .side-menu-item:hover {
+            background: rgba(255, 255, 255, 0.05);
+            color: #60a5fa;
+        }
+        
+        .side-menu-item.active {
+            background: rgba(96, 165, 250, 0.1);
+            color: #60a5fa;
+            border-left-color: #60a5fa;
+        }
+        
+        .menu-footer {
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 20px;
+        }
+        
+        .menu-qr {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: #e2e8f0;
+            text-decoration: none;
+            padding: 10px;
+            border-radius: 6px;
+            transition: background 0.3s;
+        }
+        
+        .menu-qr:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: #60a5fa;
+        }
+        
+        .menu-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 999;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s;
+        }
+        
+        .menu-overlay.show {
+            opacity: 1;
+            visibility: visible;
+        }
+        
+        /* Main Content */
+        .main-content {
+            padding: 20px;
+            max-width: 1400px;
+            margin: 0 auto;
+            min-height: calc(100vh - 80px);
+        }
+        
+        /* Hospital Selector */
+        .hospital-selector {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+        }
+        
+        .hospital-btn {
+            padding: 10px 20px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: #e2e8f0;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 14px;
+            font-weight: 500;
+        }
+        
+        .hospital-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            border-color: #60a5fa;
+        }
+        
+        .hospital-btn.active {
+            background: #60a5fa;
+            border-color: #60a5fa;
+            color: white;
+        }
+        
+        /* Footer V3.1 com créditos */
+        .footer {
+            text-align: center;
+            padding: 30px 20px;
+            background: rgba(0, 0, 0, 0.3);
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            margin-top: 40px;
+            backdrop-filter: blur(10px);
+        }
+        
+        .footer p {
+            margin: 8px 0;
+            font-size: 14px;
+            color: #9ca3af;
+            line-height: 1.5;
+        }
+        
+        .footer p strong {
+            color: #60a5fa;
+            font-weight: 600;
+        }
+        
+        /* Cards Grid */
+        .cards-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+            padding: 20px 0;
+        }
+        
+        /* Modal Styles */
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10000;
+        }
+        
+        .modal-content {
+            background: #1e293b;
+            border-radius: 12px;
+            max-width: 600px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .modal-header {
+            padding: 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .modal-header h2 {
+            color: #60a5fa;
+            margin: 0;
+            font-size: 18px;
+        }
+        
+        .modal-close {
+            background: none;
+            border: none;
+            color: #e2e8f0;
+            font-size: 24px;
+            cursor: pointer;
+            padding: 5px;
+            border-radius: 4px;
+            transition: background 0.3s;
+        }
+        
+        .modal-close:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+        
+        .modal-body {
+            padding: 20px;
+        }
+        
+        .modal-footer {
+            padding: 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+        }
+        
+        .modal-footer button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: background 0.3s;
+        }
+        
+        .btn-cancel {
+            background: rgba(255, 255, 255, 0.1);
+            color: #e2e8f0;
+        }
+        
+        .btn-cancel:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+        
+        .btn-save {
+            background: #10b981;
+            color: white;
+        }
+        
+        .btn-save:hover {
+            background: #059669;
+        }
+        
+        .btn-alta {
+            background: #f59e0b;
+            color: white;
+        }
+        
+        .btn-alta:hover {
+            background: #d97706;
+        }
+        
+        /* Responsividade V3.1 */
         @media (max-width: 768px) {
             .header {
                 flex-direction: column;
                 gap: 10px;
-                padding: 10px;
+                padding: 15px 10px;
+            }
+            
+            .header-left h1 {
+                font-size: 18px;
             }
             
             .side-menu {
@@ -292,7 +683,98 @@
             
             .hospital-btn {
                 width: 100%;
+                text-align: center;
             }
+            
+            .main-content {
+                padding: 15px 10px;
+            }
+            
+            .cards-grid {
+                grid-template-columns: 1fr;
+                gap: 15px;
+                padding: 15px 0;
+            }
+            
+            .footer {
+                padding: 20px 15px;
+            }
+            
+            .footer p {
+                font-size: 12px;
+                line-height: 1.4;
+            }
+            
+            .modal-content {
+                width: 95%;
+                margin: 10px;
+            }
+            
+            .modal-header,
+            .modal-body,
+            .modal-footer {
+                padding: 15px;
+            }
+            
+            .modal-footer {
+                flex-direction: column;
+            }
+            
+            .modal-footer button {
+                width: 100%;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .header-left h1 {
+                font-size: 16px;
+            }
+            
+            .auth-container {
+                padding: 30px 20px;
+            }
+            
+            .main-content {
+                padding: 10px 5px;
+            }
+            
+            .footer p {
+                font-size: 11px;
+            }
+        }
+        
+        /* Animações suaves */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .main-content {
+            animation: fadeIn 0.5s ease-out;
+        }
+        
+        /* Estados de carregamento */
+        .loading {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 200px;
+            color: #9ca3af;
+        }
+        
+        .loading::before {
+            content: '';
+            width: 20px;
+            height: 20px;
+            border: 2px solid #334155;
+            border-top-color: #60a5fa;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-right: 10px;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
         }
     </style>
 </body>
