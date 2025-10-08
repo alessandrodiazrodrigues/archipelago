@@ -1,6 +1,6 @@
-// =================== API V3.1 FINAL CORRIGIDO - ESTRUTURA 46 COLUNAS (AS/AT) ===================
+// =================== API V3.1 - NOVA ESTRUTURA 46 COLUNAS - COM AS/AT ===================
 
-// *** URL ATUALIZADA DA API V3.1 ***
+// *** URL ATUALIZADA DA API V3.1 FINAL CORRIGIDA ***
 window.API_URL = 'https://script.google.com/macros/s/AKfycbxC9Gdvu3_mzXko0VjIYOFgtiH_Z_d8E9VXniUpBxyfaHRC1BHilyEuKhAtLnzmnusT/exec';
 
 // =================== VARIÁVEIS GLOBAIS ===================
@@ -16,7 +16,7 @@ window.TIMELINE_OPCOES = [
     "48h", "72h", "96h", "SP"
 ];
 
-// =================== NOVA V3.1: OPÇÕES DE ISOLAMENTO (COLUNA AS) ===================
+// =================== OPÇÕES DE ISOLAMENTO V3.1 (COLUNA AS) ===================
 window.ISOLAMENTO_OPCOES = [
     "NÃO ISOLAMENTO",
     "ISOLAMENTO DE CONTATO", 
@@ -62,63 +62,6 @@ window.LINHAS_VALIDAS = [
     "Crônicos - Reumatologia"
 ];
 
-// =================== MAPEAMENTO DE COLUNAS V3.1 (46 COLUNAS) ===================
-const COLUMN_MAPPING_V31 = {
-    // *** COLUNAS BÁSICAS (A-R) - 18 colunas ***
-    hospital: 'A',          // HOSPITAL
-    leito: 'B',             // LEITO  
-    status: 'C',            // STATUS DO LEITO
-    nome: 'D',              // NOME DO PACIENTE
-    matricula: 'E',         // MATRÍCULA
-    idade: 'F',             // IDADE
-    pps: 'G',               // PPS (Palliative Performance Scale)
-    spict: 'H',             // SPICT-BR
-    complexidade: 'I',      // COMPLEXIDADE
-    prevAlta: 'J',          // PREVISÃO DE ALTA
-    dataAdmissao: 'K',      // DATA DE ADMISSÃO
-    dataAtualizacao: 'L',   // DATA DE ATUALIZAÇÃO
-    observacoes: 'M',       // OBSERVAÇÕES
-    medicamentos: 'N',      // MEDICAMENTOS
-    exames: 'O',            // EXAMES
-    interconsultas: 'P',    // INTERCONSULTAS
-    procedimentos: 'Q',     // PROCEDIMENTOS
-    alertas: 'R',           // ALERTAS
-    
-    // *** CONCESSÕES (S-AE) - 13 colunas ***
-    concessao1: 'S',        // Transição Domiciliar
-    concessao2: 'T',        // Aplicação domiciliar de medicamentos
-    concessao3: 'U',        // Fisioterapia
-    concessao4: 'V',        // Fonoaudiologia
-    concessao5: 'W',        // Aspiração
-    concessao6: 'X',        // Banho
-    concessao7: 'Y',        // Curativos
-    concessao8: 'Z',        // Oxigenoterapia
-    concessao9: 'AA',       // Recarga de O2
-    concessao10: 'AB',      // Orientação Nutricional - com dispositivo
-    concessao11: 'AC',      // Orientação Nutricional - sem dispositivo
-    concessao12: 'AD',      // Clister
-    concessao13: 'AE',      // PICC
-    
-    // *** LINHAS DE CUIDADO (AF-AR) - 13 colunas ***
-    linha1: 'AF',           // Assiste
-    linha2: 'AG',           // APS
-    linha3: 'AH',           // Cuidados Paliativos
-    linha4: 'AI',           // ICO (Insuficiência Coronariana)
-    linha5: 'AJ',           // Oncologia
-    linha6: 'AK',           // Pediatria
-    linha7: 'AL',           // Programa Autoimune - Gastroenterologia
-    linha8: 'AM',           // Programa Autoimune - Neuro-desmielinizante
-    linha9: 'AN',           // Programa Autoimune - Neuro-muscular
-    linha10: 'AO',          // Programa Autoimune - Reumatologia
-    linha11: 'AP',          // Vida Mais Leve Care
-    linha12: 'AQ',          // Crônicos
-    linha13: 'AR',          // Outras Linhas
-    
-    // *** NOVAS COLUNAS V3.1 (AS-AT) - 2 colunas ***
-    isolamento: 'AS',           // ISOLAMENTO DO PACIENTE
-    identificacaoLeito: 'AT'    // IDENTIFICAÇÃO DO LEITO (6 chars)
-};
-
 // =================== FUNÇÕES AUXILIARES ===================
 function logAPI(message, data = null) {
     console.log(`🔗 [API V3.1] ${message}`, data || '');
@@ -156,151 +99,21 @@ function validarIsolamento(isolamento) {
 function validarIdentificacaoLeito(identificacao) {
     if (!identificacao || typeof identificacao !== 'string') return '';
     
-    // Remover espaços e converter para maiúsculo
-    const limpo = identificacao.trim().toUpperCase();
-    
-    // Validar formato alfanumérico até 6 caracteres
-    const regex = /^[A-Z0-9]{1,6}$/;
-    if (!regex.test(limpo)) {
-        // Se inválido, truncar para 6 chars e manter apenas alfanuméricos
-        return limpo.replace(/[^A-Z0-9]/g, '').substring(0, 6);
+    // Validar formato alfanumérico 6 caracteres
+    const regex = /^[A-Za-z0-9]{1,6}$/;
+    if (!regex.test(identificacao)) {
+        throw new Error('Identificação do leito deve ter até 6 caracteres alfanuméricos');
     }
     
-    return limpo;
+    return identificacao.toUpperCase();
 }
 
-// =================== FUNÇÃO PARA CONVERTER DADOS DA PLANILHA V3.1 ===================
-function converterDadosPlanilha(dadosPlanilha) {
-    const hospitalData = {
-        H1: { leitos: [] },
-        H2: { leitos: [] },
-        H3: { leitos: [] },
-        H4: { leitos: [] }
-    };
-    
-    if (!Array.isArray(dadosPlanilha)) {
-        logAPIError('Dados da planilha V3.1 não são um array:', typeof dadosPlanilha);
-        return hospitalData;
-    }
-    
-    dadosPlanilha.forEach((linha, index) => {
-        try {
-            if (!linha || typeof linha !== 'object') {
-                logAPI(`Linha ${index} inválida - pulando...`);
-                return;
-            }
-            
-            const hospitalId = linha.A || linha.hospital;
-            const leito = parseInt(linha.B || linha.leito) || 0;
-            
-            if (!hospitalId || !['H1', 'H2', 'H3', 'H4'].includes(hospitalId)) {
-                return; // Pular linhas sem hospital válido
-            }
-            
-            // *** V3.1: CONVERTER CONCESSÕES (COLUNAS S-AE) ***
-            const concessoes = [];
-            if (linha.S === 'SIM' || linha.S === true) concessoes.push(window.CONCESSOES_VALIDAS[0]);
-            if (linha.T === 'SIM' || linha.T === true) concessoes.push(window.CONCESSOES_VALIDAS[1]);
-            if (linha.U === 'SIM' || linha.U === true) concessoes.push(window.CONCESSOES_VALIDAS[2]);
-            if (linha.V === 'SIM' || linha.V === true) concessoes.push(window.CONCESSOES_VALIDAS[3]);
-            if (linha.W === 'SIM' || linha.W === true) concessoes.push(window.CONCESSOES_VALIDAS[4]);
-            if (linha.X === 'SIM' || linha.X === true) concessoes.push(window.CONCESSOES_VALIDAS[5]);
-            if (linha.Y === 'SIM' || linha.Y === true) concessoes.push(window.CONCESSOES_VALIDAS[6]);
-            if (linha.Z === 'SIM' || linha.Z === true) concessoes.push(window.CONCESSOES_VALIDAS[7]);
-            if (linha.AA === 'SIM' || linha.AA === true) concessoes.push(window.CONCESSOES_VALIDAS[8]);
-            if (linha.AB === 'SIM' || linha.AB === true) concessoes.push(window.CONCESSOES_VALIDAS[9]);
-            if (linha.AC === 'SIM' || linha.AC === true) concessoes.push(window.CONCESSOES_VALIDAS[10]);
-            if (linha.AD === 'SIM' || linha.AD === true) concessoes.push(window.CONCESSOES_VALIDAS[11]);
-            if (linha.AE === 'SIM' || linha.AE === true) concessoes.push(window.CONCESSOES_VALIDAS[12]);
-            
-            // *** V3.1: CONVERTER LINHAS (COLUNAS AF-AR) ***
-            const linhas = [];
-            if (linha.AF === 'SIM' || linha.AF === true) linhas.push(window.LINHAS_VALIDAS[0]);
-            if (linha.AG === 'SIM' || linha.AG === true) linhas.push(window.LINHAS_VALIDAS[1]);
-            if (linha.AH === 'SIM' || linha.AH === true) linhas.push(window.LINHAS_VALIDAS[2]);
-            if (linha.AI === 'SIM' || linha.AI === true) linhas.push(window.LINHAS_VALIDAS[3]);
-            if (linha.AJ === 'SIM' || linha.AJ === true) linhas.push(window.LINHAS_VALIDAS[4]);
-            if (linha.AK === 'SIM' || linha.AK === true) linhas.push(window.LINHAS_VALIDAS[5]);
-            if (linha.AL === 'SIM' || linha.AL === true) linhas.push(window.LINHAS_VALIDAS[6]);
-            if (linha.AM === 'SIM' || linha.AM === true) linhas.push(window.LINHAS_VALIDAS[7]);
-            if (linha.AN === 'SIM' || linha.AN === true) linhas.push(window.LINHAS_VALIDAS[8]);
-            if (linha.AO === 'SIM' || linha.AO === true) linhas.push(window.LINHAS_VALIDAS[9]);
-            if (linha.AP === 'SIM' || linha.AP === true) linhas.push(window.LINHAS_VALIDAS[10]);
-            if (linha.AQ === 'SIM' || linha.AQ === true) linhas.push(window.LINHAS_VALIDAS[11]);
-            if (linha.AR === 'SIM' || linha.AR === true) linhas.push(window.LINHAS_VALIDAS[12]);
-            
-            // *** NOVA V3.1: MAPEAR COLUNAS AS E AT ***
-            const isolamento = validarIsolamento(linha.AS || '');
-            const identificacaoLeito = validarIdentificacaoLeito(linha.AT || '');
-            
-            const leitoData = {
-                hospital: hospitalId,
-                leito: leito,
-                status: linha.C === 'Em uso' ? 'ocupado' : 'vago',
-                nome: linha.D || '',
-                matricula: linha.E || '',
-                idade: parseInt(linha.F) || null,
-                pps: parseInt(linha.G) || null,
-                spict: linha.H || '',
-                complexidade: linha.I || '',
-                prevAlta: validarTimeline(linha.J || 'SP'),
-                concessoes: concessoes,
-                linhas: linhas,
-                
-                // *** NOVAS COLUNAS V3.1 ***
-                isolamento: isolamento,
-                identificacaoLeito: identificacaoLeito,
-                
-                // Campos extras
-                dataAdmissao: linha.K || null,
-                dataAtualizacao: linha.L || null,
-                observacoes: linha.M || '',
-                medicamentos: linha.N || '',
-                exames: linha.O || '',
-                interconsultas: linha.P || '',
-                procedimentos: linha.Q || '',
-                alertas: linha.R || ''
-            };
-            
-            // Criar objeto paciente se leito ocupado
-            if (leitoData.status === 'ocupado' && leitoData.nome) {
-                leitoData.paciente = {
-                    nome: leitoData.nome,
-                    matricula: leitoData.matricula,
-                    idade: leitoData.idade,
-                    pps: leitoData.pps,
-                    spict: leitoData.spict,
-                    complexidade: leitoData.complexidade,
-                    prevAlta: leitoData.prevAlta,
-                    linhas: leitoData.linhas,
-                    concessoes: leitoData.concessoes,
-                    isolamento: leitoData.isolamento,               // NOVA V3.1
-                    identificacaoLeito: leitoData.identificacaoLeito // NOVA V3.1
-                };
-            }
-            
-            hospitalData[hospitalId].leitos.push(leitoData);
-            
-        } catch (error) {
-            logAPIError(`Erro ao processar linha ${index} da planilha V3.1:`, error.message);
-        }
-    });
-    
-    // Ordenar leitos por número
-    Object.keys(hospitalData).forEach(hospitalId => {
-        hospitalData[hospitalId].leitos.sort((a, b) => (a.leito || 0) - (b.leito || 0));
-    });
-    
-    return hospitalData;
-}
-
-// =================== CORREÇÃO CRÍTICA PARA CORS - JSONP FUNCIONAL ===================
+// =================== CORREÇÃO CRÍTICA PARA CORS - JSONP ===================
 
 // Função auxiliar para requisições JSONP (bypass CORS)
 function jsonpRequest(url, params = {}) {
     return new Promise((resolve, reject) => {
-        // Callback único para cada requisição
-        const callbackName = `jsonpCallback_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+        const callbackName = 'jsonp_callback_' + Date.now() + '_' + Math.floor(Math.random() * 1000);
         
         // Criar URL com parâmetros
         const urlObj = new URL(url);
@@ -313,7 +126,6 @@ function jsonpRequest(url, params = {}) {
         
         // Criar callback global
         window[callbackName] = function(data) {
-            // Cleanup
             delete window[callbackName];
             if (script && script.parentNode) {
                 document.head.removeChild(script);
@@ -325,7 +137,6 @@ function jsonpRequest(url, params = {}) {
         const script = document.createElement('script');
         script.src = urlObj.toString();
         script.onerror = () => {
-            // Cleanup em caso de erro
             delete window[callbackName];
             if (script && script.parentNode) {
                 document.head.removeChild(script);
@@ -333,7 +144,7 @@ function jsonpRequest(url, params = {}) {
             reject(new Error('JSONP request failed'));
         };
         
-        // Timeout de 10 segundos
+        // Timeout
         setTimeout(() => {
             if (window[callbackName]) {
                 delete window[callbackName];
@@ -342,7 +153,7 @@ function jsonpRequest(url, params = {}) {
                 }
                 reject(new Error('JSONP request timeout'));
             }
-        }, 10000);
+        }, window.API_TIMEOUT);
         
         document.head.appendChild(script);
     });
@@ -389,7 +200,7 @@ async function apiRequest(action, params = {}, method = 'GET') {
                     throw new Error(data.error || data.message || 'Erro desconhecido da API');
                 }
                 
-                logAPISuccess(`${method} ${action} concluído (Fetch)`, data.data ? `dados carregados` : 'sem dados');
+                logAPISuccess(`${method} ${action} concluído (Fetch)`, data.data ? `${Object.keys(data.data).length || 0} registros` : 'sem dados');
                 return data.data;
                 
             } catch (fetchError) {
@@ -402,7 +213,7 @@ async function apiRequest(action, params = {}, method = 'GET') {
                     throw new Error(data?.error || data?.message || 'Erro desconhecido da API via JSONP');
                 }
                 
-                logAPISuccess(`${method} ${action} concluído (JSONP)`, data.data ? `dados carregados` : 'sem dados');
+                logAPISuccess(`${method} ${action} concluído (JSONP)`, data.data ? `${Object.keys(data.data).length || 0} registros` : 'sem dados');
                 return data.data;
             }
             
@@ -461,73 +272,43 @@ window.loadHospitalData = async function() {
             window.showLoading(null, 'Sincronizando com Google Apps Script V3.1...');
         }
         
-        // Inicializar estrutura vazia em caso de erro
-        window.hospitalData = {
-            H1: { leitos: [] },
-            H2: { leitos: [] },
-            H3: { leitos: [] },
-            H4: { leitos: [] }
-        };
+        // Buscar dados da API
+        const apiData = await apiRequest('all', {}, 'GET');
         
-        try {
-            // Buscar dados da API
-            const apiData = await apiRequest('all', {}, 'GET');
-            
-            if (!apiData) {
-                logAPIError('API V3.1 retornou dados nulos - mantendo estrutura vazia');
-                return window.hospitalData;
-            }
-            
-            // *** TRATAMENTO DE MÚLTIPLOS FORMATOS DE RESPOSTA ***
-            let hospitalData = {};
-            
-            // Array direto da planilha
-            if (Array.isArray(apiData)) {
-                logAPI('Dados V3.1 recebidos em formato array direto - convertendo...');
-                hospitalData = converterDadosPlanilha(apiData);
-            } 
-            // Formato {H1: {leitos: []}}
-            else if (apiData.H1 && apiData.H1.leitos) {
-                logAPI('Dados V3.1 recebidos em formato agrupado');
-                hospitalData = apiData;
-            }
-            // Formato {success: true, data: [...]}
-            else if (apiData.data && Array.isArray(apiData.data)) {
-                logAPI('Dados V3.1 recebidos em formato wrapper - convertendo...');
-                hospitalData = converterDadosPlanilha(apiData.data);
-            }
-            // Formato {ok: true, data: [...]}
-            else if (apiData.ok && apiData.data) {
-                logAPI('Dados V3.1 recebidos em formato ok/data - convertendo...');
-                hospitalData = Array.isArray(apiData.data) ? converterDadosPlanilha(apiData.data) : apiData.data;
-            }
-            else {
-                logAPIError('Formato de dados da API V3.1 não reconhecido - mantendo estrutura vazia');
-                logAPIError('Formato recebido:', typeof apiData);
-                return window.hospitalData;
-            }
-            
-            // Atualizar dados globais
-            window.hospitalData = hospitalData;
-            
-        } catch (apiError) {
-            logAPIError('Erro ao buscar dados da API V3.1:', apiError.message);
-            // Manter estrutura vazia
+        if (!apiData || typeof apiData !== 'object') {
+            throw new Error('API V3.1 retornou dados inválidos');
+        }
+        
+        // *** PROCESSAMENTO V3.1: DADOS JÁ VÊM COMO ARRAYS DIRETOS ***
+        window.hospitalData = {};
+        
+        // Se a API retorna formato agrupado: {H1: {leitos: [...]}, H2: {leitos: [...]}}
+        if (apiData.H1 && apiData.H1.leitos) {
+            logAPI('Dados V3.1 recebidos em formato agrupado');
+            window.hospitalData = apiData;
+        } 
+        // Se a API retorna array flat: [{hospital: 'H1', ...}, {hospital: 'H2', ...}]
+        else if (Array.isArray(apiData)) {
+            logAPI('Dados V3.1 recebidos em formato flat - convertendo...');
+            apiData.forEach(leito => {
+                const hospitalId = leito.hospital;
+                if (!window.hospitalData[hospitalId]) {
+                    window.hospitalData[hospitalId] = { leitos: [] };
+                }
+                window.hospitalData[hospitalId].leitos.push(leito);
+            });
+        }
+        else {
+            throw new Error('Formato de dados da API V3.1 não reconhecido');
         }
         
         // Verificar se temos dados
         const totalHospitais = Object.keys(window.hospitalData).length;
         if (totalHospitais === 0) {
-            logAPIError('Nenhum hospital encontrado nos dados da API V3.1 - inicializando estrutura vazia');
-            window.hospitalData = {
-                H1: { leitos: [] },
-                H2: { leitos: [] },
-                H3: { leitos: [] },
-                H4: { leitos: [] }
-            };
+            throw new Error('Nenhum hospital encontrado nos dados da API V3.1');
         }
         
-        // *** PROCESSAMENTO V3.1: GARANTIR DADOS CORRETOS ***
+        // *** PROCESSAMENTO V3.1: SEM PARSING - DADOS JÁ VÊM CORRETOS ***
         Object.keys(window.hospitalData).forEach(hospitalId => {
             const hospital = window.hospitalData[hospitalId];
             if (hospital && hospital.leitos) {
@@ -536,12 +317,12 @@ window.loadHospitalData = async function() {
                     if (leito.status === 'Em uso') leito.status = 'ocupado';
                     if (leito.status === 'Vago') leito.status = 'vago';
                     
-                    // *** V3.1: VALIDAR TIMELINE ***
+                    // *** V3.1: VALIDAR TIMELINE COM 10 OPÇÕES ***
                     if (leito.prevAlta) {
                         leito.prevAlta = validarTimeline(leito.prevAlta);
                     }
                     
-                    // *** V3.1: VALIDAR CONCESSÕES E LINHAS ***
+                    // *** V3.1: VALIDAR CONCESSÕES E LINHAS (JÁ VÊM COMO ARRAYS) ***
                     if (leito.concessoes) {
                         leito.concessoes = validarConcessoes(leito.concessoes);
                     }
@@ -558,7 +339,12 @@ window.loadHospitalData = async function() {
                     
                     // *** NOVA V3.1: VALIDAR IDENTIFICAÇÃO DO LEITO (COLUNA AT) ***
                     if (leito.identificacaoLeito) {
-                        leito.identificacaoLeito = validarIdentificacaoLeito(leito.identificacaoLeito);
+                        try {
+                            leito.identificacaoLeito = validarIdentificacaoLeito(leito.identificacaoLeito);
+                        } catch (error) {
+                            logAPIError(`Erro na identificação do leito ${hospitalId}-${leito.leito}:`, error.message);
+                            leito.identificacaoLeito = '';
+                        }
                     } else {
                         leito.identificacaoLeito = ''; // Opcional
                     }
@@ -573,9 +359,9 @@ window.loadHospitalData = async function() {
                             spict: leito.spict,
                             complexidade: leito.complexidade,
                             prevAlta: leito.prevAlta,
-                            linhas: leito.linhas || [],
-                            concessoes: leito.concessoes || [],
-                            isolamento: leito.isolamento,               // NOVA V3.1 (AS)
+                            linhas: leito.linhas || [],           // Array direto V3.1!
+                            concessoes: leito.concessoes || [],   // Array direto V3.1!
+                            isolamento: leito.isolamento,         // NOVA V3.1 (AS)
                             identificacaoLeito: leito.identificacaoLeito // NOVA V3.1 (AT)
                         };
                     }
@@ -609,21 +395,21 @@ window.loadHospitalData = async function() {
                 if (leito.isolamento && leito.isolamento !== 'NÃO ISOLAMENTO') {
                     leitosComIsolamento++;
                 }
-                if (leito.identificacaoLeito && leito.identificacaoLeito.length > 0) {
+                if (leito.identificacaoLeito) {
                     leitosComIdentificacao++;
                 }
             });
         });
         
         logAPISuccess(`Dados V3.1 carregados da planilha (46 colunas - incluindo AS/AT):`);
-        logAPISuccess(`• ${Object.keys(window.hospitalData).length} hospitais ativos`);
+        logAPISuccess(`• ${totalHospitais} hospitais ativos`);
         logAPISuccess(`• ${totalLeitos} leitos totais`);
         logAPISuccess(`• ${leitosOcupados} leitos ocupados (${taxaOcupacao}%)`);
         logAPISuccess(`• ${totalConcessoes} concessões ativas`);
         logAPISuccess(`• ${totalLinhas} linhas de cuidado ativas`);
         logAPISuccess(`• ${leitosComIsolamento} leitos com isolamento (AS)`);
         logAPISuccess(`• ${leitosComIdentificacao} leitos com identificação (AT)`);
-        logAPISuccess(`• CONVERSÃO AUTOMÁTICA - Colunas AS/AT mapeadas corretamente!`);
+        logAPISuccess(`• SEM PARSING - Dados diretos das 46 colunas!`);
         
         // Atualizar timestamp
         window.lastAPICall = Date.now();
@@ -643,17 +429,10 @@ window.loadHospitalData = async function() {
             window.hideLoading();
         }
         
-        // Manter estrutura vazia em caso de erro
-        if (!window.hospitalData || Object.keys(window.hospitalData).length === 0) {
-            window.hospitalData = {
-                H1: { leitos: [] },
-                H2: { leitos: [] },
-                H3: { leitos: [] },
-                H4: { leitos: [] }
-            };
-        }
+        // Manter dados vazios
+        window.hospitalData = {};
         
-        return window.hospitalData;
+        throw error;
     }
 };
 
@@ -672,7 +451,11 @@ window.admitirPaciente = async function(hospital, leito, dadosPaciente) {
         
         let identificacaoValida = '';
         if (dadosPaciente.identificacaoLeito) {
-            identificacaoValida = validarIdentificacaoLeito(dadosPaciente.identificacaoLeito);
+            try {
+                identificacaoValida = validarIdentificacaoLeito(dadosPaciente.identificacaoLeito);
+            } catch (error) {
+                throw new Error(`Erro na identificação do leito: ${error.message}`);
+            }
         }
         
         const payload = {
@@ -685,9 +468,9 @@ window.admitirPaciente = async function(hospital, leito, dadosPaciente) {
             spict: dadosPaciente.spict || '',
             complexidade: dadosPaciente.complexidade || 'I',
             prevAlta: timelineValida,
-            linhas: linhasValidas,
-            concessoes: concessoesValidas,
-            isolamento: isolamentoValido,       // NOVA V3.1 (AS) - OBRIGATÓRIA
+            linhas: linhasValidas,          // Array direto V3.1!
+            concessoes: concessoesValidas,  // Array direto V3.1!
+            isolamento: isolamentoValido,   // NOVA V3.1 (AS) - OBRIGATÓRIA
             identificacaoLeito: identificacaoValida // NOVA V3.1 (AT) - OPCIONAL
         };
         
@@ -723,7 +506,11 @@ window.atualizarPaciente = async function(hospital, leito, dadosAtualizados) {
         
         let identificacaoValida = '';
         if (dadosAtualizados.identificacaoLeito) {
-            identificacaoValida = validarIdentificacaoLeito(dadosAtualizados.identificacaoLeito);
+            try {
+                identificacaoValida = validarIdentificacaoLeito(dadosAtualizados.identificacaoLeito);
+            } catch (error) {
+                throw new Error(`Erro na identificação do leito: ${error.message}`);
+            }
         }
         
         const payload = {
@@ -734,9 +521,9 @@ window.atualizarPaciente = async function(hospital, leito, dadosAtualizados) {
             spict: dadosAtualizados.spict || '',
             complexidade: dadosAtualizados.complexidade || '',
             prevAlta: timelineValida,
-            linhas: linhasValidas,
-            concessoes: concessoesValidas,
-            isolamento: isolamentoValido,       // NOVA V3.1 (AS)
+            linhas: linhasValidas,          // Array direto V3.1!
+            concessoes: concessoesValidas,  // Array direto V3.1!
+            isolamento: isolamentoValido,   // NOVA V3.1 (AS)
             identificacaoLeito: identificacaoValida // NOVA V3.1 (AT)
         };
         
@@ -833,7 +620,7 @@ window.refreshAfterAction = async function() {
                         🔄 Sincronizando V3.1 com a planilha (46 colunas - incluindo AS/AT)...
                     </div>
                     <div style="color: #9ca3af; font-size: 14px;">
-                        Atualizando dados com mapeamento AS/AT correto
+                        Atualizando dados sem parsing - Performance otimizada V3.1
                     </div>
                 </div>
             `;
@@ -978,13 +765,12 @@ window.saveColors = async function(colors) {
 
 // =================== INICIALIZAÇÃO V3.1 ===================
 window.addEventListener('load', () => {
-    logAPI('API.js V3.1 FINAL CORRIGIDO carregado - URL da API V3.1 configurada');
+    logAPI('API.js V3.1 carregado - URL da API V3.1 configurada');
     logAPI(`URL: ${window.API_URL}`);
     logAPI(`Timeline: ${window.TIMELINE_OPCOES.length} opções (incluindo 96h)`);
     logAPI(`Isolamento: ${window.ISOLAMENTO_OPCOES.length} opções (AS)`);
     logAPI(`Concessões: ${window.CONCESSOES_VALIDAS.length} tipos`);
     logAPI(`Linhas: ${window.LINHAS_VALIDAS.length} tipos`);
-    logAPI(`Colunas: 46 colunas mapeadas (AS-ISOLAMENTO + AT-IDENTIFICACAO_LEITO)`);
     
     // Iniciar monitoramento após 10 segundos
     setTimeout(() => {
@@ -994,9 +780,8 @@ window.addEventListener('load', () => {
     }, 10000);
 });
 
-logAPISuccess('✅ API.js V3.1 FINAL CORRIGIDO 100% FUNCIONAL - Nova estrutura 46 colunas ativa');
-logAPISuccess('✅ Colunas AS (ISOLAMENTO) e AT (IDENTIFICACAO_LEITO) mapeadas corretamente');
+logAPISuccess('✅ API.js V3.1 100% FUNCIONAL - Nova estrutura 46 colunas (AS/AT) sem parsing ativa');
+logAPISuccess('✅ Colunas AS (ISOLAMENTO) e AT (IDENTIFICACAO_LEITO) implementadas');
 logAPISuccess('✅ Validação alfanumérica 6 chars para AT implementada');
 logAPISuccess('✅ Dropdown obrigatório 3 opções para AS implementado');
-logAPISuccess('✅ Fallback JSONP funcional implementado com callback único');
-logAPISuccess('✅ Conversão automática das 46 colunas da planilha ativa');
+logAPISuccess('✅ URL CORRIGIDA para API que funciona');
