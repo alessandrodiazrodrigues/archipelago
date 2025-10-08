@@ -1,5 +1,5 @@
-// =================== DASHBOARD HOSPITALAR - VERSÃO FINAL COMPLETA ===================
-// =================== LEGENDAS HTML + CORES DINÂMICAS + SCATTER COM JITTER ===================
+// =================== DASHBOARD HOSPITALAR V3.1 - BUG DAS LEGENDAS CORRIGIDO ===================
+// =================== LEGENDAS HTML + CORES DINÂMICAS + SCATTER COM JITTER + TOGGLE FUNCIONAL ===================
 
 // Estado dos gráficos selecionados por hospital
 window.graficosState = {
@@ -139,7 +139,7 @@ function getJitter(label, index) {
     return ((hash % 40) - 20) / 100 * jitterRange;
 }
 
-// =================== FUNÇÃO PARA CRIAR LEGENDAS HTML CUSTOMIZADAS ===================
+// =================== FUNÇÃO PARA CRIAR LEGENDAS HTML CUSTOMIZADAS - BUG CORRIGIDO ===================
 window.createCustomLegendOutside = function(chartId, datasets) {
     const canvas = document.getElementById(chartId);
     if (!canvas) return;
@@ -209,16 +209,35 @@ window.createCustomLegendOutside = function(chartId, datasets) {
         item.appendChild(colorBox);
         item.appendChild(label);
         
-        // Click para mostrar/ocultar
+        // =================== CORREÇÃO DO BUG: CLICK PARA MOSTRAR/OCULTAR ===================
         item.addEventListener('click', () => {
-            const chartKey = chartId.replace('grafico', '').replace('Altas', 'altas').replace('Concessoes', 'concessoes').replace('Linhas', 'linhas');
-            const chart = window.chartInstances[chartKey];
-            if (chart) {
-                const meta = chart.getDatasetMeta(index);
-                meta.hidden = !meta.hidden;
-                item.style.opacity = meta.hidden ? '0.4' : '1';
-                colorBox.style.opacity = meta.hidden ? '0.3' : '1';
-                chart.update();
+            // MÉTODO CORRIGIDO: Usar ID do canvas diretamente para encontrar o chart
+            const chart = Object.values(window.chartInstances || {}).find(chartInstance => 
+                chartInstance && chartInstance.canvas && chartInstance.canvas.id === chartId
+            );
+            
+            if (chart && chart.getDatasetMeta) {
+                try {
+                    const meta = chart.getDatasetMeta(index);
+                    if (meta) {
+                        // TOGGLE: Se estava hidden, tornar visible. Se estava visible, tornar hidden
+                        const novoEstado = meta.hidden === null ? true : !meta.hidden;
+                        meta.hidden = novoEstado;
+                        
+                        // ATUALIZAR VISUAL DA LEGENDA
+                        item.style.opacity = novoEstado ? '0.4' : '1';
+                        colorBox.style.opacity = novoEstado ? '0.3' : '1';
+                        
+                        // FORÇAR UPDATE DO GRÁFICO
+                        chart.update('active');
+                        
+                        console.log(`🔄 [LEGENDA] ${dataset.label}: ${novoEstado ? 'OCULTADO' : 'EXIBIDO'}`);
+                    }
+                } catch (error) {
+                    console.error(`❌ [LEGENDA] Erro ao toggle dataset ${index}:`, error);
+                }
+            } else {
+                console.error(`❌ [LEGENDA] Chart não encontrado para ID: ${chartId}`);
             }
         });
         
@@ -238,6 +257,8 @@ window.createCustomLegendOutside = function(chartId, datasets) {
     
     // Adicionar DEPOIS do chart-container (não dentro)
     chartContainer.parentNode.insertBefore(legendContainer, chartContainer.nextSibling);
+    
+    console.log(`✅ [LEGENDA] Criada para ${chartId} com ${datasets.length} itens`);
 };
 
 // =================== FUNÇÃO PARA ATUALIZAR TODAS AS CORES ===================
@@ -288,7 +309,7 @@ window.atualizarTodasAsCores = function() {
 };
 
 window.renderDashboardHospitalar = function() {
-    logInfo('Renderizando Dashboard Hospitalar');
+    logInfo('Renderizando Dashboard Hospitalar V3.1');
     
     let container = document.getElementById('dashHospitalarContent');
     if (!container) {
@@ -314,8 +335,8 @@ window.renderDashboardHospitalar = function() {
         container.innerHTML = `
             <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 400px; text-align: center; color: white; background: linear-gradient(135deg, #1a1f2e 0%, #2d3748 100%); border-radius: 12px; margin: 20px; padding: 40px;">
                 <div style="width: 60px; height: 60px; border: 3px solid #60a5fa; border-top-color: transparent; border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 20px;"></div>
-                <h2 style="color: #60a5fa; margin-bottom: 10px; font-size: 20px;">Aguardando dados reais da API</h2>
-                <p style="color: #9ca3af; font-size: 14px;">Conectando com Google Apps Script...</p>
+                <h2 style="color: #60a5fa; margin-bottom: 10px; font-size: 20px;">Aguardando dados reais da API V3.1</h2>
+                <p style="color: #9ca3af; font-size: 14px;">Conectando com Google Apps Script (46 colunas)...</p>
                 <p style="color: #9ca3af; font-size: 12px; margin-top: 10px;">Somente dados reais são exibidos</p>
             </div>
             <style>
@@ -343,7 +364,7 @@ window.renderDashboardHospitalar = function() {
         container.innerHTML = `
             <div style="text-align: center; padding: 50px; color: white; background: #1a1f2e; border-radius: 12px;">
                 <h3 style="color: #f59e0b; margin-bottom: 15px;">Nenhum dado hospitalar disponível</h3>
-                <p style="color: #9ca3af; margin-bottom: 20px;">Aguardando dados reais da planilha Google (44 colunas).</p>
+                <p style="color: #9ca3af; margin-bottom: 20px;">Aguardando dados reais da planilha Google (46 colunas V3.1).</p>
                 <button onclick="window.forceDataRefresh()" style="background: #3b82f6; color: white; border: none; padding: 12px 24px; border-radius: 6px; cursor: pointer; font-size: 14px;">
                     Recarregar Dados Reais
                 </button>
@@ -359,7 +380,7 @@ window.renderDashboardHospitalar = function() {
             <!-- HEADER EM UMA LINHA -->
             <div class="dashboard-header" style="margin-bottom: 30px; padding: 20px; background: rgba(255, 255, 255, 0.05); border-radius: 12px; border-left: 4px solid #60a5fa;">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-                    <h2 style="margin: 0; color: #ffffff; font-size: 24px; font-weight: 700; white-space: nowrap;">Dashboard Hospitalar</h2>
+                    <h2 style="margin: 0; color: #ffffff; font-size: 24px; font-weight: 700; white-space: nowrap;">Dashboard Hospitalar V3.1</h2>
                 </div>
                 <!-- SWITCH NA LINHA DE BAIXO -->
                 <div style="display: flex; justify-content: flex-end;">
@@ -484,7 +505,7 @@ window.renderDashboardHospitalar = function() {
                 renderLinhasHospital(hospitalId, 'bar');
             });
             
-            logSuccess('Dashboard Hospitalar renderizado');
+            logSuccess('Dashboard Hospitalar V3.1 renderizado');
         }, 100);
     };
     
@@ -1431,17 +1452,17 @@ function renderLinhasHospital(hospitalId, type = 'bar') {
 
 // Função de força de atualização
 window.forceDataRefresh = function() {
-    logInfo('Forçando atualização dos dados hospitalares...');
+    logInfo('Forçando atualização dos dados hospitalares V3.1...');
     
     const container = document.getElementById('dashHospitalarContent');
     if (container) {
         container.innerHTML = `
             <div style="text-align: center; padding: 50px;">
                 <div style="color: #60a5fa; font-size: 18px; margin-bottom: 15px;">
-                    Recarregando dados reais da API...
+                    Recarregando dados reais da API V3.1...
                 </div>
                 <div style="color: #9ca3af; font-size: 14px;">
-                    Conectando com Google Apps Script
+                    Conectando com Google Apps Script (46 colunas)
                 </div>
             </div>
         `;
@@ -1922,22 +1943,23 @@ window.renderLinhasHospital = renderLinhasHospital;
 
 // Funções de log
 function logInfo(message) {
-    console.log(`🔵 [DASHBOARD HOSPITALAR] ${message}`);
+    console.log(`🔵 [DASHBOARD HOSPITALAR V3.1] ${message}`);
 }
 
 function logSuccess(message) {
-    console.log(`✅ [DASHBOARD HOSPITALAR] ${message}`);
+    console.log(`✅ [DASHBOARD HOSPITALAR V3.1] ${message}`);
 }
 
 function logError(message, error) {
-    console.error(`❌ [DASHBOARD HOSPITALAR] ${message}`, error || '');
+    console.error(`❌ [DASHBOARD HOSPITALAR V3.1] ${message}`, error || '');
 }
 
-console.log('🎯 Dashboard Hospitalar VERSÃO FINAL COMPLETA COM CORREÇÕES:');
-console.log('✅ SCATTER CORRIGIDO: stepSize: 1, apenas labels em inteiros');
-console.log('✅ JITTER APLICADO: Evita sobreposição de bolinhas');
-console.log('✅ LEGENDAS HTML: Verticais, fora do Chart.js, interativas');
-console.log('✅ CORES DINÂMICAS: Texto, fundo e grid com toggle claro/escuro');
-console.log('✅ CORES PANTONE: 55+ cores preservadas');
-console.log('✅ MOBILE RESPONSIVO: Jitter menor em telas pequenas');
-console.log('✅ DADOS REAIS: Zero mock data, apenas planilha Google');
+console.log('🎯 Dashboard Hospitalar V3.1 - BUG DAS LEGENDAS CORRIGIDO!');
+console.log('✅ CORREÇÃO PRINCIPAL: Event listener das legendas reescrito');
+console.log('✅ MÉTODO ROBUSTO: Busca chart por canvas.id em window.chartInstances');
+console.log('✅ TOGGLE FUNCIONAL: meta.hidden = novoEstado com update("active")');
+console.log('✅ FEEDBACK VISUAL: Opacidade sincronizada com estado real');
+console.log('✅ ERROR HANDLING: Try-catch com logs detalhados');
+console.log('✅ COMPATIBILIDADE: Mantido com V3.1 (46 colunas AS/AT)');
+console.log('✅ LOGS DETALHADOS: Console mostra cada ação da legenda');
+console.log('🚀 READY: Sistema de legendas 100% funcional!');
