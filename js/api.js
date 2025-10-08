@@ -1,7 +1,7 @@
 // =================== API V3.1 FINAL CORRIGIDO - ESTRUTURA 46 COLUNAS (AS/AT) ===================
 
 // *** URL ATUALIZADA DA API V3.1 ***
-window.API_URL = 'https://script.google.com/macros/s/AKfycbxAEyQKas6IEFPV5iQK8HSjm-xIRfcczzB9poXEKpJhvYkmJZ6vaBN_x74IiBe-8wHC/exec';
+window.API_URL = 'https://script.google.com/macros/s/AKfycbxC9Gdvu3_mzXko0VjIYOFgtiH_Z_d8E9VXniUpBxyfaHRC1BHilyEuKhAtLnzmnusT/exec';
 
 // =================== VARIÁVEIS GLOBAIS ===================
 window.hospitalData = {};
