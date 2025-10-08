@@ -1,11 +1,11 @@
-// =================== CARDS.JS - VERSÃO CONSOLIDADA FINAL ===================
+// =================== CARDS.JS V3.1 - VERSÃO CORRIGIDA COMPLETA ===================
 // =================== TODO CSS RESPONSIVO INCLUÍDO - SEM mobile.css ===================
 
 // =================== VARIÁVEIS GLOBAIS ===================  
 window.selectedLeito = null;
 window.currentHospital = 'H1';
 
-// =================== MAPEAMENTO DE HOSPITAIS ===================
+// =================== MAPEAMENTO DE HOSPITAIS V3.1 ===================
 window.HOSPITAL_MAPPING = {
     H1: 'Neomater',
     H2: 'Cruz Azul', 
@@ -61,9 +61,16 @@ window.PREVISAO_ALTA_OPTIONS = [
     '48h', '72h', '96h', 'SP'
 ];
 
-// OPÇÕES DE IDADE PARA SELECT
+// *** NOVA V3.1: OPÇÕES DE ISOLAMENTO (COLUNA AS) ***
+window.ISOLAMENTO_OPTIONS = [
+    'NÃO ISOLAMENTO',
+    'ISOLAMENTO DE CONTATO', 
+    'ISOLAMENTO RESPIRATÓRIO'
+];
+
+// *** NOVA V3.1: OPÇÕES DE IDADE DROPDOWN 14-115 ANOS (MOBILE) ***
 window.IDADE_OPTIONS = [];
-for (let i = 0; i <= 120; i++) {
+for (let i = 14; i <= 115; i++) {
     window.IDADE_OPTIONS.push(i);
 }
 
@@ -88,7 +95,7 @@ window.selectHospital = function(hospitalId) {
 
 // =================== FUNÇÃO PRINCIPAL DE RENDERIZAÇÃO ===================
 window.renderCards = function() {
-    logInfo('Renderizando cards com dados REAIS da API');
+    logInfo('Renderizando cards V3.1 com dados REAIS da API (incluindo AS/AT)');
     
     const container = document.getElementById('cardsContainer');
     if (!container) {
@@ -109,8 +116,8 @@ window.renderCards = function() {
                     <h3>📋 ${hospitalNome}</h3>
                 </div>
                 <div style="background: rgba(96,165,250,0.1); border-radius: 8px; padding: 20px;">
-                    <p style="margin-bottom: 15px;">Carregando dados da planilha...</p>
-                    <p style="color: #28a745;"><em>✅ API conectada - Arrays diretos</em></p>
+                    <p style="margin-bottom: 15px;">Carregando dados da planilha V3.1 (46 colunas)...</p>
+                    <p style="color: #28a745;"><em>✅ API V3.1 conectada - Incluindo AS/AT</em></p>
                 </div>
             </div>
         `;
@@ -122,10 +129,37 @@ window.renderCards = function() {
         container.appendChild(card);
     });
     
-    logInfo(`${hospital.leitos.length} cards renderizados para ${hospitalNome}`);
+    logInfo(`${hospital.leitos.length} cards V3.1 renderizados para ${hospitalNome}`);
 };
 
-// =================== CRIAR CARD INDIVIDUAL ===================
+// =================== FUNÇÃO: BADGE DE ISOLAMENTO ===================
+function getBadgeIsolamento(isolamento) {
+    if (!isolamento || isolamento === 'NÃO ISOLAMENTO') {
+        return {
+            cor: '#9ca3af',
+            icone: '⚪',
+            texto: 'SEM ISOLAMENTO',
+            textoCor: '#ffffff'
+        };
+    } else if (isolamento === 'ISOLAMENTO DE CONTATO') {
+        return {
+            cor: '#f59e0b',
+            icone: '🟡',
+            texto: 'CONTATO',
+            textoCor: '#000000'
+        };
+    } else if (isolamento === 'ISOLAMENTO RESPIRATÓRIO') {
+        return {
+            cor: '#ef4444',
+            icone: '🔴',
+            texto: 'RESPIRATÓRIO',
+            textoCor: '#ffffff'
+        };
+    }
+    return getBadgeIsolamento('NÃO ISOLAMENTO'); // Fallback
+}
+
+// =================== CRIAR CARD INDIVIDUAL V3.1 ===================
 function createCard(leito, hospitalNome) {
     const card = document.createElement('div');
     card.className = 'card';
@@ -156,6 +190,11 @@ function createCard(leito, hospitalNome) {
     const spict = leito.spict || '';
     const previsaoAlta = leito.prevAlta || '';
     
+    // *** NOVA V3.1: DADOS ISOLAMENTO E IDENTIFICAÇÃO ***
+    const isolamento = leito.isolamento || 'NÃO ISOLAMENTO';
+    const identificacaoLeito = leito.identificacaoLeito || '';
+    const badgeIsolamento = getBadgeIsolamento(isolamento);
+    
     // Arrays diretos - sem parsing
     const concessoes = Array.isArray(leito.concessoes) ? leito.concessoes : [];
     const linhas = Array.isArray(leito.linhas) ? leito.linhas : [];
@@ -166,7 +205,7 @@ function createCard(leito, hospitalNome) {
         tempoInternacao = calcularTempoInternacao(admissao);
     }
     
-    // Extrair iniciais do nome
+    // *** CORREÇÃO V3.1: EXTRAIR APENAS INICIAIS DO NOME ***
     const iniciais = isVago ? '—' : getIniciais(nome);
     
     // Formatar PPS
@@ -181,7 +220,7 @@ function createCard(leito, hospitalNome) {
     
     const numeroLeito = leito.leito || leito.numero || 'N/A';
     
-    // HTML do Card (layout 3x3 mantido)
+    // HTML do Card V3.1 (layout 3x3 mantido + isolamento no rodapé)
     card.innerHTML = `
         <div class="card-row-1" style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 12px;">
             <div style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; padding: 10px; min-height: 50px; display: flex; flex-direction: column; justify-content: center;">
@@ -272,6 +311,15 @@ function createCard(leito, hospitalNome) {
                     <div style="color: #ffffff; font-weight: 600; font-size: 11px;">${tempoInternacao}</div>
                 </div>
                 ` : ''}
+                
+                ${!isVago ? `
+                <div style="display: flex; align-items: center; gap: 6px;">
+                    <div style="background: ${badgeIsolamento.cor}; color: ${badgeIsolamento.textoCor}; padding: 4px 8px; border-radius: 12px; font-size: 9px; font-weight: 700; text-transform: uppercase; display: flex; align-items: center; gap: 4px;">
+                        ${badgeIsolamento.icone} ${badgeIsolamento.texto}
+                    </div>
+                    ${identificacaoLeito ? `<div style="background: rgba(96,165,250,0.2); color: #60a5fa; padding: 4px 8px; border-radius: 8px; font-size: 9px; font-weight: 600;">ID: ${identificacaoLeito}</div>` : ''}
+                </div>
+                ` : ''}
             </div>
         </div>
         
@@ -313,7 +361,7 @@ function openAdmissaoFlow(leitoNumero) {
     setTimeout(() => {
         hideButtonLoading(button, originalText);
         openAdmissaoModal(leitoNumero);
-        logInfo(`Modal de admissão aberto: ${window.currentHospital} - Leito ${leitoNumero}`);
+        logInfo(`Modal de admissão V3.1 aberto: ${window.currentHospital} - Leito ${leitoNumero}`);
     }, 800);
 }
 
@@ -326,11 +374,11 @@ function openAtualizacaoFlow(leitoNumero, dadosLeito) {
     setTimeout(() => {
         hideButtonLoading(button, originalText);
         openAtualizacaoModal(leitoNumero, dadosLeito);
-        logInfo(`Modal de atualização aberto: ${window.currentHospital} - Leito ${leitoNumero}`);
+        logInfo(`Modal de atualização V3.1 aberto: ${window.currentHospital} - Leito ${leitoNumero}`);
     }, 800);
 }
 
-// =================== MODAIS CORRIGIDOS ===================
+// =================== MODAIS CORRIGIDOS V3.1 ===================
 function openAdmissaoModal(leitoNumero) {
     const hospitalId = window.currentHospital;
     const hospitalNome = window.HOSPITAL_MAPPING[hospitalId] || 'Hospital';
@@ -374,12 +422,12 @@ function createModalOverlay() {
     return modal;
 }
 
-// *** FORMULÁRIO DE ADMISSÃO CORRIGIDO ***
+// *** FORMULÁRIO DE ADMISSÃO V3.1 CORRIGIDO ***
 function createAdmissaoForm(hospitalNome, leitoNumero) {
     return `
         <div class="modal-content" style="background: #1a1f2e; border-radius: 12px; padding: 30px; max-width: 700px; width: 95%; max-height: 90vh; overflow-y: auto; color: #ffffff;">
             <h2 style="margin: 0 0 20px 0; text-align: center; color: #60a5fa; font-size: 24px; font-weight: 700; text-transform: uppercase;">
-                ADMITIR PACIENTE
+                ADMITIR PACIENTE V3.1
             </h2>
             
             <div style="text-align: center; margin-bottom: 30px; padding: 15px; background: rgba(96,165,250,0.1); border-radius: 8px;">
@@ -443,7 +491,7 @@ function createAdmissaoForm(hospitalNome, leitoNumero) {
                 </div>
             </div>
             
-            <div style="margin-bottom: 30px;">
+            <div style="margin-bottom: 20px;">
                 <div style="background: rgba(96,165,250,0.1); padding: 10px 15px; border-radius: 6px; margin-bottom: 10px;">
                     <div style="font-size: 11px; color: #ffffff; text-transform: uppercase; font-weight: 700;">
                         LINHAS DE CUIDADO PREVISTAS NA ALTA
@@ -459,6 +507,32 @@ function createAdmissaoForm(hospitalNome, leitoNumero) {
                 </div>
             </div>
             
+            <div style="margin-bottom: 20px;">
+                <div style="background: rgba(96,165,250,0.1); padding: 10px 15px; border-radius: 6px; margin-bottom: 10px;">
+                    <div style="font-size: 11px; color: #ffffff; text-transform: uppercase; font-weight: 700;">
+                        ISOLAMENTO DO PACIENTE (OBRIGATÓRIO)
+                    </div>
+                </div>
+                <div style="background: rgba(255,255,255,0.03); border-radius: 6px; padding: 15px;">
+                    ${window.ISOLAMENTO_OPTIONS.map((opcao, index) => `
+                        <label style="display: flex; align-items: center; padding: 8px 0; cursor: pointer; font-size: 14px;">
+                            <input type="radio" name="admIsolamento" value="${opcao}" ${index === 0 ? 'checked' : ''} style="margin-right: 12px; accent-color: #60a5fa;">
+                            <span>${opcao}</span>
+                        </label>
+                    `).join('')}
+                </div>
+            </div>
+            
+            <div style="margin-bottom: 30px;">
+                <div style="background: rgba(96,165,250,0.1); padding: 10px 15px; border-radius: 6px; margin-bottom: 10px;">
+                    <div style="font-size: 11px; color: #ffffff; text-transform: uppercase; font-weight: 700;">
+                        IDENTIFICAÇÃO DO LEITO (OPCIONAL)
+                    </div>
+                </div>
+                <input id="admIdentificacaoLeito" type="text" placeholder="Ex: A1, UTI-5, ENF12 (máx. 6 caracteres)" maxlength="6" style="width: 100%; padding: 12px; background: #374151; color: #ffffff; border: 1px solid rgba(255,255,255,0.3); border-radius: 6px; font-size: 14px;">
+                <div style="font-size: 11px; color: rgba(255,255,255,0.6); margin-top: 5px;">Campo alfanumérico com até 6 caracteres</div>
+            </div>
+            
             <div style="display: flex; justify-content: flex-end; gap: 12px; padding: 20px; border-top: 1px solid rgba(255,255,255,0.1);">
                 <button class="btn-cancelar" style="padding: 12px 30px; background: rgba(255,255,255,0.1); color: #ffffff; border: 1px solid rgba(255,255,255,0.2); border-radius: 8px; font-weight: 600; text-transform: uppercase; cursor: pointer;">CANCELAR</button>
                 <button class="btn-salvar" style="padding: 12px 30px; background: #3b82f6; color: #ffffff; border: none; border-radius: 8px; font-weight: 600; text-transform: uppercase; cursor: pointer;">SALVAR</button>
@@ -467,7 +541,7 @@ function createAdmissaoForm(hospitalNome, leitoNumero) {
     `;
 }
 
-// *** FORMULÁRIO DE ATUALIZAÇÃO CORRIGIDO ***
+// *** FORMULÁRIO DE ATUALIZAÇÃO V3.1 CORRIGIDO ***
 function createAtualizacaoForm(hospitalNome, leitoNumero, dadosLeito) {
     const tempoInternacao = dadosLeito?.admAt ? calcularTempoInternacao(dadosLeito.admAt) : '';
     const iniciais = dadosLeito?.nome ? getIniciais(dadosLeito.nome) : '';
@@ -475,11 +549,13 @@ function createAtualizacaoForm(hospitalNome, leitoNumero, dadosLeito) {
     // Arrays diretos - sem processamento
     const concessoesAtuais = Array.isArray(dadosLeito?.concessoes) ? dadosLeito.concessoes : [];
     const linhasAtuais = Array.isArray(dadosLeito?.linhas) ? dadosLeito.linhas : [];
+    const isolamentoAtual = dadosLeito?.isolamento || 'NÃO ISOLAMENTO';
+    const identificacaoAtual = dadosLeito?.identificacaoLeito || '';
     
     return `
         <div class="modal-content" style="background: #1a1f2e; border-radius: 12px; padding: 30px; max-width: 700px; width: 95%; max-height: 90vh; overflow-y: auto; color: #ffffff;">
             <h2 style="margin: 0 0 20px 0; text-align: center; color: #60a5fa; font-size: 24px; font-weight: 700; text-transform: uppercase;">
-                ATUALIZAR PACIENTE
+                ATUALIZAR PACIENTE V3.1
             </h2>
             
             <div style="text-align: center; margin-bottom: 30px; padding: 15px; background: rgba(96,165,250,0.1); border-radius: 8px;">
@@ -565,6 +641,32 @@ function createAtualizacaoForm(hospitalNome, leitoNumero, dadosLeito) {
                 </div>
             </div>
             
+            <div style="margin-bottom: 20px;">
+                <div style="background: rgba(96,165,250,0.1); padding: 10px 15px; border-radius: 6px; margin-bottom: 10px;">
+                    <div style="font-size: 11px; color: #ffffff; text-transform: uppercase; font-weight: 700;">
+                        ISOLAMENTO DO PACIENTE
+                    </div>
+                </div>
+                <div style="background: rgba(255,255,255,0.03); border-radius: 6px; padding: 15px;">
+                    ${window.ISOLAMENTO_OPTIONS.map(opcao => `
+                        <label style="display: flex; align-items: center; padding: 8px 0; cursor: pointer; font-size: 14px;">
+                            <input type="radio" name="updIsolamento" value="${opcao}" ${isolamentoAtual === opcao ? 'checked' : ''} style="margin-right: 12px; accent-color: #60a5fa;">
+                            <span>${opcao}</span>
+                        </label>
+                    `).join('')}
+                </div>
+            </div>
+            
+            <div style="margin-bottom: 20px;">
+                <div style="background: rgba(96,165,250,0.1); padding: 10px 15px; border-radius: 6px; margin-bottom: 10px;">
+                    <div style="font-size: 11px; color: #ffffff; text-transform: uppercase; font-weight: 700;">
+                        IDENTIFICAÇÃO DO LEITO
+                    </div>
+                </div>
+                <input id="updIdentificacaoLeito" type="text" value="${identificacaoAtual}" placeholder="Ex: A1, UTI-5, ENF12 (máx. 6 caracteres)" maxlength="6" style="width: 100%; padding: 12px; background: #374151; color: #ffffff; border: 1px solid rgba(255,255,255,0.3); border-radius: 6px; font-size: 14px;">
+                <div style="font-size: 11px; color: rgba(255,255,255,0.6); margin-top: 5px;">Campo alfanumérico com até 6 caracteres</div>
+            </div>
+            
             ${tempoInternacao ? `
             <div style="margin-bottom: 20px; padding: 12px; background: rgba(251, 191, 36, 0.1); border-radius: 8px; border-left: 4px solid #fbbf24;">
                 <strong>Tempo de Internação:</strong> ${tempoInternacao}
@@ -584,7 +686,7 @@ function createAtualizacaoForm(hospitalNome, leitoNumero, dadosLeito) {
 
 // FUNÇÃO DE PRÉ-MARCAÇÃO COM ARRAYS DIRETOS
 function forcarPreMarcacao(modal, dadosLeito) {
-    logDebug(`Forçando pré-marcação com arrays diretos...`);
+    logDebug(`Forçando pré-marcação V3.1 com arrays diretos...`);
     
     const concessoesAtuais = Array.isArray(dadosLeito?.concessoes) ? dadosLeito.concessoes : [];
     const linhasAtuais = Array.isArray(dadosLeito?.linhas) ? dadosLeito.linhas : [];
@@ -609,7 +711,7 @@ function forcarPreMarcacao(modal, dadosLeito) {
         }
     });
     
-    logDebug(`Pré-marcação concluída com arrays diretos`);
+    logDebug(`Pré-marcação V3.1 concluída com arrays diretos`);
 }
 
 // =================== EVENT LISTENERS DOS MODAIS ===================
@@ -621,7 +723,7 @@ function setupModalEventListeners(modal, tipo) {
             e.preventDefault();
             e.stopPropagation();
             closeModal(modal);
-            logInfo('Modal cancelado pelo usuário');
+            logInfo('Modal V3.1 cancelado pelo usuário');
         });
     }
     
@@ -633,17 +735,17 @@ function setupModalEventListeners(modal, tipo) {
             e.stopPropagation();
             
             const originalText = this.innerHTML;
-            showButtonLoading(this, 'SALVANDO...');
+            showButtonLoading(this, 'SALVANDO V3.1...');
             
             try {
                 const dadosFormulario = coletarDadosFormulario(modal, tipo);
                 
                 if (tipo === 'admissao') {
                     await window.admitirPaciente(dadosFormulario.hospital, dadosFormulario.leito, dadosFormulario);
-                    showSuccessMessage('✅ Paciente admitido com sucesso!');
+                    showSuccessMessage('✅ Paciente admitido V3.1 com sucesso (incluindo AS/AT)!');
                 } else {
                     await window.atualizarPaciente(dadosFormulario.hospital, dadosFormulario.leito, dadosFormulario);
-                    showSuccessMessage('✅ Dados atualizados com sucesso!');
+                    showSuccessMessage('✅ Dados V3.1 atualizados com sucesso (incluindo AS/AT)!');
                 }
                 
                 hideButtonLoading(this, originalText);
@@ -654,8 +756,8 @@ function setupModalEventListeners(modal, tipo) {
                 
             } catch (error) {
                 hideButtonLoading(this, originalText);
-                showErrorMessage('❌ Erro ao salvar: ' + error.message);
-                logError('Erro ao salvar:', error);
+                showErrorMessage('❌ Erro ao salvar V3.1: ' + error.message);
+                logError('Erro ao salvar V3.1:', error);
             }
         });
     }
@@ -670,13 +772,13 @@ function setupModalEventListeners(modal, tipo) {
             if (!confirm("Confirmar ALTA deste paciente?")) return;
             
             const originalText = this.innerHTML;
-            showButtonLoading(this, 'PROCESSANDO ALTA...');
+            showButtonLoading(this, 'PROCESSANDO ALTA V3.1...');
             
             try {
                 await window.darAltaPaciente(window.currentHospital, window.selectedLeito);
                 
                 hideButtonLoading(this, originalText);
-                showSuccessMessage('✅ Alta processada!');
+                showSuccessMessage('✅ Alta V3.1 processada (todas as 46 colunas limpas)!');
                 closeModal(modal);
                 
                 // Refresh automático
@@ -684,8 +786,8 @@ function setupModalEventListeners(modal, tipo) {
                 
             } catch (error) {
                 hideButtonLoading(this, originalText);
-                showErrorMessage('❌ Erro ao processar alta: ' + error.message);
-                logError('Erro ao processar alta:', error);
+                showErrorMessage('❌ Erro ao processar alta V3.1: ' + error.message);
+                logError('Erro ao processar alta V3.1:', error);
             }
         });
     }
@@ -710,12 +812,12 @@ function closeModal(modal) {
                 modal.parentNode.removeChild(modal);
             }
             window.selectedLeito = null;
-            logInfo('Modal fechado');
+            logInfo('Modal V3.1 fechado');
         }, 300);
     }
 }
 
-// COLETA DE DADOS COM ARRAYS DIRETOS
+// *** COLETA DE DADOS V3.1 COM ARRAYS DIRETOS + AS/AT ***
 function coletarDadosFormulario(modal, tipo) {
     const dados = {
         hospital: window.currentHospital,
@@ -731,6 +833,12 @@ function coletarDadosFormulario(modal, tipo) {
         dados.complexidade = modal.querySelector('#admComplexidade')?.value || 'I';
         dados.prevAlta = modal.querySelector('#admPrevAlta')?.value || 'SP';
         
+        // *** NOVA V3.1: COLETAR ISOLAMENTO (AS) ***
+        dados.isolamento = modal.querySelector('input[name="admIsolamento"]:checked')?.value || 'NÃO ISOLAMENTO';
+        
+        // *** NOVA V3.1: COLETAR IDENTIFICAÇÃO DO LEITO (AT) ***
+        dados.identificacaoLeito = modal.querySelector('#admIdentificacaoLeito')?.value?.trim().toUpperCase() || '';
+        
         // Arrays diretos - sem join
         const concessoesSelecionadas = coletarCheckboxesSelecionados(modal, '#admConcessoes');
         const linhasSelecionadas = coletarCheckboxesSelecionados(modal, '#admLinhas');
@@ -745,6 +853,12 @@ function coletarDadosFormulario(modal, tipo) {
         dados.complexidade = modal.querySelector('#updComplexidade')?.value || 'I';
         dados.prevAlta = modal.querySelector('#updPrevAlta')?.value || 'SP';
         
+        // *** NOVA V3.1: COLETAR ISOLAMENTO (AS) ***
+        dados.isolamento = modal.querySelector('input[name="updIsolamento"]:checked')?.value || 'NÃO ISOLAMENTO';
+        
+        // *** NOVA V3.1: COLETAR IDENTIFICAÇÃO DO LEITO (AT) ***
+        dados.identificacaoLeito = modal.querySelector('#updIdentificacaoLeito')?.value?.trim().toUpperCase() || '';
+        
         // Arrays diretos - sem join
         const concessoesSelecionadas = coletarCheckboxesSelecionados(modal, '#updConcessoes');
         const linhasSelecionadas = coletarCheckboxesSelecionados(modal, '#updLinhas');
@@ -752,6 +866,13 @@ function coletarDadosFormulario(modal, tipo) {
         dados.concessoes = concessoesSelecionadas;  // Array direto
         dados.linhas = linhasSelecionadas;          // Array direto
     }
+    
+    logInfo('Dados V3.1 coletados (incluindo AS/AT):', {
+        isolamento: dados.isolamento,
+        identificacaoLeito: dados.identificacaoLeito || 'vazio',
+        concessoes: dados.concessoes.length,
+        linhas: dados.linhas.length
+    });
     
     return dados;
 }
@@ -921,22 +1042,22 @@ function formatarDataHora(dataISO) {
 
 // =================== FUNÇÕES DE LOG ===================
 function logInfo(message, data = null) {
-    console.log(`🔵 [CARDS] ${message}`, data || '');
+    console.log(`🔵 [CARDS V3.1] ${message}`, data || '');
 }
 
 function logError(message, error = null) {
-    console.error(`🔴 [CARDS ERROR] ${message}`, error || '');
+    console.error(`🔴 [CARDS V3.1 ERROR] ${message}`, error || '');
 }
 
 function logSuccess(message) {
-    console.log(`🟢 [CARDS SUCCESS] ${message}`);
+    console.log(`🟢 [CARDS V3.1 SUCCESS] ${message}`);
 }
 
 function logDebug(message, data = null) {
-    console.log(`🟡 [CARDS DEBUG] ${message}`, data || '');
+    console.log(`🟡 [CARDS V3.1 DEBUG] ${message}`, data || '');
 }
 
-// =================== CSS CONSOLIDADO COMPLETO ===================
+// =================== CSS CONSOLIDADO COMPLETO V3.1 ===================
 if (!document.getElementById('cardsConsolidadoCSS')) {
     const style = document.createElement('style');
     style.id = 'cardsConsolidadoCSS';
@@ -1027,16 +1148,26 @@ if (!document.getElementById('cardsConsolidadoCSS')) {
             background-color: #60a5fa !important;
             border-color: #60a5fa !important;
         }
+
+        /* Radio buttons para isolamento */
+        input[type="radio"] {
+            width: 16px;
+            height: 16px;
+            accent-color: #60a5fa;
+            cursor: pointer;
+        }
         
         /* Labels com hover para melhor UX */
-        label:has(input[type="checkbox"]) {
+        label:has(input[type="checkbox"]),
+        label:has(input[type="radio"]) {
             cursor: pointer;
             transition: background-color 0.2s ease;
             border-radius: 4px;
             padding: 4px !important;
         }
         
-        label:has(input[type="checkbox"]):hover {
+        label:has(input[type="checkbox"]):hover,
+        label:has(input[type="radio"]):hover {
             background-color: rgba(96, 165, 250, 0.1);
         }
 
@@ -1194,13 +1325,15 @@ if (!document.getElementById('cardsConsolidadoCSS')) {
             }
             
             /* Checkboxes maiores no mobile */
-            input[type="checkbox"] {
+            input[type="checkbox"],
+            input[type="radio"] {
                 width: 18px !important;
                 height: 18px !important;
                 margin-right: 10px !important;
             }
             
-            label:has(input[type="checkbox"]) {
+            label:has(input[type="checkbox"]),
+            label:has(input[type="radio"]) {
                 padding: 8px !important;
                 font-size: 12px !important;
             }
@@ -1360,9 +1493,9 @@ if (!document.getElementById('cardsConsolidadoCSS')) {
     document.head.appendChild(style);
 }
 
-// =================== INICIALIZAÇÃO ===================
+// =================== INICIALIZAÇÃO V3.1 ===================
 document.addEventListener('DOMContentLoaded', function() {
-    logSuccess('✅ Cards.js CONSOLIDADO CARREGADO - Todo CSS responsivo incluído');
+    logSuccess('✅ Cards.js V3.1 CONSOLIDADO CARREGADO - Todo CSS responsivo incluído');
     
     // Verificar dependências
     if (typeof window.CONFIG === 'undefined') {
@@ -1371,12 +1504,12 @@ document.addEventListener('DOMContentLoaded', function() {
     
     if (typeof window.hospitalData === 'undefined') {
         window.hospitalData = {};
-        logInfo('hospitalData inicializado');
+        logInfo('hospitalData V3.1 inicializado');
     }
     
-    // Verificar se API está disponível
+    // Verificar se API V3.1 está disponível
     if (typeof window.admitirPaciente === 'undefined') {
-        logError('Funções da API não encontradas - verificar api.js');
+        logError('Funções da API V3.1 não encontradas - verificar api.js');
     }
     
     // Verificar listas
@@ -1392,35 +1525,47 @@ document.addEventListener('DOMContentLoaded', function() {
         logError(`ERRO: Esperadas 10 opções timeline, encontradas ${window.PREVISAO_ALTA_OPTIONS.length}`);
     }
     
-    // Garantir que seleção inicial funcione
-    if (window.currentHospital && window.HOSPITAL_MAPPING[window.currentHospital]) {
-        logInfo(`Hospital inicial: ${window.currentHospital} - ${window.HOSPITAL_MAPPING[window.currentHospital]}`);
+    if (window.ISOLAMENTO_OPTIONS.length !== 3) {
+        logError(`ERRO: Esperadas 3 opções isolamento, encontradas ${window.ISOLAMENTO_OPTIONS.length}`);
     }
     
-    // Log das melhorias ativas
-    logInfo('🚀 Melhorias ativas:');
+    if (window.IDADE_OPTIONS.length !== 102) {
+        logError(`ERRO: Esperadas 102 idades (14-115), encontradas ${window.IDADE_OPTIONS.length}`);
+    }
+    
+    // Garantir que seleção inicial funcione
+    if (window.currentHospital && window.HOSPITAL_MAPPING[window.currentHospital]) {
+        logInfo(`Hospital inicial V3.1: ${window.currentHospital} - ${window.HOSPITAL_MAPPING[window.currentHospital]}`);
+    }
+    
+    // Log das melhorias ativas V3.1
+    logInfo('🚀 Melhorias V3.1 ativas:');
     logInfo('  • Arrays diretos - SEM parsing');
-    logInfo('  • Timeline com 10 opções');
+    logInfo('  • Timeline com 10 opções (96h incluído)');
     logInfo('  • 13 concessões + 19 linhas');
-    logInfo('  • Performance otimizada');
-    logInfo('  • Validação automática');
+    logInfo('  • ISOLAMENTO (AS): 3 opções obrigatórias');
+    logInfo('  • IDENTIFICAÇÃO LEITO (AT): alfanumérico 6 chars');
+    logInfo('  • Campo idade: dropdown 14-115 anos (mobile)');
+    logInfo('  • Cards exibem APENAS INICIAIS');
+    logInfo('  • Badge isolamento no rodapé dos cards');
+    logInfo('  • Performance otimizada V3.1');
+    logInfo('  • Validação automática AS/AT');
     logInfo('  • Layout 3x3 mobile FORÇADO');
     logInfo('  • Leitos: VERDE=vago, AMARELO=ocupado');
     logInfo('  • Modais 3 colunas no mobile');
-    logInfo('  • Campo idade como SELECT');
     logInfo('  • CSS CONSOLIDADO - sem mobile.css');
     
     // Adicionar listener para resize
     window.addEventListener('resize', function() {
         const width = window.innerWidth;
         if (width <= 480) {
-            logDebug('Modo mobile pequeno ativado');
+            logDebug('Modo mobile pequeno V3.1 ativado');
         } else if (width <= 768) {
-            logDebug('Modo mobile ativado');
+            logDebug('Modo mobile V3.1 ativado');
         } else if (width <= 1024) {
-            logDebug('Modo tablet ativado');
+            logDebug('Modo tablet V3.1 ativado');
         } else {
-            logDebug('Modo desktop ativado');
+            logDebug('Modo desktop V3.1 ativado');
         }
     });
 });
@@ -1431,11 +1576,17 @@ window.openAdmissaoModal = openAdmissaoModal;
 window.openAtualizacaoModal = openAtualizacaoModal;
 window.forcarPreMarcacao = forcarPreMarcacao;
 window.coletarDadosFormulario = coletarDadosFormulario;
+window.getBadgeIsolamento = getBadgeIsolamento;
 
-logSuccess('🏥 CARDS.JS CONSOLIDADO - VERSÃO FINAL IMPLEMENTADA!');
+logSuccess('🏥 CARDS.JS V3.1 - VERSÃO FINAL IMPLEMENTADA!');
 logInfo('📋 Todo CSS responsivo consolidado neste arquivo');
 logInfo('✅ Eliminada dependência do mobile.css');
 logInfo('✅ Cores hardcoded: Verde=vago, Amarelo=ocupado');
 logInfo('✅ Layout 3x3 forçado no mobile');
 logInfo('✅ Modais responsivos com 3 colunas');
 logInfo('✅ Performance otimizada com CSS inline');
+logInfo('✅ Campo idade dropdown 14-115 anos (mobile)');
+logInfo('✅ Cards exibem APENAS INICIAIS');
+logInfo('✅ Badge isolamento no rodapé (máxima visibilidade)');
+logInfo('✅ Campos AS (isolamento) e AT (identificação) integrados');
+logInfo('✅ Formulários com layout 3 colunas corrigido');
