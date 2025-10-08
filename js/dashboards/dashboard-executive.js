@@ -1,4 +1,4 @@
-// =================== DASHBOARD EXECUTIVO - VERSÃO FINAL CORRIGIDA ===================
+// =================== DASHBOARD EXECUTIVO V3.1 - VERSÃO CORRIGIDA ===================
 // =================== LABELS 90°, ESCALA Y+10, LEGENDAS HTML, CORES PANTONE ===================
 
 // Estado global para fundo branco (compartilhado com dashboard hospitalar)
@@ -124,7 +124,7 @@ const backgroundPluginExec = {
 };
 
 window.renderDashboardExecutivo = function() {
-    logInfo('Renderizando Dashboard Executivo: REDE HOSPITALAR EXTERNA');
+    logInfo('Renderizando Dashboard Executivo V3.1: REDE HOSPITALAR EXTERNA');
     
     let container = document.getElementById('dashExecutivoContent');
     if (!container) {
@@ -140,7 +140,7 @@ window.renderDashboardExecutivo = function() {
     if (!container) {
         container = document.getElementById('dashboardContainer');
         if (!container) {
-            logError('Nenhum container encontrado para Dashboard Executivo');
+            logError('Nenhum container encontrado para Dashboard Executivo V3.1');
             return;
         }
     }
@@ -149,8 +149,8 @@ window.renderDashboardExecutivo = function() {
         container.innerHTML = `
             <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 400px; text-align: center; color: white; background: linear-gradient(135deg, #1a1f2e 0%, #2d3748 100%); border-radius: 12px; margin: 20px; padding: 40px;">
                 <div style="width: 60px; height: 60px; border: 3px solid #ef4444; border-top-color: transparent; border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 20px;"></div>
-                <h2 style="color: #ef4444; margin-bottom: 10px; font-size: 20px;">Dados não disponíveis</h2>
-                <p style="color: #9ca3af; font-size: 14px;">Aguardando sincronização com a planilha</p>
+                <h2 style="color: #ef4444; margin-bottom: 10px; font-size: 20px;">Dados V3.1 não disponíveis</h2>
+                <p style="color: #9ca3af; font-size: 14px;">Aguardando sincronização com a planilha (46 colunas)</p>
                 <button onclick="window.location.reload()" style="margin-top: 20px; padding: 12px 24px; background: #3b82f6; color: white; border: none; border-radius: 8px; cursor: pointer;">Recarregar</button>
                 <style>
                     @keyframes spin {
@@ -172,8 +172,8 @@ window.renderDashboardExecutivo = function() {
         container.innerHTML = `
             <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 400px; text-align: center; color: white; background: linear-gradient(135deg, #1a1f2e 0%, #2d3748 100%); border-radius: 12px; margin: 20px; padding: 40px;">
                 <div style="width: 60px; height: 60px; border: 3px solid #f59e0b; border-top-color: transparent; border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 20px;"></div>
-                <h2 style="color: #f59e0b; margin-bottom: 10px; font-size: 20px;">Nenhum hospital com dados</h2>
-                <p style="color: #9ca3af; font-size: 14px;">Verifique a conexão com a planilha</p>
+                <h2 style="color: #f59e0b; margin-bottom: 10px; font-size: 20px;">Nenhum hospital V3.1 com dados</h2>
+                <p style="color: #9ca3af; font-size: 14px;">Verifique a conexão com a planilha (46 colunas)</p>
                 <button onclick="window.location.reload()" style="margin-top: 20px; padding: 12px 24px; background: #3b82f6; color: white; border: none; border-radius: 8px; cursor: pointer;">Tentar novamente</button>
                 <style>
                     @keyframes spin {
@@ -195,7 +195,7 @@ window.renderDashboardExecutivo = function() {
             <!-- HEADER CORRIGIDO PARA MOBILE -->
             <div class="dashboard-header-exec" style="margin-bottom: 30px; padding: 20px; background: rgba(255, 255, 255, 0.05); border-radius: 12px; border-left: 4px solid #22c55e;">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-                    <h2 style="margin: 0; color: #ffffff; font-size: 24px; font-weight: 700;">Rede Hospitalar Externa</h2>
+                    <h2 style="margin: 0; color: #ffffff; font-size: 24px; font-weight: 700;">Rede Hospitalar Externa - Dashboard Geral V3.1</h2>
                 </div>
                 <div style="display: flex; justify-content: flex-end;">
                     <button id="toggleFundoBtnExec" class="toggle-fundo-btn" style="padding: 8px 16px; background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 8px; color: #e2e8f0; font-size: 14px; cursor: pointer; transition: all 0.3s ease; display: flex; align-items: center; gap: 8px;">
@@ -205,15 +205,15 @@ window.renderDashboardExecutivo = function() {
                 </div>
             </div>
             
-            <!-- KPIS GRID CORRIGIDO PARA 2x4 NO MOBILE -->
+            <!-- KPI GERAL DA REDE HOSPITALAR -->
             <div class="executive-kpis-grid">
                 <div class="kpi-gauge-principal">
-                    <h3 style="color: #9ca3af; font-size: 14px; margin-bottom: 15px; text-align: center;">Ocupação Geral</h3>
+                    <h3 style="color: #9ca3af; font-size: 14px; margin-bottom: 15px; text-align: center;">Ocupação Geral da Rede</h3>
                     <div class="gauge-container">
                         <canvas id="gaugeOcupacaoExecutivo"></canvas>
                         <div class="gauge-text">
                             <span class="gauge-value">${kpis.ocupacaoGeral}%</span>
-                            <span class="gauge-label">Ocupação</span>
+                            <span class="gauge-label">Ocupação Geral</span>
                         </div>
                     </div>
                     <div class="hospitais-percentuais">
@@ -231,7 +231,7 @@ window.renderDashboardExecutivo = function() {
                 
                 <div class="kpi-box">
                     <div class="kpi-value">${kpis.hospitaisAtivos}</div>
-                    <div class="kpi-label">Hospitais</div>
+                    <div class="kpi-label">Hospitais Ativos</div>
                 </div>
                 
                 <div class="kpi-box">
@@ -265,19 +265,20 @@ window.renderDashboardExecutivo = function() {
                 </div>
                 
                 <div class="kpi-box">
-                    <div class="kpi-value">${kpis.spctCasos}</div>
-                    <div class="kpi-label">SPCT Casos</div>
+                    <div class="kpi-value">${kpis.spictCasos}</div>
+                    <div class="kpi-label">SPICT-BR Elegíveis</div>
                 </div>
             </div>
             
-            <!-- GRÁFICOS -->
+            <!-- GRÁFICOS GERAIS DA REDE -->
             <div class="executivo-graficos">
                 
-                <!-- Gráfico de Altas -->
+                <!-- Gráfico de Altas Geral -->
                 <div class="executivo-grafico-card">
                     <div class="chart-header">
                         <div>
-                            <h3>Análise Preditiva de Altas em ${hoje}</h3>
+                            <h3>Análise Geral - Preditiva de Altas em ${hoje}</h3>
+                            <p>Panorama geral da rede hospitalar externa</p>
                         </div>
                     </div>
                     <div class="chart-container">
@@ -286,11 +287,12 @@ window.renderDashboardExecutivo = function() {
                     <div id="legendaAltasExec" class="chart-legend-custom"></div>
                 </div>
                 
-                <!-- Gráfico de Concessões -->
+                <!-- Gráfico de Concessões Geral -->
                 <div class="executivo-grafico-card">
                     <div class="chart-header">
                         <div>
-                            <h3>Análise Preditiva de Concessões em ${hoje}</h3>
+                            <h3>Análise Geral - Preditiva de Concessões em ${hoje}</h3>
+                            <p>Panorama geral de concessões da rede hospitalar</p>
                         </div>
                     </div>
                     <div class="chart-container">
@@ -299,11 +301,12 @@ window.renderDashboardExecutivo = function() {
                     <div id="legendaConcessoesExec" class="chart-legend-custom"></div>
                 </div>
                 
-                <!-- Gráfico de Linhas -->
+                <!-- Gráfico de Linhas Geral -->
                 <div class="executivo-grafico-card">
                     <div class="chart-header">
                         <div>
-                            <h3>Análise Preditiva de Linhas de Cuidado em ${hoje}</h3>
+                            <h3>Análise Geral - Preditiva de Linhas de Cuidado em ${hoje}</h3>
+                            <p>Panorama geral de linhas de cuidado da rede hospitalar</p>
                         </div>
                     </div>
                     <div class="chart-container">
@@ -427,7 +430,7 @@ window.renderDashboardExecutivo = function() {
             renderConcessoesExecutivo();
             renderLinhasExecutivo();
             
-            logInfo(`Fundo executivo alterado para: ${window.fundoBranco ? 'claro' : 'escuro'}`);
+            logInfo(`Fundo executivo V3.1 alterado para: ${window.fundoBranco ? 'claro' : 'escuro'}`);
         });
     }
     
@@ -443,14 +446,14 @@ window.renderDashboardExecutivo = function() {
             renderConcessoesExecutivo();
             renderLinhasExecutivo();
             
-            logSuccess('Dashboard Executivo renderizado');
+            logSuccess('Dashboard Executivo V3.1 renderizado com dados atualizados');
         }, 200);
     };
     
     aguardarChartJS();
 };
 
-// Calcular KPIs consolidados
+// Calcular KPIs consolidados V3.1 (incluindo dados AS/AT)
 function calcularKPIsExecutivos(hospitaisComDados) {
     let totalLeitos = 0;
     let leitosOcupados = 0;
@@ -459,7 +462,7 @@ function calcularKPIsExecutivos(hospitaisComDados) {
     let tphCount = 0;
     let ppsTotal = 0;
     let ppsCount = 0;
-    let spctCasos = 0;
+    let spictCasos = 0; // SPICT-BR Elegíveis
     
     hospitaisComDados.forEach(hospitalId => {
         const hospital = window.hospitalData[hospitalId];
@@ -491,11 +494,9 @@ function calcularKPIsExecutivos(hospitaisComDados) {
                     }
                 }
                 
-                if (leito.linhas && leito.linhas.length > 0) {
-                    const linhasStr = Array.isArray(leito.linhas) ? leito.linhas.join(' ') : leito.linhas;
-                    if (linhasStr.includes('Paliativos') || linhasStr.includes('SPCT')) {
-                        spctCasos++;
-                    }
+                // *** CORREÇÃO V3.1: CONTAR SPICT-BR ELEGÍVEIS ***
+                if (leito.spict === 'elegivel' || leito.spict === 'Elegível') {
+                    spictCasos++;
                 }
             }
         });
@@ -514,11 +515,11 @@ function calcularKPIsExecutivos(hospitaisComDados) {
         ocupacaoGeral,
         tphMedio,
         ppsMedio: ppsCount > 0 ? Math.round(ppsTotal / ppsCount) : 85,
-        spctCasos
+        spictCasos // SPICT-BR Elegíveis V3.1
     };
 }
 
-// Calcular KPIs de um hospital
+// Calcular KPIs de um hospital V3.1
 function calcularKPIsHospital(hospitalId) {
     const hospital = window.hospitalData[hospitalId];
     if (!hospital || !hospital.leitos) {
@@ -583,7 +584,7 @@ function renderGaugeExecutivoHorizontal(ocupacao) {
     });
 }
 
-// Gráfico de Altas - COM LEGENDAS HTML CUSTOMIZADAS
+// Gráfico de Altas V3.1 - COM LEGENDAS HTML CUSTOMIZADAS
 function renderAltasExecutivo() {
     const canvas = document.getElementById('graficoAltasExecutivo');
     if (!canvas || typeof Chart === 'undefined') return;
@@ -600,7 +601,7 @@ function renderAltasExecutivo() {
     const corTexto = window.fundoBranco ? '#000000' : '#ffffff';
     const corGrid = window.fundoBranco ? 'rgba(0, 0, 0, 0.1)' : 'rgba(255, 255, 255, 0.1)';
     
-    // CALCULAR DADOS REAIS DAS ALTAS
+    // CALCULAR DADOS REAIS DAS ALTAS V3.1
     const dadosReais = calcularDadosAltasReais();
     
     const ctx = canvas.getContext('2d');
@@ -651,7 +652,7 @@ function renderAltasExecutivo() {
     criarLegendaHtml('legendaAltasExec', dadosReais, chartKey);
 }
 
-// Gráfico de Concessões - COM CORES PANTONE, LABELS 90° E LEGENDAS HTML
+// Gráfico de Concessões V3.1 - COM CORES PANTONE, LABELS 90° E LEGENDAS HTML
 function renderConcessoesExecutivo() {
     const canvas = document.getElementById('graficoConcessoesExecutivo');
     if (!canvas || typeof Chart === 'undefined') return;
@@ -670,7 +671,7 @@ function renderConcessoesExecutivo() {
     const corTexto = window.fundoBranco ? '#000000' : '#ffffff';
     const corGrid = window.fundoBranco ? 'rgba(0, 0, 0, 0.1)' : 'rgba(255, 255, 255, 0.1)';
     
-    // CALCULAR DADOS REAIS DAS CONCESSÕES COM CORES PANTONE
+    // CALCULAR DADOS REAIS DAS CONCESSÕES COM CORES PANTONE V3.1
     const dadosReais = calcularDadosConcessoesReais();
     
     // Calcular valor máximo para escala Y
@@ -797,7 +798,7 @@ function renderConcessoesExecutivo() {
     criarLegendaHtml('legendaConcessoesExec', dadosReais.datasets, chartKey);
 }
 
-// Gráfico de Linhas de Cuidado - COM CORES PANTONE, LABELS 90° E LEGENDAS HTML
+// Gráfico de Linhas de Cuidado V3.1 - COM CORES PANTONE, LABELS 90° E LEGENDAS HTML
 function renderLinhasExecutivo() {
     const canvas = document.getElementById('graficoLinhasExecutivo');
     if (!canvas || typeof Chart === 'undefined') return;
@@ -816,7 +817,7 @@ function renderLinhasExecutivo() {
     const corTexto = window.fundoBranco ? '#000000' : '#ffffff';
     const corGrid = window.fundoBranco ? 'rgba(0, 0, 0, 0.1)' : 'rgba(255, 255, 255, 0.1)';
     
-    // CALCULAR DADOS REAIS DAS LINHAS DE CUIDADO COM CORES PANTONE
+    // CALCULAR DADOS REAIS DAS LINHAS DE CUIDADO COM CORES PANTONE V3.1
     const dadosReais = calcularDadosLinhasReais();
     
     // Calcular valor máximo para escala Y
@@ -976,7 +977,7 @@ function criarLegendaHtml(containerId, datasets, chartKey) {
     });
 }
 
-// CALCULAR DADOS REAIS DE ALTAS DOS HOSPITAIS
+// CALCULAR DADOS REAIS DE ALTAS DOS HOSPITAIS V3.1
 function calcularDadosAltasReais() {
     const hospitaisComDados = Object.keys(CONFIG.HOSPITAIS).filter(hospitalId => {
         const hospital = window.hospitalData[hospitalId];
@@ -990,7 +991,7 @@ function calcularDadosAltasReais() {
     const datasets = [];
     const categorias = ['HOJE', '24H', '48H', '72H', '96H'];
     
-    // Contar altas reais por categoria
+    // Contar altas reais por categoria V3.1
     const contadores = {
         'Hoje Ouro': [0, 0, 0, 0, 0],
         'Hoje 2R': [0, 0, 0, 0, 0],  
@@ -1063,7 +1064,7 @@ function calcularDadosAltasReais() {
     return datasets;
 }
 
-// CALCULAR DADOS REAIS DE CONCESSÕES DOS HOSPITAIS COM CORES PANTONE
+// CALCULAR DADOS REAIS DE CONCESSÕES DOS HOSPITAIS COM CORES PANTONE V3.1
 function calcularDadosConcessoesReais() {
     const hospitaisComDados = Object.keys(CONFIG.HOSPITAIS).filter(hospitalId => {
         const hospital = window.hospitalData[hospitalId];
@@ -1085,7 +1086,7 @@ function calcularDadosConcessoesReais() {
         });
     });
     
-    // Contar concessões reais
+    // Contar concessões reais V3.1
     const concessoesCount = {};
     
     hospitaisComDados.forEach(hospitalId => {
@@ -1095,10 +1096,10 @@ function calcularDadosConcessoesReais() {
         hospital.leitos.forEach(leito => {
             if (leito.status !== 'ocupado' && leito.status !== 'Em uso') return;
             
-            const concessoes = leito.concessoes || '';
-            const concessoesList = typeof concessoes === 'string' ? 
-                concessoes.split('|').filter(c => c.trim()) : 
-                (Array.isArray(concessoes) ? concessoes : []);
+            // *** V3.1: ARRAYS DIRETOS SEM PARSING ***
+            const concessoes = leito.concessoes || [];
+            const concessoesList = Array.isArray(concessoes) ? concessoes : 
+                (typeof concessoes === 'string' ? concessoes.split('|').filter(c => c.trim()) : []);
             
             concessoesList.forEach(concessao => {
                 const concessaoLimpa = concessao.trim();
@@ -1123,7 +1124,7 @@ function calcularDadosConcessoesReais() {
         });
     });
     
-    // Criar datasets com cores Pantone exatas
+    // Criar datasets com cores Pantone exatas V3.1
     const datasets = Object.keys(concessoesCount).map(concessao => ({
         label: concessao,
         data: concessoesCount[concessao],
@@ -1134,7 +1135,7 @@ function calcularDadosConcessoesReais() {
     return { labels, datasets };
 }
 
-// CALCULAR DADOS REAIS DE LINHAS DE CUIDADO DOS HOSPITAIS COM CORES PANTONE
+// CALCULAR DADOS REAIS DE LINHAS DE CUIDADO DOS HOSPITAIS COM CORES PANTONE V3.1
 function calcularDadosLinhasReais() {
     const hospitaisComDados = Object.keys(CONFIG.HOSPITAIS).filter(hospitalId => {
         const hospital = window.hospitalData[hospitalId];
@@ -1156,7 +1157,7 @@ function calcularDadosLinhasReais() {
         });
     });
     
-    // Contar linhas reais
+    // Contar linhas reais V3.1
     const linhasCount = {};
     
     hospitaisComDados.forEach(hospitalId => {
@@ -1166,10 +1167,10 @@ function calcularDadosLinhasReais() {
         hospital.leitos.forEach(leito => {
             if (leito.status !== 'ocupado' && leito.status !== 'Em uso') return;
             
-            const linhas = leito.linhas || '';
-            const linhasList = typeof linhas === 'string' ? 
-                linhas.split('|').filter(l => l.trim()) : 
-                (Array.isArray(linhas) ? linhas : []);
+            // *** V3.1: ARRAYS DIRETOS SEM PARSING ***
+            const linhas = leito.linhas || [];
+            const linhasList = Array.isArray(linhas) ? linhas : 
+                (typeof linhas === 'string' ? linhas.split('|').filter(l => l.trim()) : []);
             
             linhasList.forEach(linha => {
                 const linhaLimpa = linha.trim();
@@ -1194,7 +1195,7 @@ function calcularDadosLinhasReais() {
         });
     });
     
-    // Criar datasets com cores Pantone exatas
+    // Criar datasets com cores Pantone exatas V3.1
     const datasets = Object.keys(linhasCount).map(linha => ({
         label: linha,
         data: linhasCount[linha],
@@ -1542,20 +1543,23 @@ function getExecutiveCSS() {
     `;
 }
 
-// Funções de log
+// Funções de log V3.1
 function logInfo(message) {
-    console.log(`🔵 [DASHBOARD EXECUTIVO] ${message}`);
+    console.log(`🔵 [DASHBOARD EXECUTIVO V3.1] ${message}`);
 }
 
 function logSuccess(message) {
-    console.log(`✅ [DASHBOARD EXECUTIVO] ${message}`);
+    console.log(`✅ [DASHBOARD EXECUTIVO V3.1] ${message}`);
 }
 
 function logError(message) {
-    console.error(`❌ [DASHBOARD EXECUTIVO] ${message}`);
+    console.error(`❌ [DASHBOARD EXECUTIVO V3.1] ${message}`);
 }
 
-console.log('🎯 Dashboard Executivo VERSÃO FINAL CORRIGIDA:');
+console.log('🎯 Dashboard Executivo V3.1 VERSÃO CORRIGIDA:');
+console.log('✅ "SPICT-BR ELEGÍVEIS": Alterado texto do KPI');
+console.log('✅ "Geral": Títulos adicionados nas seções apropriadas');
+console.log('✅ COMPATIBILIDADE V3.1: Arrays diretos incluindo AS/AT');
 console.log('✅ LABELS 90 GRAUS: Rotação vertical completa');
 console.log('✅ ESCALA Y+10: Espaço adicional para labels');
 console.log('✅ LEGENDAS HTML: Sistema customizado como no hospitalar');
