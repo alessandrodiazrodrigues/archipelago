@@ -1,4 +1,4 @@
-// =================== CARDS.JS V3.1 - VERSÃO CORRIGIDA COMPLETA ===================
+// =================== CARDS.JS V3.1 - VERSÃO COM CORREÇÕES 2 E 3 IMPLEMENTADAS ===================
 // =================== TODO CSS RESPONSIVO INCLUÍDO - SEM mobile.css ===================
 
 // =================== VARIÁVEIS GLOBAIS ===================  
@@ -427,19 +427,31 @@ function createModalOverlay() {
     return modal;
 }
 
-// *** FORMULÁRIO DE ADMISSÃO V3.1 CORRIGIDO ***
+// *** CORREÇÃO 2 + 3: FORMULÁRIO DE ADMISSÃO CORRIGIDO COM LAYOUT 3 COLUNAS + CAMPO IDENTIFICAÇÃO PRIMEIRO ***
 function createAdmissaoForm(hospitalNome, leitoNumero) {
     return `
         <div class="modal-content" style="background: #1a1f2e; border-radius: 12px; padding: 30px; max-width: 700px; width: 95%; max-height: 90vh; overflow-y: auto; color: #ffffff;">
             <h2 style="margin: 0 0 20px 0; text-align: center; color: #60a5fa; font-size: 24px; font-weight: 700; text-transform: uppercase;">
-                ADMITIR PACIENTE V3.1
+                ADMITIR PACIENTE
             </h2>
             
             <div style="text-align: center; margin-bottom: 30px; padding: 15px; background: rgba(96,165,250,0.1); border-radius: 8px;">
                 <strong>Hospital:</strong> ${hospitalNome} | <strong>Leito:</strong> ${leitoNumero}
             </div>
             
-            <div class="form-grid-mobile" style="display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 15px; margin-bottom: 20px;">
+            <!-- CORREÇÃO 3: CAMPO IDENTIFICAÇÃO PRIMEIRO E OBRIGATÓRIO -->
+            <div style="margin-bottom: 20px;">
+                <div style="background: rgba(96,165,250,0.1); padding: 10px 15px; border-radius: 6px; margin-bottom: 10px;">
+                    <div style="font-size: 11px; color: #ffffff; text-transform: uppercase; font-weight: 700;">
+                        IDENTIFICAÇÃO DO LEITO <span style="color: #ef4444;">*</span>
+                    </div>
+                </div>
+                <input id="admIdentificacaoLeito" type="text" placeholder="Ex: NEO1, UTI-5, ENF12 (máx. 6 caracteres)" maxlength="6" required style="width: 100%; padding: 12px; background: #374151; color: #ffffff; border: 1px solid rgba(255,255,255,0.3); border-radius: 6px; font-size: 14px;">
+                <div style="font-size: 11px; color: rgba(255,255,255,0.6); margin-top: 5px;">Campo alfanumérico obrigatório com até 6 caracteres</div>
+            </div>
+            
+            <!-- CORREÇÃO 2: LAYOUT 3 COLUNAS IGUAL AOS CARDS -->
+            <div class="form-grid-3-cols" style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; margin-bottom: 20px;">
                 <div>
                     <label style="display: block; margin-bottom: 5px; color: #e2e8f0; font-weight: 600;">NOME COMPLETO</label>
                     <input id="admNome" type="text" placeholder="Nome completo do paciente" style="width: 100%; padding: 12px; background: #374151; color: #ffffff; border: 1px solid rgba(255,255,255,0.3); border-radius: 6px; font-size: 14px;">
@@ -457,7 +469,7 @@ function createAdmissaoForm(hospitalNome, leitoNumero) {
                 </div>
             </div>
             
-            <div class="form-grid-mobile" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-bottom: 20px;">
+            <div class="form-grid-3-cols" style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; margin-bottom: 20px;">
                 <div>
                     <label style="display: block; margin-bottom: 5px; color: #e2e8f0; font-weight: 600;">PPS</label>
                     <select id="admPPS" style="width: 100%; padding: 12px; background: #374151 !important; color: #ffffff !important; border: 1px solid rgba(255,255,255,0.3); border-radius: 6px; font-size: 14px;">
@@ -512,16 +524,6 @@ function createAdmissaoForm(hospitalNome, leitoNumero) {
                 </div>
             </div>
             
-            <div style="margin-bottom: 20px;">
-                <div style="background: rgba(96,165,250,0.1); padding: 10px 15px; border-radius: 6px; margin-bottom: 10px;">
-                    <div style="font-size: 11px; color: #ffffff; text-transform: uppercase; font-weight: 700;">
-                        IDENTIFICAÇÃO DO LEITO
-                    </div>
-                </div>
-                <input id="admIdentificacaoLeito" type="text" placeholder="Ex: NEO1, UTI-5, ENF12 (máx. 6 caracteres)" maxlength="6" style="width: 100%; padding: 12px; background: #374151; color: #ffffff; border: 1px solid rgba(255,255,255,0.3); border-radius: 6px; font-size: 14px;">
-                <div style="font-size: 11px; color: rgba(255,255,255,0.6); margin-top: 5px;">Campo alfanumérico com até 6 caracteres</div>
-            </div>
-            
             <div style="margin-bottom: 30px;">
                 <div style="background: rgba(96,165,250,0.1); padding: 10px 15px; border-radius: 6px; margin-bottom: 10px;">
                     <div style="font-size: 11px; color: #ffffff; text-transform: uppercase; font-weight: 700;">
@@ -540,13 +542,13 @@ function createAdmissaoForm(hospitalNome, leitoNumero) {
             
             <div style="display: flex; justify-content: flex-end; gap: 12px; padding: 20px; border-top: 1px solid rgba(255,255,255,0.1);">
                 <button class="btn-cancelar" style="padding: 12px 30px; background: rgba(255,255,255,0.1); color: #ffffff; border: 1px solid rgba(255,255,255,0.2); border-radius: 8px; font-weight: 600; text-transform: uppercase; cursor: pointer;">CANCELAR</button>
-                <button class="btn-salvar" style="padding: 12px 30px; background: #3b82f6; color: #ffffff; border: none; border-radius: 8px; font-weight: 600; text-transform: uppercase; cursor: pointer;">SALVAR </button>
+                <button class="btn-salvar" style="padding: 12px 30px; background: #3b82f6; color: #ffffff; border: none; border-radius: 8px; font-weight: 600; text-transform: uppercase; cursor: pointer;">SALVAR</button>
             </div>
         </div>
     `;
 }
 
-// *** FORMULÁRIO DE ATUALIZAÇÃO V3.1 CORRIGIDO ***
+// *** CORREÇÃO 3: FORMULÁRIO DE ATUALIZAÇÃO COM CAMPO IDENTIFICAÇÃO PRIMEIRO ***
 function createAtualizacaoForm(hospitalNome, leitoNumero, dadosLeito) {
     const tempoInternacao = dadosLeito?.admAt ? calcularTempoInternacao(dadosLeito.admAt) : '';
     const iniciais = dadosLeito?.nome ? getIniciais(dadosLeito.nome) : '';
@@ -560,24 +562,25 @@ function createAtualizacaoForm(hospitalNome, leitoNumero, dadosLeito) {
     return `
         <div class="modal-content" style="background: #1a1f2e; border-radius: 12px; padding: 30px; max-width: 700px; width: 95%; max-height: 90vh; overflow-y: auto; color: #ffffff;">
             <h2 style="margin: 0 0 20px 0; text-align: center; color: #60a5fa; font-size: 24px; font-weight: 700; text-transform: uppercase;">
-                ATUALIZAR PACIENTE V3.1
+                ATUALIZAR PACIENTE
             </h2>
             
             <div style="text-align: center; margin-bottom: 30px; padding: 15px; background: rgba(96,165,250,0.1); border-radius: 8px;">
                 <strong>Hospital:</strong> ${hospitalNome} | <strong>Leito:</strong> ${leitoNumero}
             </div>
             
+            <!-- CORREÇÃO 3: CAMPO IDENTIFICAÇÃO PRIMEIRO E OBRIGATÓRIO -->
             <div style="margin-bottom: 20px;">
                 <div style="background: rgba(96,165,250,0.1); padding: 10px 15px; border-radius: 6px; margin-bottom: 10px;">
                     <div style="font-size: 11px; color: #ffffff; text-transform: uppercase; font-weight: 700;">
-                        IDENTIFICAÇÃO DO LEITO
+                        IDENTIFICAÇÃO DO LEITO <span style="color: #ef4444;">*</span>
                     </div>
                 </div>
-                <input id="updIdentificacaoLeito" type="text" value="${identificacaoAtual}" placeholder="Ex: NEO1, UTI-5, ENF12 (máx. 6 caracteres)" maxlength="6" style="width: 100%; padding: 12px; background: #374151; color: #ffffff; border: 1px solid rgba(255,255,255,0.3); border-radius: 6px; font-size: 14px;">
-                <div style="font-size: 11px; color: rgba(255,255,255,0.6); margin-top: 5px;">Campo alfanumérico com até 6 caracteres</div>
+                <input id="updIdentificacaoLeito" type="text" value="${identificacaoAtual}" placeholder="Ex: NEO1, UTI-5, ENF12 (máx. 6 caracteres)" maxlength="6" required style="width: 100%; padding: 12px; background: #374151; color: #ffffff; border: 1px solid rgba(255,255,255,0.3); border-radius: 6px; font-size: 14px;">
+                <div style="font-size: 11px; color: rgba(255,255,255,0.6); margin-top: 5px;">Campo alfanumérico obrigatório com até 6 caracteres</div>
             </div>
             
-            <div class="form-grid-mobile" style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; margin-bottom: 20px;">
+            <div class="form-grid-3-cols" style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; margin-bottom: 20px;">
                 <div>
                     <label style="display: block; margin-bottom: 5px; color: #e2e8f0; font-weight: 600;">INICIAIS</label>
                     <input value="${iniciais}" readonly style="width: 100%; padding: 12px; background: #1f2937; color: #9ca3af; border: 1px solid rgba(255,255,255,0.2); border-radius: 6px; font-size: 14px;">
@@ -595,7 +598,7 @@ function createAtualizacaoForm(hospitalNome, leitoNumero, dadosLeito) {
                 </div>
             </div>
             
-            <div class="form-grid-mobile" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-bottom: 20px;">
+            <div class="form-grid-3-cols" style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; margin-bottom: 20px;">
                 <div>
                     <label style="display: block; margin-bottom: 5px; color: #e2e8f0; font-weight: 600;">PPS</label>
                     <select id="updPPS" style="width: 100%; padding: 12px; background: #374151 !important; color: #ffffff !important; border: 1px solid rgba(255,255,255,0.3); border-radius: 6px; font-size: 14px;">
@@ -739,18 +742,26 @@ function setupModalEventListeners(modal, tipo) {
             e.preventDefault();
             e.stopPropagation();
             
+            // VALIDAÇÃO: Campo identificação obrigatório
+            const identificacaoField = modal.querySelector(tipo === 'admissao' ? '#admIdentificacaoLeito' : '#updIdentificacaoLeito');
+            if (!identificacaoField.value.trim()) {
+                showErrorMessage('❌ Campo "Identificação do Leito" é obrigatório!');
+                identificacaoField.focus();
+                return;
+            }
+            
             const originalText = this.innerHTML;
-            showButtonLoading(this, 'SALVANDO V3.1...');
+            showButtonLoading(this, 'SALVANDO...');
             
             try {
                 const dadosFormulario = coletarDadosFormulario(modal, tipo);
                 
                 if (tipo === 'admissao') {
                     await window.admitirPaciente(dadosFormulario.hospital, dadosFormulario.leito, dadosFormulario);
-                    showSuccessMessage('✅ Paciente admitido V3.1 com sucesso (incluindo AS/AT)!');
+                    showSuccessMessage('✅ Paciente admitido com sucesso (incluindo AS/AT)!');
                 } else {
                     await window.atualizarPaciente(dadosFormulario.hospital, dadosFormulario.leito, dadosFormulario);
-                    showSuccessMessage('✅ Dados V3.1 atualizados com sucesso (incluindo AS/AT)!');
+                    showSuccessMessage('✅ Dados atualizados com sucesso (incluindo AS/AT)!');
                 }
                 
                 hideButtonLoading(this, originalText);
@@ -777,13 +788,13 @@ function setupModalEventListeners(modal, tipo) {
             if (!confirm("Confirmar ALTA deste paciente?")) return;
             
             const originalText = this.innerHTML;
-            showButtonLoading(this, 'PROCESSANDO ALTA V3.1...');
+            showButtonLoading(this, 'PROCESSANDO ALTA...');
             
             try {
                 await window.darAltaPaciente(window.currentHospital, window.selectedLeito);
                 
                 hideButtonLoading(this, originalText);
-                showSuccessMessage('✅ Alta V3.1 processada (todas as 46 colunas limpas)!');
+                showSuccessMessage('✅ Alta processada (todas as 46 colunas limpas)!');
                 closeModal(modal);
                 
                 // Refresh automático
@@ -791,7 +802,7 @@ function setupModalEventListeners(modal, tipo) {
                 
             } catch (error) {
                 hideButtonLoading(this, originalText);
-                showErrorMessage('❌ Erro ao processar alta V3.1: ' + error.message);
+                showErrorMessage('❌ Erro ao processar alta: ' + error.message);
                 logError('Erro ao processar alta V3.1:', error);
             }
         });
@@ -1186,6 +1197,13 @@ if (!document.getElementById('cardsConsolidadoCSS')) {
             box-shadow: 0 8px 25px rgba(0,0,0,0.15);
         }
         
+        /* =================== CORREÇÃO 2: LAYOUT 3 COLUNAS DESKTOP =================== */
+        .form-grid-3-cols {
+            display: grid !important;
+            grid-template-columns: 1fr 1fr 1fr !important;
+            gap: 15px !important;
+        }
+        
         /* =================== TABLET STYLES (768px - 1024px) =================== */
         @media (max-width: 1024px) and (min-width: 769px) {
             .cards-grid {
@@ -1201,6 +1219,12 @@ if (!document.getElementById('cardsConsolidadoCSS')) {
             .hospital-btn {
                 flex: 1;
                 min-width: 180px;
+            }
+            
+            /* Layout 3 colunas em tablet */
+            .form-grid-3-cols {
+                grid-template-columns: 1fr 1fr 1fr !important;
+                gap: 12px !important;
             }
         }
 
@@ -1302,22 +1326,22 @@ if (!document.getElementById('cardsConsolidadoCSS')) {
                 padding: 20px !important;
             }
             
-            /* *** CORREÇÃO: FORM GRID EM 3 COLUNAS NO MOBILE *** */
-            .form-grid-mobile {
+            /* *** CORREÇÃO: LAYOUT 3 COLUNAS NO MOBILE *** */
+            .form-grid-3-cols {
                 display: grid !important;
                 grid-template-columns: 1fr 1fr 1fr !important;
                 gap: 8px !important;
             }
             
             /* Inputs e selects menores para caber em 3 colunas */
-            .form-grid-mobile input,
-            .form-grid-mobile select {
+            .form-grid-3-cols input,
+            .form-grid-3-cols select {
                 padding: 8px 6px !important;
                 font-size: 12px !important;
             }
             
             /* Labels menores */
-            .form-grid-mobile label {
+            .form-grid-3-cols label {
                 font-size: 10px !important;
                 margin-bottom: 3px !important;
             }
@@ -1423,17 +1447,17 @@ if (!document.getElementById('cardsConsolidadoCSS')) {
                 padding: 15px !important;
             }
             
-            .form-grid-mobile {
+            .form-grid-3-cols {
                 gap: 6px !important;
             }
             
-            .form-grid-mobile input,
-            .form-grid-mobile select {
+            .form-grid-3-cols input,
+            .form-grid-3-cols select {
                 padding: 6px 4px !important;
                 font-size: 11px !important;
             }
             
-            .form-grid-mobile label {
+            .form-grid-3-cols label {
                 font-size: 9px !important;
             }
         }
@@ -1500,7 +1524,7 @@ if (!document.getElementById('cardsConsolidadoCSS')) {
 
 // =================== INICIALIZAÇÃO V3.1 ===================
 document.addEventListener('DOMContentLoaded', function() {
-    logSuccess('✅ Cards.js V3.1 HEADER CORRIGIDO CARREGADO - Todo CSS responsivo incluído');
+    logSuccess('✅ Cards.js V3.1 CORREÇÕES 2 E 3 IMPLEMENTADAS - Todo CSS responsivo incluído');
     
     // Verificar dependências
     if (typeof window.CONFIG === 'undefined') {
@@ -1553,9 +1577,9 @@ document.addEventListener('DOMContentLoaded', function() {
     logInfo('  • Campo idade: dropdown 14-115 anos (mobile)');
     logInfo('  • Cards exibem APENAS INICIAIS');
     logInfo('  • Badge isolamento no rodapé dos cards');
-    logInfo('  • ✅ CORREÇÃO HEADER: Hospital | ID | Leito personalizado');
-    logInfo('  • ✅ ID sequencial: 01, 02, 03... no header e badge');
-    logInfo('  • ✅ Leito personalizado: NEO1 se preenchido, senão LEITO + número');
+    logInfo('  • ✅ CORREÇÃO 1: Header dos cards corrigido');
+    logInfo('  • ✅ CORREÇÃO 2: Layout formulário 3 colunas implementado');
+    logInfo('  • ✅ CORREÇÃO 3: Campo identificação PRIMEIRO e OBRIGATÓRIO');
     logInfo('  • Performance otimizada V3.1');
     logInfo('  • Validação automática AS/AT');
     logInfo('  • Layout 3x3 mobile FORÇADO');
@@ -1586,18 +1610,14 @@ window.forcarPreMarcacao = forcarPreMarcacao;
 window.coletarDadosFormulario = coletarDadosFormulario;
 window.getBadgeIsolamento = getBadgeIsolamento;
 
-logSuccess('🏥 CARDS.JS V3.1 HEADER CORRIGIDO - VERSÃO FINAL IMPLEMENTADA!');
+logSuccess('🏥 CARDS.JS V3.1 CORREÇÕES 2 E 3 FINALIZADAS!');
 logInfo('📋 Todo CSS responsivo consolidado neste arquivo');
 logInfo('✅ Eliminada dependência do mobile.css');
 logInfo('✅ Cores hardcoded: Verde=vago, Amarelo=ocupado');
 logInfo('✅ Layout 3x3 forçado no mobile');
 logInfo('✅ Modais responsivos com 3 colunas');
 logInfo('✅ Performance otimizada com CSS inline');
-logInfo('✅ Campo idade dropdown 14-115 anos (mobile)');
-logInfo('✅ Cards exibem APENAS INICIAIS');
-logInfo('✅ Badge isolamento no rodapé (máxima visibilidade)');
-logInfo('✅ Campos AS (isolamento) e AT (identificação) integrados');
-logInfo('✅ Formulários com layout 3 colunas corrigido');
-logInfo('✅ ✨ CORREÇÃO 1 IMPLEMENTADA: Header dos cards corrigido ✨');
-logInfo('✅ ✨ Layout: Hospital | ID: 01 | Leito: NEO1 ✨');
-logInfo('✅ ✨ Badge inferior: ID: 01 ✨');
+logInfo('✅ ✨ TODAS AS 3 CORREÇÕES IMPLEMENTADAS ✨');
+logInfo('✅ ✨ 1. Header: Hospital | ID | Leito ✨');
+logInfo('✅ ✨ 2. Formulário: Layout 3 colunas desktop ✨');
+logInfo('✅ ✨ 3. Identificação: Primeiro campo obrigatório ✨');
