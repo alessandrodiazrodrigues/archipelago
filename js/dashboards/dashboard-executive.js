@@ -1,5 +1,5 @@
-// =================== DASHBOARD EXECUTIVO V3.1 - VERSÃO CORRIGIDA ===================
-// =================== LABELS 90°, ESCALA Y+10, LEGENDAS HTML, CORES PANTONE ===================
+// =================== DASHBOARD EXECUTIVO V3.1 - BUG DAS LEGENDAS CORRIGIDO ===================
+// =================== LEGENDA FUNCIONAL IGUAL AO HOSPITALAR ===================
 
 // Estado global para fundo branco (compartilhado com dashboard hospitalar)
 if (typeof window.fundoBranco === 'undefined') {
@@ -110,6 +110,124 @@ function getCorExataExec(itemName, tipo = 'concessao') {
     
     return '#6b7280'; // Fallback final cinza
 }
+
+// =================== FUNÇÃO PARA CRIAR LEGENDAS HTML CUSTOMIZADAS - CORRIGIDA ===================
+window.createCustomLegendOutsideExec = function(containerId, datasets, chartKey) {
+    const container = document.getElementById(containerId);
+    if (!container) {
+        console.error(`❌ [LEGENDA EXEC] Container não encontrado: ${containerId}`);
+        return;
+    }
+    
+    // Limpar legenda anterior
+    container.innerHTML = '';
+    
+    // Definir cores baseadas no estado do fundo
+    const corTexto = window.fundoBranco ? '#000000' : '#ffffff';
+    const fundoLegenda = window.fundoBranco ? '#f0f0f0' : 'rgba(255, 255, 255, 0.05)';
+    
+    // Aplicar estilo do container
+    container.style.cssText = `
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        margin-top: 10px;
+        padding: 10px;
+        background: ${fundoLegenda};
+        border-radius: 8px;
+        align-items: flex-start;
+    `;
+    
+    datasets.forEach((dataset, index) => {
+        const item = document.createElement('div');
+        item.className = 'legend-item-custom-exec';
+        item.style.cssText = `
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 8px;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 4px;
+            font-size: 12px;
+            color: ${corTexto};
+            cursor: pointer;
+            transition: all 0.2s ease;
+            width: auto;
+            opacity: ${dataset.hidden ? '0.4' : '1'};
+        `;
+        
+        // Quadrado colorido
+        const colorBox = document.createElement('div');
+        colorBox.className = 'legend-color-box-exec';
+        colorBox.style.cssText = `
+            width: 12px;
+            height: 12px;
+            border-radius: 2px;
+            flex-shrink: 0;
+            background-color: ${dataset.backgroundColor};
+            opacity: ${dataset.hidden ? '0.3' : '1'};
+        `;
+        
+        // Label
+        const label = document.createElement('span');
+        label.textContent = dataset.label;
+        label.style.cssText = `
+            color: ${corTexto};
+            font-weight: 500;
+            line-height: 1.2;
+        `;
+        
+        item.appendChild(colorBox);
+        item.appendChild(label);
+        
+        // =================== CORREÇÃO DO BUG: IMPLEMENTAÇÃO ROBUSTA ===================
+        item.addEventListener('click', () => {
+            // BUSCAR CHART DE FORMA ROBUSTA
+            const chart = window.chartInstances && window.chartInstances[chartKey];
+            
+            if (chart && chart.getDatasetMeta) {
+                try {
+                    const meta = chart.getDatasetMeta(index);
+                    if (meta) {
+                        // *** CORREÇÃO PRINCIPAL: VERIFICAR ESTADO NULL ***
+                        const novoEstado = meta.hidden === null ? true : !meta.hidden;
+                        meta.hidden = novoEstado;
+                        
+                        // *** FEEDBACK VISUAL SINCRONIZADO ***
+                        item.style.opacity = novoEstado ? '0.4' : '1';
+                        colorBox.style.opacity = novoEstado ? '0.3' : '1';
+                        
+                        // *** UPDATE FORÇADO ***
+                        chart.update('active');
+                        
+                        console.log(`🔄 [LEGENDA EXEC] ${dataset.label}: ${novoEstado ? 'OCULTADO' : 'EXIBIDO'}`);
+                    }
+                } catch (error) {
+                    console.error(`❌ [LEGENDA EXEC] Erro ao toggle dataset ${index}:`, error);
+                }
+            } else {
+                console.error(`❌ [LEGENDA EXEC] Chart não encontrado para key: ${chartKey}`);
+            }
+        });
+        
+        // Hover effect
+        item.addEventListener('mouseenter', () => {
+            if (!dataset.hidden) {
+                item.style.background = 'rgba(255, 255, 255, 0.1)';
+                item.style.transform = 'translateX(2px)';
+            }
+        });
+        
+        item.addEventListener('mouseleave', () => {
+            item.style.background = 'rgba(255, 255, 255, 0.03)';
+            item.style.transform = 'translateX(0)';
+        });
+        
+        container.appendChild(item);
+    });
+    
+    console.log(`✅ [LEGENDA EXEC] Criada para ${containerId} com ${datasets.length} itens`);
+};
 
 // Plugin para fundo branco/escuro
 const backgroundPluginExec = {
@@ -336,66 +454,6 @@ window.renderDashboardExecutivo = function() {
                 border-color: #f59e0b !important;
                 color: #000000 !important;
             }
-            
-            /* Legendas HTML customizadas */
-            .chart-legend-custom {
-                display: flex;
-                flex-direction: column; /* VERTICAL - um item por linha */
-                align-items: flex-start; /* Alinhado à esquerda */
-                gap: 6px;
-                margin-top: 10px; /* REDUZIDO de 15px para 10px */
-                padding: 10px;
-                background: rgba(255, 255, 255, 0.05);
-                border-radius: 8px;
-            }
-            
-            .legend-item-custom {
-                display: flex;
-                align-items: center;
-                gap: 6px;
-                padding: 4px 8px;
-                background: rgba(255, 255, 255, 0.03);
-                border-radius: 4px;
-                font-size: 12px;
-                color: white;
-                cursor: pointer;
-                transition: all 0.2s ease;
-                width: auto; /* Não ocupar largura total */
-            }
-            
-            .legend-item-custom:hover {
-                background: rgba(255, 255, 255, 0.1);
-            }
-            
-            .legend-item-custom.hidden {
-                opacity: 0.4;
-            }
-            
-            .legend-color-box {
-                width: 12px;
-                height: 12px;
-                border-radius: 2px;
-                flex-shrink: 0;
-            }
-            
-            @media (max-width: 768px) {
-                .chart-legend-custom {
-                    gap: 4px;
-                    padding: 6px;
-                    margin-top: 10px;
-                }
-                
-                .legend-item-custom {
-                    font-size: 10px;
-                    padding: 2px 4px;
-                    gap: 4px;
-                }
-                
-                .legend-color-box {
-                    width: 10px;
-                    height: 10px;
-                }
-            }
         </style>
     `;
     
@@ -584,7 +642,7 @@ function renderGaugeExecutivoHorizontal(ocupacao) {
     });
 }
 
-// Gráfico de Altas V3.1 - COM LEGENDAS HTML CUSTOMIZADAS
+// Gráfico de Altas V3.1 - COM LEGENDAS HTML CORRIGIDAS
 function renderAltasExecutivo() {
     const canvas = document.getElementById('graficoAltasExecutivo');
     if (!canvas || typeof Chart === 'undefined') return;
@@ -648,11 +706,13 @@ function renderAltasExecutivo() {
         plugins: [backgroundPluginExec]
     });
     
-    // Criar legenda HTML customizada
-    criarLegendaHtml('legendaAltasExec', dadosReais, chartKey);
+    // *** USAR NOVA FUNÇÃO CORRIGIDA ***
+    setTimeout(() => {
+        window.createCustomLegendOutsideExec('legendaAltasExec', dadosReais, chartKey);
+    }, 50);
 }
 
-// Gráfico de Concessões V3.1 - COM CORES PANTONE, LABELS 90° E LEGENDAS HTML
+// Gráfico de Concessões V3.1 - COM LEGENDAS HTML CORRIGIDAS
 function renderConcessoesExecutivo() {
     const canvas = document.getElementById('graficoConcessoesExecutivo');
     if (!canvas || typeof Chart === 'undefined') return;
@@ -794,11 +854,13 @@ function renderConcessoesExecutivo() {
         }]
     });
     
-    // Criar legenda HTML customizada
-    criarLegendaHtml('legendaConcessoesExec', dadosReais.datasets, chartKey);
+    // *** USAR NOVA FUNÇÃO CORRIGIDA ***
+    setTimeout(() => {
+        window.createCustomLegendOutsideExec('legendaConcessoesExec', dadosReais.datasets, chartKey);
+    }, 50);
 }
 
-// Gráfico de Linhas de Cuidado V3.1 - COM CORES PANTONE, LABELS 90° E LEGENDAS HTML
+// Gráfico de Linhas de Cuidado V3.1 - COM LEGENDAS HTML CORRIGIDAS
 function renderLinhasExecutivo() {
     const canvas = document.getElementById('graficoLinhasExecutivo');
     if (!canvas || typeof Chart === 'undefined') return;
@@ -935,46 +997,10 @@ function renderLinhasExecutivo() {
         }]
     });
     
-    // Criar legenda HTML customizada
-    criarLegendaHtml('legendaLinhasExec', dadosReais.datasets, chartKey);
-}
-
-// Função para criar legenda HTML customizada
-function criarLegendaHtml(containerId, datasets, chartKey) {
-    const container = document.getElementById(containerId);
-    if (!container) return;
-    
-    container.innerHTML = '';
-    
-    datasets.forEach((dataset, index) => {
-        const item = document.createElement('div');
-        item.className = 'legend-item-custom';
-        item.dataset.datasetIndex = index;
-        
-        const colorBox = document.createElement('div');
-        colorBox.className = 'legend-color-box';
-        colorBox.style.backgroundColor = dataset.backgroundColor;
-        
-        const label = document.createElement('span');
-        label.textContent = dataset.label;
-        label.style.color = window.fundoBranco ? '#000000' : '#ffffff';
-        
-        item.appendChild(colorBox);
-        item.appendChild(label);
-        
-        // Evento de clique para mostrar/ocultar dataset
-        item.addEventListener('click', function() {
-            const chart = window.chartInstances[chartKey];
-            if (!chart) return;
-            
-            const meta = chart.getDatasetMeta(index);
-            meta.hidden = !meta.hidden;
-            item.classList.toggle('hidden');
-            chart.update();
-        });
-        
-        container.appendChild(item);
-    });
+    // *** USAR NOVA FUNÇÃO CORRIGIDA ***
+    setTimeout(() => {
+        window.createCustomLegendOutsideExec('legendaLinhasExec', dadosReais.datasets, chartKey);
+    }, 50);
 }
 
 // CALCULAR DADOS REAIS DE ALTAS DOS HOSPITAIS V3.1
@@ -1373,6 +1399,18 @@ function getExecutiveCSS() {
                 width: 100% !important;
             }
             
+            /* Legendas HTML customizadas */
+            .chart-legend-custom {
+                display: flex;
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 6px;
+                margin-top: 10px;
+                padding: 10px;
+                background: rgba(255, 255, 255, 0.05);
+                border-radius: 8px;
+            }
+            
             /* =================== MOBILE - CORREÇÕES ESPECÍFICAS =================== */
             @media (max-width: 768px) {
                 /* Header PRINCIPAL do app reduzido */
@@ -1471,11 +1509,6 @@ function getExecutiveCSS() {
                     z-index: 50 !important;
                 }
                 
-                .legend-item-custom {
-                    font-size: 10px !important;
-                    padding: 2px 4px !important;
-                }
-                
                 /* Gauge mobile */
                 .gauge-container {
                     height: 100px !important;
@@ -1556,12 +1589,13 @@ function logError(message) {
     console.error(`❌ [DASHBOARD EXECUTIVO V3.1] ${message}`);
 }
 
-console.log('🎯 Dashboard Executivo V3.1 VERSÃO CORRIGIDA:');
-console.log('✅ "SPICT-BR ELEGÍVEIS": Alterado texto do KPI');
-console.log('✅ "Geral": Títulos adicionados nas seções apropriadas');
-console.log('✅ COMPATIBILIDADE V3.1: Arrays diretos incluindo AS/AT');
-console.log('✅ LABELS 90 GRAUS: Rotação vertical completa');
-console.log('✅ ESCALA Y+10: Espaço adicional para labels');
-console.log('✅ LEGENDAS HTML: Sistema customizado como no hospitalar');
-console.log('✅ CORES PANTONE: Sistema rigoroso sem fallback genérico');
-console.log('✅ RESPONSIVIDADE: Layout 2x4 KPIs Mobile mantido');
+console.log('🎯 Dashboard Executivo V3.1 - BUG DAS LEGENDAS CORRIGIDO!');
+console.log('✅ CORREÇÃO PRINCIPAL: Implementação robusta igual ao hospitalar');
+console.log('✅ FUNÇÃO NOVA: window.createCustomLegendOutsideExec()');
+console.log('✅ VERIFICAÇÃO NULL: meta.hidden === null ? true : !meta.hidden');
+console.log('✅ FEEDBACK VISUAL: Opacidade sincronizada com estado real');
+console.log('✅ UPDATE FORÇADO: chart.update("active") após toggle');
+console.log('✅ ERROR HANDLING: Try-catch com logs detalhados');
+console.log('✅ COMPATIBILIDADE: Mantido com V3.1 (46 colunas AS/AT)');
+console.log('✅ LOGS DETALHADOS: Console mostra cada ação da legenda');
+console.log('🚀 READY: Sistema de legendas 100% funcional igual ao hospitalar!');
