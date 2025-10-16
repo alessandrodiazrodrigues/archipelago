@@ -1,6 +1,6 @@
-// =================== APP.JS - ARQUIVO PRINCIPAL CORRIGIDO V3.1 ===================
+// =================== APP.JS - ARQUIVO PRINCIPAL V3.2 ===================
 
-// =================== CONFIGURAÇÕES GLOBAIS V3.1 ===================
+// =================== CONFIGURAÇÕES GLOBAIS V3.2 ===================
 window.CONFIG = {
     AUTH_PASSWORD: '170284',
     ADM_EMAIL: 'cvcalessandro@gmail.com',
@@ -8,13 +8,105 @@ window.CONFIG = {
     REFRESH_INTERVAL: 240000, // 4 minutos
     QR_TIMEOUT: 120000, // 2 minutos
     HOSPITAIS: {
-        // *** CORREÇÃO V3.1: ATUALIZAR 49→66 leitos (H1:10, H2:36, H3:13, H4:7) ***
-        H1: { nome: "Neomater", leitos: 10, ativo: true },
-        H2: { nome: "Cruz Azul", leitos: 36, ativo: true },
-        H3: { nome: "Santa Marcelina", leitos: 13, ativo: true },
-        H4: { nome: "Santa Clara", leitos: 7, ativo: true }
+        // *** V3.2: 79 LEITOS TOTAIS (H1:10, H2:36, H3:13, H4:13, H5:13) ***
+        H1: { nome: "Neomater", leitos: 10, tipo: "Híbrido", ativo: true },
+        H2: { nome: "Cruz Azul", leitos: 36, tipo: "Misto", ativo: true },
+        H3: { nome: "Santa Marcelina", leitos: 13, tipo: "Híbrido", ativo: true },
+        H4: { nome: "Santa Clara", leitos: 13, tipo: "Misto", ativo: true },
+        H5: { nome: "Hospital Adventista", leitos: 13, tipo: "Híbrido", ativo: true } // *** NOVO V3.2 ***
     }
 };
+
+// =================== LISTAS COMPLETAS V3.2 ===================
+window.CONCESSOES_LISTA = [
+    "Bradesco",
+    "Care Plus",
+    "Intermédica",
+    "NotreDame",
+    "Omint",
+    "Porto Seguro",
+    "Prevent Senior",
+    "São Francisco",
+    "Sul América",
+    "Trasmontano",
+    "Unimed"
+];
+
+window.LINHAS_CUIDADO_LISTA = [
+    "Assiste",
+    "APS",
+    "Cuidados Paliativos",
+    "Alta Dependência",
+    "Fisioterapia",
+    "Fonoaudiologia",
+    "Nutrição",
+    "Psicologia",
+    "Serviço Social",
+    "Terapia Ocupacional",
+    "Farmácia Clínica",
+    "Angiologia",
+    "Cardiologia",
+    "Cirurgia Geral",
+    "Clínica Médica",
+    "Dermatologia",
+    "Endocrinologia",
+    "Fisiatria",
+    "Gastroenterologia",
+    "Geriatria",
+    "Ginecologia e Obstetrícia",
+    "Hematologia",
+    "Infectologia",
+    "Nefrologia",
+    "Neurocirurgia",
+    "Neurologia",
+    "Nutrição Parenteral",
+    "Oftalmologia",
+    "Oncologia",
+    "Ortopedia",
+    "Otorrinolaringologia",
+    "Pneumologia",
+    "Proctologia",
+    "Psiquiatria",
+    "Urologia",
+    "Psicologia",
+    "Serviço Social",
+    "Terapia Ocupacional",
+    "Farmácia Clínica",
+    "Medicina Interna",
+    "Cirurgia Vascular",
+    "Cirurgia Plástica",
+    "Cirurgia Torácica",
+    "Reumatologia",
+    "Imunologia"
+];
+
+window.REGIOES_LISTA = [
+    "Zona Central",
+    "Zona Sul",
+    "Zona Norte",
+    "Zona Leste",
+    "Zona Oeste",
+    "ABC",
+    "Guarulhos",
+    "Osasco",
+    "Outra"
+];
+
+window.ISOLAMENTO_OPCOES = [
+    "Não",
+    "Contato",
+    "Respiratório"
+];
+
+window.GENERO_OPCOES = [
+    "Masculino",
+    "Feminino"
+];
+
+window.CATEGORIA_OPCOES = [
+    "Apartamento",
+    "Enfermaria"
+];
 
 // =================== VARIÁVEIS GLOBAIS ===================
 window.currentHospital = 'H1'; // *** SEMPRE INICIA COM NEOMATER ***
@@ -22,20 +114,20 @@ window.currentView = 'leitos';
 window.isAuthenticated = false;
 window.refreshTimer = null;
 window.timerInterval = null;
-window.isLoading = false; // *** NOVO: CONTROLE DE LOADING ***
-window.loadingOverlay = null; // *** NOVO: OVERLAY GLOBAL ***
+window.isLoading = false; // *** CONTROLE DE LOADING ***
+window.loadingOverlay = null; // *** OVERLAY GLOBAL ***
 
 // =================== FUNÇÕES DE LOG (GLOBAIS) ===================
 window.logInfo = function(msg) {
-    console.log(`ℹ️ [INFO] ${msg}`);
+    console.log(`ℹ️ [INFO V3.2] ${msg}`);
 };
 
 window.logSuccess = function(msg) {
-    console.log(`✅ [SUCCESS] ${msg}`);
+    console.log(`✅ [SUCCESS V3.2] ${msg}`);
 };
 
 window.logError = function(msg, error = null) {
-    console.error(`❌ [ERROR] ${msg}`, error || '');
+    console.error(`❌ [ERROR V3.2] ${msg}`, error || '');
 };
 
 // =================== SISTEMA DE LOADING MELHORADO COM BLOQUEIO ===================
@@ -203,7 +295,7 @@ window.authenticate = function() {
         
         // *** INICIALIZAR SISTEMA COM LOADING TOTAL ***
         window.initSystem();
-        logSuccess('Autenticação bem-sucedida');
+        logSuccess('Autenticação bem-sucedida - Guilherme Santoro autorizado');
     } else {
         if (errorDiv) {
             errorDiv.textContent = 'Senha incorreta. Tente novamente.';
@@ -214,13 +306,13 @@ window.authenticate = function() {
     }
 };
 
-// =================== INICIALIZAÇÃO DO SISTEMA (CORRIGIDA COM BLOQUEIO) ===================
+// =================== INICIALIZAÇÃO DO SISTEMA V3.2 (CORRIGIDA COM BLOQUEIO) ===================
 window.initSystem = async function() {
-    logInfo('Inicializando sistema Archipelago Dashboard V3.1...');
+    logInfo('Inicializando sistema Archipelago Dashboard V3.2...');
     
     try {
         // *** FASE 1: LOADING INICIAL ***
-        showLoading(null, 'Inicializando sistema V3.1...');
+        showLoading(null, 'Inicializando sistema V3.2...');
         await delay(800);
         
         // *** FASE 2: TESTAR API ***
@@ -232,13 +324,13 @@ window.initSystem = async function() {
         
         // *** FASE 3: CARREGAR DADOS DOS HOSPITAIS ***
         if (window.loadHospitalData) {
-            showLoading(null, 'Carregando dados dos 66 leitos...');
+            showLoading(null, 'Carregando dados dos 79 leitos...');
             await window.loadHospitalData();
             await delay(800);
         }
         
         // *** FASE 4: INICIALIZAR COMPONENTES ***
-        showLoading(null, 'Inicializando componentes...');
+        showLoading(null, 'Inicializando componentes V3.2...');
         
         // Iniciar timer de atualização
         window.startTimer();
@@ -259,10 +351,11 @@ window.initSystem = async function() {
         
         // *** FINALIZAR: REMOVER LOADING E LIBERAR SISTEMA ***
         hideLoading();
-        logSuccess('✅ Sistema V3.1 inicializado! Configuração: 66 leitos (H1:10, H2:36, H3:13, H4:7)');
+        logSuccess('✅ Sistema V3.2 inicializado! Configuração: 79 leitos (H1:10, H2:36, H3:13, H4:13, H5:13)');
+        logSuccess('🏥 5 hospitais ativos: Neomater, Cruz Azul, Santa Marcelina, Santa Clara, Hospital Adventista');
         
     } catch (error) {
-        logError('Erro na inicialização V3.1:', error);
+        logError('Erro na inicialização V3.2:', error);
         hideLoading();
         alert('Erro ao inicializar o sistema. Verifique a conexão e tente recarregar a página.');
         
@@ -333,7 +426,7 @@ window.setActiveTab = function(tab) {
         if (tab === 'leitos' && window.renderCards) {
             // Se não há dados, mostrar loading e carregar
             if (!window.hospitalData || Object.keys(window.hospitalData).length === 0) {
-                showLoading(null, 'Carregando dados dos 66 leitos...');
+                showLoading(null, 'Carregando dados dos 79 leitos...');
                 if (window.loadHospitalData) {
                     window.loadHospitalData().then(() => {
                         setTimeout(() => {
@@ -386,17 +479,17 @@ window.toggleMenu = function() {
     }
 };
 
-// =================== ATUALIZAÇÃO DE DADOS (CORRIGIDO COM LOADING) ===================
+// =================== ATUALIZAÇÃO DE DADOS V3.2 (CORRIGIDO COM LOADING) ===================
 window.updateData = async function() {
     if (window.isLoading) {
         logInfo('Atualização bloqueada - sistema já está carregando');
         return;
     }
     
-    logInfo('Iniciando atualização manual de dados V3.1...');
+    logInfo('Iniciando atualização manual de dados V3.2...');
     
     try {
-        showLoading(null, 'Atualizando 66 leitos...');
+        showLoading(null, 'Atualizando 79 leitos...');
         
         // Carregar dados dos hospitais
         if (window.loadHospitalData) {
@@ -415,16 +508,16 @@ window.updateData = async function() {
         }
         
         hideLoading();
-        logSuccess('Dados V3.1 atualizados com sucesso');
+        logSuccess('Dados V3.2 atualizados com sucesso - 79 leitos sincronizados');
         
     } catch (error) {
-        logError('Erro na atualização V3.1:', error);
+        logError('Erro na atualização V3.2:', error);
         hideLoading();
         alert('Erro ao atualizar dados. Verifique a conexão com a internet.');
     }
 };
 
-// =================== SELEÇÃO DE HOSPITAL (CORRIGIDO COM LOADING) ===================
+// =================== SELEÇÃO DE HOSPITAL V3.2 (CORRIGIDO COM LOADING) ===================
 window.selectHospital = function(hospitalId) {
     // *** BLOQUEAR SELEÇÃO DURANTE LOADING ***
     if (window.isLoading) {
@@ -460,7 +553,7 @@ window.selectHospital = function(hospitalId) {
         }, 800);
     }
     
-    logSuccess(`Hospital selecionado: ${CONFIG.HOSPITAIS[hospitalId].nome} (${CONFIG.HOSPITAIS[hospitalId].leitos} leitos)`);
+    logSuccess(`Hospital selecionado: ${CONFIG.HOSPITAIS[hospitalId].nome} (${hospitalConfig.leitos} leitos - ${hospitalConfig.tipo})`);
 };
 
 // =================== FUNÇÕES DE CONFIGURAÇÃO ===================
@@ -505,9 +598,10 @@ window.darAlta = function() {
     }
 };
 
-// =================== INICIALIZAÇÃO DO APP (CORRIGIDA) ===================
+// =================== INICIALIZAÇÃO DO APP V3.2 (CORRIGIDA) ===================
 window.initApp = async function() {
-    logInfo('🏥 Archipelago Dashboard V3.1 - Iniciando aplicação...');
+    logInfo('🏥 Archipelago Dashboard V3.2 - Iniciando aplicação...');
+    logInfo('👤 Cliente: Guilherme Santoro | 👨‍💻 Dev: Alessandro Rodrigues');
     
     // Verificar autenticação
     if (window.checkAuthentication()) {
@@ -534,7 +628,7 @@ window.initApp = async function() {
         }
     }
     
-    logSuccess('🚀 App V3.1 inicializado e pronto para uso');
+    logSuccess('🚀 App V3.2 inicializado e pronto para uso');
 };
 
 // =================== GERENCIAR CORES (Para integração com Admin) ===================
@@ -554,7 +648,7 @@ window.restoreDefaultColors = function() {
     logSuccess('Cores padrão restauradas');
 };
 
-// =================== FUNÇÃO PARA OBTER HOSPITAIS ATIVOS ===================
+// =================== FUNÇÃO PARA OBTER HOSPITAIS ATIVOS V3.2 ===================
 window.getActiveHospitals = function() {
     return Object.entries(CONFIG.HOSPITAIS)
         .filter(([id, hospital]) => hospital.ativo)
@@ -586,7 +680,7 @@ window.toggleHospital = function(hospitalId, ativo) {
     return false;
 };
 
-// =================== TIMER DE ATUALIZAÇÃO ===================
+// =================== TIMER DE ATUALIZAÇÃO V3.2 ===================
 window.startTimer = function() {
     let countdown = 240; // 4 minutos em segundos
     
@@ -622,7 +716,67 @@ window.startTimer = function() {
     logInfo('Timer de atualização iniciado (4 minutos)');
 };
 
-// =================== LOG DE INICIALIZAÇÃO V3.1 ===================
-logSuccess('📋 App.js V3.1 carregado - CORREÇÃO IMPLEMENTADA:');
-logSuccess('🏥 Hospitais atualizados: H1:10, H2:36, H3:13, H4:7 leitos (66 total)');
+// =================== FUNÇÕES AUXILIARES V3.2 ===================
+window.getTotalLeitos = function() {
+    return Object.values(CONFIG.HOSPITAIS)
+        .filter(h => h.ativo)
+        .reduce((total, h) => total + h.leitos, 0);
+};
+
+window.getHospitalByLeito = function(leitoId) {
+    // Retornar dados do hospital baseado no ID do leito
+    for (const [id, hospital] of Object.entries(CONFIG.HOSPITAIS)) {
+        if (leitoId.startsWith(id)) {
+            return { id, ...hospital };
+        }
+    }
+    return null;
+};
+
+window.validarConcessao = function(concessao) {
+    return CONCESSOES_LISTA.includes(concessao);
+};
+
+window.validarLinhaCuidado = function(linha) {
+    return LINHAS_CUIDADO_LISTA.includes(linha);
+};
+
+window.validarRegiao = function(regiao) {
+    return REGIOES_LISTA.includes(regiao);
+};
+
+window.validarIsolamento = function(isolamento) {
+    return ISOLAMENTO_OPCOES.includes(isolamento);
+};
+
+window.validarGenero = function(genero) {
+    return GENERO_OPCOES.includes(genero);
+};
+
+window.validarCategoria = function(categoria) {
+    return CATEGORIA_OPCOES.includes(categoria);
+};
+
+// =================== LOG DE INICIALIZAÇÃO V3.2 ===================
+logSuccess('📋 App.js V3.2 carregado com sucesso!');
+logSuccess('');
+logSuccess('🏥 REDE HOSPITALAR V3.2:');
+logSuccess('   H1 - Neomater:             10 leitos (Híbrido)');
+logSuccess('   H2 - Cruz Azul:            36 leitos (20 Aptos + 16 Enf)');
+logSuccess('   H3 - Santa Marcelina:      13 leitos (Híbrido)');
+logSuccess('   H4 - Santa Clara:          13 leitos (9 Aptos + 4 Enf)');
+logSuccess('   H5 - Hospital Adventista:  13 leitos (Híbrido) ⭐ NOVO');
+logSuccess('   ────────────────────────────────────────────');
+logSuccess('   TOTAL:                     79 leitos');
+logSuccess('');
+logSuccess('📊 ESTRUTURA DE DADOS V3.2:');
+logSuccess('   ✅ 73 colunas (A-BU) na planilha');
+logSuccess('   ✅ 11 concessões (checkboxes)');
+logSuccess('   ✅ 45 linhas de cuidado (checkboxes)');
+logSuccess('   ✅ 9 regiões');
+logSuccess('   ✅ 3 campos novos: gênero, região, categoria');
+logSuccess('');
+logSuccess('👤 Cliente: Guilherme Santoro');
+logSuccess('👨‍💻 Desenvolvedor: Alessandro Rodrigues');
+logSuccess('📅 Versão: V3.2 - Outubro/2025');
 logSuccess('✅ Sistema com loading bloqueante implementado');
