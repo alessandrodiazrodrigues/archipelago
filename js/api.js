@@ -1,81 +1,121 @@
-// =================== API V3.1 - NOVA ESTRUTURA 46 COLUNAS - COM AS/AT ===================
+// =================== API V3.2 - NOVA ESTRUTURA 73 COLUNAS - COM BS/BT/BU ===================
 
-// *** URL ATUALIZADA DA API V3.1 FINAL CORRIGIDA ***
+// *** URL DA API V3.2 ***
 window.API_URL = 'https://script.google.com/macros/s/AKfycbxC9Gdvu3_mzXko0VjIYOFgtiH_Z_d8E9VXniUpBxyfaHRC1BHilyEuKhAtLnzmnusT/exec';
 
 // =================== VARIÁVEIS GLOBAIS ===================
 window.hospitalData = {};
 window.apiCache = {};
 window.lastAPICall = 0;
-window.API_TIMEOUT = 15000; // 15 segundos para CORS
+window.API_TIMEOUT = 15000; // 15 segundos
 
-// =================== TIMELINE CORRIGIDA (10 OPÇÕES) ===================
+// =================== TIMELINE (10 OPÇÕES) ===================
 window.TIMELINE_OPCOES = [
     "Hoje Ouro", "Hoje 2R", "Hoje 3R",
     "24h Ouro", "24h 2R", "24h 3R", 
     "48h", "72h", "96h", "SP"
 ];
 
-// =================== OPÇÕES DE ISOLAMENTO V3.1 (COLUNA AS) ===================
+// =================== ISOLAMENTO (3 OPÇÕES - COLUNA AR) ===================
 window.ISOLAMENTO_OPCOES = [
-    "NÃO ISOLAMENTO",
-    "ISOLAMENTO DE CONTATO", 
-    "ISOLAMENTO RESPIRATÓRIO"
+    "Não Isolamento",
+    "Isolamento De Contato", 
+    "Isolamento Respiratório"
 ];
 
-// =================== LISTAS PARA VALIDAÇÃO ===================
+// =================== REGIÕES (9 OPÇÕES - COLUNA BT/72) ===================
+window.REGIOES_OPCOES = [
+    "Zona Central",
+    "Zona Sul",
+    "Zona Norte",
+    "Zona Leste",
+    "Zona Oeste",
+    "ABC",
+    "Guarulhos",
+    "Osasco",
+    "Outra"
+];
+
+// =================== LISTAS V3.2 ATUALIZADAS ===================
+
+// *** CONCESSÕES: 11 ITENS (M-W checkboxes) ***
 window.CONCESSOES_VALIDAS = [
-    "Transição Domiciliar",
-    "Aplicação domiciliar de medicamentos",
-    "Fisioterapia", 
-    "Fonoaudiologia",
+    "Fisioterapia Domiciliar",
+    "Fonoaudiologia Domiciliar",
     "Aspiração",
     "Banho",
-    "Curativos",
+    "Curativo",
     "Oxigenoterapia",
-    "Recarga de O2",
-    "Orientação Nutricional - com dispositivo",
-    "Orientação Nutricional - sem dispositivo",
+    "Recarga O2",
+    "Orientação Nutricional Com Dispositivo",
+    "Orientação Nutricional Sem Dispositivo",
     "Clister",
-    "PICC"
+    "Curativo PICC"
 ];
 
+// *** LINHAS DE CUIDADO: 45 ITENS (X-AP + AS-BR checkboxes) ***
 window.LINHAS_VALIDAS = [
     "Assiste",
     "APS",
     "Cuidados Paliativos",
-    "ICO (Insuficiência Coronariana)",
+    "ICO",
     "Oncologia",
     "Pediatria",
-    "Programa Autoimune - Gastroenterologia",
-    "Programa Autoimune - Neuro-desmielinizante",
-    "Programa Autoimune - Neuro-muscular",
-    "Programa Autoimune - Reumatologia",
-    "Vida Mais Leve Care",
-    "Crônicos - Cardiologia",
-    "Crônicos - Endocrinologia",
-    "Crônicos - Geriatria",
-    "Crônicos - Melhor Cuidado",
-    "Crônicos - Neurologia",
-    "Crônicos - Pneumologia",
-    "Crônicos - Pós-bariátrica",
-    "Crônicos - Reumatologia"
+    "Autoimune Gastro",
+    "Autoimune Neuro Desm",
+    "Autoimune Neuro Musc",
+    "Autoimune Reumato",
+    "Vida Mais Leve",
+    "Cron Cardio",
+    "Cron Endocrino",
+    "Cron Geriatria",
+    "Cron Melhor Cuid",
+    "Cron Neuro",
+    "Cron Pneumo",
+    "Cron Pos Bariat",
+    "Cron Reumato",
+    "Cardiologia",
+    "Cirurgia Geral",
+    "Clinica Medica",
+    "Dermatologia",
+    "Endocrinologia",
+    "Fisiatria",
+    "Gastroenterologia",
+    "Geriatria",
+    "Gineco Obstetricia",
+    "Hematologia",
+    "Infectologia",
+    "Nefrologia",
+    "Neurologia",
+    "Nutricao",
+    "Odontologia",
+    "Oftalmologia",
+    "Ortopedia Traumato",
+    "Otorrinolaringologia",
+    "Pneumologia",
+    "Proctologia",
+    "Psiquiatria",
+    "Urologia",
+    "Psicologia",
+    "Servico Social",
+    "Terapia Ocupacional",
+    "Farmacia Clinica"
 ];
 
 // =================== FUNÇÕES AUXILIARES ===================
 function logAPI(message, data = null) {
-    console.log(`🔗 [API V3.1] ${message}`, data || '');
+    console.log(`🔗 [API V3.2] ${message}`, data || '');
 }
 
 function logAPIError(message, error) {
-    console.error(`❌ [API ERROR V3.1] ${message}`, error);
+    console.error(`❌ [API ERROR V3.2] ${message}`, error);
 }
 
 function logAPISuccess(message, data = null) {
-    console.log(`✅ [API SUCCESS V3.1] ${message}`, data || '');
+    console.log(`✅ [API SUCCESS V3.2] ${message}`, data || '');
 }
 
-// =================== VALIDAÇÃO DE DADOS V3.1 ===================
+// =================== VALIDAÇÃO DE DADOS V3.2 ===================
 function validarTimeline(prevAlta) {
     return window.TIMELINE_OPCOES.includes(prevAlta) ? prevAlta : 'SP';
 }
@@ -90,12 +130,12 @@ function validarLinhas(linhas) {
     return linhas.filter(l => window.LINHAS_VALIDAS.includes(l));
 }
 
-// *** NOVA V3.1: VALIDAR ISOLAMENTO (COLUNA AS) ***
+// *** VALIDAR ISOLAMENTO (COLUNA AR/44) ***
 function validarIsolamento(isolamento) {
-    return window.ISOLAMENTO_OPCOES.includes(isolamento) ? isolamento : 'NÃO ISOLAMENTO';
+    return window.ISOLAMENTO_OPCOES.includes(isolamento) ? isolamento : 'Não Isolamento';
 }
 
-// *** NOVA V3.1: VALIDAR IDENTIFICAÇÃO DO LEITO (COLUNA AT) ***
+// *** VALIDAR IDENTIFICAÇÃO DO LEITO (COLUNA AQ/43) ***
 function validarIdentificacaoLeito(identificacao) {
     if (!identificacao || typeof identificacao !== 'string') return '';
     
@@ -106,6 +146,23 @@ function validarIdentificacaoLeito(identificacao) {
     }
     
     return identificacao.toUpperCase();
+}
+
+// *** NOVA V3.2: VALIDAR GÊNERO (COLUNA BS/71) ***
+function validarGenero(genero) {
+    const generosValidos = ['Masculino', 'Feminino'];
+    return generosValidos.includes(genero) ? genero : '';
+}
+
+// *** NOVA V3.2: VALIDAR REGIÃO (COLUNA BT/72) ***
+function validarRegiao(regiao) {
+    return window.REGIOES_OPCOES.includes(regiao) ? regiao : '';
+}
+
+// *** NOVA V3.2: VALIDAR CATEGORIA ESCOLHIDA (COLUNA BU/73) ***
+function validarCategoriaEscolhida(categoria) {
+    const categoriasValidas = ['Apartamento', 'Enfermaria'];
+    return categoriasValidas.includes(categoria) ? categoria : '';
 }
 
 // =================== CORREÇÃO CRÍTICA PARA CORS - JSONP ===================
@@ -262,34 +319,34 @@ async function apiRequest(action, params = {}, method = 'GET') {
     }
 }
 
-// =================== FUNÇÃO PRINCIPAL DE CARREGAMENTO V3.1 ===================
+// =================== FUNÇÃO PRINCIPAL DE CARREGAMENTO V3.2 ===================
 window.loadHospitalData = async function() {
     try {
-        logAPI('🔄 Carregando dados V3.1 da planilha (46 colunas - incluindo AS/AT)...');
+        logAPI('🔄 Carregando dados V3.2 da planilha (73 colunas - A-BU)...');
         
         // Mostrar loading global
         if (window.showLoading) {
-            window.showLoading(null, 'Sincronizando com Google Apps Script V3.1...');
+            window.showLoading(null, 'Sincronizando com Google Apps Script V3.2...');
         }
         
         // Buscar dados da API
         const apiData = await apiRequest('all', {}, 'GET');
         
         if (!apiData || typeof apiData !== 'object') {
-            throw new Error('API V3.1 retornou dados inválidos');
+            throw new Error('API V3.2 retornou dados inválidos');
         }
         
-        // *** PROCESSAMENTO V3.1: DADOS JÁ VÊM COMO ARRAYS DIRETOS ***
+        // *** PROCESSAMENTO V3.2: DADOS JÁ VÊM COMO ARRAYS DIRETOS (CHECKBOXES) ***
         window.hospitalData = {};
         
         // Se a API retorna formato agrupado: {H1: {leitos: [...]}, H2: {leitos: [...]}}
         if (apiData.H1 && apiData.H1.leitos) {
-            logAPI('Dados V3.1 recebidos em formato agrupado');
+            logAPI('Dados V3.2 recebidos em formato agrupado');
             window.hospitalData = apiData;
         } 
         // Se a API retorna array flat: [{hospital: 'H1', ...}, {hospital: 'H2', ...}]
         else if (Array.isArray(apiData)) {
-            logAPI('Dados V3.1 recebidos em formato flat - convertendo...');
+            logAPI('Dados V3.2 recebidos em formato flat - convertendo...');
             apiData.forEach(leito => {
                 const hospitalId = leito.hospital;
                 if (!window.hospitalData[hospitalId]) {
@@ -299,16 +356,16 @@ window.loadHospitalData = async function() {
             });
         }
         else {
-            throw new Error('Formato de dados da API V3.1 não reconhecido');
+            throw new Error('Formato de dados da API V3.2 não reconhecido');
         }
         
         // Verificar se temos dados
         const totalHospitais = Object.keys(window.hospitalData).length;
         if (totalHospitais === 0) {
-            throw new Error('Nenhum hospital encontrado nos dados da API V3.1');
+            throw new Error('Nenhum hospital encontrado nos dados da API V3.2');
         }
         
-        // *** PROCESSAMENTO V3.1: SEM PARSING - DADOS JÁ VÊM CORRETOS ***
+        // *** PROCESSAMENTO V3.2: CHECKBOXES DIRETOS - SEM PARSING DE M/N ***
         Object.keys(window.hospitalData).forEach(hospitalId => {
             const hospital = window.hospitalData[hospitalId];
             if (hospital && hospital.leitos) {
@@ -317,12 +374,12 @@ window.loadHospitalData = async function() {
                     if (leito.status === 'Em uso') leito.status = 'ocupado';
                     if (leito.status === 'Vago') leito.status = 'vago';
                     
-                    // *** V3.1: VALIDAR TIMELINE COM 10 OPÇÕES ***
+                    // *** V3.2: VALIDAR TIMELINE COM 10 OPÇÕES ***
                     if (leito.prevAlta) {
                         leito.prevAlta = validarTimeline(leito.prevAlta);
                     }
                     
-                    // *** V3.1: VALIDAR CONCESSÕES E LINHAS (JÁ VÊM COMO ARRAYS) ***
+                    // *** V3.2: VALIDAR CONCESSÕES E LINHAS (JÁ VÊM COMO ARRAYS DOS CHECKBOXES) ***
                     if (leito.concessoes) {
                         leito.concessoes = validarConcessoes(leito.concessoes);
                     }
@@ -330,14 +387,14 @@ window.loadHospitalData = async function() {
                         leito.linhas = validarLinhas(leito.linhas);
                     }
                     
-                    // *** NOVA V3.1: VALIDAR ISOLAMENTO (COLUNA AS) ***
+                    // *** V3.2: VALIDAR ISOLAMENTO (COLUNA AR/44) ***
                     if (leito.isolamento) {
                         leito.isolamento = validarIsolamento(leito.isolamento);
                     } else {
-                        leito.isolamento = 'NÃO ISOLAMENTO'; // Padrão
+                        leito.isolamento = 'Não Isolamento'; // Padrão
                     }
                     
-                    // *** NOVA V3.1: VALIDAR IDENTIFICAÇÃO DO LEITO (COLUNA AT) ***
+                    // *** V3.2: VALIDAR IDENTIFICAÇÃO DO LEITO (COLUNA AQ/43) ***
                     if (leito.identificacaoLeito) {
                         try {
                             leito.identificacaoLeito = validarIdentificacaoLeito(leito.identificacaoLeito);
@@ -347,6 +404,27 @@ window.loadHospitalData = async function() {
                         }
                     } else {
                         leito.identificacaoLeito = ''; // Opcional
+                    }
+                    
+                    // *** NOVA V3.2: VALIDAR GÊNERO (COLUNA BS/71) ***
+                    if (leito.genero) {
+                        leito.genero = validarGenero(leito.genero);
+                    } else {
+                        leito.genero = '';
+                    }
+                    
+                    // *** NOVA V3.2: VALIDAR REGIÃO (COLUNA BT/72) ***
+                    if (leito.regiao) {
+                        leito.regiao = validarRegiao(leito.regiao);
+                    } else {
+                        leito.regiao = '';
+                    }
+                    
+                    // *** NOVA V3.2: VALIDAR CATEGORIA ESCOLHIDA (COLUNA BU/73) ***
+                    if (leito.categoriaEscolhida) {
+                        leito.categoriaEscolhida = validarCategoriaEscolhida(leito.categoriaEscolhida);
+                    } else {
+                        leito.categoriaEscolhida = '';
                     }
                     
                     // Criar objeto paciente se leito ocupado
@@ -359,10 +437,13 @@ window.loadHospitalData = async function() {
                             spict: leito.spict,
                             complexidade: leito.complexidade,
                             prevAlta: leito.prevAlta,
-                            linhas: leito.linhas || [],           // Array direto V3.1!
-                            concessoes: leito.concessoes || [],   // Array direto V3.1!
-                            isolamento: leito.isolamento,         // NOVA V3.1 (AS)
-                            identificacaoLeito: leito.identificacaoLeito // NOVA V3.1 (AT)
+                            linhas: leito.linhas || [],                      // Array de checkboxes
+                            concessoes: leito.concessoes || [],              // Array de checkboxes
+                            isolamento: leito.isolamento,                    // AR/44
+                            identificacaoLeito: leito.identificacaoLeito,    // AQ/43
+                            genero: leito.genero,                            // BS/71 (NOVA V3.2)
+                            regiao: leito.regiao,                            // BT/72 (NOVA V3.2)
+                            categoriaEscolhida: leito.categoriaEscolhida     // BU/73 (NOVA V3.2)
                         };
                     }
                     
@@ -374,17 +455,20 @@ window.loadHospitalData = async function() {
             }
         });
         
-        // Estatísticas V3.1
+        // Estatísticas V3.2
         const totalLeitos = Object.values(window.hospitalData).reduce((acc, h) => acc + (h.leitos ? h.leitos.length : 0), 0);
         const leitosOcupados = Object.values(window.hospitalData).reduce((acc, h) => 
             acc + (h.leitos ? h.leitos.filter(l => l.status === 'ocupado').length : 0), 0);
         const taxaOcupacao = totalLeitos > 0 ? Math.round((leitosOcupados / totalLeitos) * 100) : 0;
         
-        // Estatísticas de concessões, linhas e novos campos V3.1
+        // Estatísticas de concessões, linhas e novos campos V3.2
         let totalConcessoes = 0;
         let totalLinhas = 0;
         let leitosComIsolamento = 0;
         let leitosComIdentificacao = 0;
+        let leitosComGenero = 0;
+        let leitosComRegiao = 0;
+        let leitosComCategoria = 0;
         
         Object.values(window.hospitalData).forEach(hospital => {
             hospital.leitos?.forEach(leito => {
@@ -392,24 +476,36 @@ window.loadHospitalData = async function() {
                     totalConcessoes += (leito.concessoes?.length || 0);
                     totalLinhas += (leito.linhas?.length || 0);
                 }
-                if (leito.isolamento && leito.isolamento !== 'NÃO ISOLAMENTO') {
+                if (leito.isolamento && leito.isolamento !== 'Não Isolamento') {
                     leitosComIsolamento++;
                 }
                 if (leito.identificacaoLeito) {
                     leitosComIdentificacao++;
                 }
+                if (leito.genero) {
+                    leitosComGenero++;
+                }
+                if (leito.regiao) {
+                    leitosComRegiao++;
+                }
+                if (leito.categoriaEscolhida) {
+                    leitosComCategoria++;
+                }
             });
         });
         
-        logAPISuccess(`Dados V3.1 carregados da planilha (46 colunas - incluindo AS/AT):`);
+        logAPISuccess(`Dados V3.2 carregados da planilha (73 colunas A-BU):`);
         logAPISuccess(`• ${totalHospitais} hospitais ativos`);
         logAPISuccess(`• ${totalLeitos} leitos totais`);
         logAPISuccess(`• ${leitosOcupados} leitos ocupados (${taxaOcupacao}%)`);
-        logAPISuccess(`• ${totalConcessoes} concessões ativas`);
-        logAPISuccess(`• ${totalLinhas} linhas de cuidado ativas`);
-        logAPISuccess(`• ${leitosComIsolamento} leitos com isolamento (AS)`);
-        logAPISuccess(`• ${leitosComIdentificacao} leitos com identificação (AT)`);
-        logAPISuccess(`• SEM PARSING - Dados diretos das 46 colunas!`);
+        logAPISuccess(`• ${totalConcessoes} concessões ativas (11 tipos)`);
+        logAPISuccess(`• ${totalLinhas} linhas de cuidado ativas (45 tipos)`);
+        logAPISuccess(`• ${leitosComIsolamento} leitos com isolamento (AR)`);
+        logAPISuccess(`• ${leitosComIdentificacao} leitos com identificação (AQ)`);
+        logAPISuccess(`• ${leitosComGenero} leitos com gênero (BS/71)`);
+        logAPISuccess(`• ${leitosComRegiao} leitos com região (BT/72)`);
+        logAPISuccess(`• ${leitosComCategoria} leitos com categoria (BU/73)`);
+        logAPISuccess(`• CHECKBOXES DIRETOS - Zero parsing!`);
         
         // Atualizar timestamp
         window.lastAPICall = Date.now();
@@ -422,7 +518,7 @@ window.loadHospitalData = async function() {
         return window.hospitalData;
         
     } catch (error) {
-        logAPIError('❌ ERRO ao carregar dados V3.1:', error.message);
+        logAPIError('❌ ERRO ao carregar dados V3.2:', error.message);
         
         // Esconder loading mesmo com erro
         if (window.hideLoading) {
@@ -436,18 +532,21 @@ window.loadHospitalData = async function() {
     }
 };
 
-// =================== FUNÇÕES DE SALVAMENTO V3.1 ===================
+// =================== FUNÇÕES DE SALVAMENTO V3.2 ===================
 
-// Admitir paciente V3.1 (salvar na planilha com colunas AS/AT)
+// Admitir paciente V3.2 (salvar na planilha com 73 colunas)
 window.admitirPaciente = async function(hospital, leito, dadosPaciente) {
     try {
-        logAPI(`Admitindo paciente V3.1 no ${hospital}-${leito} NA PLANILHA REAL (46 colunas - incluindo AS/AT)`);
+        logAPI(`Admitindo paciente V3.2 no ${hospital}-${leito} NA PLANILHA REAL (73 colunas A-BU)`);
         
-        // *** V3.1: VALIDAR DADOS ANTES DE ENVIAR ***
+        // *** V3.2: VALIDAR DADOS ANTES DE ENVIAR ***
         const concessoesValidas = validarConcessoes(dadosPaciente.concessoes || []);
         const linhasValidas = validarLinhas(dadosPaciente.linhas || []);
         const timelineValida = validarTimeline(dadosPaciente.prevAlta || 'SP');
-        const isolamentoValido = validarIsolamento(dadosPaciente.isolamento || 'NÃO ISOLAMENTO');
+        const isolamentoValido = validarIsolamento(dadosPaciente.isolamento || 'Não Isolamento');
+        const generoValido = validarGenero(dadosPaciente.genero || '');
+        const regiaoValida = validarRegiao(dadosPaciente.regiao || '');
+        const categoriaValida = validarCategoriaEscolhida(dadosPaciente.categoriaEscolhida || '');
         
         let identificacaoValida = '';
         if (dadosPaciente.identificacaoLeito) {
@@ -468,41 +567,50 @@ window.admitirPaciente = async function(hospital, leito, dadosPaciente) {
             spict: dadosPaciente.spict || '',
             complexidade: dadosPaciente.complexidade || 'I',
             prevAlta: timelineValida,
-            linhas: linhasValidas,          // Array direto V3.1!
-            concessoes: concessoesValidas,  // Array direto V3.1!
-            isolamento: isolamentoValido,   // NOVA V3.1 (AS) - OBRIGATÓRIA
-            identificacaoLeito: identificacaoValida // NOVA V3.1 (AT) - OPCIONAL
+            linhas: linhasValidas,                      // Array de checkboxes
+            concessoes: concessoesValidas,              // Array de checkboxes
+            isolamento: isolamentoValido,               // AR/44
+            identificacaoLeito: identificacaoValida,    // AQ/43
+            genero: generoValido,                       // BS/71 (NOVA V3.2)
+            regiao: regiaoValida,                       // BT/72 (NOVA V3.2)
+            categoriaEscolhida: categoriaValida         // BU/73 (NOVA V3.2)
         };
         
-        logAPI('Payload V3.1 validado (incluindo AS/AT):', {
+        logAPI('Payload V3.2 validado (73 colunas):', {
             concessoes: payload.concessoes.length,
             linhas: payload.linhas.length,
             timeline: payload.prevAlta,
             isolamento: payload.isolamento,
-            identificacaoLeito: payload.identificacaoLeito || 'vazio'
+            identificacaoLeito: payload.identificacaoLeito || 'vazio',
+            genero: payload.genero || 'vazio',
+            regiao: payload.regiao || 'vazio',
+            categoria: payload.categoriaEscolhida || 'vazio'
         });
         
         const result = await apiRequest('admitir', payload, 'POST');
         
-        logAPISuccess(`✅ Paciente admitido V3.1 na planilha (46 colunas - AS: ${payload.isolamento}, AT: ${payload.identificacaoLeito || 'vazio'})!`);
+        logAPISuccess(`✅ Paciente admitido V3.2 na planilha (73 colunas)!`);
         return result;
         
     } catch (error) {
-        logAPIError('Erro ao admitir paciente V3.1:', error.message);
+        logAPIError('Erro ao admitir paciente V3.2:', error.message);
         throw error;
     }
 };
 
-// Atualizar dados do paciente V3.1 (salvar na planilha com colunas AS/AT)  
+// Atualizar dados do paciente V3.2 (salvar na planilha com 73 colunas)  
 window.atualizarPaciente = async function(hospital, leito, dadosAtualizados) {
     try {
-        logAPI(`Atualizando paciente V3.1 ${hospital}-${leito} NA PLANILHA REAL (46 colunas - incluindo AS/AT)`);
+        logAPI(`Atualizando paciente V3.2 ${hospital}-${leito} NA PLANILHA REAL (73 colunas A-BU)`);
         
-        // *** V3.1: VALIDAR DADOS ANTES DE ENVIAR ***
+        // *** V3.2: VALIDAR DADOS ANTES DE ENVIAR ***
         const concessoesValidas = validarConcessoes(dadosAtualizados.concessoes || []);
         const linhasValidas = validarLinhas(dadosAtualizados.linhas || []);
         const timelineValida = dadosAtualizados.prevAlta ? validarTimeline(dadosAtualizados.prevAlta) : '';
         const isolamentoValido = dadosAtualizados.isolamento ? validarIsolamento(dadosAtualizados.isolamento) : '';
+        const generoValido = dadosAtualizados.genero ? validarGenero(dadosAtualizados.genero) : '';
+        const regiaoValida = dadosAtualizados.regiao ? validarRegiao(dadosAtualizados.regiao) : '';
+        const categoriaValida = dadosAtualizados.categoriaEscolhida ? validarCategoriaEscolhida(dadosAtualizados.categoriaEscolhida) : '';
         
         let identificacaoValida = '';
         if (dadosAtualizados.identificacaoLeito) {
@@ -521,35 +629,41 @@ window.atualizarPaciente = async function(hospital, leito, dadosAtualizados) {
             spict: dadosAtualizados.spict || '',
             complexidade: dadosAtualizados.complexidade || '',
             prevAlta: timelineValida,
-            linhas: linhasValidas,          // Array direto V3.1!
-            concessoes: concessoesValidas,  // Array direto V3.1!
-            isolamento: isolamentoValido,   // NOVA V3.1 (AS)
-            identificacaoLeito: identificacaoValida // NOVA V3.1 (AT)
+            linhas: linhasValidas,                      // Array de checkboxes
+            concessoes: concessoesValidas,              // Array de checkboxes
+            isolamento: isolamentoValido,               // AR/44
+            identificacaoLeito: identificacaoValida,    // AQ/43
+            genero: generoValido,                       // BS/71 (NOVA V3.2)
+            regiao: regiaoValida,                       // BT/72 (NOVA V3.2)
+            categoriaEscolhida: categoriaValida         // BU/73 (NOVA V3.2)
         };
         
-        logAPI('Payload V3.1 atualização validado (incluindo AS/AT):', {
+        logAPI('Payload V3.2 atualização validado (73 colunas):', {
             concessoes: payload.concessoes.length,
             linhas: payload.linhas.length,
             timeline: payload.prevAlta,
             isolamento: payload.isolamento || 'não alterado',
-            identificacaoLeito: payload.identificacaoLeito || 'não alterado'
+            identificacaoLeito: payload.identificacaoLeito || 'não alterado',
+            genero: payload.genero || 'não alterado',
+            regiao: payload.regiao || 'não alterado',
+            categoria: payload.categoriaEscolhida || 'não alterado'
         });
         
         const result = await apiRequest('atualizar', payload, 'POST');
         
-        logAPISuccess(`✅ Paciente V3.1 atualizado na planilha (46 colunas - AS/AT incluídas)!`);
+        logAPISuccess(`✅ Paciente V3.2 atualizado na planilha (73 colunas)!`);
         return result;
         
     } catch (error) {
-        logAPIError('Erro ao atualizar paciente V3.1:', error.message);
+        logAPIError('Erro ao atualizar paciente V3.2:', error.message);
         throw error;
     }
 };
 
-// Dar alta ao paciente V3.1 (salvar na planilha - limpar todas as 46 colunas)
+// Dar alta ao paciente V3.2 (salvar na planilha - limpar todas as 73 colunas)
 window.darAltaPaciente = async function(hospital, leito) {
     try {
-        logAPI(`Dando alta V3.1 ao paciente ${hospital}-${leito} NA PLANILHA REAL (46 colunas - incluindo AS/AT)`);
+        logAPI(`Dando alta V3.2 ao paciente ${hospital}-${leito} NA PLANILHA REAL (73 colunas A-BU)`);
         
         const payload = {
             hospital: hospital,
@@ -558,16 +672,16 @@ window.darAltaPaciente = async function(hospital, leito) {
         
         const result = await apiRequest('daralta', payload, 'POST');
         
-        logAPISuccess('✅ Alta V3.1 processada na planilha (todas as 46 colunas limpas - incluindo AS/AT)!');
+        logAPISuccess('✅ Alta V3.2 processada na planilha (todas as 73 colunas limpas)!');
         return result;
         
     } catch (error) {
-        logAPIError('Erro ao processar alta V3.1:', error.message);
+        logAPIError('Erro ao processar alta V3.2:', error.message);
         throw error;
     }
 };
 
-// *** NOVA V3.1: FUNÇÃO PARA COLETAR DADOS DO FORMULÁRIO (INCLUINDO AS/AT) ***
+// *** NOVA V3.2: FUNÇÃO PARA COLETAR DADOS DO FORMULÁRIO (INCLUINDO BS/BT/BU) ***
 window.coletarDadosFormulario = function(tipo) {
     const dados = {
         // Campos existentes
@@ -581,9 +695,14 @@ window.coletarDadosFormulario = function(tipo) {
         concessoes: [],
         linhas: [],
         
-        // *** NOVA V3.1: CAMPOS AS/AT ***
-        isolamento: document.getElementById(`${tipo}Isolamento`)?.value || 'NÃO ISOLAMENTO', // OBRIGATÓRIO
-        identificacaoLeito: document.getElementById(`${tipo}IdentificacaoLeito`)?.value || '' // OPCIONAL
+        // Campos V3.1
+        isolamento: document.getElementById(`${tipo}Isolamento`)?.value || 'Não Isolamento',
+        identificacaoLeito: document.getElementById(`${tipo}IdentificacaoLeito`)?.value || '',
+        
+        // *** NOVOS CAMPOS V3.2: BS/BT/BU ***
+        genero: document.getElementById(`${tipo}Genero`)?.value || '',              // BS/71
+        regiao: document.getElementById(`${tipo}Regiao`)?.value || '',              // BT/72
+        categoriaEscolhida: document.getElementById(`${tipo}Categoria`)?.value || '' // BU/73
     };
     
     // Coletar concessões selecionadas
@@ -596,9 +715,12 @@ window.coletarDadosFormulario = function(tipo) {
         dados.linhas.push(checkbox.value);
     });
     
-    logAPI(`Dados V3.1 coletados do formulário (incluindo AS/AT):`, {
+    logAPI(`Dados V3.2 coletados do formulário (73 colunas):`, {
         isolamento: dados.isolamento,
         identificacaoLeito: dados.identificacaoLeito || 'vazio',
+        genero: dados.genero || 'vazio',
+        regiao: dados.regiao || 'vazio',
+        categoria: dados.categoriaEscolhida || 'vazio',
         concessoes: dados.concessoes.length,
         linhas: dados.linhas.length
     });
@@ -606,10 +728,10 @@ window.coletarDadosFormulario = function(tipo) {
     return dados;
 };
 
-// =================== REFRESH APÓS AÇÕES V3.1 ===================
+// =================== REFRESH APÓS AÇÕES V3.2 ===================
 window.refreshAfterAction = async function() {
     try {
-        logAPI('🔄 Recarregando dados V3.1 da planilha após ação...');
+        logAPI('🔄 Recarregando dados V3.2 da planilha após ação...');
         
         // Mostrar loading nos cards
         const container = document.getElementById('cardsContainer');
@@ -617,10 +739,10 @@ window.refreshAfterAction = async function() {
             container.innerHTML = `
                 <div class="card" style="grid-column: 1 / -1; text-align: center; padding: 40px; background: #1a1f2e; border-radius: 12px;">
                     <div style="color: #60a5fa; margin-bottom: 15px; font-size: 18px;">
-                        🔄 Sincronizando V3.1 com a planilha (46 colunas - incluindo AS/AT)...
+                        🔄 Sincronizando V3.2 com a planilha (73 colunas A-BU)...
                     </div>
                     <div style="color: #9ca3af; font-size: 14px;">
-                        Atualizando dados sem parsing - Performance otimizada V3.1
+                        Atualizando dados - Checkboxes diretos V3.2
                     </div>
                 </div>
             `;
@@ -629,19 +751,19 @@ window.refreshAfterAction = async function() {
         // Aguardar um pouco (para garantir que a planilha foi atualizada)
         await new Promise(resolve => setTimeout(resolve, 2000));
         
-        // Recarregar dados da API V3.1
+        // Recarregar dados da API V3.2
         await window.loadHospitalData();
         
         // Re-renderizar cards após dados carregados
         setTimeout(() => {
             if (window.renderCards) {
                 window.renderCards();
-                logAPISuccess('✅ Interface V3.1 atualizada com dados da planilha (incluindo AS/AT)');
+                logAPISuccess('✅ Interface V3.2 atualizada com dados da planilha');
             }
         }, 500);
         
     } catch (error) {
-        logAPIError('Erro ao refresh V3.1:', error.message);
+        logAPIError('Erro ao refresh V3.2:', error.message);
         
         // Mesmo com erro, tentar re-renderizar cards
         setTimeout(() => {
@@ -652,29 +774,29 @@ window.refreshAfterAction = async function() {
     }
 };
 
-// =================== FUNÇÕES DE TESTE E MONITORAMENTO V3.1 ===================
+// =================== FUNÇÕES DE TESTE E MONITORAMENTO V3.2 ===================
 
-// Testar conectividade da API V3.1
+// Testar conectividade da API V3.2
 window.testAPI = async function() {
     try {
-        logAPI('🔍 Testando conectividade V3.1 com a planilha (46 colunas - incluindo AS/AT)...');
+        logAPI('🔍 Testando conectividade V3.2 com a planilha (73 colunas A-BU)...');
         
         const result = await apiRequest('test', {}, 'GET');
         
         if (result) {
-            logAPISuccess('✅ API V3.1 funcionando corretamente!', result);
+            logAPISuccess('✅ API V3.2 funcionando corretamente!', result);
             return { status: 'ok', data: result };
         } else {
-            throw new Error('API V3.1 não retornou dados de teste válidos');
+            throw new Error('API V3.2 não retornou dados de teste válidos');
         }
         
     } catch (error) {
-        logAPIError('❌ Erro na conectividade V3.1:', error.message);
+        logAPIError('❌ Erro na conectividade V3.2:', error.message);
         return { status: 'error', message: error.message };
     }
 };
 
-// Monitorar API V3.1 em tempo real
+// Monitorar API V3.2 em tempo real
 window.monitorAPI = function() {
     if (window.apiMonitorInterval) {
         clearInterval(window.apiMonitorInterval);
@@ -686,7 +808,7 @@ window.monitorAPI = function() {
             
             // Se passou mais de 4 minutos, fazer refresh automático
             if (timeSinceLastCall > 240000) { // 4 minutos
-                logAPI('🔄 Refresh automático V3.1 dos dados...');
+                logAPI('🔄 Refresh automático V3.2 dos dados...');
                 await window.loadHospitalData();
                 
                 // Re-renderizar interface se necessário
@@ -695,18 +817,18 @@ window.monitorAPI = function() {
                 }
             }
         } catch (error) {
-            logAPIError('Erro no monitoramento automático V3.1:', error.message);
+            logAPIError('Erro no monitoramento automático V3.2:', error.message);
         }
     }, 60000); // Verificar a cada minuto
     
-    logAPI('🔍 Monitoramento automático V3.1 da API ativado');
+    logAPI('🔍 Monitoramento automático V3.2 da API ativado');
 };
 
 // =================== COMPATIBILIDADE COM VERSÕES ANTERIORES ===================
 
 // Alias para funções antigas
 window.fetchHospitalData = async function(hospital) {
-    logAPI(`Buscando dados V3.1 do hospital: ${hospital}`);
+    logAPI(`Buscando dados V3.2 do hospital: ${hospital}`);
     
     // Carregar todos os dados e filtrar
     await window.loadHospitalData();
@@ -721,18 +843,18 @@ window.fetchHospitalData = async function(hospital) {
 // Alias para função antiga
 window.loadAllHospitalsData = window.loadHospitalData;
 
-// Função para buscar dados de um leito específico V3.1
+// Função para buscar dados de um leito específico V3.2
 window.fetchLeitoData = async function(hospital, leito) {
     try {
         const data = await apiRequest('one', { hospital: hospital, leito: leito }, 'GET');
         return data;
     } catch (error) {
-        logAPIError(`Erro ao buscar leito V3.1 ${hospital}-${leito}:`, error.message);
+        logAPIError(`Erro ao buscar leito V3.2 ${hospital}-${leito}:`, error.message);
         return null;
     }
 };
 
-// =================== FUNÇÕES DE CORES V3.1 ===================
+// =================== FUNÇÕES DE CORES V3.2 ===================
 window.loadColors = async function() {
     try {
         const colors = await apiRequest('getcolors', {}, 'GET');
@@ -743,11 +865,11 @@ window.loadColors = async function() {
                     document.documentElement.style.setProperty(property, value);
                 }
             });
-            logAPISuccess('✅ Cores V3.1 carregadas da planilha');
+            logAPISuccess('✅ Cores V3.2 carregadas da planilha');
             return colors;
         }
     } catch (error) {
-        logAPIError('Erro ao carregar cores V3.1:', error.message);
+        logAPIError('Erro ao carregar cores V3.2:', error.message);
     }
     return null;
 };
@@ -755,22 +877,24 @@ window.loadColors = async function() {
 window.saveColors = async function(colors) {
     try {
         const result = await apiRequest('savecolors', { colors: colors }, 'POST');
-        logAPISuccess('✅ Cores V3.1 salvas na planilha');
+        logAPISuccess('✅ Cores V3.2 salvas na planilha');
         return result;
     } catch (error) {
-        logAPIError('Erro ao salvar cores V3.1:', error.message);
+        logAPIError('Erro ao salvar cores V3.2:', error.message);
         throw error;
     }
 };
 
-// =================== INICIALIZAÇÃO V3.1 ===================
+// =================== INICIALIZAÇÃO V3.2 ===================
 window.addEventListener('load', () => {
-    logAPI('API.js V3.1 carregado - URL da API V3.1 configurada');
+    logAPI('API.js V3.2 carregado - URL da API V3.2 configurada');
     logAPI(`URL: ${window.API_URL}`);
-    logAPI(`Timeline: ${window.TIMELINE_OPCOES.length} opções (incluindo 96h)`);
-    logAPI(`Isolamento: ${window.ISOLAMENTO_OPCOES.length} opções (AS)`);
-    logAPI(`Concessões: ${window.CONCESSOES_VALIDAS.length} tipos`);
-    logAPI(`Linhas: ${window.LINHAS_VALIDAS.length} tipos`);
+    logAPI(`Timeline: ${window.TIMELINE_OPCOES.length} opções`);
+    logAPI(`Isolamento: ${window.ISOLAMENTO_OPCOES.length} opções (AR/44)`);
+    logAPI(`Regiões: ${window.REGIOES_OPCOES.length} opções (BT/72)`);
+    logAPI(`Concessões: ${window.CONCESSOES_VALIDAS.length} tipos (M-W checkboxes)`);
+    logAPI(`Linhas: ${window.LINHAS_VALIDAS.length} tipos (X-AP + AS-BR checkboxes)`);
+    logAPI(`Novos campos: BS/71 (genero), BT/72 (regiao), BU/73 (categoria)`);
     
     // Iniciar monitoramento após 10 segundos
     setTimeout(() => {
@@ -780,8 +904,7 @@ window.addEventListener('load', () => {
     }, 10000);
 });
 
-logAPISuccess('✅ API.js V3.1 100% FUNCIONAL - Nova estrutura 46 colunas (AS/AT) sem parsing ativa');
-logAPISuccess('✅ Colunas AS (ISOLAMENTO) e AT (IDENTIFICACAO_LEITO) implementadas');
-logAPISuccess('✅ Validação alfanumérica 6 chars para AT implementada');
-logAPISuccess('✅ Dropdown obrigatório 3 opções para AS implementado');
-logAPISuccess('✅ URL CORRIGIDA para API que funciona');
+logAPISuccess('✅ API.js V3.2 100% FUNCIONAL - Nova estrutura 73 colunas (A-BU) ativa');
+logAPISuccess('✅ Checkboxes diretos (M-W + X-AP + AS-BR) - ZERO parsing');
+logAPISuccess('✅ Novos campos V3.2: BS/71 (genero), BT/72 (regiao), BU/73 (categoria)');
+logAPISuccess('✅ 11 concessões + 45 linhas de cuidado implementadas');
