@@ -21,6 +21,18 @@ window.HOSPITAIS_HIBRIDOS = ['H1', 'H3', 'H5'];
 // ⭐ NOVO V3.3: TIPO DE QUARTO (2 OPÇÕES - APENAS PARA HÍBRIDOS)
 window.TIPO_QUARTO_OPTIONS = ['Apartamento', 'Enfermaria'];
 
+// ⭐ NOVO V3.3: IDENTIFICAÇÕES FIXAS CRUZ AZUL - ENFERMARIA (16 leitos)
+window.CRUZ_AZUL_ENFERMARIA_IDS = [
+    '711.1', '711.2',
+    '713.1', '713.2',
+    '715.1', '715.2',
+    '717.1', '717.2',
+    '719.1', '719.2',
+    '721.1', '721.2',
+    '723.1', '723.2',
+    '725.1', '725.2'
+];
+
 // =================== LISTAS FINAIS CONFIRMADAS V3.3 ===================
 
 // CONCESSÕES: 11 ITENS (ORDEM CONFIRMADA)
@@ -633,6 +645,16 @@ function createAdmissaoForm(hospitalNome, leitoNumero, hospitalId) {
     const idSequencial = String(leitoNumero).padStart(2, '0');
     const isHibrido = window.HOSPITAIS_HIBRIDOS.includes(hospitalId);
     
+    // ⭐ NOVO: Verificar se é Cruz Azul Enfermaria (leitos 21-36 com ID fixa)
+    const isCruzAzulEnfermaria = (hospitalId === 'H2' && leitoNumero >= 21 && leitoNumero <= 36);
+    
+    // ⭐ NOVO: Buscar identificação fixa do leito (se existir na planilha)
+    let identificacaoFixa = '';
+    if (isCruzAzulEnfermaria && window.hospitalData?.H2?.leitos) {
+        const leitoData = window.hospitalData.H2.leitos.find(l => l.leito == leitoNumero);
+        identificacaoFixa = leitoData?.identificacaoLeito || '';
+    }
+    
     return `
         <div class="modal-content" style="background: #1a1f2e; border-radius: 12px; padding: 30px; max-width: 700px; width: 95%; max-height: 90vh; overflow-y: auto; color: #ffffff;">
             <h2 style="margin: 0 0 20px 0; text-align: center; color: #60a5fa; font-size: 24px; font-weight: 700; text-transform: uppercase;">
@@ -652,7 +674,11 @@ function createAdmissaoForm(hospitalNome, leitoNumero, hospitalId) {
                     <!-- IDENTIFICAÇÃO DO LEITO -->
                     <div>
                         <label style="display: block; margin-bottom: 5px; color: #e2e8f0; font-weight: 600; font-size: 11px; text-transform: uppercase;">IDENTIFICAÇÃO DO LEITO <span style="color: #ef4444;">*</span></label>
-                        <input id="admIdentificacaoLeito" type="text" placeholder="Ex: NEO1 (máx. 6)" maxlength="6" required style="width: 100%; padding: 12px; background: #374151; color: #ffffff; border: 1px solid rgba(255,255,255,0.3); border-radius: 6px; font-size: 14px;">
+                        ${isCruzAzulEnfermaria && identificacaoFixa 
+                            ? `<input id="admIdentificacaoLeito" type="text" value="${identificacaoFixa}" readonly style="width: 100%; padding: 12px; background: #1f2937; color: #9ca3af; border: 1px solid rgba(255,255,255,0.2); border-radius: 6px; font-size: 14px; cursor: not-allowed;">`
+                            : `<input id="admIdentificacaoLeito" type="text" placeholder="Ex: NEO1 (máx. 6)" maxlength="6" required style="width: 100%; padding: 12px; background: #374151; color: #ffffff; border: 1px solid rgba(255,255,255,0.3); border-radius: 6px; font-size: 14px;">`
+                        }
+                        ${isCruzAzulEnfermaria ? '<div style="font-size: 10px; color: rgba(255,255,255,0.5); margin-top: 3px;">🔒 Identificação fixa</div>' : ''}
                     </div>
                     
                     <!-- DIRETIVAS -->
@@ -812,6 +838,9 @@ function createAtualizacaoForm(hospitalNome, leitoNumero, dadosLeito) {
     const isHibrido = window.HOSPITAIS_HIBRIDOS.includes(hospitalId);
     const tipoAtual = dadosLeito?.tipo || '';
     
+    // ⭐ NOVO: Verificar se é Cruz Azul Enfermaria (leitos 21-36 com ID fixa)
+    const isCruzAzulEnfermaria = (hospitalId === 'H2' && leitoNumero >= 21 && leitoNumero <= 36);
+    
     return `
         <div class="modal-content" style="background: #1a1f2e; border-radius: 12px; padding: 30px; max-width: 700px; width: 95%; max-height: 90vh; overflow-y: auto; color: #ffffff;">
             <h2 style="margin: 0 0 20px 0; text-align: center; color: #60a5fa; font-size: 24px; font-weight: 700; text-transform: uppercase;">
@@ -830,7 +859,11 @@ function createAtualizacaoForm(hospitalNome, leitoNumero, dadosLeito) {
                     <!-- IDENTIFICAÇÃO DO LEITO -->
                     <div>
                         <label style="display: block; margin-bottom: 5px; color: #e2e8f0; font-weight: 600; font-size: 11px; text-transform: uppercase;">IDENTIFICAÇÃO DO LEITO <span style="color: #ef4444;">*</span></label>
-                        <input id="updIdentificacaoLeito" type="text" value="${identificacaoAtual}" placeholder="Ex: NEO1 (máx. 6)" maxlength="6" required style="width: 100%; padding: 12px; background: #374151; color: #ffffff; border: 1px solid rgba(255,255,255,0.3); border-radius: 6px; font-size: 14px;">
+                        ${isCruzAzulEnfermaria 
+                            ? `<input id="updIdentificacaoLeito" type="text" value="${identificacaoAtual}" readonly style="width: 100%; padding: 12px; background: #1f2937; color: #9ca3af; border: 1px solid rgba(255,255,255,0.2); border-radius: 6px; font-size: 14px; cursor: not-allowed;">`
+                            : `<input id="updIdentificacaoLeito" type="text" value="${identificacaoAtual}" placeholder="Ex: NEO1 (máx. 6)" maxlength="6" required style="width: 100%; padding: 12px; background: #374151; color: #ffffff; border: 1px solid rgba(255,255,255,0.3); border-radius: 6px; font-size: 14px;">`
+                        }
+                        ${isCruzAzulEnfermaria ? '<div style="font-size: 10px; color: rgba(255,255,255,0.5); margin-top: 3px;">🔒 Identificação fixa</div>' : ''}
                     </div>
                     
                     <!-- DIRETIVAS -->
