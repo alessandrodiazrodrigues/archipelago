@@ -653,10 +653,10 @@ function createAdmissaoForm(hospitalNome, leitoNumero, hospitalId) {
     const idSequencial = String(leitoNumero).padStart(2, '0');
     const isHibrido = window.HOSPITAIS_HIBRIDOS.includes(hospitalId);
     
-    // ⭐ NOVO: Verificar se é Cruz Azul Enfermaria (leitos 21-36 com ID fixa)
+    // ⭐ NOVO: Verificar se é Cruz Azul Enfermaria (leitos 21-36 = sempre bloqueado)
     const isCruzAzulEnfermaria = (hospitalId === 'H2' && leitoNumero >= 21 && leitoNumero <= 36);
     
-    // ⭐ NOVO: Buscar identificação fixa do leito (se existir na planilha)
+    // ⭐ Se for Cruz Azul enfermaria, buscar o valor atual da planilha
     let identificacaoFixa = '';
     if (isCruzAzulEnfermaria && window.hospitalData?.H2?.leitos) {
         const leitoData = window.hospitalData.H2.leitos.find(l => {
@@ -664,11 +664,7 @@ function createAdmissaoForm(hospitalNome, leitoNumero, hospitalId) {
             return numLeito === parseInt(leitoNumero);
         });
         if (leitoData) {
-            // ⭐ ACEITA AMBOS OS FORMATOS: camelCase ou snake_case
             identificacaoFixa = leitoData.identificacaoLeito || leitoData.identificacao_leito || '';
-            logInfo(`🔒 Leito fixo encontrado - H2 Leito ${leitoNumero}: ${identificacaoFixa}`);
-        } else {
-            logError(`❌ Leito H2-${leitoNumero} não encontrado nos dados`);
         }
     }
     
@@ -691,9 +687,9 @@ function createAdmissaoForm(hospitalNome, leitoNumero, hospitalId) {
                     <!-- IDENTIFICAÇÃO DO LEITO -->
                     <div>
                         <label style="display: block; margin-bottom: 5px; color: #e2e8f0; font-weight: 600; font-size: 11px; text-transform: uppercase;">IDENTIFICAÇÃO DO LEITO <span style="color: #ef4444;">*</span></label>
-                        ${isCruzAzulEnfermaria && identificacaoFixa 
+                        ${isCruzAzulEnfermaria 
                             ? `<input id="admIdentificacaoLeito" type="text" value="${identificacaoFixa}" readonly style="width: 100%; padding: 12px; background: #1f2937; color: #9ca3af; border: 1px solid rgba(255,255,255,0.2); border-radius: 6px; font-size: 14px; cursor: not-allowed;">
-                               <div style="font-size: 10px; color: rgba(255,255,255,0.5); margin-top: 3px;">🔒 Identificação fixa deste leito</div>`
+                               <div style="font-size: 10px; color: rgba(255,255,255,0.5); margin-top: 3px;">🔒 Numeração fixa (definida na planilha)</div>`
                             : `<input id="admIdentificacaoLeito" type="text" placeholder="Ex: NEO1 (máx. 6)" maxlength="6" required style="width: 100%; padding: 12px; background: #374151; color: #ffffff; border: 1px solid rgba(255,255,255,0.3); border-radius: 6px; font-size: 14px;">`
                         }
                     </div>
