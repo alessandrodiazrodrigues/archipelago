@@ -804,7 +804,7 @@ function createAtualizacaoForm(hospitalNome, leitoNumero, dadosLeito) {
     const identificacaoAtual = dadosLeito?.identificacaoLeito || '';
     const regiaoAtual = dadosLeito?.regiao || '';
     const sexoAtual = dadosLeito?.sexo || '';
-    const diretivasAtual = dadosLeito?.diretivas || 'Não se aplica'; // ⭐ NOVO V3.3
+    const diretivasAtual = dadosLeito?.diretivas || 'Não se aplica';
     const admissaoData = dadosLeito?.admAt || '';
     
     return `
@@ -817,33 +817,29 @@ function createAtualizacaoForm(hospitalNome, leitoNumero, dadosLeito) {
                 <strong>Hospital:</strong> ${hospitalNome} | <strong>ID:</strong> ${idSequencial} | <strong>Leito:</strong> ${leitoPersonalizado}
             </div>
             
-            <!-- ⭐ CORREÇÃO 3: LAYOUT IGUAL AO ADMITIR -->
+            <!-- ⭐ CORREÇÃO 3: LAYOUT IGUAL AO ADMITIR (3 COLUNAS) -->
             
-            <!-- IDENTIFICAÇÃO DO LEITO -->
+            <!-- ID LEITO | DIRETIVAS (2 COLUNAS) -->
             <div style="margin-bottom: 20px;">
-                <div style="background: rgba(96,165,250,0.1); padding: 10px 15px; border-radius: 6px; margin-bottom: 10px;">
-                    <div style="font-size: 11px; color: #ffffff; text-transform: uppercase; font-weight: 700;">
-                        IDENTIFICAÇÃO DO LEITO <span style="color: #ef4444;">*</span>
+                <div class="form-grid-3-cols" style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                    <!-- IDENTIFICAÇÃO DO LEITO -->
+                    <div>
+                        <label style="display: block; margin-bottom: 5px; color: #e2e8f0; font-weight: 600; font-size: 11px; text-transform: uppercase;">IDENTIFICAÇÃO DO LEITO <span style="color: #ef4444;">*</span></label>
+                        <input id="updIdentificacaoLeito" type="text" value="${identificacaoAtual}" placeholder="Ex: NEO1 (máx. 6)" maxlength="6" required style="width: 100%; padding: 12px; background: #374151; color: #ffffff; border: 1px solid rgba(255,255,255,0.3); border-radius: 6px; font-size: 14px;">
+                    </div>
+                    
+                    <!-- DIRETIVAS -->
+                    <div>
+                        <label style="display: block; margin-bottom: 5px; color: #e2e8f0; font-weight: 600; font-size: 11px; text-transform: uppercase;">DIRETIVAS</label>
+                        <select id="updDiretivas" style="width: 100%; padding: 12px; background: #374151 !important; color: #ffffff !important; border: 1px solid rgba(255,255,255,0.3); border-radius: 6px; font-size: 14px;">
+                            ${window.DIRETIVAS_OPTIONS.map(opcao => `<option value="${opcao}" ${diretivasAtual === opcao ? 'selected' : ''}>${opcao}</option>`).join('')}
+                        </select>
                     </div>
                 </div>
-                <input id="updIdentificacaoLeito" type="text" value="${identificacaoAtual}" placeholder="Ex: NEO1, UTI-5, ENF12 (máx. 6 caracteres)" maxlength="6" required style="width: 100%; padding: 12px; background: #374151; color: #ffffff; border: 1px solid rgba(255,255,255,0.3); border-radius: 6px; font-size: 14px;">
             </div>
             
-            <!-- DIRETIVAS -->
+            <!-- ISOLAMENTO, REGIÃO, GÊNERO: 3 COLUNAS OBRIGATÓRIAS -->
             <div style="margin-bottom: 20px;">
-                <div style="background: rgba(96,165,250,0.1); padding: 10px 15px; border-radius: 6px; margin-bottom: 10px;">
-                    <div style="font-size: 11px; color: #ffffff; text-transform: uppercase; font-weight: 700;">
-                        DIRETIVAS ANTECIPADAS
-                    </div>
-                </div>
-                <select id="updDiretivas" style="width: 100%; padding: 12px; background: #374151 !important; color: #ffffff !important; border: 1px solid rgba(255,255,255,0.3); border-radius: 6px; font-size: 14px;">
-                    ${window.DIRETIVAS_OPTIONS.map(opcao => `<option value="${opcao}" ${diretivasAtual === opcao ? 'selected' : ''}>${opcao}</option>`).join('')}
-                </select>
-            </div>
-            
-            <!-- ISOLAMENTO, REGIÃO, GÊNERO -->
-            <div style="margin-bottom: 20px;">
-                
                 <div class="form-grid-3-cols" style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px;">
                     <div>
                         <label style="display: block; margin-bottom: 5px; color: #e2e8f0; font-weight: 600;">ISOLAMENTO <span style="color: #ef4444;">*</span></label>
@@ -868,7 +864,7 @@ function createAtualizacaoForm(hospitalNome, leitoNumero, dadosLeito) {
                 </div>
             </div>
             
-            <!-- INICIAIS, MATRÍCULA, IDADE -->
+            <!-- INICIAIS, MATRÍCULA, IDADE: 3 COLUNAS -->
             <div class="form-grid-3-cols" style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; margin-bottom: 20px;">
                 <div>
                     <label style="display: block; margin-bottom: 5px; color: #e2e8f0; font-weight: 600;">INICIAIS</label>
@@ -887,7 +883,7 @@ function createAtualizacaoForm(hospitalNome, leitoNumero, dadosLeito) {
                 </div>
             </div>
             
-            <!-- PPS, SPICT, PREVISÃO ALTA -->
+            <!-- PPS, SPICT, PREVISÃO ALTA: 3 COLUNAS -->
             <div class="form-grid-3-cols" style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; margin-bottom: 20px;">
                 <div>
                     <label style="display: block; margin-bottom: 5px; color: #e2e8f0; font-weight: 600;">PPS</label>
@@ -917,7 +913,7 @@ function createAtualizacaoForm(hospitalNome, leitoNumero, dadosLeito) {
             <div style="margin-bottom: 20px;">
                 <div style="background: rgba(96,165,250,0.1); padding: 10px 15px; border-radius: 6px; margin-bottom: 10px;">
                     <div style="font-size: 11px; color: #ffffff; text-transform: uppercase; font-weight: 700;">
-                        CONCESSÕES PREVISTAS NA ALTA
+                        CONCESSÕES PREVISTAS NA ALTA (${window.CONCESSOES_LIST.length} opções)
                     </div>
                 </div>
                 <div id="updConcessoes" style="max-height: 150px; overflow-y: auto; background: rgba(255,255,255,0.03); border-radius: 6px; padding: 10px; display: grid; grid-template-columns: 1fr; gap: 6px;">
@@ -937,7 +933,7 @@ function createAtualizacaoForm(hospitalNome, leitoNumero, dadosLeito) {
             <div style="margin-bottom: 20px;">
                 <div style="background: rgba(96,165,250,0.1); padding: 10px 15px; border-radius: 6px; margin-bottom: 10px;">
                     <div style="font-size: 11px; color: #ffffff; text-transform: uppercase; font-weight: 700;">
-                        LINHAS DE CUIDADO PREVISTAS NA ALTA
+                        LINHAS DE CUIDADO PREVISTAS NA ALTA (${window.LINHAS_CUIDADO_LIST.length} especialidades)
                     </div>
                 </div>
                 <div id="updLinhas" style="max-height: 150px; overflow-y: auto; background: rgba(255,255,255,0.03); border-radius: 6px; padding: 10px; display: grid; grid-template-columns: 1fr; gap: 6px;">
