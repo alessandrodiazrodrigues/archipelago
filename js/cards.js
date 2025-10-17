@@ -22,16 +22,26 @@ window.HOSPITAIS_HIBRIDOS = ['H1', 'H3', 'H5'];
 window.TIPO_QUARTO_OPTIONS = ['Apartamento', 'Enfermaria'];
 
 // ⭐ NOVO V3.3: IDENTIFICAÇÕES FIXAS CRUZ AZUL - ENFERMARIA (16 leitos)
-window.CRUZ_AZUL_ENFERMARIA_IDS = [
-    '711.1', '711.2',
-    '713.1', '713.2',
-    '715.1', '715.2',
-    '717.1', '717.2',
-    '719.1', '719.2',
-    '721.1', '721.2',
-    '723.1', '723.2',
-    '725.1', '725.2'
-];
+// ⭐ NOVO V3.3: MAPEAMENTO FIXO NUMERAÇÃO CRUZ AZUL - ENFERMARIAS (16 leitos: 21-36)
+// ✅ HARDCODED - NÃO BUSCA DA PLANILHA
+window.CRUZ_AZUL_NUMERACAO = {
+    21: '711.1',
+    22: '711.2',
+    23: '713.1',
+    24: '713.2',
+    25: '715.1',
+    26: '715.2',
+    27: '717.1',
+    28: '717.2',
+    29: '719.1',
+    30: '719.2',
+    31: '721.1',
+    32: '721.2',
+    33: '723.1',
+    34: '723.2',
+    35: '725.1',
+    36: '725.2'
+};
 
 // =================== LISTAS FINAIS CONFIRMADAS V3.3 ===================
 
@@ -332,7 +342,18 @@ function createCard(leito, hospitalNome) {
     
     // Dados V3.3
     const isolamento = leito.isolamento || 'Não Isolamento';
-    const identificacaoLeito = leito.identificacaoLeito || leito.identificacao_leito || ''; // ⭐ ACEITA AMBOS OS FORMATOS
+    // ⭐ CORREÇÃO V3.3: Numeração fixa para Cruz Azul enfermarias (leitos 21-36)
+    let identificacaoLeito = '';
+    const numeroLeito = leito.leito || leito.numero;
+    const isCruzAzulEnfermaria = (window.currentHospital === 'H2' && numeroLeito >= 21 && numeroLeito <= 36);
+    
+    if (isCruzAzulEnfermaria && window.CRUZ_AZUL_NUMERACAO[numeroLeito]) {
+        // ✅ HARDCODED - Usar numeração fixa do mapeamento
+        identificacaoLeito = window.CRUZ_AZUL_NUMERACAO[numeroLeito];
+    } else {
+        // ✅ Outros hospitais - Buscar da planilha normalmente
+        identificacaoLeito = leito.identificacaoLeito || leito.identificacao_leito || '';
+    }
     const regiao = leito.regiao || '';
     const sexo = leito.genero || ''; // ✅ CORRIGIDO: leito.genero (não leito.sexo)
     const diretivas = leito.diretivas || 'Não se aplica'; // ⭐ NOVO V3.3
@@ -653,19 +674,13 @@ function createAdmissaoForm(hospitalNome, leitoNumero, hospitalId) {
     const idSequencial = String(leitoNumero).padStart(2, '0');
     const isHibrido = window.HOSPITAIS_HIBRIDOS.includes(hospitalId);
     
-    // ⭐ NOVO: Verificar se é Cruz Azul Enfermaria (leitos 21-36 = sempre bloqueado)
+    // ⭐ CORREÇÃO V3.3: Verificar se é Cruz Azul Enfermaria (leitos 21-36)
     const isCruzAzulEnfermaria = (hospitalId === 'H2' && leitoNumero >= 21 && leitoNumero <= 36);
     
-    // ⭐ Se for Cruz Azul enfermaria, buscar o valor atual da planilha
+    // ✅ Se for Cruz Azul enfermaria, usar numeração HARDCODED
     let identificacaoFixa = '';
-    if (isCruzAzulEnfermaria && window.hospitalData?.H2?.leitos) {
-        const leitoData = window.hospitalData.H2.leitos.find(l => {
-            const numLeito = parseInt(l.leito) || parseInt(l.numero);
-            return numLeito === parseInt(leitoNumero);
-        });
-        if (leitoData) {
-            identificacaoFixa = leitoData.identificacaoLeito || leitoData.identificacao_leito || '';
-        }
+    if (isCruzAzulEnfermaria) {
+        identificacaoFixa = window.CRUZ_AZUL_NUMERACAO[leitoNumero] || '';
     }
     
     return `
@@ -689,7 +704,7 @@ function createAdmissaoForm(hospitalNome, leitoNumero, hospitalId) {
                         <label style="display: block; margin-bottom: 5px; color: #e2e8f0; font-weight: 600; font-size: 11px; text-transform: uppercase;">IDENTIFICAÇÃO DO LEITO <span style="color: #ef4444;">*</span></label>
                         ${isCruzAzulEnfermaria 
                             ? `<input id="admIdentificacaoLeito" type="text" value="${identificacaoFixa}" readonly style="width: 100%; padding: 12px; background: #1f2937; color: #9ca3af; border: 1px solid rgba(255,255,255,0.2); border-radius: 6px; font-size: 14px; cursor: not-allowed;">
-                               <div style="font-size: 10px; color: rgba(255,255,255,0.5); margin-top: 3px;">🔒 Numeração fixa (definida na planilha)</div>`
+                               <div style="font-size: 10px; color: rgba(255,255,255,0.5); margin-top: 3px;">🔒 Numeração fixa (Cruz Azul - Enfermaria)</div>`
                             : `<input id="admIdentificacaoLeito" type="text" placeholder="Ex: NEO1 (máx. 6)" maxlength="6" required style="width: 100%; padding: 12px; background: #374151; color: #ffffff; border: 1px solid rgba(255,255,255,0.3); border-radius: 6px; font-size: 14px;">`
                         }
                     </div>
