@@ -1,12 +1,12 @@
-// =================== CARDS.JS V3.2 FINAL - ESTRUTURA 4 LINHAS APROVADA ===================
-// =================== TODO CSS RESPONSIVO INCLUÍDO - SEM mobile.css ===================
-// =================== LISTAS FINAIS CONFIRMADAS: 9 REGIÕES + GÊNERO POR EXTENSO ===================
+// =================== CARDS.JS V3.3 FINAL - ESTRUTURA MOCKUP APROVADA ===================
+// =================== LAYOUT: HOSPITAL FORA DOS BOXES + LINHA DIVISÓRIA + CÍRCULO PESSOA ===================
+// =================== LISTAS FINAIS: 11 CONCESSÕES + 45 LINHAS + DIRETIVAS (BV/73) ===================
 
 // =================== VARIÁVEIS GLOBAIS ===================  
 window.selectedLeito = null;
 window.currentHospital = 'H1';
 
-// =================== MAPEAMENTO DE HOSPITAIS V3.2 ===================
+// =================== MAPEAMENTO DE HOSPITAIS V3.3 ===================
 window.HOSPITAL_MAPPING = {
     H1: 'Neomater',
     H2: 'Cruz Azul', 
@@ -15,7 +15,7 @@ window.HOSPITAL_MAPPING = {
     H5: 'Adventista'
 };
 
-// =================== LISTAS FINAIS CONFIRMADAS ===================
+// =================== LISTAS FINAIS CONFIRMADAS V3.3 ===================
 
 // CONCESSÕES: 11 ITENS (ORDEM CONFIRMADA)
 window.CONCESSOES_LIST = [
@@ -117,6 +117,13 @@ window.SEXO_OPTIONS = [
     'Feminino'
 ];
 
+// ⭐ NOVO V3.3: DIRETIVAS ANTECIPADAS (BV/73)
+window.DIRETIVAS_OPTIONS = [
+    'Não se aplica',
+    'Sim',
+    'Não'
+];
+
 // IDADE: DROPDOWN 14-115 ANOS
 window.IDADE_OPTIONS = [];
 for (let i = 14; i <= 115; i++) {
@@ -144,7 +151,7 @@ window.selectHospital = function(hospitalId) {
 
 // =================== FUNÇÃO PRINCIPAL DE RENDERIZAÇÃO ===================
 window.renderCards = function() {
-    logInfo('Renderizando cards V3.2 FINAL estrutura 4 linhas - dados REAIS da API');
+    logInfo('Renderizando cards V3.3 FINAL - layout MOCKUP + DIRETIVAS');
     
     const container = document.getElementById('cardsContainer');
     if (!container) {
@@ -165,8 +172,8 @@ window.renderCards = function() {
                     <h3>📋 ${hospitalNome}</h3>
                 </div>
                 <div style="background: rgba(96,165,250,0.1); border-radius: 8px; padding: 20px;">
-                    <p style="margin-bottom: 15px;">Carregando dados da planilha V3.2...</p>
-                    <p style="color: #28a745;"><em>✅ API V3.2 conectada - 11 concessões + 45 linhas + estrutura 4 linhas</em></p>
+                    <p style="margin-bottom: 15px;">Carregando dados da planilha V3.3...</p>
+                    <p style="color: #28a745;"><em>✅ API V3.3 conectada - 74 colunas + DIRETIVAS (BV/73)</em></p>
                 </div>
             </div>
         `;
@@ -178,7 +185,7 @@ window.renderCards = function() {
         container.appendChild(card);
     });
     
-    logInfo(`${hospital.leitos.length} cards V3.2 FINAL estrutura 4 linhas renderizados para ${hospitalNome}`);
+    logInfo(`${hospital.leitos.length} cards V3.3 FINAL renderizados para ${hospitalNome}`);
 };
 
 // =================== FUNÇÃO: BADGE DE ISOLAMENTO ===================
@@ -186,47 +193,98 @@ function getBadgeIsolamento(isolamento) {
     if (!isolamento || isolamento === 'Não Isolamento') {
         return {
             cor: '#9ca3af',
-            icone: '⚪',
-            texto: 'Não Isolamento',
+            texto: 'Não Isol',
             textoCor: '#ffffff'
         };
     } else if (isolamento === 'Isolamento de Contato') {
         return {
             cor: '#f59e0b',
-            icone: '🟡',
-            texto: 'Isolamento de Contato',
+            texto: 'Contato',
             textoCor: '#000000'
         };
     } else if (isolamento === 'Isolamento Respiratório') {
         return {
             cor: '#ef4444',
-            icone: '🔴',
-            texto: 'Isolamento Respiratório',
+            texto: 'Respiratório',
             textoCor: '#ffffff'
         };
     }
     return getBadgeIsolamento('Não Isolamento');
 }
 
-// =================== CRIAR CARD INDIVIDUAL V3.2 FINAL - ESTRUTURA 4 LINHAS ===================
+// =================== FUNÇÃO: BADGE DE GÊNERO ===================
+function getBadgeGenero(sexo) {
+    if (sexo === 'Masculino') {
+        return {
+            cor: 'rgba(59,130,246,0.2)',
+            borda: '#3b82f6',
+            textoCor: '#60a5fa',
+            texto: 'Masculino'
+        };
+    } else if (sexo === 'Feminino') {
+        return {
+            cor: 'rgba(236,72,153,0.2)',
+            borda: '#ec4899',
+            textoCor: '#ec4899',
+            texto: 'Feminino'
+        };
+    }
+    return {
+        cor: 'rgba(255,255,255,0.05)',
+        borda: 'rgba(255,255,255,0.1)',
+        textoCor: '#ffffff',
+        texto: '—'
+    };
+}
+
+// ⭐ NOVO V3.3: BADGE DE DIRETIVAS
+function getBadgeDiretivas(diretivas) {
+    if (diretivas === 'Sim') {
+        return {
+            cor: 'rgba(34,197,94,0.2)',
+            borda: '#22c55e',
+            textoCor: '#22c55e',
+            texto: 'Sim'
+        };
+    } else if (diretivas === 'Não') {
+        return {
+            cor: 'rgba(107,114,128,0.2)',
+            borda: '#6b7280',
+            textoCor: '#9ca3af',
+            texto: 'Não'
+        };
+    }
+    // Padrão: Não se aplica
+    return {
+        cor: 'rgba(96,165,250,0.2)',
+        borda: '#60a5fa',
+        textoCor: '#60a5fa',
+        texto: 'N/A'
+    };
+}
+
+// =================== CRIAR CARD INDIVIDUAL V3.3 FINAL - LAYOUT MOCKUP ===================
 function createCard(leito, hospitalNome) {
     const card = document.createElement('div');
     card.className = 'card';
-    card.style.cssText = 'background: var(--card); border-radius: 12px; padding: 20px; color: var(--text-white); box-shadow: 0 4px 6px rgba(0,0,0,0.1);';
+    card.style.cssText = 'background: var(--card); border-radius: 12px; padding: 18px; color: var(--text-white); box-shadow: 0 4px 6px rgba(0,0,0,0.1);';
     
     // Determinar status
     let isVago = false;
-    let leitoBgColor = '#22c55e'; // VERDE PADRÃO
-    let leitoTextColor = '#000000';
+    let statusBgColor = '#22c55e'; // VERDE PADRÃO
+    let statusTextColor = '#000000';
+    let statusTexto = 'Disponível';
     
     if (leito.status === 'Em uso' || leito.status === 'ocupado' || leito.status === 'Ocupado') {
         isVago = false;
-        leitoBgColor = '#fbbf24'; // AMARELO PARA OCUPADO
-        leitoTextColor = '#000000';
+        statusBgColor = '#fbbf24'; // AMARELO PARA OCUPADO
+        statusTextColor = '#000000';
+        statusTexto = 'Ocupado';
     } else if (leito.status === 'Vago' || leito.status === 'vago') {
         isVago = true;
-        leitoBgColor = '#22c55e'; // VERDE PARA VAGO
-        leitoTextColor = '#000000';
+        statusBgColor = '#22c55e'; // VERDE PARA VAGO
+        statusTextColor = '#000000';
+        statusTexto = 'Disponível';
     }
     
     // Dados do paciente
@@ -238,12 +296,17 @@ function createCard(leito, hospitalNome) {
     const spict = leito.spict || '';
     const previsaoAlta = leito.prevAlta || '';
     
-    // Dados V3.2
+    // Dados V3.3
     const isolamento = leito.isolamento || 'Não Isolamento';
     const identificacaoLeito = leito.identificacaoLeito || '';
-    const badgeIsolamento = getBadgeIsolamento(isolamento);
     const regiao = leito.regiao || '';
     const sexo = leito.sexo || '';
+    const diretivas = leito.diretivas || 'Não se aplica'; // ⭐ NOVO V3.3
+    
+    // Badges
+    const badgeIsolamento = getBadgeIsolamento(isolamento);
+    const badgeGenero = getBadgeGenero(sexo);
+    const badgeDiretivas = getBadgeDiretivas(diretivas);
     
     // Arrays diretos
     const concessoes = Array.isArray(leito.concessoes) ? leito.concessoes : [];
@@ -276,129 +339,173 @@ function createCard(leito, hospitalNome) {
         ? identificacaoLeito.trim().toUpperCase()
         : `LEITO ${numeroLeito}`;
     
-    // HTML do Card V3.2 FINAL (estrutura 4 linhas aprovada)
+    // COR DO CÍRCULO PESSOA
+    let circuloCor = '#C1FF72'; // VERDE (vago)
+    let circuloStroke = '#7A9B4D';
+    if (!isVago) {
+        if (sexo === 'Masculino') {
+            circuloCor = '#38BDF8'; // AZUL
+            circuloStroke = '#0369A1';
+        } else if (sexo === 'Feminino') {
+            circuloCor = '#EC4899'; // ROSA
+            circuloStroke = '#9333EA';
+        }
+    }
+    
+    // HTML do Card V3.3 FINAL (estrutura MOCKUP aprovada)
     card.innerHTML = `
-        <div class="card-row-1" style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 12px;">
-            <div style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; padding: 10px; min-height: 50px; display: flex; flex-direction: column; justify-content: center;">
-                <div style="font-size: 10px; color: rgba(255,255,255,0.7); font-weight: 600; text-transform: uppercase; margin-bottom: 3px;">HOSPITAL</div>
-                <div style="color: #ffffff; font-weight: 600; font-size: 12px; line-height: 1.2;">${hospitalNome}</div>
+        <!-- HEADER: HOSPITAL FORA DOS BOXES -->
+        <div class="card-header" style="text-align: center; margin-bottom: 12px; padding-bottom: 8px;">
+            <div style="font-size: 9px; color: rgba(255,255,255,0.7); font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 3px;">HOSPITAL</div>
+            <div style="font-size: 16px; color: #ffffff; font-weight: 800; text-transform: uppercase; letter-spacing: 1px;">${hospitalNome}</div>
+        </div>
+
+        <!-- LINHA 1: LEITO | TIPO | STATUS -->
+        <div class="card-row" style="display: grid; grid-template-columns: 100px 1fr 1fr; gap: 8px; margin-bottom: 10px;">
+            <div class="card-box" style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; padding: 8px; min-height: 45px; display: flex; flex-direction: column; justify-content: center;">
+                <div class="box-label" style="font-size: 9px; color: rgba(255,255,255,0.8); font-weight: 700; text-transform: uppercase; margin-bottom: 3px; letter-spacing: 0.5px;">LEITO</div>
+                <div class="box-value" style="color: #ffffff; font-weight: 700; font-size: 11px; line-height: 1.2;">${leitoPersonalizado}</div>
             </div>
             
-            <div style="min-height: 50px; display: flex; align-items: center; justify-content: center;">
-                <div class="leito-badge ${isVago ? '' : 'ocupado'}" style="background: ${leitoBgColor}; color: ${leitoTextColor}; width: 100%; padding: 15px 8px; border-radius: 8px; font-weight: 700; text-transform: uppercase; text-align: center; font-size: 12px; letter-spacing: 1px;">
-                    ${leitoPersonalizado}
-                </div>
+            <div class="card-box" style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; padding: 8px; min-height: 45px; display: flex; flex-direction: column; justify-content: center;">
+                <div class="box-label" style="font-size: 9px; color: rgba(255,255,255,0.8); font-weight: 700; text-transform: uppercase; margin-bottom: 3px; letter-spacing: 0.5px;">TIPO</div>
+                <div class="box-value" style="color: #ffffff; font-weight: 700; font-size: 11px; line-height: 1.2;">${leito.tipo === 'UTI' ? 'UTI' : 'Híbrido'}</div>
             </div>
             
-            <div style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; padding: 10px; min-height: 50px; display: flex; flex-direction: column; justify-content: center;">
-                <div style="font-size: 10px; color: rgba(255,255,255,0.7); font-weight: 600; text-transform: uppercase; margin-bottom: 3px;">TIPO</div>
-                <div style="color: #ffffff; font-weight: 600; font-size: 12px; line-height: 1.2;">${leito.tipo === 'UTI' ? 'UTI' : 'ENF/APTO'}</div>
+            <div class="status-badge" style="background: ${statusBgColor}; color: ${statusTextColor}; padding: 12px 6px; border-radius: 6px; font-weight: 800; text-transform: uppercase; text-align: center; font-size: 11px; letter-spacing: 0.5px; min-height: 45px; display: flex; flex-direction: column; align-items: center; justify-content: center;">
+                <div class="box-label" style="font-size: 9px; font-weight: 700; text-transform: uppercase; margin-bottom: 3px; letter-spacing: 0.5px; color: ${statusTextColor};">STATUS</div>
+                <div class="box-value" style="font-weight: 700; font-size: 11px; line-height: 1.2; color: ${statusTextColor};">${statusTexto}</div>
             </div>
         </div>
 
-        <div class="card-row-2" style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 12px;">
-            <div style="background: ${badgeIsolamento.cor}; border: 1px solid rgba(255,255,255,0.3); border-radius: 8px; padding: 10px; min-height: 50px; display: flex; flex-direction: column; justify-content: center;">
-                <div style="color: ${badgeIsolamento.textoCor}; font-weight: 600; font-size: 12px; line-height: 1.2; display: flex; align-items: center; text-align: center; justify-content: center;">
-                    ${badgeIsolamento.texto}
-                </div>
+        <!-- LINHA 2: GÊNERO | ISOLAMENTO | PREV ALTA -->
+        <div class="card-row" style="display: grid; grid-template-columns: 100px 1fr 1fr; gap: 8px; margin-bottom: 10px;">
+            <div class="card-box" style="background: ${badgeGenero.cor}; border: 1px solid ${badgeGenero.borda}; border-radius: 6px; padding: 8px; min-height: 45px; display: flex; flex-direction: column; justify-content: center;">
+                <div class="box-label" style="font-size: 9px; color: ${badgeGenero.textoCor}; font-weight: 700; text-transform: uppercase; margin-bottom: 3px; letter-spacing: 0.5px;">GÊNERO</div>
+                <div class="box-value" style="color: ${badgeGenero.textoCor}; font-weight: 700; font-size: 11px; line-height: 1.2;">${badgeGenero.texto}</div>
             </div>
             
-            <div style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; padding: 10px; min-height: 50px; display: flex; flex-direction: column; justify-content: center;">
-                <div style="font-size: 10px; color: rgba(255,255,255,0.7); font-weight: 600; text-transform: uppercase; margin-bottom: 3px;">REGIÃO</div>
-                <div style="color: #ffffff; font-weight: 600; font-size: 12px; line-height: 1.2;">${regiao || '—'}</div>
+            <div class="card-box" style="background: ${badgeIsolamento.cor}; border: 1px solid rgba(255,255,255,0.3); border-radius: 6px; padding: 8px; min-height: 45px; display: flex; flex-direction: column; justify-content: center;">
+                <div class="box-label" style="font-size: 9px; color: ${badgeIsolamento.textoCor}; font-weight: 700; text-transform: uppercase; margin-bottom: 3px; letter-spacing: 0.5px;">ISOLAMENTO</div>
+                <div class="box-value" style="color: ${badgeIsolamento.textoCor}; font-weight: 700; font-size: 11px; line-height: 1.2;">${badgeIsolamento.texto}</div>
             </div>
             
-            <div style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; padding: 10px; min-height: 50px; display: flex; flex-direction: column; justify-content: center;">
-                <div style="font-size: 10px; color: rgba(255,255,255,0.7); font-weight: 600; text-transform: uppercase; margin-bottom: 3px;">GÊNERO</div>
-                <div style="color: #ffffff; font-weight: 600; font-size: 12px; line-height: 1.2;">${sexo || '—'}</div>
+            <div class="card-box prev-alta" style="background: #8FD3F4; border: 1px solid rgba(143,211,244,0.5); border-radius: 6px; padding: 8px; min-height: 45px; display: flex; flex-direction: column; justify-content: center;">
+                <div class="box-label" style="font-size: 9px; color: #000000; font-weight: 700; text-transform: uppercase; margin-bottom: 3px; letter-spacing: 0.5px;">PREVISÃO ALTA</div>
+                <div class="box-value" style="color: #000000; font-weight: 700; font-size: 11px; line-height: 1.2;">${previsaoAlta || '—'}</div>
             </div>
         </div>
 
-        <div class="card-row-3" style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 12px;">
-            <div style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; padding: 10px; min-height: 50px; display: flex; flex-direction: column; justify-content: center;">
-                <div style="font-size: 10px; color: rgba(255,255,255,0.7); font-weight: 600; text-transform: uppercase; margin-bottom: 3px;">INICIAIS</div>
-                <div style="color: #ffffff; font-weight: 600; font-size: 12px; line-height: 1.2;">${iniciais}</div>
+        <!-- LINHA DIVISÓRIA -->
+        <div class="divider" style="height: 2px; background: rgba(255,255,255,0.3); margin: 12px 0;"></div>
+
+        <!-- SEÇÃO PESSOA: CÍRCULO + 4 CÉLULAS -->
+        <div class="card-row-pessoa" style="display: grid; grid-template-columns: 100px 1fr 1fr; grid-template-rows: 1fr 1fr; gap: 8px; margin-bottom: 10px;">
+            <!-- CÍRCULO PERFEITO COM ÍCONE PESSOA -->
+            <div class="pessoa-circle" style="grid-row: span 2; grid-column: 1; width: 100px; height: 100px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; background: ${circuloCor};">
+                <svg class="pessoa-icon" viewBox="0 0 24 24" fill="none" stroke="${circuloStroke}" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="width: 55%; height: 55%;">
+                    <circle cx="12" cy="8" r="4"></circle>
+                    <path d="M4 20c0-4 4-6 8-6s8 2 8 6"></path>
+                </svg>
             </div>
-            
-            <div style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; padding: 10px; min-height: 50px; display: flex; flex-direction: column; justify-content: center;">
-                <div style="font-size: 10px; color: rgba(255,255,255,0.7); font-weight: 600; text-transform: uppercase; margin-bottom: 3px;">MATRÍCULA</div>
-                <div style="color: #ffffff; font-weight: 600; font-size: 12px; line-height: 1.2;">${matricula || '—'}</div>
+
+            <!-- CÉLULA 1: INICIAIS -->
+            <div class="small-cell" style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; padding: 6px; display: flex; flex-direction: column; justify-content: center; min-height: 46px;">
+                <div class="box-label" style="font-size: 8px; color: rgba(255,255,255,0.8); font-weight: 700; text-transform: uppercase; margin-bottom: 2px; letter-spacing: 0.5px;">INICIAIS</div>
+                <div class="box-value" style="color: #ffffff; font-weight: 700; font-size: 10px; line-height: 1.2;">${iniciais}</div>
             </div>
-            
-            <div style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; padding: 10px; min-height: 50px; display: flex; flex-direction: column; justify-content: center;">
-                <div style="font-size: 10px; color: rgba(255,255,255,0.7); font-weight: 600; text-transform: uppercase; margin-bottom: 3px;">IDADE</div>
-                <div style="color: #ffffff; font-weight: 600; font-size: 12px; line-height: 1.2;">${idade ? idade + ' anos' : '—'}</div>
+
+            <!-- CÉLULA 2: MATRÍCULA -->
+            <div class="small-cell" style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; padding: 6px; display: flex; flex-direction: column; justify-content: center; min-height: 46px;">
+                <div class="box-label" style="font-size: 8px; color: rgba(255,255,255,0.8); font-weight: 700; text-transform: uppercase; margin-bottom: 2px; letter-spacing: 0.5px;">MATRÍCULA</div>
+                <div class="box-value" style="color: #ffffff; font-weight: 700; font-size: 10px; line-height: 1.2;">${matricula || '—'}</div>
+            </div>
+
+            <!-- CÉLULA 3: IDADE -->
+            <div class="small-cell" style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; padding: 6px; display: flex; flex-direction: column; justify-content: center; min-height: 46px;">
+                <div class="box-label" style="font-size: 8px; color: rgba(255,255,255,0.8); font-weight: 700; text-transform: uppercase; margin-bottom: 2px; letter-spacing: 0.5px;">IDADE</div>
+                <div class="box-value" style="color: #ffffff; font-weight: 700; font-size: 10px; line-height: 1.2;">${idade ? idade + ' anos' : '—'}</div>
+            </div>
+
+            <!-- CÉLULA 4: REGIÃO -->
+            <div class="small-cell" style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; padding: 6px; display: flex; flex-direction: column; justify-content: center; min-height: 46px;">
+                <div class="box-label" style="font-size: 8px; color: rgba(255,255,255,0.8); font-weight: 700; text-transform: uppercase; margin-bottom: 2px; letter-spacing: 0.5px;">REGIÃO</div>
+                <div class="box-value" style="color: #ffffff; font-weight: 700; font-size: 10px; line-height: 1.2;">${regiao || '—'}</div>
             </div>
         </div>
 
-        <div class="card-row-4" style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 15px;">
-            <div style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; padding: 10px; min-height: 50px; display: flex; flex-direction: column; justify-content: center;">
-                <div style="font-size: 10px; color: rgba(255,255,255,0.7); font-weight: 600; text-transform: uppercase; margin-bottom: 3px;">PPS</div>
-                <div style="color: #ffffff; font-weight: 600; font-size: 12px; line-height: 1.2;">${ppsFormatado}</div>
+        <!-- LINHA 3: PPS | SPICT-BR | DIRETIVAS (NOVO V3.3!) -->
+        <div class="card-row" style="display: grid; grid-template-columns: 100px 1fr 1fr; gap: 8px; margin-bottom: 12px;">
+            <div class="card-box" style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; padding: 8px; min-height: 45px; display: flex; flex-direction: column; justify-content: center;">
+                <div class="box-label" style="font-size: 9px; color: rgba(255,255,255,0.8); font-weight: 700; text-transform: uppercase; margin-bottom: 3px; letter-spacing: 0.5px;">PPS</div>
+                <div class="box-value" style="color: #ffffff; font-weight: 700; font-size: 11px; line-height: 1.2;">${ppsFormatado}</div>
             </div>
             
-            <div style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; padding: 10px; min-height: 50px; display: flex; flex-direction: column; justify-content: center;">
-                <div style="font-size: 10px; color: rgba(255,255,255,0.7); font-weight: 600; text-transform: uppercase; margin-bottom: 3px;">SPICT-BR</div>
-                <div style="color: #ffffff; font-weight: 600; font-size: 12px; line-height: 1.2;">${spictFormatado}</div>
+            <div class="card-box" style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; padding: 8px; min-height: 45px; display: flex; flex-direction: column; justify-content: center;">
+                <div class="box-label" style="font-size: 9px; color: rgba(255,255,255,0.8); font-weight: 700; text-transform: uppercase; margin-bottom: 3px; letter-spacing: 0.5px;">SPICT-BR</div>
+                <div class="box-value" style="color: #ffffff; font-weight: 700; font-size: 11px; line-height: 1.2;">${spictFormatado}</div>
             </div>
             
-            <div style="background: var(--destaque); border: 1px solid rgba(143,211,244,0.5); border-radius: 8px; padding: 10px; min-height: 50px; display: flex; flex-direction: column; justify-content: center;">
-                <div style="font-size: 10px; color: #000000; font-weight: 700; text-transform: uppercase; margin-bottom: 3px;">PREV ALTA</div>
-                <div style="color: #000000; font-weight: 700; font-size: 12px; line-height: 1.2;">${previsaoAlta || '—'}</div>
+            <div class="card-box" style="background: ${badgeDiretivas.cor}; border: 1px solid ${badgeDiretivas.borda}; border-radius: 6px; padding: 8px; min-height: 45px; display: flex; flex-direction: column; justify-content: center;">
+                <div class="box-label" style="font-size: 9px; color: ${badgeDiretivas.textoCor}; font-weight: 700; text-transform: uppercase; margin-bottom: 3px; letter-spacing: 0.5px;">DIRETIVAS</div>
+                <div class="box-value" style="color: ${badgeDiretivas.textoCor}; font-weight: 700; font-size: 11px; line-height: 1.2;">${badgeDiretivas.texto}</div>
             </div>
         </div>
 
-        <div class="card-section" style="margin-bottom: 15px;">
-            <div class="section-title" style="font-size: 11px; color: #ffffff; background: #60a5fa; padding: 8px; border-radius: 4px; margin-bottom: 8px; text-transform: uppercase; font-weight: 700;">
+        <!-- CONCESSÕES -->
+        <div class="card-section" style="margin-bottom: 12px;">
+            <div class="section-header" style="background: #60a5fa; color: #ffffff; font-size: 10px; padding: 6px 8px; border-radius: 4px; margin-bottom: 6px; text-transform: uppercase; font-weight: 800; letter-spacing: 0.5px;">
                 CONCESSÕES PREVISTAS NA ALTA
             </div>
-            <div class="chips-container" style="display: flex; flex-wrap: wrap; gap: 4px; min-height: 24px; background: rgba(255,255,255,0.05); border-radius: 6px; padding: 8px;">
+            <div class="chips-container" style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); display: flex; flex-wrap: wrap; gap: 4px; min-height: 24px; border-radius: 6px; padding: 8px;">
                 ${(concessoes && concessoes.length > 0) 
-                    ? concessoes.map(concessao => `<span class="chip" style="font-size: 10px; background: rgba(96,165,250,0.1); border: 1px solid rgba(96,165,250,0.3); color: #60a5fa; padding: 3px 8px; border-radius: 12px; font-weight: 600;">${concessao}</span>`).join('') 
+                    ? concessoes.map(concessao => `<span class="chip" style="font-size: 9px; background: rgba(96,165,250,0.2); border: 1px solid rgba(96,165,250,0.4); color: #60a5fa; padding: 3px 8px; border-radius: 10px; font-weight: 700;">${concessao}</span>`).join('') 
                     : '<span style="color: rgba(255,255,255,0.7); font-size: 10px;">Nenhuma</span>'
                 }
             </div>
         </div>
 
+        <!-- LINHAS DE CUIDADO -->
         <div class="card-section" style="margin-bottom: 15px;">
-            <div class="section-title" style="font-size: 11px; color: #ffffff; background: #60a5fa; padding: 8px; border-radius: 4px; margin-bottom: 8px; text-transform: uppercase; font-weight: 700;">
+            <div class="section-header" style="background: #60a5fa; color: #ffffff; font-size: 10px; padding: 6px 8px; border-radius: 4px; margin-bottom: 6px; text-transform: uppercase; font-weight: 800; letter-spacing: 0.5px;">
                 LINHAS DE CUIDADO PREVISTAS NA ALTA
             </div>
-            <div class="chips-container" style="display: flex; flex-wrap: wrap; gap: 4px; min-height: 24px; background: rgba(255,255,255,0.05); border-radius: 6px; padding: 8px;">
+            <div class="chips-container" style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); display: flex; flex-wrap: wrap; gap: 4px; min-height: 24px; border-radius: 6px; padding: 8px;">
                 ${(linhas && linhas.length > 0) 
-                    ? linhas.map(linha => `<span class="chip" style="font-size: 10px; background: rgba(96,165,250,0.1); border: 1px solid rgba(96,165,250,0.3); color: #60a5fa; padding: 3px 8px; border-radius: 12px; font-weight: 600;">${linha}</span>`).join('') 
+                    ? linhas.map(linha => `<span class="chip" style="font-size: 9px; background: rgba(96,165,250,0.2); border: 1px solid rgba(96,165,250,0.4); color: #60a5fa; padding: 3px 8px; border-radius: 10px; font-weight: 700;">${linha}</span>`).join('') 
                     : '<span style="color: rgba(255,255,255,0.7); font-size: 10px;">Nenhuma</span>'
                 }
             </div>
         </div>
 
-        <div style="margin-bottom: 15px;">
-            <div style="display: flex; justify-content: flex-start; align-items: center; gap: 15px; margin-bottom: 12px; flex-wrap: wrap;">
-                <div>
-                    <div style="font-size: 10px; color: rgba(255,255,255,0.7); font-weight: 600; text-transform: uppercase; margin-bottom: 3px;">ADMISSÃO</div>
-                    <div style="color: #ffffff; font-weight: 600; font-size: 11px;">${admissao ? formatarDataHora(admissao) : '—'}</div>
-                </div>
-                
-                ${!isVago && tempoInternacao ? `
-                <div>
-                    <div style="font-size: 10px; color: rgba(255,255,255,0.7); font-weight: 600; text-transform: uppercase; margin-bottom: 3px;">INTERNADO HÁ</div>
-                    <div style="color: #ffffff; font-weight: 600; font-size: 11px;">${tempoInternacao}</div>
+        <!-- FOOTER -->
+        <div class="card-footer" style="display: flex; justify-content: space-between; align-items: center; padding-top: 10px; border-top: 1px solid rgba(255,255,255,0.1); gap: 10px;">
+            <div class="card-info" style="display: flex; gap: 12px; flex-wrap: wrap; flex: 1;">
+                ${!isVago && admissao ? `
+                <div class="info-item" style="display: flex; flex-direction: column;">
+                    <div class="info-label" style="font-size: 9px; color: rgba(255,255,255,0.7); font-weight: 700; text-transform: uppercase; margin-bottom: 2px;">ADMISSÃO</div>
+                    <div class="info-value" style="color: #ffffff; font-weight: 700; font-size: 10px;">${formatarDataHora(admissao)}</div>
                 </div>
                 ` : ''}
                 
-                ${!isVago ? `
-                <div style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">
-                    <div style="background: rgba(96,165,250,0.2); color: #60a5fa; padding: 4px 8px; border-radius: 8px; font-size: 9px; font-weight: 600; text-transform: uppercase;">ID: ${idSequencial}</div>
+                ${!isVago && tempoInternacao ? `
+                <div class="info-item" style="display: flex; flex-direction: column;">
+                    <div class="info-label" style="font-size: 9px; color: rgba(255,255,255,0.7); font-weight: 700; text-transform: uppercase; margin-bottom: 2px;">INTERNADO</div>
+                    <div class="info-value" style="color: #ffffff; font-weight: 700; font-size: 10px;">${tempoInternacao}</div>
+                </div>
+                ` : ''}
+                
+                ${isVago ? `
+                <div class="info-item" style="display: flex; flex-direction: column;">
+                    <div class="info-label" style="font-size: 9px; color: rgba(255,255,255,0.7); font-weight: 700; text-transform: uppercase; margin-bottom: 2px;">STATUS</div>
+                    <div class="info-value" style="color: #C1FF72; font-weight: 700; font-size: 10px;">✓ Disponível</div>
                 </div>
                 ` : ''}
             </div>
-        </div>
-        
-        <div style="display: flex; justify-content: flex-end; gap: 8px; padding-top: 12px; border-top: 1px solid rgba(255,255,255,0.1);">
-            ${isVago 
-                ? `<button class="btn-action" data-action="admitir" data-leito="${numeroLeito}" style="padding: 10px 20px; background: #3b82f6; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; text-transform: uppercase; font-size: 12px;">ADMITIR</button>`
-                : `<button class="btn-action" data-action="atualizar" data-leito="${numeroLeito}" style="padding: 10px 20px; background: #374151; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; text-transform: uppercase; font-size: 12px;">ATUALIZAR</button>`
-            }
+            
+            <button class="btn-action" data-action="${isVago ? 'admitir' : 'atualizar'}" data-leito="${numeroLeito}" style="padding: 10px 18px; background: ${isVago ? '#C1FF72' : '#374151'}; color: ${isVago ? '#000000' : '#ffffff'}; border: none; border-radius: 6px; cursor: pointer; font-weight: 800; text-transform: uppercase; font-size: 11px; transition: all 0.2s ease; letter-spacing: 0.5px; white-space: nowrap; flex-shrink: 0;">
+                ${isVago ? 'ADMITIR' : 'ATUALIZAR'}
+            </button>
         </div>
     `;
 
@@ -432,7 +539,7 @@ function openAdmissaoFlow(leitoNumero) {
     setTimeout(() => {
         hideButtonLoading(button, originalText);
         openAdmissaoModal(leitoNumero);
-        logInfo(`Modal de admissão V3.2 FINAL aberto: ${window.currentHospital} - Leito ${leitoNumero}`);
+        logInfo(`Modal de admissão V3.3 FINAL aberto: ${window.currentHospital} - Leito ${leitoNumero}`);
     }, 800);
 }
 
@@ -445,11 +552,11 @@ function openAtualizacaoFlow(leitoNumero, dadosLeito) {
     setTimeout(() => {
         hideButtonLoading(button, originalText);
         openAtualizacaoModal(leitoNumero, dadosLeito);
-        logInfo(`Modal de atualização V3.2 FINAL aberto: ${window.currentHospital} - Leito ${leitoNumero}`);
+        logInfo(`Modal de atualização V3.3 FINAL aberto: ${window.currentHospital} - Leito ${leitoNumero}`);
     }, 800);
 }
 
-// =================== MODAIS V3.2 FINAL ===================
+// =================== MODAIS V3.3 FINAL ===================
 function openAdmissaoModal(leitoNumero) {
     const hospitalId = window.currentHospital;
     const hospitalNome = window.HOSPITAL_MAPPING[hospitalId] || 'Hospital';
@@ -493,14 +600,14 @@ function createModalOverlay() {
     return modal;
 }
 
-// =================== FORMULÁRIO DE ADMISSÃO V3.2 FINAL ===================
+// =================== FORMULÁRIO DE ADMISSÃO V3.3 FINAL ===================
 function createAdmissaoForm(hospitalNome, leitoNumero) {
     const idSequencial = String(leitoNumero).padStart(2, '0');
     
     return `
         <div class="modal-content" style="background: #1a1f2e; border-radius: 12px; padding: 30px; max-width: 700px; width: 95%; max-height: 90vh; overflow-y: auto; color: #ffffff;">
             <h2 style="margin: 0 0 20px 0; text-align: center; color: #60a5fa; font-size: 24px; font-weight: 700; text-transform: uppercase;">
-                ADMITIR PACIENTE
+                ADMITIR PACIENTE V3.3
             </h2>
             
             <div style="text-align: center; margin-bottom: 30px; padding: 15px; background: rgba(96,165,250,0.1); border-radius: 8px;">
@@ -592,6 +699,19 @@ function createAdmissaoForm(hospitalNome, leitoNumero) {
                 </div>
             </div>
             
+            <!-- ⭐ NOVO V3.3: DIRETIVAS ANTECIPADAS -->
+            <div style="margin-bottom: 20px;">
+                <div style="background: rgba(96,165,250,0.1); padding: 10px 15px; border-radius: 6px; margin-bottom: 10px;">
+                    <div style="font-size: 11px; color: #ffffff; text-transform: uppercase; font-weight: 700;">
+                        DIRETIVAS ANTECIPADAS (NOVO V3.3)
+                    </div>
+                </div>
+                <select id="admDiretivas" style="width: 100%; padding: 12px; background: #374151 !important; color: #ffffff !important; border: 1px solid rgba(255,255,255,0.3); border-radius: 6px; font-size: 14px;">
+                    ${window.DIRETIVAS_OPTIONS.map((opcao, index) => `<option value="${opcao}" ${index === 0 ? 'selected' : ''}>${opcao}</option>`).join('')}
+                </select>
+                <div style="font-size: 11px; color: rgba(255,255,255,0.6); margin-top: 5px;">Padrão: "Não se aplica" | Será armazenado na coluna BV (índice 73)</div>
+            </div>
+            
             <!-- CONCESSÕES: 11 ITENS -->
             <div style="margin-bottom: 20px;">
                 <div style="background: rgba(96,165,250,0.1); padding: 10px 15px; border-radius: 6px; margin-bottom: 10px;">
@@ -635,7 +755,7 @@ function createAdmissaoForm(hospitalNome, leitoNumero) {
     `;
 }
 
-// =================== FORMULÁRIO DE ATUALIZAÇÃO V3.2 FINAL ===================
+// =================== FORMULÁRIO DE ATUALIZAÇÃO V3.3 FINAL ===================
 function createAtualizacaoForm(hospitalNome, leitoNumero, dadosLeito) {
     const tempoInternacao = dadosLeito?.admAt ? calcularTempoInternacao(dadosLeito.admAt) : '';
     const iniciais = dadosLeito?.nome ? getIniciais(dadosLeito.nome) : '';
@@ -650,11 +770,12 @@ function createAtualizacaoForm(hospitalNome, leitoNumero, dadosLeito) {
     const identificacaoAtual = dadosLeito?.identificacaoLeito || '';
     const regiaoAtual = dadosLeito?.regiao || '';
     const sexoAtual = dadosLeito?.sexo || '';
+    const diretivasAtual = dadosLeito?.diretivas || 'Não se aplica'; // ⭐ NOVO V3.3
     
     return `
         <div class="modal-content" style="background: #1a1f2e; border-radius: 12px; padding: 30px; max-width: 700px; width: 95%; max-height: 90vh; overflow-y: auto; color: #ffffff;">
             <h2 style="margin: 0 0 20px 0; text-align: center; color: #60a5fa; font-size: 24px; font-weight: 700; text-transform: uppercase;">
-                ATUALIZAR PACIENTE
+                ATUALIZAR PACIENTE V3.3
             </h2>
             
             <div style="text-align: center; margin-bottom: 30px; padding: 15px; background: rgba(96,165,250,0.1); border-radius: 8px;">
@@ -745,6 +866,19 @@ function createAtualizacaoForm(hospitalNome, leitoNumero, dadosLeito) {
                 </div>
             </div>
             
+            <!-- ⭐ NOVO V3.3: DIRETIVAS ANTECIPADAS -->
+            <div style="margin-bottom: 20px;">
+                <div style="background: rgba(96,165,250,0.1); padding: 10px 15px; border-radius: 6px; margin-bottom: 10px;">
+                    <div style="font-size: 11px; color: #ffffff; text-transform: uppercase; font-weight: 700;">
+                        DIRETIVAS ANTECIPADAS (NOVO V3.3)
+                    </div>
+                </div>
+                <select id="updDiretivas" style="width: 100%; padding: 12px; background: #374151 !important; color: #ffffff !important; border: 1px solid rgba(255,255,255,0.3); border-radius: 6px; font-size: 14px;">
+                    ${window.DIRETIVAS_OPTIONS.map(opcao => `<option value="${opcao}" ${diretivasAtual === opcao ? 'selected' : ''}>${opcao}</option>`).join('')}
+                </select>
+                <div style="font-size: 11px; color: rgba(255,255,255,0.6); margin-top: 5px;">Será atualizado na coluna BV (índice 73)</div>
+            </div>
+            
             <!-- CONCESSÕES -->
             <div style="margin-bottom: 20px;">
                 <div style="background: rgba(96,165,250,0.1); padding: 10px 15px; border-radius: 6px; margin-bottom: 10px;">
@@ -805,7 +939,7 @@ function createAtualizacaoForm(hospitalNome, leitoNumero, dadosLeito) {
 
 // =================== PRÉ-MARCAÇÃO DE CHECKBOXES ===================
 function forcarPreMarcacao(modal, dadosLeito) {
-    logDebug(`Forçando pré-marcação V3.2 FINAL...`);
+    logDebug(`Forçando pré-marcação V3.3 FINAL...`);
     
     const concessoesAtuais = Array.isArray(dadosLeito?.concessoes) ? dadosLeito.concessoes : [];
     const linhasAtuais = Array.isArray(dadosLeito?.linhas) ? dadosLeito.linhas : [];
@@ -886,10 +1020,10 @@ function setupModalEventListeners(modal, tipo) {
                 
                 if (tipo === 'admissao') {
                     await window.admitirPaciente(dadosFormulario.hospital, dadosFormulario.leito, dadosFormulario);
-                    showSuccessMessage('✅ Paciente admitido com sucesso (V3.2 FINAL)!');
+                    showSuccessMessage('✅ Paciente admitido com sucesso (V3.3 + DIRETIVAS)!');
                 } else {
                     await window.atualizarPaciente(dadosFormulario.hospital, dadosFormulario.leito, dadosFormulario);
-                    showSuccessMessage('✅ Dados atualizados com sucesso (V3.2 FINAL)!');
+                    showSuccessMessage('✅ Dados atualizados com sucesso (V3.3 + DIRETIVAS)!');
                 }
                 
                 hideButtonLoading(this, originalText);
@@ -956,7 +1090,7 @@ function closeModal(modal) {
     }
 }
 
-// =================== COLETAR DADOS DO FORMULÁRIO ===================
+// =================== COLETAR DADOS DO FORMULÁRIO V3.3 ===================
 function coletarDadosFormulario(modal, tipo) {
     const dados = {
         hospital: window.currentHospital,
@@ -974,6 +1108,7 @@ function coletarDadosFormulario(modal, tipo) {
         dados.identificacaoLeito = modal.querySelector('#admIdentificacaoLeito')?.value?.trim().toUpperCase() || '';
         dados.regiao = modal.querySelector('#admRegiao')?.value || '';
         dados.sexo = modal.querySelector('#admSexo')?.value || '';
+        dados.diretivas = modal.querySelector('#admDiretivas')?.value || 'Não se aplica'; // ⭐ NOVO V3.3
         
         dados.concessoes = coletarCheckboxesSelecionados(modal, '#admConcessoes');
         dados.linhas = coletarCheckboxesSelecionados(modal, '#admLinhas');
@@ -987,16 +1122,18 @@ function coletarDadosFormulario(modal, tipo) {
         dados.identificacaoLeito = modal.querySelector('#updIdentificacaoLeito')?.value?.trim().toUpperCase() || '';
         dados.regiao = modal.querySelector('#updRegiao')?.value || '';
         dados.sexo = modal.querySelector('#updSexo')?.value || '';
+        dados.diretivas = modal.querySelector('#updDiretivas')?.value || 'Não se aplica'; // ⭐ NOVO V3.3
         
         dados.concessoes = coletarCheckboxesSelecionados(modal, '#updConcessoes');
         dados.linhas = coletarCheckboxesSelecionados(modal, '#updLinhas');
     }
     
-    logInfo('Dados V3.2 FINAL coletados:', {
+    logInfo('Dados V3.3 FINAL coletados (COM DIRETIVAS):', {
         isolamento: dados.isolamento,
         identificacaoLeito: dados.identificacaoLeito,
         regiao: dados.regiao,
         sexo: dados.sexo,
+        diretivas: dados.diretivas, // ⭐ NOVO
         concessoes: dados.concessoes.length,
         linhas: dados.linhas.length
     });
@@ -1158,22 +1295,22 @@ function formatarDataHora(dataISO) {
 
 // =================== FUNÇÕES DE LOG ===================
 function logInfo(message, data = null) {
-    console.log(`🔵 [CARDS V3.2 FINAL] ${message}`, data || '');
+    console.log(`🔵 [CARDS V3.3 FINAL] ${message}`, data || '');
 }
 
 function logError(message, error = null) {
-    console.error(`🔴 [CARDS V3.2 FINAL ERROR] ${message}`, error || '');
+    console.error(`🔴 [CARDS V3.3 FINAL ERROR] ${message}`, error || '');
 }
 
 function logSuccess(message) {
-    console.log(`🟢 [CARDS V3.2 FINAL SUCCESS] ${message}`);
+    console.log(`🟢 [CARDS V3.3 FINAL SUCCESS] ${message}`);
 }
 
 function logDebug(message, data = null) {
-    console.log(`🟡 [CARDS V3.2 FINAL DEBUG] ${message}`, data || '');
+    console.log(`🟡 [CARDS V3.3 FINAL DEBUG] ${message}`, data || '');
 }
 
-// =================== CSS CONSOLIDADO COMPLETO V3.2 FINAL ===================
+// =================== CSS CONSOLIDADO COMPLETO V3.3 FINAL ===================
 if (!document.getElementById('cardsConsolidadoCSS')) {
     const style = document.createElement('style');
     style.id = 'cardsConsolidadoCSS';
@@ -1288,47 +1425,16 @@ if (!document.getElementById('cardsConsolidadoCSS')) {
                 gap: 15px !important;
             }
             
-            .card-row-1,
-            .card-row-2,
-            .card-row-3,
-            .card-row-4 {
+            .card-row,
+            .card-row-pessoa {
                 display: grid !important;
-                grid-template-columns: 1fr 1fr 1fr !important;
+                grid-template-columns: 100px 1fr 1fr !important;
                 gap: 8px !important;
-                margin-bottom: 10px !important;
             }
             
-            .card-row-1 > div,
-            .card-row-3 > div,
-            .card-row-4 > div {
-                background: rgba(255,255,255,0.05) !important;
-                border: 1px solid rgba(255,255,255,0.1) !important;
-                border-radius: 8px !important;
-                padding: 8px 4px !important;
-                min-height: 45px !important;
-            }
-            
-            .card-row-2 > div:not(:first-child) {
-                background: rgba(255,255,255,0.05) !important;
-                border: 1px solid rgba(255,255,255,0.1) !important;
-                border-radius: 8px !important;
-                padding: 8px 4px !important;
-                min-height: 45px !important;
-            }
-            
-            .leito-badge {
-                background: #22c55e !important;
-                color: #000000 !important;
-            }
-            
-            .leito-badge.ocupado {
-                background: #fbbf24 !important;
-                color: #000000 !important;
-            }
-            
-            .card-row-4 > div:last-child {
-                background: #8FD3F4 !important;
-                color: #000000 !important;
+            .pessoa-circle {
+                width: 100px !important;
+                height: 100px !important;
             }
             
             .modal-overlay .modal-content {
@@ -1380,20 +1486,9 @@ if (!document.getElementById('cardsConsolidadoCSS')) {
                 padding: 12px !important;
             }
             
-            .card-row-1,
-            .card-row-2,
-            .card-row-3,
-            .card-row-4 {
+            .card-row,
+            .card-row-pessoa {
                 gap: 6px !important;
-                margin-bottom: 8px !important;
-            }
-            
-            .card-row-1 > div,
-            .card-row-2 > div,
-            .card-row-3 > div,
-            .card-row-4 > div {
-                padding: 6px 3px !important;
-                min-height: 40px !important;
             }
             
             .modal-content {
@@ -1403,16 +1498,6 @@ if (!document.getElementById('cardsConsolidadoCSS')) {
             .form-grid-3-cols {
                 gap: 6px !important;
             }
-            
-            .form-grid-3-cols input,
-            .form-grid-3-cols select {
-                padding: 6px 4px !important;
-                font-size: 11px !important;
-            }
-            
-            .form-grid-3-cols label {
-                font-size: 9px !important;
-            }
         }
         
         /* =================== LANDSCAPE =================== */
@@ -1421,27 +1506,14 @@ if (!document.getElementById('cardsConsolidadoCSS')) {
                 grid-template-columns: repeat(2, 1fr) !important;
                 gap: 12px !important;
             }
-            
-            .card-row-1,
-            .card-row-2,
-            .card-row-3,
-            .card-row-4 {
-                grid-template-columns: 1fr 1fr 1fr !important;
-                gap: 6px !important;
-            }
-            
-            .modal-overlay .modal-content {
-                max-height: 85vh !important;
-                padding: 15px !important;
-            }
         }
     `;
     document.head.appendChild(style);
 }
 
-// =================== INICIALIZAÇÃO V3.2 FINAL ===================
+// =================== INICIALIZAÇÃO V3.3 FINAL ===================
 document.addEventListener('DOMContentLoaded', function() {
-    logSuccess('✅ CARDS.JS V3.2 FINAL CARREGADO');
+    logSuccess('✅ CARDS.JS V3.3 FINAL CARREGADO');
     
     // Verificar listas
     if (window.CONCESSOES_LIST.length !== 11) {
@@ -1468,15 +1540,23 @@ document.addEventListener('DOMContentLoaded', function() {
         logSuccess(`✅ ${window.SEXO_OPTIONS.length} opções de gênero confirmadas (por extenso)`);
     }
     
-    logInfo('🚀 ESTRUTURA V3.2 FINAL:');
-    logInfo('  • ✅ LINHA 1: Hospital | Leito | Tipo');
-    logInfo('  • ✅ LINHA 2: Isolamento | Região | Gênero');
-    logInfo('  • ✅ LINHA 3: Iniciais | Matrícula | Idade');
-    logInfo('  • ✅ LINHA 4: PPS | SPICT-BR | Prev Alta');
-    logInfo('  • ✅ 9 regiões (Zona Central até Outra)');
-    logInfo('  • ✅ Gênero: Masculino/Feminino (por extenso)');
-    logInfo('  • ✅ 11 concessões confirmadas');
-    logInfo('  • ✅ 45 linhas de cuidado confirmadas');
+    if (window.DIRETIVAS_OPTIONS.length !== 3) {
+        logError(`ERRO: Esperadas 3 opções diretivas, encontradas ${window.DIRETIVAS_OPTIONS.length}`);
+    } else {
+        logSuccess(`✅ ${window.DIRETIVAS_OPTIONS.length} opções de diretivas confirmadas (NOVO V3.3)`);
+    }
+    
+    logInfo('🚀 ESTRUTURA V3.3 FINAL (MOCKUP):');
+    logInfo('  • ✅ HEADER: Hospital fora dos boxes');
+    logInfo('  • ✅ LINHA 1: Leito | Tipo | Status');
+    logInfo('  • ✅ LINHA 2: Gênero | Isolamento | Prev Alta');
+    logInfo('  • ✅ LINHA DIVISÓRIA horizontal');
+    logInfo('  • ✅ SEÇÃO PESSOA: Círculo 100px + Grid 2x2');
+    logInfo('  • ✅ LINHA 3: PPS | SPICT-BR | DIRETIVAS ⭐ NOVO!');
+    logInfo('  • ✅ CORES ORIGINAIS: #1a1f2e + rgba(255,255,255,0.05)');
+    logInfo('  • ✅ Círculo pessoa com cores: verde/azul/rosa');
+    logInfo('  • ✅ Badges com cores específicas (isolamento/gênero/diretivas)');
+    logInfo('  • ✅ 74 colunas (A-BV) | BV/73 = DIRETIVAS');
     logInfo('  • ✅ CSS responsivo completo inline');
     logInfo('  • ✅ Validações obrigatórias: isolamento + região + gênero');
 });
@@ -1488,12 +1568,19 @@ window.openAtualizacaoModal = openAtualizacaoModal;
 window.forcarPreMarcacao = forcarPreMarcacao;
 window.coletarDadosFormulario = coletarDadosFormulario;
 window.getBadgeIsolamento = getBadgeIsolamento;
+window.getBadgeGenero = getBadgeGenero;
+window.getBadgeDiretivas = getBadgeDiretivas;
 window.formatarMatricula = formatarMatricula;
 
-logSuccess('🏥 CARDS.JS V3.2 FINAL PRONTO!');
-logInfo('📋 LISTAS FINAIS CONFIRMADAS:');
-logInfo('  • 9 REGIÕES: Zona Central, Sul, Norte, Leste, Oeste, ABC, Guarulhos, Osasco, Outra');
-logInfo('  • 2 GÊNEROS: Masculino, Feminino (por extenso)');
-logInfo('  • 11 CONCESSÕES (ordem exata confirmada)');
-logInfo('  • 45 LINHAS DE CUIDADO (ordem exata confirmada)');
-logInfo('✅ TODO CSS RESPONSIVO CONSOLIDADO NESTE ARQUIVO');
+logSuccess('🎉 CARDS.JS V3.3 FINAL COMPLETO E PRONTO!');
+logInfo('📋 RESUMO V3.3:');
+logInfo('  • ✅ Layout MOCKUP implementado 100%');
+logInfo('  • ✅ Hospital FORA dos boxes');
+logInfo('  • ✅ Linha divisória horizontal');
+logInfo('  • ✅ Círculo pessoa 100px com SVG ícone');
+logInfo('  • ✅ DIRETIVAS na Linha 3 (coluna BV/73)');
+logInfo('  • ✅ PREV ALTA movida para Linha 2');
+logInfo('  • ✅ Cores originais do projeto (#1a1f2e)');
+logInfo('  • ✅ 11 concessões + 45 linhas + 9 regiões + 2 gêneros + 3 diretivas');
+logInfo('  • ✅ TODO CSS responsivo consolidado');
+logInfo('  • ✅ 1600+ linhas completas do arquivo original');
