@@ -14,7 +14,7 @@
 // ==================================================================================
 
 // *** URL DA API V3.3 ***
-window.API_URL = 'https://script.google.com/macros/s/AKfycbxC9Gdvu3_mzXko0VjIYOFgtiH_Z_d8E9VXniUpBxyfaHRC1BHilyEuKhAtLnzmnusT/exec';
+window.API_URL = 'https://script.google.com/macros/s/AKfycbzDbUzEf6tUMQgJFUb0634AyWHjhlSVDBoMxP_jP03-O7YNX7UD-oD-22XVc63FJf0/exec';
 
 // =================== VARIÁVEIS GLOBAIS ===================
 window.hospitalData = {};
