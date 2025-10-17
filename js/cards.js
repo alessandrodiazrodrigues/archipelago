@@ -1287,7 +1287,7 @@ function createCardHTML(leito, hospitalId) {
         return `
             <div class="card bloqueado" style="background: #ffebee; border-left: 4px solid #d32f2f; opacity: 0.7;">
                 <h3 style="color: #d32f2f; margin-bottom: 15px;">
-                    🔒 ${hospital}.${leito.leito} - BLOQUEADO
+                    🔒 ${hospitalId}.${leito.leito} - BLOQUEADO
                 </h3>
                 <div style="padding: 15px; background: #ffcdd2; border-radius: 8px; text-align: center;">
                     <p style="font-size: 14px; font-weight: 600; color: #b71c1c; margin: 0;">
@@ -1429,3 +1429,38 @@ logInfo('✅ Layout 3x3 forçado no mobile');
 logInfo('✅ Checkboxes múltiplas seleções');
 logInfo('✅ Validações completas');
 logInfo('====================================');
+
+// =================== RENDERIZAÇÃO AUTOMÁTICA ===================
+// Aguardar dados serem carregados e renderizar automaticamente
+document.addEventListener('DOMContentLoaded', () => {
+    logInfo('🎨 DOM carregado - aguardando dados...');
+    
+    // Tentar renderizar após 2 segundos (tempo para API carregar)
+    setTimeout(() => {
+        if (window.hospitalData && Object.keys(window.hospitalData).length > 0) {
+            logInfo('✅ Dados encontrados - renderizando cards automaticamente...');
+            window.renderCards();
+        } else {
+            logInfo('⏳ Aguardando mais 2 segundos para dados carregarem...');
+            setTimeout(() => {
+                if (window.hospitalData && Object.keys(window.hospitalData).length > 0) {
+                    logInfo('✅ Dados carregados - renderizando cards...');
+                    window.renderCards();
+                } else {
+                    logError('❌ Dados não carregados após 4 segundos!');
+                }
+            }, 2000);
+        }
+    }, 2000);
+});
+
+// Se main.js chamar renderCards, garantir que funciona
+if (window.initApp) {
+    const originalInitApp = window.initApp;
+    window.initApp = function() {
+        originalInitApp();
+        setTimeout(() => window.renderCards(), 1000);
+    };
+}
+
+logInfo('✅ Renderização automática configurada');
