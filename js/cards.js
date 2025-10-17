@@ -807,6 +807,11 @@ function createAtualizacaoForm(hospitalNome, leitoNumero, dadosLeito) {
     const diretivasAtual = dadosLeito?.diretivas || 'Não se aplica';
     const admissaoData = dadosLeito?.admAt || '';
     
+    // Verificar se o leito é híbrido
+    const hospitalId = window.currentHospital;
+    const isHibrido = window.HOSPITAIS_HIBRIDOS.includes(hospitalId);
+    const tipoAtual = dadosLeito?.tipo || '';
+    
     return `
         <div class="modal-content" style="background: #1a1f2e; border-radius: 12px; padding: 30px; max-width: 700px; width: 95%; max-height: 90vh; overflow-y: auto; color: #ffffff;">
             <h2 style="margin: 0 0 20px 0; text-align: center; color: #60a5fa; font-size: 24px; font-weight: 700; text-transform: uppercase;">
@@ -819,9 +824,9 @@ function createAtualizacaoForm(hospitalNome, leitoNumero, dadosLeito) {
             
             <!-- ⭐ CORREÇÃO 3: LAYOUT IGUAL AO ADMITIR (3 COLUNAS) -->
             
-            <!-- ID LEITO | DIRETIVAS (2 COLUNAS) -->
+            <!-- ID LEITO | DIRETIVAS | TIPO DE QUARTO (3 COLUNAS) -->
             <div style="margin-bottom: 20px;">
-                <div class="form-grid-3-cols" style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                <div class="form-grid-3-cols" style="display: grid; grid-template-columns: ${isHibrido ? '1fr 1fr 1fr' : '1fr 1fr'}; gap: 15px;">
                     <!-- IDENTIFICAÇÃO DO LEITO -->
                     <div>
                         <label style="display: block; margin-bottom: 5px; color: #e2e8f0; font-weight: 600; font-size: 11px; text-transform: uppercase;">IDENTIFICAÇÃO DO LEITO <span style="color: #ef4444;">*</span></label>
@@ -835,6 +840,17 @@ function createAtualizacaoForm(hospitalNome, leitoNumero, dadosLeito) {
                             ${window.DIRETIVAS_OPTIONS.map(opcao => `<option value="${opcao}" ${diretivasAtual === opcao ? 'selected' : ''}>${opcao}</option>`).join('')}
                         </select>
                     </div>
+                    
+                    <!-- ⭐ TIPO DE QUARTO (APENAS PARA HÍBRIDOS) -->
+                    ${isHibrido ? `
+                    <div>
+                        <label style="display: block; margin-bottom: 5px; color: #e2e8f0; font-weight: 600; font-size: 11px; text-transform: uppercase;">TIPO DE QUARTO</label>
+                        <select id="updTipoQuarto" style="width: 100%; padding: 12px; background: #374151 !important; color: #ffffff !important; border: 1px solid rgba(255,255,255,0.3); border-radius: 6px; font-size: 14px;">
+                            <option value="">Selecionar...</option>
+                            ${window.TIPO_QUARTO_OPTIONS.map(tipo => `<option value="${tipo}" ${tipoAtual === tipo ? 'selected' : ''}>${tipo}</option>`).join('')}
+                        </select>
+                    </div>
+                    ` : ''}
                 </div>
             </div>
             
@@ -1161,6 +1177,12 @@ function coletarDadosFormulario(modal, tipo) {
         dados.sexo = modal.querySelector('#updSexo')?.value || '';
         dados.diretivas = modal.querySelector('#updDiretivas')?.value || 'Não se aplica'; // ⭐ NOVO V3.3
         
+        // ⭐ NOVO: Tipo de quarto para híbridos no ATUALIZAR
+        const tipoQuartoField = modal.querySelector('#updTipoQuarto');
+        if (tipoQuartoField) {
+            dados.tipoQuarto = tipoQuartoField.value || '';
+        }
+        
         dados.concessoes = coletarCheckboxesSelecionados(modal, '#updConcessoes');
         dados.linhas = coletarCheckboxesSelecionados(modal, '#updLinhas');
     }
@@ -1171,6 +1193,7 @@ function coletarDadosFormulario(modal, tipo) {
         regiao: dados.regiao,
         sexo: dados.sexo,
         diretivas: dados.diretivas, // ⭐ NOVO
+        tipoQuarto: dados.tipoQuarto || 'N/A',
         concessoes: dados.concessoes.length,
         linhas: dados.linhas.length
     });
