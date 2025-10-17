@@ -533,6 +533,9 @@ window.selectHospital = function(hospitalId) {
     
     window.currentHospital = hospitalId;
     
+    // ✅ CORREÇÃO: Definir hospitalConfig ANTES do if
+    const hospitalConfig = CONFIG.HOSPITAIS[hospitalId];
+    
     // Atualizar botões
     document.querySelectorAll('.hospital-btn').forEach(btn => {
         btn.classList.remove('active');
@@ -545,7 +548,6 @@ window.selectHospital = function(hospitalId) {
     
     // *** RE-RENDERIZAR CARDS COM LOADING ***
     if (window.renderCards) {
-        const hospitalConfig = CONFIG.HOSPITAIS[hospitalId];
         showLoading(null, `Carregando ${hospitalConfig.leitos} leitos do ${hospitalConfig.nome}...`);
         setTimeout(() => {
             window.renderCards();
