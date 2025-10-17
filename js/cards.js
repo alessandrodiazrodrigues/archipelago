@@ -274,8 +274,8 @@ function getTipoLeito(leito, hospitalId) {
     // Se for híbrido, verificar categoria escolhida
     if (window.HOSPITAIS_HIBRIDOS.includes(hospitalId)) {
         // Se tem categoria escolhida, usar ela
-        if (leito.categoriaEscolhida) { // ✅ CORRIGIDO
-            return leito.categoriaEscolhida;
+        if (leito.categoria_escolhida) {
+            return leito.categoria_escolhida;
         }
         // Se não tem, exibir "Híbrido"
         return 'Híbrido';
@@ -322,13 +322,12 @@ function createCard(leito, hospitalNome) {
     const isolamento = leito.isolamento || 'Não Isolamento';
     const identificacaoLeito = leito.identificacaoLeito || '';
     const regiao = leito.regiao || '';
-    const sexo = leito.genero || ''; // ✅ CORRIGIDO: leito.genero (não leito.sexo)
+    const sexo = leito.sexo || '';
     const diretivas = leito.diretivas || 'Não se aplica'; // ⭐ NOVO V3.3
     
     // ⭐ CORREÇÃO: Usar tipo real do leito
     const hospitalId = leito.hospital || window.currentHospital;
     const tipoReal = getTipoLeito(leito, hospitalId);
-    const isHibrido = window.HOSPITAIS_HIBRIDOS.includes(hospitalId); // ✅ NOVO: detectar se é híbrido
     
     // Badges
     const badgeIsolamento = getBadgeIsolamento(isolamento);
@@ -385,7 +384,6 @@ function createCard(leito, hospitalNome) {
         <div class="card-header" style="text-align: center; margin-bottom: 12px; padding-bottom: 8px;">
             <div style="font-size: 9px; color: rgba(255,255,255,0.7); font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 3px;">HOSPITAL</div>
             <div style="font-size: 16px; color: #ffffff; font-weight: 800; text-transform: uppercase; letter-spacing: 1px;">${hospitalNome}</div>
-            ${isHibrido ? '<div style="font-size: 10px; color: rgba(255,255,255,0.6); font-weight: 600; margin-top: 2px;">Leito Híbrido</div>' : ''}
         </div>
 
         <!-- LINHA 1: LEITO | TIPO | STATUS -->
