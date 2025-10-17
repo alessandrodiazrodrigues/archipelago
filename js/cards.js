@@ -15,6 +15,12 @@ window.HOSPITAL_MAPPING = {
     H5: 'Adventista'
 };
 
+// ⭐ NOVO V3.3: IDENTIFICAR HOSPITAIS HÍBRIDOS
+window.HOSPITAIS_HIBRIDOS = ['H1', 'H3', 'H5'];
+
+// ⭐ NOVO V3.3: TIPO DE QUARTO (2 OPÇÕES - APENAS PARA HÍBRIDOS)
+window.TIPO_QUARTO_OPTIONS = ['Apartamento', 'Enfermaria'];
+
 // =================== LISTAS FINAIS CONFIRMADAS V3.3 ===================
 
 // CONCESSÕES: 11 ITENS (ORDEM CONFIRMADA)
@@ -263,6 +269,22 @@ function getBadgeDiretivas(diretivas) {
     };
 }
 
+// ⭐ CORREÇÃO V3.3: DETERMINAR TIPO REAL DO LEITO
+function getTipoLeito(leito, hospitalId) {
+    // Se for híbrido, verificar categoria escolhida
+    if (window.HOSPITAIS_HIBRIDOS.includes(hospitalId)) {
+        // Se tem categoria escolhida, usar ela
+        if (leito.categoriaEscolhida) { // ✅ CORRIGIDO
+            return leito.categoriaEscolhida;
+        }
+        // Se não tem, exibir "Híbrido"
+        return 'Híbrido';
+    }
+    
+    // Se não for híbrido, retornar o tipo fixo
+    return leito.tipo || 'Apartamento';
+}
+
 // =================== CRIAR CARD INDIVIDUAL V3.3 FINAL - LAYOUT MOCKUP ===================
 function createCard(leito, hospitalNome) {
     const card = document.createElement('div');
@@ -300,8 +322,13 @@ function createCard(leito, hospitalNome) {
     const isolamento = leito.isolamento || 'Não Isolamento';
     const identificacaoLeito = leito.identificacaoLeito || '';
     const regiao = leito.regiao || '';
-    const sexo = leito.sexo || '';
+    const sexo = leito.genero || ''; // ✅ CORRIGIDO: leito.genero (não leito.sexo)
     const diretivas = leito.diretivas || 'Não se aplica'; // ⭐ NOVO V3.3
+    
+    // ⭐ CORREÇÃO: Usar tipo real do leito
+    const hospitalId = leito.hospital || window.currentHospital;
+    const tipoReal = getTipoLeito(leito, hospitalId);
+    const isHibrido = window.HOSPITAIS_HIBRIDOS.includes(hospitalId); // ✅ NOVO: detectar se é híbrido
     
     // Badges
     const badgeIsolamento = getBadgeIsolamento(isolamento);
@@ -358,6 +385,7 @@ function createCard(leito, hospitalNome) {
         <div class="card-header" style="text-align: center; margin-bottom: 12px; padding-bottom: 8px;">
             <div style="font-size: 9px; color: rgba(255,255,255,0.7); font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 3px;">HOSPITAL</div>
             <div style="font-size: 16px; color: #ffffff; font-weight: 800; text-transform: uppercase; letter-spacing: 1px;">${hospitalNome}</div>
+            ${isHibrido ? '<div style="font-size: 10px; color: rgba(255,255,255,0.6); font-weight: 600; margin-top: 2px;">Leito Híbrido</div>' : ''}
         </div>
 
         <!-- LINHA 1: LEITO | TIPO | STATUS -->
@@ -369,7 +397,7 @@ function createCard(leito, hospitalNome) {
             
             <div class="card-box" style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; padding: 8px; min-height: 45px; display: flex; flex-direction: column; justify-content: center;">
                 <div class="box-label" style="font-size: 9px; color: rgba(255,255,255,0.8); font-weight: 700; text-transform: uppercase; margin-bottom: 3px; letter-spacing: 0.5px;">TIPO</div>
-                <div class="box-value" style="color: #ffffff; font-weight: 700; font-size: 11px; line-height: 1.2;">${leito.tipo === 'UTI' ? 'UTI' : 'Híbrido'}</div>
+                <div class="box-value" style="color: #ffffff; font-weight: 700; font-size: 11px; line-height: 1.2;">${tipoReal}</div>
             </div>
             
             <div class="status-badge" style="background: ${statusBgColor}; color: ${statusTextColor}; padding: 12px 6px; border-radius: 6px; font-weight: 800; text-transform: uppercase; text-align: center; font-size: 11px; letter-spacing: 0.5px; min-height: 45px; display: flex; flex-direction: column; align-items: center; justify-content: center;">
@@ -479,26 +507,26 @@ function createCard(leito, hospitalNome) {
         </div>
 
         <!-- FOOTER -->
-        <div class="card-footer" style="display: flex; justify-content: space-between; align-items: center; padding-top: 10px; border-top: 1px solid rgba(255,255,255,0.1); gap: 10px;">
-            <div class="card-info" style="display: flex; gap: 12px; flex-wrap: wrap; flex: 1;">
+        <div class="card-footer" style="display: flex; justify-content: space-between; align-items: center; padding-top: 10px; border-top: 1px solid rgba(255,255,255,0.05); gap: 10px;">
+            <div class="card-info" style="display: flex; gap: 8px; flex-wrap: wrap; flex: 1;">
                 ${!isVago && admissao ? `
-                <div class="info-item" style="display: flex; flex-direction: column;">
-                    <div class="info-label" style="font-size: 9px; color: rgba(255,255,255,0.7); font-weight: 700; text-transform: uppercase; margin-bottom: 2px;">ADMISSÃO</div>
-                    <div class="info-value" style="color: #ffffff; font-weight: 700; font-size: 10px;">${formatarDataHora(admissao)}</div>
+                <div class="info-item" style="display: flex; flex-direction: column; opacity: 0.5;">
+                    <div class="info-label" style="font-size: 8px; color: rgba(255,255,255,0.5); font-weight: 600; text-transform: uppercase; margin-bottom: 1px;">ADMISSÃO</div>
+                    <div class="info-value" style="color: rgba(255,255,255,0.6); font-weight: 600; font-size: 9px;">${formatarDataHora(admissao)}</div>
                 </div>
                 ` : ''}
                 
                 ${!isVago && tempoInternacao ? `
-                <div class="info-item" style="display: flex; flex-direction: column;">
-                    <div class="info-label" style="font-size: 9px; color: rgba(255,255,255,0.7); font-weight: 700; text-transform: uppercase; margin-bottom: 2px;">INTERNADO</div>
-                    <div class="info-value" style="color: #ffffff; font-weight: 700; font-size: 10px;">${tempoInternacao}</div>
+                <div class="info-item" style="display: flex; flex-direction: column; opacity: 0.5;">
+                    <div class="info-label" style="font-size: 8px; color: rgba(255,255,255,0.5); font-weight: 600; text-transform: uppercase; margin-bottom: 1px;">INTERNADO</div>
+                    <div class="info-value" style="color: rgba(255,255,255,0.6); font-weight: 600; font-size: 9px;">${tempoInternacao}</div>
                 </div>
                 ` : ''}
                 
                 ${isVago ? `
                 <div class="info-item" style="display: flex; flex-direction: column;">
-                    <div class="info-label" style="font-size: 9px; color: rgba(255,255,255,0.7); font-weight: 700; text-transform: uppercase; margin-bottom: 2px;">STATUS</div>
-                    <div class="info-value" style="color: #C1FF72; font-weight: 700; font-size: 10px;">✓ Disponível</div>
+                    <div class="info-label" style="font-size: 8px; color: rgba(255,255,255,0.5); font-weight: 600; text-transform: uppercase; margin-bottom: 1px;">STATUS</div>
+                    <div class="info-value" style="color: #C1FF72; font-weight: 700; font-size: 9px;">✓ Disponível</div>
                 </div>
                 ` : ''}
             </div>
@@ -564,7 +592,7 @@ function openAdmissaoModal(leitoNumero) {
     window.selectedLeito = leitoNumero;
     
     const modal = createModalOverlay();
-    modal.innerHTML = createAdmissaoForm(hospitalNome, leitoNumero);
+    modal.innerHTML = createAdmissaoForm(hospitalNome, leitoNumero, hospitalId);
     document.body.appendChild(modal);
     
     setupModalEventListeners(modal, 'admissao');
@@ -601,37 +629,60 @@ function createModalOverlay() {
 }
 
 // =================== FORMULÁRIO DE ADMISSÃO V3.3 FINAL ===================
-function createAdmissaoForm(hospitalNome, leitoNumero) {
+function createAdmissaoForm(hospitalNome, leitoNumero, hospitalId) {
     const idSequencial = String(leitoNumero).padStart(2, '0');
+    const isHibrido = window.HOSPITAIS_HIBRIDOS.includes(hospitalId);
     
     return `
         <div class="modal-content" style="background: #1a1f2e; border-radius: 12px; padding: 30px; max-width: 700px; width: 95%; max-height: 90vh; overflow-y: auto; color: #ffffff;">
             <h2 style="margin: 0 0 20px 0; text-align: center; color: #60a5fa; font-size: 24px; font-weight: 700; text-transform: uppercase;">
-                ADMITIR PACIENTE V3.3
+                ADMITIR PACIENTE
             </h2>
             
             <div style="text-align: center; margin-bottom: 30px; padding: 15px; background: rgba(96,165,250,0.1); border-radius: 8px;">
-                <strong>Hospital:</strong> ${hospitalNome} | <strong>ID:</strong> ${idSequencial} | <strong>Leito:</strong> ${leitoNumero}
+                <div style="margin-bottom: 8px;">
+                    <strong>Hospital:</strong> ${hospitalNome} | <strong>ID:</strong> ${idSequencial} | <strong>Leito:</strong> ${leitoNumero}
+                </div>
+                ${isHibrido ? `
+                    <div style="display: inline-block; background: rgba(249,115,22,0.2); color: #f97316; padding: 6px 12px; border-radius: 6px; font-size: 11px; font-weight: 700; text-transform: uppercase; border: 1px solid rgba(249,115,22,0.4); margin-top: 8px;">
+                        🔄 LEITO HÍBRIDO
+                    </div>
+                ` : ''}
             </div>
             
-            <!-- IDENTIFICAÇÃO DO LEITO: OBRIGATÓRIO -->
+            <!-- ⭐ CORREÇÃO: 3 COLUNAS - ID LEITO | DIRETIVAS | TIPO DE QUARTO -->
             <div style="margin-bottom: 20px;">
-                <div style="background: rgba(96,165,250,0.1); padding: 10px 15px; border-radius: 6px; margin-bottom: 10px;">
-                    <div style="font-size: 11px; color: #ffffff; text-transform: uppercase; font-weight: 700;">
-                        IDENTIFICAÇÃO DO LEITO <span style="color: #ef4444;">*</span>
+                <div class="form-grid-3-cols" style="display: grid; grid-template-columns: ${isHibrido ? '1fr 1fr 1fr' : '1fr 1fr'}; gap: 15px;">
+                    <!-- IDENTIFICAÇÃO DO LEITO -->
+                    <div>
+                        <label style="display: block; margin-bottom: 5px; color: #e2e8f0; font-weight: 600; font-size: 11px; text-transform: uppercase;">IDENTIFICAÇÃO DO LEITO <span style="color: #ef4444;">*</span></label>
+                        <input id="admIdentificacaoLeito" type="text" placeholder="Ex: NEO1 (máx. 6)" maxlength="6" required style="width: 100%; padding: 12px; background: #374151; color: #ffffff; border: 1px solid rgba(255,255,255,0.3); border-radius: 6px; font-size: 14px;">
                     </div>
+                    
+                    <!-- DIRETIVAS -->
+                    <div>
+                        <label style="display: block; margin-bottom: 5px; color: #e2e8f0; font-weight: 600; font-size: 11px; text-transform: uppercase;">DIRETIVAS</label>
+                        <select id="admDiretivas" style="width: 100%; padding: 12px; background: #374151 !important; color: #ffffff !important; border: 1px solid rgba(255,255,255,0.3); border-radius: 6px; font-size: 14px;">
+                            ${window.DIRETIVAS_OPTIONS.map((opcao, index) => `<option value="${opcao}" ${index === 0 ? 'selected' : ''}>${opcao}</option>`).join('')}
+                        </select>
+                    </div>
+                    
+                    <!-- ⭐ NOVO: TIPO DE QUARTO (APENAS PARA HÍBRIDOS) -->
+                    ${isHibrido ? `
+                    <div>
+                        <label style="display: block; margin-bottom: 5px; color: #e2e8f0; font-weight: 600; font-size: 11px; text-transform: uppercase;">TIPO DE QUARTO <span style="color: #ef4444;">*</span></label>
+                        <select id="admTipoQuarto" required style="width: 100%; padding: 12px; background: #374151 !important; color: #ffffff !important; border: 1px solid rgba(255,255,255,0.3); border-radius: 6px; font-size: 14px;">
+                            <option value="">Selecionar...</option>
+                            ${window.TIPO_QUARTO_OPTIONS.map(tipo => `<option value="${tipo}">${tipo}</option>`).join('')}
+                        </select>
+                    </div>
+                    ` : ''}
                 </div>
-                <input id="admIdentificacaoLeito" type="text" placeholder="Ex: NEO1, UTI-5, ENF12 (máx. 6 caracteres)" maxlength="6" required style="width: 100%; padding: 12px; background: #374151; color: #ffffff; border: 1px solid rgba(255,255,255,0.3); border-radius: 6px; font-size: 14px;">
-                <div style="font-size: 11px; color: rgba(255,255,255,0.6); margin-top: 5px;">Campo alfanumérico obrigatório com até 6 caracteres</div>
             </div>
             
             <!-- ISOLAMENTO, REGIÃO, GÊNERO: 3 COLUNAS OBRIGATÓRIAS -->
             <div style="margin-bottom: 20px;">
-                <div style="background: rgba(96,165,250,0.1); padding: 10px 15px; border-radius: 6px; margin-bottom: 10px;">
-                    <div style="font-size: 11px; color: #ffffff; text-transform: uppercase; font-weight: 700;">
-                        ISOLAMENTO, REGIÃO E GÊNERO (OBRIGATÓRIOS)
-                    </div>
-                </div>
+                
                 <div class="form-grid-3-cols" style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px;">
                     <div>
                         <label style="display: block; margin-bottom: 5px; color: #e2e8f0; font-weight: 600;">ISOLAMENTO <span style="color: #ef4444;">*</span></label>
@@ -775,7 +826,7 @@ function createAtualizacaoForm(hospitalNome, leitoNumero, dadosLeito) {
     return `
         <div class="modal-content" style="background: #1a1f2e; border-radius: 12px; padding: 30px; max-width: 700px; width: 95%; max-height: 90vh; overflow-y: auto; color: #ffffff;">
             <h2 style="margin: 0 0 20px 0; text-align: center; color: #60a5fa; font-size: 24px; font-weight: 700; text-transform: uppercase;">
-                ATUALIZAR PACIENTE V3.3
+                ATUALIZAR PACIENTE
             </h2>
             
             <div style="text-align: center; margin-bottom: 30px; padding: 15px; background: rgba(96,165,250,0.1); border-radius: 8px;">
@@ -794,11 +845,7 @@ function createAtualizacaoForm(hospitalNome, leitoNumero, dadosLeito) {
             
             <!-- ISOLAMENTO, REGIÃO, GÊNERO -->
             <div style="margin-bottom: 20px;">
-                <div style="background: rgba(96,165,250,0.1); padding: 10px 15px; border-radius: 6px; margin-bottom: 10px;">
-                    <div style="font-size: 11px; color: #ffffff; text-transform: uppercase; font-weight: 700;">
-                        ISOLAMENTO, REGIÃO E GÊNERO (OBRIGATÓRIOS)
-                    </div>
-                </div>
+                
                 <div class="form-grid-3-cols" style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px;">
                     <div>
                         <label style="display: block; margin-bottom: 5px; color: #e2e8f0; font-weight: 600;">ISOLAMENTO <span style="color: #ef4444;">*</span></label>
@@ -851,6 +898,7 @@ function createAtualizacaoForm(hospitalNome, leitoNumero, dadosLeito) {
                         ${window.PPS_OPTIONS.map(pps => `<option value="${pps}" ${dadosLeito?.pps && `${dadosLeito.pps}%` === pps ? 'selected' : ''}>${pps}</option>`).join('')}
                     </select>
                 </div>
+                
                 <div>
                     <label style="display: block; margin-bottom: 5px; color: #e2e8f0; font-weight: 600;">SPICT-BR</label>
                     <select id="updSPICT" style="width: 100%; padding: 12px; background: #374151 !important; color: #ffffff !important; border: 1px solid rgba(255,255,255,0.3); border-radius: 6px; font-size: 14px;">
@@ -858,12 +906,8 @@ function createAtualizacaoForm(hospitalNome, leitoNumero, dadosLeito) {
                         <option value="elegivel" ${dadosLeito?.spict === 'elegivel' ? 'selected' : ''}>Elegível</option>
                     </select>
                 </div>
+                
                 <div>
-                    <label style="display: block; margin-bottom: 5px; color: #e2e8f0; font-weight: 600;">PREVISÃO ALTA</label>
-                    <select id="updPrevAlta" style="width: 100%; padding: 12px; background: #374151 !important; color: #ffffff !important; border: 1px solid rgba(255,255,255,0.3); border-radius: 6px; font-size: 14px;">
-                        ${window.PREVISAO_ALTA_OPTIONS.map(opt => `<option value="${opt}" ${dadosLeito?.prevAlta === opt ? 'selected' : ''}>${opt}</option>`).join('')}
-                    </select>
-                </div>
             </div>
             
             <!-- ⭐ NOVO V3.3: DIRETIVAS ANTECIPADAS -->
@@ -1584,3 +1628,14 @@ logInfo('  • ✅ Cores originais do projeto (#1a1f2e)');
 logInfo('  • ✅ 11 concessões + 45 linhas + 9 regiões + 2 gêneros + 3 diretivas');
 logInfo('  • ✅ TODO CSS responsivo consolidado');
 logInfo('  • ✅ 1600+ linhas completas do arquivo original');
+
+// =================== LOG INICIALIZAÇÃO V3.3 CORRIGIDO ===================
+console.log('✅ CARDS.JS V3.3 COMPLETO CARREGADO!');
+console.log('📊 11 Concessões + 45 Linhas de Cuidado + Diretivas (BV/73)');
+console.log('🏥 Hospitais Híbridos:', window.HOSPITAIS_HIBRIDOS);
+console.log('⭐ Correções V3.3 aplicadas:');
+console.log('   1. Gênero: leito.genero (não leito.sexo)');
+console.log('   2. Categoria: leito.categoriaEscolhida (não categoria_escolhida)');
+console.log('   3. Indicador "Leito Híbrido" para H1/H3/H5');
+console.log('   4. Linha 898 corrigida (erro de sintaxe no PPS select)');
+console.log('📁 Arquivo completo e funcional!');
