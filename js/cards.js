@@ -638,14 +638,7 @@ function createAdmissaoForm(hospitalNome, leitoNumero, hospitalId) {
             </h2>
             
             <div style="text-align: center; margin-bottom: 30px; padding: 15px; background: rgba(96,165,250,0.1); border-radius: 8px;">
-                <div style="margin-bottom: 8px;">
-                    <strong>Hospital:</strong> ${hospitalNome} | <strong>ID:</strong> ${idSequencial} | <strong>Leito:</strong> ${leitoNumero}
-                </div>
-                ${isHibrido ? `
-                    <div style="display: inline-block; background: rgba(249,115,22,0.2); color: #f97316; padding: 6px 12px; border-radius: 6px; font-size: 11px; font-weight: 700; text-transform: uppercase; border: 1px solid rgba(249,115,22,0.4); margin-top: 8px;">
-                        🔄 LEITO HÍBRIDO
-                    </div>
-                ` : ''}
+                <strong>Hospital:</strong> ${hospitalNome} | <strong>ID:</strong> ${idSequencial} | <strong>Leito:</strong> ${leitoNumero}${isHibrido ? ' | <strong>Leito Híbrido</strong>' : ''}
             </div>
             
             <!-- ⭐ CORREÇÃO: 3 COLUNAS - ID LEITO | DIRETIVAS | TIPO DE QUARTO -->
@@ -748,19 +741,6 @@ function createAdmissaoForm(hospitalNome, leitoNumero, hospitalId) {
                 </div>
             </div>
             
-            <!-- ⭐ NOVO V3.3: DIRETIVAS ANTECIPADAS -->
-            <div style="margin-bottom: 20px;">
-                <div style="background: rgba(96,165,250,0.1); padding: 10px 15px; border-radius: 6px; margin-bottom: 10px;">
-                    <div style="font-size: 11px; color: #ffffff; text-transform: uppercase; font-weight: 700;">
-                        DIRETIVAS ANTECIPADAS (NOVO V3.3)
-                    </div>
-                </div>
-                <select id="admDiretivas" style="width: 100%; padding: 12px; background: #374151 !important; color: #ffffff !important; border: 1px solid rgba(255,255,255,0.3); border-radius: 6px; font-size: 14px;">
-                    ${window.DIRETIVAS_OPTIONS.map((opcao, index) => `<option value="${opcao}" ${index === 0 ? 'selected' : ''}>${opcao}</option>`).join('')}
-                </select>
-                <div style="font-size: 11px; color: rgba(255,255,255,0.6); margin-top: 5px;">Padrão: "Não se aplica" | Será armazenado na coluna BV (índice 73)</div>
-            </div>
-            
             <!-- CONCESSÕES: 11 ITENS -->
             <div style="margin-bottom: 20px;">
                 <div style="background: rgba(96,165,250,0.1); padding: 10px 15px; border-radius: 6px; margin-bottom: 10px;">
@@ -805,10 +785,15 @@ function createAdmissaoForm(hospitalNome, leitoNumero, hospitalId) {
 }
 
 // =================== FORMULÁRIO DE ATUALIZAÇÃO V3.3 FINAL ===================
+// =================== FORMULÁRIO DE ATUALIZAÇÃO V3.3 CORRIGIDO ===================
 function createAtualizacaoForm(hospitalNome, leitoNumero, dadosLeito) {
     const tempoInternacao = dadosLeito?.admAt ? calcularTempoInternacao(dadosLeito.admAt) : '';
+    const dataAdmissao = dadosLeito?.admAt ? formatarDataHora(dadosLeito.admAt) : '';
     const iniciais = dadosLeito?.nome ? getIniciais(dadosLeito.nome) : '';
     const idSequencial = String(leitoNumero).padStart(2, '0');
+    const hospitalId = window.currentHospital;
+    const isHibrido = window.HOSPITAIS_HIBRIDOS.includes(hospitalId);
+    
     const leitoPersonalizado = (dadosLeito?.identificacaoLeito && dadosLeito.identificacaoLeito.trim()) 
         ? dadosLeito.identificacaoLeito.trim().toUpperCase()
         : `LEITO ${leitoNumero}`;
@@ -819,7 +804,8 @@ function createAtualizacaoForm(hospitalNome, leitoNumero, dadosLeito) {
     const identificacaoAtual = dadosLeito?.identificacaoLeito || '';
     const regiaoAtual = dadosLeito?.regiao || '';
     const sexoAtual = dadosLeito?.sexo || '';
-    const diretivasAtual = dadosLeito?.diretivas || 'Não se aplica'; // ⭐ NOVO V3.3
+    const diretivasAtual = dadosLeito?.diretivas || 'Não se aplica';
+    const tipoQuartoAtual = dadosLeito?.categoria_escolhida || '';
     
     return `
         <div class="modal-content" style="background: #1a1f2e; border-radius: 12px; padding: 30px; max-width: 700px; width: 95%; max-height: 90vh; overflow-y: auto; color: #ffffff;">
@@ -828,22 +814,41 @@ function createAtualizacaoForm(hospitalNome, leitoNumero, dadosLeito) {
             </h2>
             
             <div style="text-align: center; margin-bottom: 30px; padding: 15px; background: rgba(96,165,250,0.1); border-radius: 8px;">
-                <strong>Hospital:</strong> ${hospitalNome} | <strong>ID:</strong> ${idSequencial} | <strong>Leito:</strong> ${leitoPersonalizado}
+                <strong>Hospital:</strong> ${hospitalNome} | <strong>ID:</strong> ${idSequencial} | <strong>Leito:</strong> ${leitoPersonalizado}${isHibrido ? ' | <strong>Leito Híbrido</strong>' : ''}
             </div>
             
-            <!-- IDENTIFICAÇÃO DO LEITO -->
+            <!-- ✅ LINHA 1: ID LEITO | DIRETIVAS | TIPO DE QUARTO (3 colunas) -->
             <div style="margin-bottom: 20px;">
-                <div style="background: rgba(96,165,250,0.1); padding: 10px 15px; border-radius: 6px; margin-bottom: 10px;">
-                    <div style="font-size: 11px; color: #ffffff; text-transform: uppercase; font-weight: 700;">
-                        IDENTIFICAÇÃO DO LEITO <span style="color: #ef4444;">*</span>
+                <div class="form-grid-3-cols" style="display: grid; grid-template-columns: ${isHibrido ? '1fr 1fr 1fr' : '1fr 1fr'}; gap: 15px;">
+                    <!-- IDENTIFICAÇÃO DO LEITO -->
+                    <div>
+                        <label style="display: block; margin-bottom: 5px; color: #e2e8f0; font-weight: 600; font-size: 11px; text-transform: uppercase;">IDENTIFICAÇÃO DO LEITO <span style="color: #ef4444;">*</span></label>
+                        <input id="updIdentificacaoLeito" type="text" value="${identificacaoAtual}" placeholder="Ex: NEO1 (máx. 6)" maxlength="6" required style="width: 100%; padding: 12px; background: #374151; color: #ffffff; border: 1px solid rgba(255,255,255,0.3); border-radius: 6px; font-size: 14px;">
                     </div>
+                    
+                    <!-- DIRETIVAS -->
+                    <div>
+                        <label style="display: block; margin-bottom: 5px; color: #e2e8f0; font-weight: 600; font-size: 11px; text-transform: uppercase;">DIRETIVAS</label>
+                        <select id="updDiretivas" style="width: 100%; padding: 12px; background: #374151 !important; color: #ffffff !important; border: 1px solid rgba(255,255,255,0.3); border-radius: 6px; font-size: 14px;">
+                            ${window.DIRETIVAS_OPTIONS.map(opcao => `<option value="${opcao}" ${diretivasAtual === opcao ? 'selected' : ''}>${opcao}</option>`).join('')}
+                        </select>
+                    </div>
+                    
+                    <!-- TIPO DE QUARTO (APENAS PARA HÍBRIDOS) -->
+                    ${isHibrido ? `
+                    <div>
+                        <label style="display: block; margin-bottom: 5px; color: #e2e8f0; font-weight: 600; font-size: 11px; text-transform: uppercase;">TIPO DE QUARTO <span style="color: #ef4444;">*</span></label>
+                        <select id="updTipoQuarto" required style="width: 100%; padding: 12px; background: #374151 !important; color: #ffffff !important; border: 1px solid rgba(255,255,255,0.3); border-radius: 6px; font-size: 14px;">
+                            <option value="">Selecionar...</option>
+                            ${window.TIPO_QUARTO_OPTIONS.map(tipo => `<option value="${tipo}" ${tipoQuartoAtual === tipo ? 'selected' : ''}>${tipo}</option>`).join('')}
+                        </select>
+                    </div>
+                    ` : ''}
                 </div>
-                <input id="updIdentificacaoLeito" type="text" value="${identificacaoAtual}" placeholder="Ex: NEO1, UTI-5, ENF12 (máx. 6 caracteres)" maxlength="6" required style="width: 100%; padding: 12px; background: #374151; color: #ffffff; border: 1px solid rgba(255,255,255,0.3); border-radius: 6px; font-size: 14px;">
             </div>
             
-            <!-- ISOLAMENTO, REGIÃO, GÊNERO -->
+            <!-- ✅ ISOLAMENTO, REGIÃO, GÊNERO (SEM SUBTÍTULO) -->
             <div style="margin-bottom: 20px;">
-                
                 <div class="form-grid-3-cols" style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px;">
                     <div>
                         <label style="display: block; margin-bottom: 5px; color: #e2e8f0; font-weight: 600;">ISOLAMENTO <span style="color: #ef4444;">*</span></label>
@@ -911,19 +916,6 @@ function createAtualizacaoForm(hospitalNome, leitoNumero, dadosLeito) {
                 </div>
             </div>
             
-            <!-- ⭐ NOVO V3.3: DIRETIVAS ANTECIPADAS -->
-            <div style="margin-bottom: 20px;">
-                <div style="background: rgba(96,165,250,0.1); padding: 10px 15px; border-radius: 6px; margin-bottom: 10px;">
-                    <div style="font-size: 11px; color: #ffffff; text-transform: uppercase; font-weight: 700;">
-                        DIRETIVAS ANTECIPADAS (NOVO V3.3)
-                    </div>
-                </div>
-                <select id="updDiretivas" style="width: 100%; padding: 12px; background: #374151 !important; color: #ffffff !important; border: 1px solid rgba(255,255,255,0.3); border-radius: 6px; font-size: 14px;">
-                    ${window.DIRETIVAS_OPTIONS.map(opcao => `<option value="${opcao}" ${diretivasAtual === opcao ? 'selected' : ''}>${opcao}</option>`).join('')}
-                </select>
-                <div style="font-size: 11px; color: rgba(255,255,255,0.6); margin-top: 5px;">Será atualizado na coluna BV (índice 73)</div>
-            </div>
-            
             <!-- CONCESSÕES -->
             <div style="margin-bottom: 20px;">
                 <div style="background: rgba(96,165,250,0.1); padding: 10px 15px; border-radius: 6px; margin-bottom: 10px;">
@@ -964,13 +956,15 @@ function createAtualizacaoForm(hospitalNome, leitoNumero, dadosLeito) {
                 </div>
             </div>
             
-            ${tempoInternacao ? `
+            <!-- ✅ INFORMAÇÕES DE ADMISSÃO -->
+            ${(dataAdmissao || tempoInternacao) ? `
             <div style="margin-bottom: 20px; padding: 12px; background: rgba(251, 191, 36, 0.1); border-radius: 8px; border-left: 4px solid #fbbf24;">
-                <strong>Tempo de Internação:</strong> ${tempoInternacao}
+                ${dataAdmissao ? `<div style="margin-bottom: 5px;"><strong>Data de admissão:</strong> ${dataAdmissao}</div>` : ''}
+                ${tempoInternacao ? `<div><strong>Admitido há:</strong> ${tempoInternacao}</div>` : ''}
             </div>
             ` : ''}
             
-            <!-- BOTÕES -->
+            <!-- BOTÕES COM ALTA -->
             <div style="display: flex; justify-content: space-between; gap: 12px; padding: 20px; border-top: 1px solid rgba(255,255,255,0.1);">
                 <button class="btn-alta" style="padding: 12px 30px; background: #ef4444; color: #ffffff; border: none; border-radius: 8px; font-weight: 600; text-transform: uppercase; cursor: pointer;">ALTA</button>
                 <div style="display: flex; gap: 12px;">
