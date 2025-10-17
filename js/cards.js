@@ -893,20 +893,17 @@ function createAtualizacaoForm(hospitalNome, leitoNumero, dadosLeito) {
                     <label style="display: block; margin-bottom: 5px; color: #e2e8f0; font-weight: 600;">PPS</label>
                     <select id="updPPS" style="width: 100%; padding: 12px; background: #374151 !important; color: #ffffff !important; border: 1px solid rgba(255,255,255,0.3); border-radius: 6px; font-size: 14px;">
                         <option value="">Selecionar...</option>
-                        ${window.PPS_OPTIONS.map(pps => `<option value="${pps}" ${dadosLeito?.pps && `${dadosLeito.pps}%` === pps ? 'selected
-// =================== LOG INICIALIZAÇÃO V3.3 CORRIGIDO ===================
-console.log('✅ CARDS.JS V3.3 COMPLETO CARREGADO!');
-console.log('📊 11 Concessões + 45 Linhas de Cuidado + Diretivas (BV/73)');
-console.log('🏥 Hospitais Híbridos:', window.HOSPITAIS_HIBRIDOS);
-console.log('⭐ Correções V3.3 aplicadas:');
-console.log('   1. Título sem "V3.3"');
-console.log('   2. Indicador "Leito Híbrido" para H1/H3/H5');
-console.log('   3. Campo "Tipo de Quarto" em 3 colunas (ID|Diretivas|Tipo)');
-console.log('   4. Subtítulo desnecessário removido');
-console.log('   5. Exibição correta de tipos nos cards (função getTipoLeito)');
-console.log('   6. Campo categoria_escolhida para híbridos');
-console.log('📁 Arquivo completo: 1600+ linhas preservadas');
->
+                        ${window.PPS_OPTIONS.map(pps => `<option value="${pps}" ${dadosLeito?.pps && `${dadosLeito.pps}%` === pps ? 'selected' : ''}>${pps}</option>`).join('')}
+                    </select>
+                </div>
+                <div>
+                    <label style="display: block; margin-bottom: 5px; color: #e2e8f0; font-weight: 600;">SPICT-BR</label>
+                    <select id="updSPICT" style="width: 100%; padding: 12px; background: #374151 !important; color: #ffffff !important; border: 1px solid rgba(255,255,255,0.3); border-radius: 6px; font-size: 14px;">
+                        <option value="nao_elegivel" ${dadosLeito?.spict === 'nao_elegivel' ? 'selected' : ''}>Não elegível</option>
+                        <option value="elegivel" ${dadosLeito?.spict === 'elegivel' ? 'selected' : ''}>Elegível</option>
+                    </select>
+                </div>
+                <div>
                     <label style="display: block; margin-bottom: 5px; color: #e2e8f0; font-weight: 600;">PREVISÃO ALTA</label>
                     <select id="updPrevAlta" style="width: 100%; padding: 12px; background: #374151 !important; color: #ffffff !important; border: 1px solid rgba(255,255,255,0.3); border-radius: 6px; font-size: 14px;">
                         ${window.PREVISAO_ALTA_OPTIONS.map(opt => `<option value="${opt}" ${dadosLeito?.prevAlta === opt ? 'selected' : ''}>${opt}</option>`).join('')}
