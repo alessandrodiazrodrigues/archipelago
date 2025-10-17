@@ -507,26 +507,26 @@ function createCard(leito, hospitalNome) {
         </div>
 
         <!-- FOOTER -->
-        <div class="card-footer" style="display: flex; justify-content: space-between; align-items: center; padding-top: 10px; border-top: 1px solid rgba(255,255,255,0.1); gap: 10px;">
-            <div class="card-info" style="display: flex; gap: 12px; flex-wrap: wrap; flex: 1;">
+        <div class="card-footer" style="display: flex; justify-content: space-between; align-items: center; padding-top: 10px; border-top: 1px solid rgba(255,255,255,0.05); gap: 10px;">
+            <div class="card-info" style="display: flex; gap: 8px; flex-wrap: wrap; flex: 1;">
                 ${!isVago && admissao ? `
-                <div class="info-item" style="display: flex; flex-direction: column;">
-                    <div class="info-label" style="font-size: 9px; color: rgba(255,255,255,0.7); font-weight: 700; text-transform: uppercase; margin-bottom: 2px;">ADMISSÃO</div>
-                    <div class="info-value" style="color: #ffffff; font-weight: 700; font-size: 10px;">${formatarDataHora(admissao)}</div>
+                <div class="info-item" style="display: flex; flex-direction: column; opacity: 0.5;">
+                    <div class="info-label" style="font-size: 8px; color: rgba(255,255,255,0.5); font-weight: 600; text-transform: uppercase; margin-bottom: 1px;">ADMISSÃO</div>
+                    <div class="info-value" style="color: rgba(255,255,255,0.6); font-weight: 600; font-size: 9px;">${formatarDataHora(admissao)}</div>
                 </div>
                 ` : ''}
                 
                 ${!isVago && tempoInternacao ? `
-                <div class="info-item" style="display: flex; flex-direction: column;">
-                    <div class="info-label" style="font-size: 9px; color: rgba(255,255,255,0.7); font-weight: 700; text-transform: uppercase; margin-bottom: 2px;">INTERNADO</div>
-                    <div class="info-value" style="color: #ffffff; font-weight: 700; font-size: 10px;">${tempoInternacao}</div>
+                <div class="info-item" style="display: flex; flex-direction: column; opacity: 0.5;">
+                    <div class="info-label" style="font-size: 8px; color: rgba(255,255,255,0.5); font-weight: 600; text-transform: uppercase; margin-bottom: 1px;">INTERNADO</div>
+                    <div class="info-value" style="color: rgba(255,255,255,0.6); font-weight: 600; font-size: 9px;">${tempoInternacao}</div>
                 </div>
                 ` : ''}
                 
                 ${isVago ? `
                 <div class="info-item" style="display: flex; flex-direction: column;">
-                    <div class="info-label" style="font-size: 9px; color: rgba(255,255,255,0.7); font-weight: 700; text-transform: uppercase; margin-bottom: 2px;">STATUS</div>
-                    <div class="info-value" style="color: #C1FF72; font-weight: 700; font-size: 10px;">✓ Disponível</div>
+                    <div class="info-label" style="font-size: 8px; color: rgba(255,255,255,0.5); font-weight: 600; text-transform: uppercase; margin-bottom: 1px;">STATUS</div>
+                    <div class="info-value" style="color: #C1FF72; font-weight: 700; font-size: 9px;">✓ Disponível</div>
                 </div>
                 ` : ''}
             </div>
