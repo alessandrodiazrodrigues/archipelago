@@ -344,7 +344,7 @@ function createCard(leito, hospitalNome) {
     const isolamento = leito.isolamento || 'Não Isolamento';
     // ⭐ CORREÇÃO V3.3: Numeração fixa para Cruz Azul enfermarias (leitos 21-36)
     let identificacaoLeito = '';
-    const numeroLeito = leito.leito || leito.numero;
+    const numeroLeito = leito.leito || leito.numero || 'N/A';
     const isCruzAzulEnfermaria = (window.currentHospital === 'H2' && numeroLeito >= 21 && numeroLeito <= 36);
     
     if (isCruzAzulEnfermaria && window.CRUZ_AZUL_NUMERACAO[numeroLeito]) {
@@ -391,8 +391,6 @@ function createCard(leito, hospitalNome) {
     const spictFormatado = spict === 'elegivel' ? 'Elegível' : 
                           (spict === 'nao_elegivel' ? 'Não elegível' : '—');
     
-    const numeroLeito = leito.leito || leito.numero || 'N/A';
-    
     // ID sequencial e leito personalizado
     const idSequencial = String(numeroLeito).padStart(2, '0');
     
@@ -401,10 +399,9 @@ function createCard(leito, hospitalNome) {
         ? identificacaoLeito.trim().toUpperCase()
         : `LEITO ${numeroLeito}`;
     
-    // ⭐ Se for Cruz Azul enfermaria (21-36) e tiver identificação, usar ela
-    const isCruzAzulEnfermaria = (hospitalId === 'H2' && numeroLeito >= 21 && numeroLeito <= 36);
-    if (isCruzAzulEnfermaria && identificacaoLeito && identificacaoLeito.trim()) {
-        leitoDisplay = identificacaoLeito.trim().toUpperCase();
+    // ⭐ Se for Cruz Azul enfermaria (21-36), já está com numeração fixa do mapeamento
+    if (isCruzAzulEnfermaria && identificacaoLeito) {
+        leitoDisplay = identificacaoLeito; // Já vem em maiúscula do mapeamento
     }
     
     // COR DO CÍRCULO PESSOA
