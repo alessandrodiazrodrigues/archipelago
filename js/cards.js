@@ -1186,9 +1186,72 @@ function coletarDadosFormulario(modal, tipo) {
     return dados;
 }
 
+// =================== RENDERIZAR CARDS (FUNÇÃO PRINCIPAL) ===================
+window.renderCards = function() {
+    logInfo('🎨 Renderizando cards V3.3...');
+    
+    const container = document.getElementById('cardsContainer');
+    if (!container) {
+        logError('❌ Container #cardsContainer não encontrado!');
+        return;
+    }
+    
+    // Limpar container
+    container.innerHTML = '';
+    
+    // Hospital atual
+    const hospitalId = window.currentHospital || 'H1';
+    logInfo(`Hospital atual: ${hospitalId}`);
+    
+    // ✅ CORREÇÃO: Usar window.hospitalData[H1].leitos
+    if (!window.hospitalData || !window.hospitalData[hospitalId]) {
+        container.innerHTML = '<div style="padding: 40px; text-align: center; background: #fff; border-radius: 12px;"><h3>⚠️ Carregando dados...</h3></div>';
+        logError(`Hospital ${hospitalId} não encontrado em window.hospitalData`);
+        return;
+    }
+    
+    const leitos = window.hospitalData[hospitalId].leitos || [];
+    logInfo(`✅ ${leitos.length} leitos encontrados para ${hospitalId}`);
+    
+    if (leitos.length === 0) {
+        container.innerHTML = '<div style="padding: 40px; text-align: center; background: #fff; border-radius: 12px;"><h3>📋 Nenhum leito disponível</h3></div>';
+        return;
+    }
+    
+    // Renderizar cada leito
+    leitos.forEach(leito => {
+        const card = createCard(leito, hospitalId);
+        container.appendChild(card);
+    });
+    
+    logInfo(`✅ ${leitos.length} cards renderizados com sucesso!`);
+};
+
+// =================== CRIAR CARD (ELEMENTO DOM) ===================
+function createCard(leito, hospitalId) {
+    const div = document.createElement('div');
+    div.className = 'card';
+    div.innerHTML = createCardHTML(leito, hospitalId);
+    
+    // Adicionar event listeners aos botões
+    setTimeout(() => {
+        const btnAdmitir = div.querySelector('[data-action="admitir"]');
+        if (btnAdmitir) {
+            btnAdmitir.addEventListener('click', handleAdmitirClick);
+        }
+        
+        const btnAtualizar = div.querySelector('[data-action="atualizar"]');
+        if (btnAtualizar) {
+            btnAtualizar.addEventListener('click', (e) => handleAtualizarClick(e, leito));
+        }
+    }, 0);
+    
+    return div;
+}
+
 // =================== CRIAR CARD HTML ===================
 // ✅ CORREÇÃO: Mostrar tipo correto (Apartamento/Enfermaria/Híbrido)
-window.createCardHTML = function(leito, hospital) {
+function createCardHTML(leito, hospitalId) {
     const isOcupado = leito.status === 'Em uso';
     const isBloqueado = leito.bloqueado === true;
     
@@ -1239,7 +1302,7 @@ window.createCardHTML = function(leito, hospital) {
         return `
             <div class="card vago" data-status="vago" style="background: #F0F4F8; border-left: 4px solid #4CAF50;">
                 <h3 style="color: #4CAF50; margin-bottom: 15px;">
-                    🟢 ${hospital}.${leito.leito} - VAGO
+                    🟢 ${hospitalId}.${leito.leito} - VAGO
                 </h3>
                 <div style="text-align: center; padding: 10px; background: white; border-radius: 8px; margin-bottom: 15px;">
                     <p style="font-size: 13px; font-weight: 600; color: #555; margin: 0;">
@@ -1258,7 +1321,7 @@ window.createCardHTML = function(leito, hospital) {
     return `
         <div class="card ocupado" data-status="ocupado" style="background: #FFF8E1; border-left: 4px solid #FFA726;">
             <h3 style="color: #F57C00; margin-bottom: 15px;">
-                🔴 ${hospital}.${leito.leito} - OCUPADO
+                🔴 ${hospitalId}.${leito.leito} - OCUPADO
             </h3>
             
             <!-- LINHA 1: Tipo, Complexidade, Tempo -->
@@ -1350,7 +1413,7 @@ window.createCardHTML = function(leito, hospital) {
             </button>
         </div>
     `;
-};
+}
 
 // =================== INICIALIZAÇÃO ===================
 logInfo('====================================');
