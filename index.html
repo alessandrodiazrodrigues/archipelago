@@ -87,6 +87,7 @@
                     <button class="hospital-btn" data-hospital="H2" onclick="selectHospital('H2')">Cruz Azul</button>
                     <button class="hospital-btn" data-hospital="H3" onclick="selectHospital('H3')">Santa Marcelina</button>
                     <button class="hospital-btn" data-hospital="H4" onclick="selectHospital('H4')">Santa Clara</button>
+                    <button class="hospital-btn" data-hospital="H5" onclick="selectHospital('H5')">Hospital Adventista</button>
                 </div>
             </div>
             
@@ -106,12 +107,12 @@
         
     </main>
 
-    <!-- =================== FOOTER V3.1 COM CRÉDITOS COMPLETOS =================== -->
+    <!-- =================== FOOTER V3.2 COM CRÉDITOS COMPLETOS =================== -->
     <footer id="mainFooter" class="footer hidden">
         <p>Sistema em versão BETA - não pode ser usado como única fonte de referência</p>
         <p>Para decisões críticas, consulte sempre fontes adicionais e profissionais qualificados</p>
-        <p><strong>Criado por: Guilherme Santori | Desenvolvido por: Alessandro Rodrigues</strong></p>
-        <p><strong>Archipelago Dashboard - Outubro/2025</strong></p>
+        <p><strong>Criado por: Guilherme Santoro | Desenvolvido por: Alessandro Rodrigues</strong></p>
+        <p><strong>Archipelago Dashboard V3.2 - Outubro/2025</strong></p>
     </footer>
 
     <!-- =================== MODAL DE PACIENTE =================== -->
@@ -134,43 +135,40 @@
         </div>
     </div>
 
-    <!-- =================== SCRIPTS MODULARES V3.1 =================== -->
+    <!-- =================== SCRIPTS MODULARES V3.2 CORRIGIDOS =================== -->
     
     <!-- Scripts Core -->
     <script src="js/app.js"></script>
     <script src="js/api.js"></script>
     
-    <!-- Scripts de Dashboards -->
-    <script src="js/dashboards/charts-config.js"></script>
-    <script src="js/dashboards/dashboard-hospital.js"></script>
-    <script src="js/dashboards/dashboard-executive.js"></script>
+    <!-- Scripts de Dashboards - CORRIGIDO: Usar dashboard.js (arquivo que existe) -->
+    <script src="js/dashboards/dashboard.js"></script>
     
     <!-- Scripts de Interface -->
     <script src="js/cards.js"></script>
     
     <!-- Scripts de Funcionalidades - QRCode.js DEVE vir APÓS a biblioteca -->
     <script src="js/qrcode.js"></script>
-    <script src="js/admin.js"></script>
+    
+    <!-- Script de Inicialização -->
     <script src="js/main.js"></script>
     
-    <!-- =================== INICIALIZAÇÃO V3.1 =================== -->
+    <!-- =================== INICIALIZAÇÃO V3.2 =================== -->
     <script>
         // Verificar se QRCode.js foi carregada
         document.addEventListener('DOMContentLoaded', function() {
-            console.log('🚀 Archipelago Dashboard V3.1 - Inicializando...');
-            console.log('👨‍💼 Criado por: Guilherme Santori');
+            console.log('🚀 Archipelago Dashboard V3.2 - Inicializando...');
+            console.log('👨‍💼 Criado por: Guilherme Santoro');
             console.log('👨‍💻 Desenvolvido por: Alessandro Rodrigues');
-            console.log('📅 Outubro/2025 - Versão V3.1');
+            console.log('📅 Outubro/2025 - Versão V3.2');
             console.log('');
-            console.log('✅ CORREÇÕES V3.1 IMPLEMENTADAS:');
-            console.log('   • Mobile: Campo idade dropdown 14-115 anos');
-            console.log('   • Desktop: Cards exibem apenas INICIAIS');
-            console.log('   • Hospitais: 66 leitos (H1:10, H2:36, H3:13, H4:7)');
-            console.log('   • Dashboard Executivo: "SPICT-BR ELEGÍVEIS" + títulos "Geral"');
-            console.log('   • BUG CORRIGIDO: Legendas dos gráficos funcionais');
-            console.log('   • Coluna AS: ISOLAMENTO (dropdown obrigatório)');
-            console.log('   • Coluna AT: IDENTIFICACAO_LEITO (alfanumérico 6 chars)');
-            console.log('   • Créditos: Guilherme Santori + Alessandro Rodrigues');
+            console.log('✅ CORREÇÕES V3.2 IMPLEMENTADAS:');
+            console.log('   • ✅ Cards.js corrigido (erro sintaxe linha 896)');
+            console.log('   • ✅ Index.html corrigido (removido charts-config.js e admin.js)');
+            console.log('   • ✅ Hospital H5 adicionado (Hospital Adventista - 13 leitos)');
+            console.log('   • ✅ Total atualizado: 79 leitos (H1:10, H2:36, H3:13, H4:13, H5:13)');
+            console.log('   • ✅ Estrutura de arquivos corrigida (17 módulos)');
+            console.log('   • ✅ Créditos: Guilherme Santoro + Alessandro Rodrigues');
             console.log('');
             
             // Verificar biblioteca QRCode
@@ -184,29 +182,29 @@
             setTimeout(() => {
                 if (typeof window.initApp === 'function') {
                     window.initApp();
-                    console.log('✅ Sistema V3.1 inicializado com sucesso');
+                    console.log('✅ Sistema V3.2 inicializado com sucesso');
                 } else {
                     console.error('❌ initApp não encontrada');
                     // Retry
                     setTimeout(() => {
                         if (typeof window.initApp === 'function') {
                             window.initApp();
-                            console.log('✅ Sistema V3.1 inicializado após retry');
+                            console.log('✅ Sistema V3.2 inicializado após retry');
                         }
                     }, 1000);
                 }
             }, 200);
         });
         
-        // Log de informações importantes V3.1
+        // Log de informações importantes V3.2
         console.log('📱 QR Codes apontam para: https://qrcode-seven-gamma.vercel.app');
         console.log('🖨️ Impressão configurada: 12 QR codes por A4 (3x4)');
-        console.log('📊 Planilha V3.1: 46 colunas (AS: ISOLAMENTO, AT: IDENTIFICACAO_LEITO)');
-        console.log('🏥 Hospitais configurados: 66 leitos totais');
-        console.log('🔧 Status: TODAS as 8 correções implementadas - 100% concluído');
+        console.log('📊 Planilha V3.2: 47 colunas (A-AV)');
+        console.log('🏥 Hospitais configurados: 79 leitos totais (5 hospitais)');
+        console.log('🔧 Status: Arquivos corrigidos - Sistema funcional');
     </script>
     
-    <!-- =================== CSS BASE V3.1 =================== -->
+    <!-- =================== CSS BASE V3.2 =================== -->
     <style>
         * {
             box-sizing: border-box;
@@ -246,38 +244,35 @@
             text-align: center;
             max-width: 400px;
             width: 90%;
-            border: 2px solid #60a5fa;
-            box-shadow: 0 20px 60px rgba(96, 165, 250, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.1);
         }
         
         .auth-container h1 {
-            margin: 0 0 20px;
             color: #60a5fa;
-            font-size: 24px;
-            font-weight: 700;
+            margin-bottom: 10px;
+            font-size: 28px;
         }
         
         .auth-container p {
             color: #e2e8f0;
             margin-bottom: 20px;
-            font-size: 16px;
         }
         
         .auth-container input {
             width: 100%;
             padding: 12px;
-            margin: 10px 0;
-            border: 1px solid #334155;
-            background: #0f172a;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            background: #334155;
             color: white;
             border-radius: 8px;
             font-size: 16px;
-            transition: border-color 0.3s;
+            margin-bottom: 15px;
         }
         
         .auth-container input:focus {
             outline: none;
             border-color: #60a5fa;
+            box-shadow: 0 0 0 2px rgba(96, 165, 250, 0.2);
         }
         
         .auth-container button {
@@ -289,9 +284,8 @@
             border-radius: 8px;
             font-size: 16px;
             cursor: pointer;
-            margin-top: 10px;
-            transition: background 0.3s;
             font-weight: 600;
+            transition: background 0.3s;
         }
         
         .auth-container button:hover {
@@ -300,49 +294,36 @@
         
         .error-msg {
             color: #ef4444;
-            margin-top: 10px;
             font-size: 14px;
-            font-weight: 500;
+            margin-top: 10px;
         }
         
-        /* Header V3.1 */
+        /* Header */
         .header {
-            background: rgba(15, 23, 42, 0.95);
-            padding: 15px 20px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(10px);
-            position: sticky;
-            top: 0;
-            z-index: 100;
+            background: #1e293b;
+            padding: 20px 30px;
             display: flex;
             justify-content: space-between;
             align-items: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
         }
         
         .header-left {
             display: flex;
             align-items: center;
-            gap: 15px;
-        }
-        
-        .header-left h1 {
-            color: #60a5fa;
-            margin: 0;
-            font-size: 20px;
-            font-weight: 700;
+            gap: 20px;
         }
         
         .hamburger {
-            font-size: 24px;
+            font-size: 28px;
             cursor: pointer;
-            color: #e2e8f0;
-            padding: 5px;
-            border-radius: 4px;
-            transition: background 0.3s;
+            color: #60a5fa;
         }
         
-        .hamburger:hover {
-            background: rgba(255, 255, 255, 0.1);
+        .header-left h1 {
+            font-size: 24px;
+            color: #60a5fa;
+            margin: 0;
         }
         
         .header-right {
@@ -352,13 +333,12 @@
         }
         
         .header-right button {
+            padding: 10px 20px;
             background: #3b82f6;
             color: white;
             border: none;
-            padding: 8px 16px;
             border-radius: 6px;
             cursor: pointer;
-            font-size: 14px;
             font-weight: 500;
             transition: background 0.3s;
         }
@@ -370,20 +350,19 @@
         /* Side Menu */
         .side-menu {
             position: fixed;
-            left: -300px;
+            left: 0;
             top: 0;
-            width: 300px;
-            height: 100vh;
+            height: 100%;
+            width: 280px;
             background: #1e293b;
             border-right: 1px solid rgba(255, 255, 255, 0.1);
-            transition: left 0.3s ease;
             z-index: 1000;
-            display: flex;
-            flex-direction: column;
+            transform: translateX(-100%);
+            transition: transform 0.3s ease;
         }
         
         .side-menu.open {
-            left: 0;
+            transform: translateX(0);
         }
         
         .menu-header {
@@ -397,73 +376,69 @@
         .menu-header h2 {
             color: #60a5fa;
             margin: 0;
-            font-size: 18px;
+            font-size: 20px;
         }
         
         .menu-close {
             background: none;
             border: none;
             color: #e2e8f0;
-            font-size: 24px;
+            font-size: 32px;
             cursor: pointer;
             padding: 0;
-            width: 30px;
-            height: 30px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 4px;
-            transition: background 0.3s;
-        }
-        
-        .menu-close:hover {
-            background: rgba(255, 255, 255, 0.1);
         }
         
         .menu-items {
-            flex: 1;
-            padding: 20px 0;
+            padding: 10px 0;
         }
         
         .side-menu-item {
             display: block;
-            padding: 12px 20px;
+            padding: 15px 20px;
             color: #e2e8f0;
             text-decoration: none;
-            transition: all 0.3s;
-            border-left: 3px solid transparent;
+            transition: background 0.3s, color 0.3s;
         }
         
         .side-menu-item:hover {
-            background: rgba(255, 255, 255, 0.05);
+            background: rgba(96, 165, 250, 0.1);
             color: #60a5fa;
         }
         
         .side-menu-item.active {
-            background: rgba(96, 165, 250, 0.1);
+            background: rgba(96, 165, 250, 0.2);
             color: #60a5fa;
-            border-left-color: #60a5fa;
+            border-left: 3px solid #60a5fa;
         }
         
         .menu-footer {
-            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            position: absolute;
+            bottom: 0;
+            width: 100%;
             padding: 20px;
+        }
+        
+        .menu-divider {
+            height: 1px;
+            background: rgba(255, 255, 255, 0.1);
+            margin-bottom: 20px;
         }
         
         .menu-qr {
             display: flex;
             align-items: center;
             gap: 10px;
-            color: #e2e8f0;
+            padding: 12px;
+            background: rgba(96, 165, 250, 0.1);
+            border-radius: 8px;
             text-decoration: none;
-            padding: 10px;
-            border-radius: 6px;
+            color: #60a5fa;
+            font-weight: 500;
             transition: background 0.3s;
         }
         
         .menu-qr:hover {
-            background: rgba(255, 255, 255, 0.1);
-            color: #60a5fa;
+            background: rgba(96, 165, 250, 0.2);
         }
         
         .menu-overlay {
@@ -474,69 +449,68 @@
             height: 100%;
             background: rgba(0, 0, 0, 0.5);
             z-index: 999;
-            opacity: 0;
-            visibility: hidden;
-            transition: all 0.3s;
+            display: none;
         }
         
         .menu-overlay.show {
-            opacity: 1;
-            visibility: visible;
+            display: block;
         }
         
         /* Main Content */
         .main-content {
-            padding: 20px;
-            max-width: 1400px;
-            margin: 0 auto;
-            min-height: calc(100vh - 80px);
+            padding: 30px;
         }
         
-        /* Hospital Selector */
+        .leitos-header {
+            margin-bottom: 30px;
+        }
+        
+        .leitos-header h2 {
+            color: #60a5fa;
+            margin-bottom: 20px;
+        }
+        
         .hospital-selector {
             display: flex;
             gap: 10px;
             flex-wrap: wrap;
-            margin-bottom: 20px;
         }
         
         .hospital-btn {
-            padding: 10px 20px;
-            background: rgba(255, 255, 255, 0.1);
+            padding: 12px 24px;
+            background: rgba(255, 255, 255, 0.05);
             border: 1px solid rgba(255, 255, 255, 0.2);
             color: #e2e8f0;
             border-radius: 8px;
             cursor: pointer;
-            transition: all 0.3s;
-            font-size: 14px;
             font-weight: 500;
+            transition: all 0.3s;
         }
         
         .hospital-btn:hover {
-            background: rgba(255, 255, 255, 0.2);
+            background: rgba(96, 165, 250, 0.1);
             border-color: #60a5fa;
         }
         
         .hospital-btn.active {
-            background: #60a5fa;
-            border-color: #60a5fa;
+            background: #3b82f6;
+            border-color: #3b82f6;
             color: white;
         }
         
-        /* Footer V3.1 com créditos */
+        /* Footer */
         .footer {
+            background: #1e293b;
+            padding: 30px;
             text-align: center;
-            padding: 30px 20px;
-            background: rgba(0, 0, 0, 0.3);
             border-top: 1px solid rgba(255, 255, 255, 0.1);
             margin-top: 40px;
-            backdrop-filter: blur(10px);
         }
         
         .footer p {
+            color: #e2e8f0;
             margin: 8px 0;
             font-size: 14px;
-            color: #9ca3af;
             line-height: 1.5;
         }
         
@@ -655,7 +629,7 @@
             background: #d97706;
         }
         
-        /* Responsividade V3.1 */
+        /* Responsividade V3.2 */
         @media (max-width: 768px) {
             .header {
                 flex-direction: column;
