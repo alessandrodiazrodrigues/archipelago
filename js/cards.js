@@ -269,7 +269,7 @@ function getBadgeDiretivas(diretivas) {
     };
 }
 
-// ⭐ CORREÇÃO V3.3: DETERMINAR TIPO REAL DO LEITO
+// ⭐ CORREÇÃO 1: DETERMINAR TIPO REAL DO LEITO
 function getTipoLeito(leito, hospitalId) {
     // Se for híbrido, verificar categoria escolhida
     if (window.HOSPITAIS_HIBRIDOS.includes(hospitalId)) {
@@ -325,7 +325,7 @@ function createCard(leito, hospitalNome) {
     const sexo = leito.genero || ''; // ✅ CORRIGIDO: leito.genero (não leito.sexo)
     const diretivas = leito.diretivas || 'Não se aplica'; // ⭐ NOVO V3.3
     
-    // ⭐ CORREÇÃO: Usar tipo real do leito
+    // ⭐ CORREÇÃO 1: Usar tipo real do leito
     const hospitalId = leito.hospital || window.currentHospital;
     const tipoReal = getTipoLeito(leito, hospitalId);
     const isHibrido = window.HOSPITAIS_HIBRIDOS.includes(hospitalId); // ✅ NOVO: detectar se é híbrido
@@ -605,7 +605,7 @@ function openAtualizacaoModal(leitoNumero, dadosLeito) {
     window.selectedLeito = leitoNumero;
     
     const modal = createModalOverlay();
-    modal.innerHTML = createAtualizacaoForm(hospitalNome, leitoNumero, dadosLeito);
+    modal.innerHTML = createAtualizacaoForm(hospitalNome, leitoNumero, dadosLeito, hospitalId);
     document.body.appendChild(modal);
     
     setupModalEventListeners(modal, 'atualizacao');
@@ -633,195 +633,222 @@ function createAdmissaoForm(hospitalNome, leitoNumero, hospitalId) {
     const idSequencial = String(leitoNumero).padStart(2, '0');
     const isHibrido = window.HOSPITAIS_HIBRIDOS.includes(hospitalId);
     
+    // ⭐ CORREÇÃO 2: Header com informação híbrido na mesma linha, sem emoji
+    const headerInfo = `Hospital: ${hospitalNome} | ID: ${idSequencial} | Leito: ${leitoNumero}${isHibrido ? ' | LEITO HÍBRIDO' : ''}`;
+    
     return `
         <div class="modal-content" style="background: #1a1f2e; border-radius: 12px; padding: 30px; max-width: 700px; width: 95%; max-height: 90vh; overflow-y: auto; color: #ffffff;">
             <h2 style="margin: 0 0 20px 0; text-align: center; color: #60a5fa; font-size: 24px; font-weight: 700; text-transform: uppercase;">
                 ADMITIR PACIENTE
             </h2>
             
+            <!-- ⭐ CORREÇÃO 2: Header simplificado em uma linha -->
             <div style="text-align: center; margin-bottom: 30px; padding: 15px; background: rgba(96,165,250,0.1); border-radius: 8px;">
-                <div style="margin-bottom: 8px;">
-                    <strong>Hospital:</strong> ${hospitalNome} | <strong>ID:</strong> ${idSequencial} | <strong>Leito:</strong> ${leitoNumero}
+                <div style="font-size: 14px; color: #ffffff;">
+                    ${headerInfo}
                 </div>
-                ${isHibrido ? `
-                    <div style="display: inline-block; background: rgba(249,115,22,0.2); color: #f97316; padding: 6px 12px; border-radius: 6px; font-size: 11px; font-weight: 700; text-transform: uppercase; border: 1px solid rgba(249,115,22,0.4); margin-top: 8px;">
-                        🔄 LEITO HÍBRIDO
-                    </div>
-                ` : ''}
             </div>
-            
-            <!-- ⭐ CORREÇÃO: 3 COLUNAS - ID LEITO | DIRETIVAS | TIPO DE QUARTO -->
-            <div style="margin-bottom: 20px;">
-                <div class="form-grid-3-cols" style="display: grid; grid-template-columns: ${isHibrido ? '1fr 1fr 1fr' : '1fr 1fr'}; gap: 15px;">
-                    <!-- IDENTIFICAÇÃO DO LEITO -->
+
+            <form id="formAdmissao">
+                
+                <!-- LINHA 1: NOME | IDADE | MATRÍCULA -->
+                <div class="form-grid-3-cols" style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; margin-bottom: 20px;">
                     <div>
-                        <label style="display: block; margin-bottom: 5px; color: #e2e8f0; font-weight: 600; font-size: 11px; text-transform: uppercase;">IDENTIFICAÇÃO DO LEITO <span style="color: #ef4444;">*</span></label>
-                        <input id="admIdentificacaoLeito" type="text" placeholder="Ex: NEO1 (máx. 6)" maxlength="6" required style="width: 100%; padding: 12px; background: #374151; color: #ffffff; border: 1px solid rgba(255,255,255,0.3); border-radius: 6px; font-size: 14px;">
+                        <label style="display: block; color: rgba(255,255,255,0.7); font-size: 12px; margin-bottom: 6px; font-weight: 600;">
+                            Nome Completo <span style="color: #ef4444;">*</span>
+                        </label>
+                        <input type="text" id="admitNome" required
+                            style="width: 100%; padding: 10px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.2); background: #2d3748; color: #ffffff; font-size: 14px;">
                     </div>
                     
-                    <!-- DIRETIVAS -->
                     <div>
-                        <label style="display: block; margin-bottom: 5px; color: #e2e8f0; font-weight: 600; font-size: 11px; text-transform: uppercase;">DIRETIVAS</label>
-                        <select id="admDiretivas" style="width: 100%; padding: 12px; background: #374151 !important; color: #ffffff !important; border: 1px solid rgba(255,255,255,0.3); border-radius: 6px; font-size: 14px;">
-                            ${window.DIRETIVAS_OPTIONS.map((opcao, index) => `<option value="${opcao}" ${index === 0 ? 'selected' : ''}>${opcao}</option>`).join('')}
+                        <label style="display: block; color: rgba(255,255,255,0.7); font-size: 12px; margin-bottom: 6px; font-weight: 600;">
+                            Idade <span style="color: #ef4444;">*</span>
+                        </label>
+                        <select id="admitIdade" required
+                            style="width: 100%; padding: 10px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.2); background: #2d3748; color: #ffffff; font-size: 14px;">
+                            <option value="">Selecione...</option>
+                            ${window.IDADE_OPTIONS.map(i => `<option value="${i}">${i} anos</option>`).join('')}
                         </select>
                     </div>
                     
-                    <!-- ⭐ NOVO: TIPO DE QUARTO (APENAS PARA HÍBRIDOS) -->
+                    <div>
+                        <label style="display: block; color: rgba(255,255,255,0.7); font-size: 12px; margin-bottom: 6px; font-weight: 600;">
+                            Matrícula <span style="color: #ef4444;">*</span>
+                        </label>
+                        <input type="text" id="admitMatricula" required placeholder="00000-0" maxlength="7"
+                            oninput="formatarMatricula(this)"
+                            style="width: 100%; padding: 10px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.2); background: #2d3748; color: #ffffff; font-size: 14px;">
+                    </div>
+                </div>
+                
+                <!-- LINHA 2: GÊNERO | REGIÃO | ISOLAMENTO -->
+                <div class="form-grid-3-cols" style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; margin-bottom: 20px;">
+                    <div>
+                        <label style="display: block; color: rgba(255,255,255,0.7); font-size: 12px; margin-bottom: 6px; font-weight: 600;">
+                            Gênero <span style="color: #ef4444;">*</span>
+                        </label>
+                        <select id="admitGenero" required
+                            style="width: 100%; padding: 10px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.2); background: #2d3748; color: #ffffff; font-size: 14px;">
+                            <option value="">Selecione...</option>
+                            ${window.SEXO_OPTIONS.map(s => `<option value="${s}">${s}</option>`).join('')}
+                        </select>
+                    </div>
+                    
+                    <div>
+                        <label style="display: block; color: rgba(255,255,255,0.7); font-size: 12px; margin-bottom: 6px; font-weight: 600;">
+                            Região <span style="color: #ef4444;">*</span>
+                        </label>
+                        <select id="admitRegiao" required
+                            style="width: 100%; padding: 10px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.2); background: #2d3748; color: #ffffff; font-size: 14px;">
+                            <option value="">Selecione...</option>
+                            ${window.REGIAO_OPTIONS.map(r => `<option value="${r}">${r}</option>`).join('')}
+                        </select>
+                    </div>
+                    
+                    <div>
+                        <label style="display: block; color: rgba(255,255,255,0.7); font-size: 12px; margin-bottom: 6px; font-weight: 600;">
+                            Isolamento <span style="color: #ef4444;">*</span>
+                        </label>
+                        <select id="admitIsolamento" required
+                            style="width: 100%; padding: 10px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.2); background: #2d3748; color: #ffffff; font-size: 14px;">
+                            <option value="">Selecione...</option>
+                            ${window.ISOLAMENTO_OPTIONS.map(i => `<option value="${i}">${i}</option>`).join('')}
+                        </select>
+                    </div>
+                </div>
+                
+                <!-- LINHA 3: CATEGORIA (só híbridos) | MÉDICO | PPS -->
+                <div class="form-grid-3-cols" style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; margin-bottom: 20px;">
                     ${isHibrido ? `
                     <div>
-                        <label style="display: block; margin-bottom: 5px; color: #e2e8f0; font-weight: 600; font-size: 11px; text-transform: uppercase;">TIPO DE QUARTO <span style="color: #ef4444;">*</span></label>
-                        <select id="admTipoQuarto" required style="width: 100%; padding: 12px; background: #374151 !important; color: #ffffff !important; border: 1px solid rgba(255,255,255,0.3); border-radius: 6px; font-size: 14px;">
-                            <option value="">Selecionar...</option>
-                            ${window.TIPO_QUARTO_OPTIONS.map(tipo => `<option value="${tipo}">${tipo}</option>`).join('')}
+                        <label style="display: block; color: rgba(255,255,255,0.7); font-size: 12px; margin-bottom: 6px; font-weight: 600;">
+                            Categoria <span style="color: #ef4444;">*</span>
+                        </label>
+                        <select id="admitCategoriaEscolhida" required
+                            style="width: 100%; padding: 10px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.2); background: #2d3748; color: #ffffff; font-size: 14px;">
+                            <option value="">Selecione...</option>
+                            ${window.TIPO_QUARTO_OPTIONS.map(t => `<option value="${t}">${t}</option>`).join('')}
                         </select>
                     </div>
-                    ` : ''}
+                    ` : '<div></div>'}
+                    
+                    <div>
+                        <label style="display: block; color: rgba(255,255,255,0.7); font-size: 12px; margin-bottom: 6px; font-weight: 600;">
+                            Médico Responsável <span style="color: #ef4444;">*</span>
+                        </label>
+                        <input type="text" id="admitMedico" required
+                            style="width: 100%; padding: 10px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.2); background: #2d3748; color: #ffffff; font-size: 14px;">
+                    </div>
+                    
+                    <div>
+                        <label style="display: block; color: rgba(255,255,255,0.7); font-size: 12px; margin-bottom: 6px; font-weight: 600;">
+                            PPS <span style="color: #ef4444;">*</span>
+                        </label>
+                        <select id="admitPps" required
+                            style="width: 100%; padding: 10px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.2); background: #2d3748; color: #ffffff; font-size: 14px;">
+                            <option value="">Selecione...</option>
+                            ${window.PPS_OPTIONS.map(p => `<option value="${p}">${p}</option>`).join('')}
+                        </select>
+                    </div>
                 </div>
-            </div>
-            
-            <!-- ISOLAMENTO, REGIÃO, GÊNERO: 3 COLUNAS OBRIGATÓRIAS -->
-            <div style="margin-bottom: 20px;">
                 
-                <div class="form-grid-3-cols" style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px;">
+                <!-- LINHA 4: PREVISÃO ALTA | DIRETIVAS | SPICT -->
+                <div class="form-grid-3-cols" style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; margin-bottom: 25px;">
                     <div>
-                        <label style="display: block; margin-bottom: 5px; color: #e2e8f0; font-weight: 600;">ISOLAMENTO <span style="color: #ef4444;">*</span></label>
-                        <select id="admIsolamento" required style="width: 100%; padding: 12px; background: #374151 !important; color: #ffffff !important; border: 1px solid rgba(255,255,255,0.3); border-radius: 6px; font-size: 14px;">
-                            ${window.ISOLAMENTO_OPTIONS.map((opcao, index) => `<option value="${opcao}" ${index === 0 ? 'selected' : ''}>${opcao}</option>`).join('')}
-                        </select>
-                    </div>
-                    <div>
-                        <label style="display: block; margin-bottom: 5px; color: #e2e8f0; font-weight: 600;">REGIÃO <span style="color: #ef4444;">*</span></label>
-                        <select id="admRegiao" required style="width: 100%; padding: 12px; background: #374151 !important; color: #ffffff !important; border: 1px solid rgba(255,255,255,0.3); border-radius: 6px; font-size: 14px;">
-                            <option value="">Selecionar...</option>
-                            ${window.REGIAO_OPTIONS.map(regiao => `<option value="${regiao}">${regiao}</option>`).join('')}
-                        </select>
-                    </div>
-                    <div>
-                        <label style="display: block; margin-bottom: 5px; color: #e2e8f0; font-weight: 600;">GÊNERO <span style="color: #ef4444;">*</span></label>
-                        <select id="admSexo" required style="width: 100%; padding: 12px; background: #374151 !important; color: #ffffff !important; border: 1px solid rgba(255,255,255,0.3); border-radius: 6px; font-size: 14px;">
-                            <option value="">Selecionar...</option>
-                            ${window.SEXO_OPTIONS.map(sexo => `<option value="${sexo}">${sexo}</option>`).join('')}
-                        </select>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- INICIAIS, MATRÍCULA, IDADE: 3 COLUNAS -->
-            <div class="form-grid-3-cols" style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; margin-bottom: 20px;">
-                <div>
-                    <label style="display: block; margin-bottom: 5px; color: #e2e8f0; font-weight: 600;">INICIAIS</label>
-                    <input id="admNome" type="text" placeholder="Ex: J S M" maxlength="10" style="width: 100%; padding: 12px; background: #374151; color: #ffffff; border: 1px solid rgba(255,255,255,0.3); border-radius: 6px; font-size: 14px;">
-                </div>
-                <div>
-                    <label style="display: block; margin-bottom: 5px; color: #e2e8f0; font-weight: 600;">MATRÍCULA</label>
-                    <input id="admMatricula" type="text" placeholder="Ex: 00000-0" maxlength="8" style="width: 100%; padding: 12px; background: #374151; color: #ffffff; border: 1px solid rgba(255,255,255,0.3); border-radius: 6px; font-size: 14px;" oninput="formatarMatricula(this)">
-                </div>
-                <div>
-                    <label style="display: block; margin-bottom: 5px; color: #e2e8f0; font-weight: 600;">IDADE</label>
-                    <select id="admIdade" style="width: 100%; padding: 12px; background: #374151 !important; color: #ffffff !important; border: 1px solid rgba(255,255,255,0.3); border-radius: 6px; font-size: 14px;">
-                        <option value="">Selecionar...</option>
-                        ${window.IDADE_OPTIONS.map(idade => `<option value="${idade}">${idade} anos</option>`).join('')}
-                    </select>
-                </div>
-            </div>
-            
-            <!-- PPS, SPICT, PREVISÃO ALTA: 3 COLUNAS -->
-            <div class="form-grid-3-cols" style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; margin-bottom: 20px;">
-                <div>
-                    <label style="display: block; margin-bottom: 5px; color: #e2e8f0; font-weight: 600;">PPS</label>
-                    <select id="admPPS" style="width: 100%; padding: 12px; background: #374151 !important; color: #ffffff !important; border: 1px solid rgba(255,255,255,0.3); border-radius: 6px; font-size: 14px;">
-                        <option value="">Selecionar...</option>
-                        ${window.PPS_OPTIONS.map(pps => `<option value="${pps}">${pps}</option>`).join('')}
-                    </select>
-                </div>
-                <div>
-                    <label style="display: block; margin-bottom: 5px; color: #e2e8f0; font-weight: 600;">SPICT-BR</label>
-                    <select id="admSPICT" style="width: 100%; padding: 12px; background: #374151 !important; color: #ffffff !important; border: 1px solid rgba(255,255,255,0.3); border-radius: 6px; font-size: 14px;">
-                        <option value="nao_elegivel">Não elegível</option>
-                        <option value="elegivel">Elegível</option>
-                    </select>
-                </div>
-                <div>
-                    <label style="display: block; margin-bottom: 5px; color: #e2e8f0; font-weight: 600;">PREVISÃO ALTA</label>
-                    <select id="admPrevAlta" style="width: 100%; padding: 12px; background: #374151 !important; color: #ffffff !important; border: 1px solid rgba(255,255,255,0.3); border-radius: 6px; font-size: 14px;">
-                        ${window.PREVISAO_ALTA_OPTIONS.map(opt => `<option value="${opt}">${opt}</option>`).join('')}
-                    </select>
-                </div>
-            </div>
-            
-            <!-- ⭐ NOVO V3.3: DIRETIVAS ANTECIPADAS -->
-            <div style="margin-bottom: 20px;">
-                <div style="background: rgba(96,165,250,0.1); padding: 10px 15px; border-radius: 6px; margin-bottom: 10px;">
-                    <div style="font-size: 11px; color: #ffffff; text-transform: uppercase; font-weight: 700;">
-                        DIRETIVAS ANTECIPADAS (NOVO V3.3)
-                    </div>
-                </div>
-                <select id="admDiretivas" style="width: 100%; padding: 12px; background: #374151 !important; color: #ffffff !important; border: 1px solid rgba(255,255,255,0.3); border-radius: 6px; font-size: 14px;">
-                    ${window.DIRETIVAS_OPTIONS.map((opcao, index) => `<option value="${opcao}" ${index === 0 ? 'selected' : ''}>${opcao}</option>`).join('')}
-                </select>
-                <div style="font-size: 11px; color: rgba(255,255,255,0.6); margin-top: 5px;">Padrão: "Não se aplica" | Será armazenado na coluna BV (índice 73)</div>
-            </div>
-            
-            <!-- CONCESSÕES: 11 ITENS -->
-            <div style="margin-bottom: 20px;">
-                <div style="background: rgba(96,165,250,0.1); padding: 10px 15px; border-radius: 6px; margin-bottom: 10px;">
-                    <div style="font-size: 11px; color: #ffffff; text-transform: uppercase; font-weight: 700;">
-                        CONCESSÕES PREVISTAS NA ALTA (${window.CONCESSOES_LIST.length} opções)
-                    </div>
-                </div>
-                <div id="admConcessoes" style="max-height: 150px; overflow-y: auto; background: rgba(255,255,255,0.03); border-radius: 6px; padding: 10px; display: grid; grid-template-columns: 1fr; gap: 6px;">
-                    ${window.CONCESSOES_LIST.map(c => `
-                        <label style="display: flex; align-items: center; padding: 4px 0; cursor: pointer; font-size: 12px;">
-                            <input type="checkbox" value="${c}" style="margin-right: 8px; accent-color: #60a5fa;">
-                            <span>${c}</span>
+                        <label style="display: block; color: rgba(255,255,255,0.7); font-size: 12px; margin-bottom: 6px; font-weight: 600;">
+                            Previsão de Alta <span style="color: #ef4444;">*</span>
                         </label>
-                    `).join('')}
-                </div>
-            </div>
-            
-            <!-- LINHAS DE CUIDADO: 45 ESPECIALIDADES -->
-            <div style="margin-bottom: 20px;">
-                <div style="background: rgba(96,165,250,0.1); padding: 10px 15px; border-radius: 6px; margin-bottom: 10px;">
-                    <div style="font-size: 11px; color: #ffffff; text-transform: uppercase; font-weight: 700;">
-                        LINHAS DE CUIDADO PREVISTAS NA ALTA (${window.LINHAS_CUIDADO_LIST.length} especialidades)
+                        <select id="admitPrevisaoAlta" required
+                            style="width: 100%; padding: 10px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.2); background: #2d3748; color: #ffffff; font-size: 14px;">
+                            <option value="">Selecione...</option>
+                            ${window.PREVISAO_ALTA_OPTIONS.map(p => `<option value="${p}">${p}</option>`).join('')}
+                        </select>
+                    </div>
+                    
+                    <div>
+                        <label style="display: block; color: rgba(255,255,255,0.7); font-size: 12px; margin-bottom: 6px; font-weight: 600;">
+                            Diretivas <span style="color: #ef4444;">*</span>
+                        </label>
+                        <select id="admitDiretivas" required
+                            style="width: 100%; padding: 10px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.2); background: #2d3748; color: #ffffff; font-size: 14px;">
+                            <option value="">Selecione...</option>
+                            ${window.DIRETIVAS_OPTIONS.map(d => `<option value="${d}">${d}</option>`).join('')}
+                        </select>
+                    </div>
+                    
+                    <div>
+                        <label style="display: block; color: rgba(255,255,255,0.7); font-size: 12px; margin-bottom: 6px; font-weight: 600;">
+                            SPICT-BR
+                        </label>
+                        <div style="display: flex; align-items: center; height: 42px; padding-left: 10px;">
+                            <input type="checkbox" id="admitSpict"
+                                style="width: 18px; height: 18px; margin-right: 8px; accent-color: #60a5fa; cursor: pointer;">
+                            <label for="admitSpict" style="color: #ffffff; cursor: pointer; font-size: 14px;">Aplicável</label>
+                        </div>
                     </div>
                 </div>
-                <div id="admLinhas" style="max-height: 150px; overflow-y: auto; background: rgba(255,255,255,0.03); border-radius: 6px; padding: 10px; display: grid; grid-template-columns: 1fr; gap: 6px;">
-                    ${window.LINHAS_CUIDADO_LIST.map(l => `
-                        <label style="display: flex; align-items: center; padding: 4px 0; cursor: pointer; font-size: 12px;">
-                            <input type="checkbox" value="${l}" style="margin-right: 8px; accent-color: #60a5fa;">
-                            <span>${l}</span>
-                        </label>
-                    `).join('')}
+                
+                <!-- CONCESSÕES -->
+                <div style="margin-bottom: 20px;">
+                    <label style="display: block; color: rgba(255,255,255,0.9); font-size: 13px; font-weight: 700; margin-bottom: 10px; text-transform: uppercase;">
+                        Concessões Previstas na Alta
+                    </label>
+                    <div id="admitConcessoes" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; padding: 12px; max-height: 200px; overflow-y: auto;">
+                        ${window.CONCESSOES_LIST.map(c => `
+                            <label style="display: flex; align-items: center; padding: 6px; cursor: pointer; border-radius: 4px; transition: background 0.2s;">
+                                <input type="checkbox" name="concessao" value="${c}" style="margin-right: 8px; width: 16px; height: 16px; accent-color: #60a5fa; cursor: pointer;">
+                                <span style="font-size: 12px; color: rgba(255,255,255,0.9);">${c}</span>
+                            </label>
+                        `).join('')}
+                    </div>
                 </div>
-            </div>
-            
-            <!-- BOTÕES -->
-            <div style="display: flex; justify-content: flex-end; gap: 12px; padding: 20px; border-top: 1px solid rgba(255,255,255,0.1);">
-                <button class="btn-cancelar" style="padding: 12px 30px; background: rgba(255,255,255,0.1); color: #ffffff; border: 1px solid rgba(255,255,255,0.2); border-radius: 8px; font-weight: 600; text-transform: uppercase; cursor: pointer;">CANCELAR</button>
-                <button class="btn-salvar" style="padding: 12px 30px; background: #3b82f6; color: #ffffff; border: none; border-radius: 8px; font-weight: 600; text-transform: uppercase; cursor: pointer;">SALVAR</button>
-            </div>
+                
+                <!-- LINHAS DE CUIDADO -->
+                <div style="margin-bottom: 30px;">
+                    <label style="display: block; color: rgba(255,255,255,0.9); font-size: 13px; font-weight: 700; margin-bottom: 10px; text-transform: uppercase;">
+                        Linhas de Cuidado Previstas na Alta
+                    </label>
+                    <div id="admitLinhas" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; padding: 12px; max-height: 250px; overflow-y: auto;">
+                        ${window.LINHAS_CUIDADO_LIST.map(l => `
+                            <label style="display: flex; align-items: center; padding: 6px; cursor: pointer; border-radius: 4px; transition: background 0.2s;">
+                                <input type="checkbox" name="linha" value="${l}" style="margin-right: 8px; width: 16px; height: 16px; accent-color: #60a5fa; cursor: pointer;">
+                                <span style="font-size: 12px; color: rgba(255,255,255,0.9);">${l}</span>
+                            </label>
+                        `).join('')}
+                    </div>
+                </div>
+                
+                <!-- BOTÕES -->
+                <div style="display: flex; gap: 12px; justify-content: flex-end;">
+                    <button type="button" class="btn-cancelar" style="padding: 12px 24px; background: rgba(255,255,255,0.1); color: #ffffff; border: none; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: 700; text-transform: uppercase; transition: all 0.2s;">
+                        Cancelar
+                    </button>
+                    <button type="submit" class="btn-submit" style="padding: 12px 32px; background: linear-gradient(135deg, #10b981, #059669); color: #ffffff; border: none; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: 700; text-transform: uppercase; transition: all 0.2s;">
+                        Admitir Paciente
+                    </button>
+                </div>
+            </form>
         </div>
     `;
 }
 
 // =================== FORMULÁRIO DE ATUALIZAÇÃO V3.3 FINAL ===================
-function createAtualizacaoForm(hospitalNome, leitoNumero, dadosLeito) {
-    const tempoInternacao = dadosLeito?.admAt ? calcularTempoInternacao(dadosLeito.admAt) : '';
-    const iniciais = dadosLeito?.nome ? getIniciais(dadosLeito.nome) : '';
+function createAtualizacaoForm(hospitalNome, leitoNumero, dadosLeito, hospitalId) {
     const idSequencial = String(leitoNumero).padStart(2, '0');
-    const leitoPersonalizado = (dadosLeito?.identificacaoLeito && dadosLeito.identificacaoLeito.trim()) 
-        ? dadosLeito.identificacaoLeito.trim().toUpperCase()
-        : `LEITO ${leitoNumero}`;
+    const isHibrido = window.HOSPITAIS_HIBRIDOS.includes(hospitalId);
     
-    const concessoesAtuais = Array.isArray(dadosLeito?.concessoes) ? dadosLeito.concessoes : [];
-    const linhasAtuais = Array.isArray(dadosLeito?.linhas) ? dadosLeito.linhas : [];
-    const isolamentoAtual = dadosLeito?.isolamento || 'Não Isolamento';
-    const identificacaoAtual = dadosLeito?.identificacaoLeito || '';
-    const regiaoAtual = dadosLeito?.regiao || '';
-    const sexoAtual = dadosLeito?.sexo || '';
-    const diretivasAtual = dadosLeito?.diretivas || 'Não se aplica'; // ⭐ NOVO V3.3
+    // ⭐ CORREÇÃO 2: Header com informação híbrido na mesma linha, sem emoji
+    const headerInfo = `Hospital: ${hospitalNome} | ID: ${idSequencial} | Leito: ${leitoNumero}${isHibrido ? ' | LEITO HÍBRIDO' : ''}`;
+    
+    // ⭐ CORREÇÃO 4: Calcular tempo de internação
+    let tempoInternacao = '';
+    let dataAdmissaoFormatada = '';
+    if (dadosLeito.admAt) {
+        const dataAdm = new Date(dadosLeito.admAt);
+        dataAdmissaoFormatada = formatarDataHora(dadosLeito.admAt);
+        tempoInternacao = calcularTempoInternacao(dadosLeito.admAt);
+    }
     
     return `
         <div class="modal-content" style="background: #1a1f2e; border-radius: 12px; padding: 30px; max-width: 700px; width: 95%; max-height: 90vh; overflow-y: auto; color: #ffffff;">
@@ -829,780 +856,579 @@ function createAtualizacaoForm(hospitalNome, leitoNumero, dadosLeito) {
                 ATUALIZAR PACIENTE
             </h2>
             
+            <!-- ⭐ CORREÇÃO 2: Header simplificado em uma linha -->
             <div style="text-align: center; margin-bottom: 30px; padding: 15px; background: rgba(96,165,250,0.1); border-radius: 8px;">
-                <strong>Hospital:</strong> ${hospitalNome} | <strong>ID:</strong> ${idSequencial} | <strong>Leito:</strong> ${leitoPersonalizado}
-            </div>
-            
-            <!-- IDENTIFICAÇÃO DO LEITO -->
-            <div style="margin-bottom: 20px;">
-                <div style="background: rgba(96,165,250,0.1); padding: 10px 15px; border-radius: 6px; margin-bottom: 10px;">
-                    <div style="font-size: 11px; color: #ffffff; text-transform: uppercase; font-weight: 700;">
-                        IDENTIFICAÇÃO DO LEITO <span style="color: #ef4444;">*</span>
-                    </div>
+                <div style="font-size: 14px; color: #ffffff;">
+                    ${headerInfo}
                 </div>
-                <input id="updIdentificacaoLeito" type="text" value="${identificacaoAtual}" placeholder="Ex: NEO1, UTI-5, ENF12 (máx. 6 caracteres)" maxlength="6" required style="width: 100%; padding: 12px; background: #374151; color: #ffffff; border: 1px solid rgba(255,255,255,0.3); border-radius: 6px; font-size: 14px;">
             </div>
-            
-            <!-- ISOLAMENTO, REGIÃO, GÊNERO -->
-            <div style="margin-bottom: 20px;">
+
+            <form id="formAtualizacao">
                 
-                <div class="form-grid-3-cols" style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px;">
+                <!-- LINHA 1: NOME | IDADE | MATRÍCULA -->
+                <div class="form-grid-3-cols" style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; margin-bottom: 20px;">
                     <div>
-                        <label style="display: block; margin-bottom: 5px; color: #e2e8f0; font-weight: 600;">ISOLAMENTO <span style="color: #ef4444;">*</span></label>
-                        <select id="updIsolamento" required style="width: 100%; padding: 12px; background: #374151 !important; color: #ffffff !important; border: 1px solid rgba(255,255,255,0.3); border-radius: 6px; font-size: 14px;">
-                            ${window.ISOLAMENTO_OPTIONS.map(opcao => `<option value="${opcao}" ${isolamentoAtual === opcao ? 'selected' : ''}>${opcao}</option>`).join('')}
+                        <label style="display: block; color: rgba(255,255,255,0.7); font-size: 12px; margin-bottom: 6px; font-weight: 600;">
+                            Nome Completo <span style="color: #ef4444;">*</span>
+                        </label>
+                        <input type="text" id="updateNome" required value="${dadosLeito.nome || ''}"
+                            style="width: 100%; padding: 10px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.2); background: #2d3748; color: #ffffff; font-size: 14px;">
+                    </div>
+                    
+                    <div>
+                        <label style="display: block; color: rgba(255,255,255,0.7); font-size: 12px; margin-bottom: 6px; font-weight: 600;">
+                            Idade <span style="color: #ef4444;">*</span>
+                        </label>
+                        <select id="updateIdade" required
+                            style="width: 100%; padding: 10px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.2); background: #2d3748; color: #ffffff; font-size: 14px;">
+                            <option value="">Selecione...</option>
+                            ${window.IDADE_OPTIONS.map(i => `<option value="${i}" ${dadosLeito.idade == i ? 'selected' : ''}>${i} anos</option>`).join('')}
                         </select>
                     </div>
+                    
                     <div>
-                        <label style="display: block; margin-bottom: 5px; color: #e2e8f0; font-weight: 600;">REGIÃO <span style="color: #ef4444;">*</span></label>
-                        <select id="updRegiao" required style="width: 100%; padding: 12px; background: #374151 !important; color: #ffffff !important; border: 1px solid rgba(255,255,255,0.3); border-radius: 6px; font-size: 14px;">
-                            <option value="">Selecionar...</option>
-                            ${window.REGIAO_OPTIONS.map(regiao => `<option value="${regiao}" ${regiaoAtual === regiao ? 'selected' : ''}>${regiao}</option>`).join('')}
-                        </select>
+                        <label style="display: block; color: rgba(255,255,255,0.7); font-size: 12px; margin-bottom: 6px; font-weight: 600;">
+                            Matrícula <span style="color: #ef4444;">*</span>
+                        </label>
+                        <input type="text" id="updateMatricula" required placeholder="00000-0" maxlength="7" value="${dadosLeito.matricula || ''}"
+                            oninput="formatarMatricula(this)"
+                            style="width: 100%; padding: 10px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.2); background: #2d3748; color: #ffffff; font-size: 14px;">
                     </div>
-                    <div>
-                        <label style="display: block; margin-bottom: 5px; color: #e2e8f0; font-weight: 600;">GÊNERO <span style="color: #ef4444;">*</span></label>
-                        <select id="updSexo" required style="width: 100%; padding: 12px; background: #374151 !important; color: #ffffff !important; border: 1px solid rgba(255,255,255,0.3); border-radius: 6px; font-size: 14px;">
-                            <option value="">Selecionar...</option>
-                            ${window.SEXO_OPTIONS.map(sexo => `<option value="${sexo}" ${sexoAtual === sexo ? 'selected' : ''}>${sexo}</option>`).join('')}
-                        </select>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- INICIAIS, MATRÍCULA, IDADE -->
-            <div class="form-grid-3-cols" style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; margin-bottom: 20px;">
-                <div>
-                    <label style="display: block; margin-bottom: 5px; color: #e2e8f0; font-weight: 600;">INICIAIS</label>
-                    <input value="${iniciais}" readonly style="width: 100%; padding: 12px; background: #1f2937; color: #9ca3af; border: 1px solid rgba(255,255,255,0.2); border-radius: 6px; font-size: 14px;">
-                </div>
-                <div>
-                    <label style="display: block; margin-bottom: 5px; color: #e2e8f0; font-weight: 600;">MATRÍCULA</label>
-                    <input value="${dadosLeito?.matricula || ''}" readonly style="width: 100%; padding: 12px; background: #1f2937; color: #9ca3af; border: 1px solid rgba(255,255,255,0.2); border-radius: 6px; font-size: 14px;">
-                </div>
-                <div>
-                    <label style="display: block; margin-bottom: 5px; color: #e2e8f0; font-weight: 600;">IDADE</label>
-                    <select id="updIdade" style="width: 100%; padding: 12px; background: #374151 !important; color: #ffffff !important; border: 1px solid rgba(255,255,255,0.3); border-radius: 6px; font-size: 14px;">
-                        <option value="">Selecionar...</option>
-                        ${window.IDADE_OPTIONS.map(idade => `<option value="${idade}" ${dadosLeito?.idade == idade ? 'selected' : ''}>${idade} anos</option>`).join('')}
-                    </select>
-                </div>
-            </div>
-            
-            <!-- PPS, SPICT, PREVISÃO ALTA -->
-            <div class="form-grid-3-cols" style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; margin-bottom: 20px;">
-                <div>
-                    <label style="display: block; margin-bottom: 5px; color: #e2e8f0; font-weight: 600;">PPS</label>
-                    <select id="updPPS" style="width: 100%; padding: 12px; background: #374151 !important; color: #ffffff !important; border: 1px solid rgba(255,255,255,0.3); border-radius: 6px; font-size: 14px;">
-                        <option value="">Selecionar...</option>
-                        ${window.PPS_OPTIONS.map(pps => `<option value="${pps}" ${dadosLeito?.pps && `${dadosLeito.pps}%` === pps ? 'selected' : ''}>${pps}</option>`).join('')}
-                    </select>
                 </div>
                 
-                <div>
-                    <label style="display: block; margin-bottom: 5px; color: #e2e8f0; font-weight: 600;">SPICT-BR</label>
-                    <select id="updSPICT" style="width: 100%; padding: 12px; background: #374151 !important; color: #ffffff !important; border: 1px solid rgba(255,255,255,0.3); border-radius: 6px; font-size: 14px;">
-                        <option value="nao_elegivel" ${dadosLeito?.spict === 'nao_elegivel' ? 'selected' : ''}>Não elegível</option>
-                        <option value="elegivel" ${dadosLeito?.spict === 'elegivel' ? 'selected' : ''}>Elegível</option>
-                    </select>
+                <!-- LINHA 2: GÊNERO | REGIÃO | ISOLAMENTO -->
+                <div class="form-grid-3-cols" style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; margin-bottom: 20px;">
+                    <div>
+                        <label style="display: block; color: rgba(255,255,255,0.7); font-size: 12px; margin-bottom: 6px; font-weight: 600;">
+                            Gênero <span style="color: #ef4444;">*</span>
+                        </label>
+                        <select id="updateGenero" required
+                            style="width: 100%; padding: 10px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.2); background: #2d3748; color: #ffffff; font-size: 14px;">
+                            <option value="">Selecione...</option>
+                            ${window.SEXO_OPTIONS.map(s => `<option value="${s}" ${dadosLeito.genero === s ? 'selected' : ''}>${s}</option>`).join('')}
+                        </select>
+                    </div>
+                    
+                    <div>
+                        <label style="display: block; color: rgba(255,255,255,0.7); font-size: 12px; margin-bottom: 6px; font-weight: 600;">
+                            Região <span style="color: #ef4444;">*</span>
+                        </label>
+                        <select id="updateRegiao" required
+                            style="width: 100%; padding: 10px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.2); background: #2d3748; color: #ffffff; font-size: 14px;">
+                            <option value="">Selecione...</option>
+                            ${window.REGIAO_OPTIONS.map(r => `<option value="${r}" ${dadosLeito.regiao === r ? 'selected' : ''}>${r}</option>`).join('')}
+                        </select>
+                    </div>
+                    
+                    <div>
+                        <label style="display: block; color: rgba(255,255,255,0.7); font-size: 12px; margin-bottom: 6px; font-weight: 600;">
+                            Isolamento <span style="color: #ef4444;">*</span>
+                        </label>
+                        <select id="updateIsolamento" required
+                            style="width: 100%; padding: 10px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.2); background: #2d3748; color: #ffffff; font-size: 14px;">
+                            <option value="">Selecione...</option>
+                            ${window.ISOLAMENTO_OPTIONS.map(i => `<option value="${i}" ${dadosLeito.isolamento === i ? 'selected' : ''}>${i}</option>`).join('')}
+                        </select>
+                    </div>
                 </div>
                 
-                <div>
-            </div>
-            
-            <!-- ⭐ NOVO V3.3: DIRETIVAS ANTECIPADAS -->
-            <div style="margin-bottom: 20px;">
-                <div style="background: rgba(96,165,250,0.1); padding: 10px 15px; border-radius: 6px; margin-bottom: 10px;">
-                    <div style="font-size: 11px; color: #ffffff; text-transform: uppercase; font-weight: 700;">
-                        DIRETIVAS ANTECIPADAS (NOVO V3.3)
+                <!-- LINHA 3: CATEGORIA (só híbridos) | MÉDICO | PPS -->
+                <div class="form-grid-3-cols" style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; margin-bottom: 20px;">
+                    ${isHibrido ? `
+                    <div>
+                        <label style="display: block; color: rgba(255,255,255,0.7); font-size: 12px; margin-bottom: 6px; font-weight: 600;">
+                            Categoria <span style="color: #ef4444;">*</span>
+                        </label>
+                        <select id="updateCategoriaEscolhida" required
+                            style="width: 100%; padding: 10px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.2); background: #2d3748; color: #ffffff; font-size: 14px;">
+                            <option value="">Selecione...</option>
+                            ${window.TIPO_QUARTO_OPTIONS.map(t => `<option value="${t}" ${dadosLeito.categoriaEscolhida === t ? 'selected' : ''}>${t}</option>`).join('')}
+                        </select>
+                    </div>
+                    ` : '<div></div>'}
+                    
+                    <div>
+                        <label style="display: block; color: rgba(255,255,255,0.7); font-size: 12px; margin-bottom: 6px; font-weight: 600;">
+                            Médico Responsável <span style="color: #ef4444;">*</span>
+                        </label>
+                        <input type="text" id="updateMedico" required value="${dadosLeito.medicoResp || ''}"
+                            style="width: 100%; padding: 10px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.2); background: #2d3748; color: #ffffff; font-size: 14px;">
+                    </div>
+                    
+                    <div>
+                        <label style="display: block; color: rgba(255,255,255,0.7); font-size: 12px; margin-bottom: 6px; font-weight: 600;">
+                            PPS <span style="color: #ef4444;">*</span>
+                        </label>
+                        <select id="updatePps" required
+                            style="width: 100%; padding: 10px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.2); background: #2d3748; color: #ffffff; font-size: 14px;">
+                            <option value="">Selecione...</option>
+                            ${window.PPS_OPTIONS.map(p => `<option value="${p}" ${dadosLeito.pps === p ? 'selected' : ''}>${p}</option>`).join('')}
+                        </select>
                     </div>
                 </div>
-                <select id="updDiretivas" style="width: 100%; padding: 12px; background: #374151 !important; color: #ffffff !important; border: 1px solid rgba(255,255,255,0.3); border-radius: 6px; font-size: 14px;">
-                    ${window.DIRETIVAS_OPTIONS.map(opcao => `<option value="${opcao}" ${diretivasAtual === opcao ? 'selected' : ''}>${opcao}</option>`).join('')}
-                </select>
-                <div style="font-size: 11px; color: rgba(255,255,255,0.6); margin-top: 5px;">Será atualizado na coluna BV (índice 73)</div>
-            </div>
-            
-            <!-- CONCESSÕES -->
-            <div style="margin-bottom: 20px;">
-                <div style="background: rgba(96,165,250,0.1); padding: 10px 15px; border-radius: 6px; margin-bottom: 10px;">
-                    <div style="font-size: 11px; color: #ffffff; text-transform: uppercase; font-weight: 700;">
-                        CONCESSÕES PREVISTAS NA ALTA
+                
+                <!-- LINHA 4: PREVISÃO ALTA | DIRETIVAS | SPICT -->
+                <div class="form-grid-3-cols" style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; margin-bottom: 25px;">
+                    <div>
+                        <label style="display: block; color: rgba(255,255,255,0.7); font-size: 12px; margin-bottom: 6px; font-weight: 600;">
+                            Previsão de Alta <span style="color: #ef4444;">*</span>
+                        </label>
+                        <select id="updatePrevisaoAlta" required
+                            style="width: 100%; padding: 10px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.2); background: #2d3748; color: #ffffff; font-size: 14px;">
+                            <option value="">Selecione...</option>
+                            ${window.PREVISAO_ALTA_OPTIONS.map(p => `<option value="${p}" ${dadosLeito.prevAlta === p ? 'selected' : ''}>${p}</option>`).join('')}
+                        </select>
+                    </div>
+                    
+                    <div>
+                        <label style="display: block; color: rgba(255,255,255,0.7); font-size: 12px; margin-bottom: 6px; font-weight: 600;">
+                            Diretivas <span style="color: #ef4444;">*</span>
+                        </label>
+                        <select id="updateDiretivas" required
+                            style="width: 100%; padding: 10px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.2); background: #2d3748; color: #ffffff; font-size: 14px;">
+                            <option value="">Selecione...</option>
+                            ${window.DIRETIVAS_OPTIONS.map(d => `<option value="${d}" ${dadosLeito.diretivas === d ? 'selected' : ''}>${d}</option>`).join('')}
+                        </select>
+                    </div>
+                    
+                    <div>
+                        <label style="display: block; color: rgba(255,255,255,0.7); font-size: 12px; margin-bottom: 6px; font-weight: 600;">
+                            SPICT-BR
+                        </label>
+                        <div style="display: flex; align-items: center; height: 42px; padding-left: 10px;">
+                            <input type="checkbox" id="updateSpict" ${dadosLeito.spict === 'elegivel' ? 'checked' : ''}
+                                style="width: 18px; height: 18px; margin-right: 8px; accent-color: #60a5fa; cursor: pointer;">
+                            <label for="updateSpict" style="color: #ffffff; cursor: pointer; font-size: 14px;">Aplicável</label>
+                        </div>
                     </div>
                 </div>
-                <div id="updConcessoes" style="max-height: 150px; overflow-y: auto; background: rgba(255,255,255,0.03); border-radius: 6px; padding: 10px; display: grid; grid-template-columns: 1fr; gap: 6px;">
-                    ${window.CONCESSOES_LIST.map(c => {
-                        const isChecked = concessoesAtuais.includes(c);
-                        return `
-                            <label style="display: flex; align-items: center; padding: 4px 0; cursor: pointer; font-size: 12px;">
-                                <input type="checkbox" value="${c}" ${isChecked ? 'checked' : ''} style="margin-right: 8px; accent-color: #60a5fa;">
-                                <span>${c}</span>
-                            </label>
-                        `;
-                    }).join('')}
-                </div>
-            </div>
-            
-            <!-- LINHAS DE CUIDADO -->
-            <div style="margin-bottom: 20px;">
-                <div style="background: rgba(96,165,250,0.1); padding: 10px 15px; border-radius: 6px; margin-bottom: 10px;">
-                    <div style="font-size: 11px; color: #ffffff; text-transform: uppercase; font-weight: 700;">
-                        LINHAS DE CUIDADO PREVISTAS NA ALTA
+                
+                <!-- CONCESSÕES -->
+                <div style="margin-bottom: 20px;">
+                    <label style="display: block; color: rgba(255,255,255,0.9); font-size: 13px; font-weight: 700; margin-bottom: 10px; text-transform: uppercase;">
+                        Concessões Previstas na Alta
+                    </label>
+                    <div id="updateConcessoes" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; padding: 12px; max-height: 200px; overflow-y: auto;">
+                        ${window.CONCESSOES_LIST.map(c => {
+                            const checked = dadosLeito.concessoes && dadosLeito.concessoes.includes(c) ? 'checked' : '';
+                            return `
+                                <label style="display: flex; align-items: center; padding: 6px; cursor: pointer; border-radius: 4px; transition: background 0.2s;">
+                                    <input type="checkbox" name="concessao" value="${c}" ${checked} style="margin-right: 8px; width: 16px; height: 16px; accent-color: #60a5fa; cursor: pointer;">
+                                    <span style="font-size: 12px; color: rgba(255,255,255,0.9);">${c}</span>
+                                </label>
+                            `;
+                        }).join('')}
                     </div>
                 </div>
-                <div id="updLinhas" style="max-height: 150px; overflow-y: auto; background: rgba(255,255,255,0.03); border-radius: 6px; padding: 10px; display: grid; grid-template-columns: 1fr; gap: 6px;">
-                    ${window.LINHAS_CUIDADO_LIST.map(l => {
-                        const isChecked = linhasAtuais.includes(l);
-                        return `
-                            <label style="display: flex; align-items: center; padding: 4px 0; cursor: pointer; font-size: 12px;">
-                                <input type="checkbox" value="${l}" ${isChecked ? 'checked' : ''} style="margin-right: 8px; accent-color: #60a5fa;">
-                                <span>${l}</span>
-                            </label>
-                        `;
-                    }).join('')}
+                
+                <!-- LINHAS DE CUIDADO -->
+                <div style="margin-bottom: 30px;">
+                    <label style="display: block; color: rgba(255,255,255,0.9); font-size: 13px; font-weight: 700; margin-bottom: 10px; text-transform: uppercase;">
+                        Linhas de Cuidado Previstas na Alta
+                    </label>
+                    <div id="updateLinhas" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; padding: 12px; max-height: 250px; overflow-y: auto;">
+                        ${window.LINHAS_CUIDADO_LIST.map(l => {
+                            const checked = dadosLeito.linhas && dadosLeito.linhas.includes(l) ? 'checked' : '';
+                            return `
+                                <label style="display: flex; align-items: center; padding: 6px; cursor: pointer; border-radius: 4px; transition: background 0.2s;">
+                                    <input type="checkbox" name="linha" value="${l}" ${checked} style="margin-right: 8px; width: 16px; height: 16px; accent-color: #60a5fa; cursor: pointer;">
+                                    <span style="font-size: 12px; color: rgba(255,255,255,0.9);">${l}</span>
+                                </label>
+                            `;
+                        }).join('')}
+                    </div>
                 </div>
-            </div>
-            
-            ${tempoInternacao ? `
-            <div style="margin-bottom: 20px; padding: 12px; background: rgba(251, 191, 36, 0.1); border-radius: 8px; border-left: 4px solid #fbbf24;">
-                <strong>Tempo de Internação:</strong> ${tempoInternacao}
-            </div>
-            ` : ''}
-            
-            <!-- BOTÕES -->
-            <div style="display: flex; justify-content: space-between; gap: 12px; padding: 20px; border-top: 1px solid rgba(255,255,255,0.1);">
-                <button class="btn-alta" style="padding: 12px 30px; background: #ef4444; color: #ffffff; border: none; border-radius: 8px; font-weight: 600; text-transform: uppercase; cursor: pointer;">ALTA</button>
-                <div style="display: flex; gap: 12px;">
-                    <button class="btn-cancelar" style="padding: 12px 30px; background: rgba(255,255,255,0.1); color: #ffffff; border: 1px solid rgba(255,255,255,0.2); border-radius: 8px; font-weight: 600; text-transform: uppercase; cursor: pointer;">CANCELAR</button>
-                    <button class="btn-salvar" style="padding: 12px 30px; background: #3b82f6; color: #ffffff; border: none; border-radius: 8px; font-weight: 600; text-transform: uppercase; cursor: pointer;">SALVAR</button>
+                
+                <!-- ⭐ CORREÇÃO 4: INFO ADMISSÃO + BOTÕES -->
+                <div style="display: flex; justify-content: space-between; align-items: center; padding-top: 20px; border-top: 2px solid rgba(255,255,255,0.1);">
+                    <div style="font-size: 11px; color: rgba(255,255,255,0.6);">
+                        ${dataAdmissaoFormatada ? `
+                            <div style="margin-bottom: 4px;">
+                                <strong style="color: rgba(255,255,255,0.5);">ADMISSÃO:</strong> ${dataAdmissaoFormatada}
+                            </div>
+                            <div>
+                                <strong style="color: #22c55e;">INTERNADO:</strong> ${tempoInternacao}
+                            </div>
+                        ` : ''}
+                    </div>
+                    
+                    <div style="display: flex; gap: 10px;">
+                        <button type="button" class="btn-alta" style="padding: 12px 20px; background: linear-gradient(135deg, #ef4444, #dc2626); color: #ffffff; border: none; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: 700; text-transform: uppercase; transition: all 0.2s;">
+                            Dar Alta
+                        </button>
+                        <button type="button" class="btn-cancelar" style="padding: 12px 20px; background: rgba(255,255,255,0.1); color: #ffffff; border: none; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: 700; text-transform: uppercase; transition: all 0.2s;">
+                            Cancelar
+                        </button>
+                        <button type="submit" class="btn-submit" style="padding: 12px 28px; background: linear-gradient(135deg, #3b82f6, #2563eb); color: #ffffff; border: none; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: 700; text-transform: uppercase; transition: all 0.2s;">
+                            Salvar
+                        </button>
+                    </div>
                 </div>
-            </div>
+            </form>
         </div>
     `;
 }
 
-// =================== PRÉ-MARCAÇÃO DE CHECKBOXES ===================
-function forcarPreMarcacao(modal, dadosLeito) {
-    logDebug(`Forçando pré-marcação V3.3 FINAL...`);
-    
-    const concessoesAtuais = Array.isArray(dadosLeito?.concessoes) ? dadosLeito.concessoes : [];
-    const linhasAtuais = Array.isArray(dadosLeito?.linhas) ? dadosLeito.linhas : [];
-    
-    // Marcar concessões
-    const concessoesCheckboxes = modal.querySelectorAll('#updConcessoes input[type="checkbox"]');
-    concessoesCheckboxes.forEach(checkbox => {
-        if (concessoesAtuais.includes(checkbox.value)) {
-            checkbox.checked = true;
-        }
-    });
-    
-    // Marcar linhas de cuidado
-    const linhasCheckboxes = modal.querySelectorAll('#updLinhas input[type="checkbox"]');
-    linhasCheckboxes.forEach(checkbox => {
-        if (linhasAtuais.includes(checkbox.value)) {
-            checkbox.checked = true;
-        }
-    });
-    
-    logDebug(`Pré-marcação concluída`);
-}
-
-// =================== EVENT LISTENERS DOS MODAIS ===================
+// =================== SETUP DE EVENT LISTENERS ===================
 function setupModalEventListeners(modal, tipo) {
-    // Botão Cancelar
+    // Cancelar
     const btnCancelar = modal.querySelector('.btn-cancelar');
     if (btnCancelar) {
-        btnCancelar.addEventListener('click', function(e) {
-            e.preventDefault();
-            e.stopPropagation();
-            closeModal(modal);
+        btnCancelar.addEventListener('click', () => {
+            modal.remove();
+            logInfo(`Modal de ${tipo} cancelado`);
         });
     }
     
-    // Botão Salvar
-    const btnSalvar = modal.querySelector('.btn-salvar');
-    if (btnSalvar) {
-        btnSalvar.addEventListener('click', async function(e) {
+    // Submit
+    const form = modal.querySelector('form');
+    if (form) {
+        form.addEventListener('submit', (e) => {
             e.preventDefault();
-            e.stopPropagation();
-            
-            // VALIDAÇÕES
-            const identificacaoField = modal.querySelector(tipo === 'admissao' ? '#admIdentificacaoLeito' : '#updIdentificacaoLeito');
-            if (!identificacaoField.value.trim()) {
-                showErrorMessage('❌ Campo "Identificação do Leito" é obrigatório!');
-                identificacaoField.focus();
-                return;
-            }
-            
-            const isolamentoField = modal.querySelector(tipo === 'admissao' ? '#admIsolamento' : '#updIsolamento');
-            const regiaoField = modal.querySelector(tipo === 'admissao' ? '#admRegiao' : '#updRegiao');
-            const sexoField = modal.querySelector(tipo === 'admissao' ? '#admSexo' : '#updSexo');
-            
-            if (!isolamentoField.value) {
-                showErrorMessage('❌ Campo "Isolamento" é obrigatório!');
-                isolamentoField.focus();
-                return;
-            }
-            
-            if (!regiaoField.value) {
-                showErrorMessage('❌ Campo "Região" é obrigatório!');
-                regiaoField.focus();
-                return;
-            }
-            
-            if (!sexoField.value) {
-                showErrorMessage('❌ Campo "Gênero" é obrigatório!');
-                sexoField.focus();
-                return;
-            }
-            
-            const originalText = this.innerHTML;
-            showButtonLoading(this, 'SALVANDO...');
-            
-            try {
-                const dadosFormulario = coletarDadosFormulario(modal, tipo);
-                
-                if (tipo === 'admissao') {
-                    await window.admitirPaciente(dadosFormulario.hospital, dadosFormulario.leito, dadosFormulario);
-                    showSuccessMessage('✅ Paciente admitido com sucesso (V3.3 + DIRETIVAS)!');
-                } else {
-                    await window.atualizarPaciente(dadosFormulario.hospital, dadosFormulario.leito, dadosFormulario);
-                    showSuccessMessage('✅ Dados atualizados com sucesso (V3.3 + DIRETIVAS)!');
-                }
-                
-                hideButtonLoading(this, originalText);
-                closeModal(modal);
-                
-                await window.refreshAfterAction();
-                
-            } catch (error) {
-                hideButtonLoading(this, originalText);
-                showErrorMessage('❌ Erro ao salvar: ' + error.message);
-                logError('Erro ao salvar:', error);
+            if (tipo === 'admissao') {
+                submitAdmissao(form);
+            } else if (tipo === 'atualizacao') {
+                submitAtualizacao(form);
             }
         });
     }
     
-    // Botão Alta
-    const btnAlta = modal.querySelector('.btn-alta');
-    if (btnAlta) {
-        btnAlta.addEventListener('click', async function(e) {
-            e.preventDefault();
-            e.stopPropagation();
-            
-            if (!confirm("Confirmar ALTA deste paciente?")) return;
-            
-            const originalText = this.innerHTML;
-            showButtonLoading(this, 'PROCESSANDO ALTA...');
-            
-            try {
-                await window.darAltaPaciente(window.currentHospital, window.selectedLeito);
-                
-                hideButtonLoading(this, originalText);
-                showSuccessMessage('✅ Alta processada!');
-                closeModal(modal);
-                
-                await window.refreshAfterAction();
-                
-            } catch (error) {
-                hideButtonLoading(this, originalText);
-                showErrorMessage('❌ Erro ao processar alta: ' + error.message);
-                logError('Erro alta:', error);
-            }
-        });
+    // Dar Alta (apenas atualização)
+    if (tipo === 'atualizacao') {
+        const btnAlta = modal.querySelector('.btn-alta');
+        if (btnAlta) {
+            btnAlta.addEventListener('click', () => {
+                darAlta(window.selectedLeito);
+                modal.remove();
+            });
+        }
     }
     
-    // Fechar clicando fora
-    modal.addEventListener('click', function(e) {
+    // Fechar ao clicar fora
+    modal.addEventListener('click', (e) => {
         if (e.target === modal) {
-            closeModal(modal);
+            modal.remove();
+            logInfo(`Modal de ${tipo} fechado`);
         }
     });
 }
 
-// =================== CLOSE MODAL ===================
-function closeModal(modal) {
-    if (modal && modal.parentNode) {
-        modal.style.animation = 'fadeOut 0.3s ease';
-        modal.style.opacity = '0';
-        setTimeout(() => {
-            if (modal.parentNode) {
-                modal.parentNode.removeChild(modal);
-            }
-            window.selectedLeito = null;
-        }, 300);
+// =================== SUBMIT HANDLERS ===================
+async function submitAdmissao(form) {
+    try {
+        const dados = coletarDadosFormulario('admit');
+        
+        const payload = {
+            action: 'admitir',
+            hospitalId: window.currentHospital,
+            leitoId: window.selectedLeito,
+            ...dados
+        };
+        
+        logInfo('Enviando admissão:', payload);
+        
+        const response = await fetch(window.API_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+            logSuccess('Admissão realizada com sucesso!');
+            document.querySelector('.modal-overlay').remove();
+            await window.loadData();
+        } else {
+            logError('Erro na admissão:', result.error);
+            alert('Erro ao admitir paciente: ' + result.error);
+        }
+    } catch (error) {
+        logError('Erro ao processar admissão:', error);
+        alert('Erro ao processar admissão. Verifique o console.');
     }
 }
 
-// =================== COLETAR DADOS DO FORMULÁRIO V3.3 ===================
-function coletarDadosFormulario(modal, tipo) {
+async function submitAtualizacao(form) {
+    try {
+        const dados = coletarDadosFormulario('update');
+        
+        const payload = {
+            action: 'atualizar',
+            hospitalId: window.currentHospital,
+            leitoId: window.selectedLeito,
+            ...dados
+        };
+        
+        logInfo('Enviando atualização:', payload);
+        
+        const response = await fetch(window.API_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+            logSuccess('Atualização realizada com sucesso!');
+            document.querySelector('.modal-overlay').remove();
+            await window.loadData();
+        } else {
+            logError('Erro na atualização:', result.error);
+            alert('Erro ao atualizar paciente: ' + result.error);
+        }
+    } catch (error) {
+        logError('Erro ao processar atualização:', error);
+        alert('Erro ao processar atualização. Verifique o console.');
+    }
+}
+
+async function darAlta(leitoId) {
+    if (!confirm(`Confirma a alta do paciente do leito ${leitoId}?`)) {
+        return;
+    }
+    
+    try {
+        const payload = {
+            action: 'darAlta',
+            hospitalId: window.currentHospital,
+            leitoId: leitoId
+        };
+        
+        logInfo('Dando alta:', payload);
+        
+        const response = await fetch(window.API_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+            logSuccess('Alta realizada com sucesso!');
+            await window.loadData();
+        } else {
+            logError('Erro ao dar alta:', result.error);
+            alert('Erro ao dar alta: ' + result.error);
+        }
+    } catch (error) {
+        logError('Erro ao processar alta:', error);
+        alert('Erro ao processar alta. Verifique o console.');
+    }
+}
+
+// =================== FUNÇÃO: COLETAR DADOS DO FORMULÁRIO ===================
+window.coletarDadosFormulario = function(prefixo) {
+    const concessoesSelecionadas = Array.from(document.querySelectorAll(`#${prefixo}Concessoes input[type="checkbox"]:checked`))
+        .map(cb => cb.value);
+    
+    const linhasSelecionadas = Array.from(document.querySelectorAll(`#${prefixo}Linhas input[type="checkbox"]:checked`))
+        .map(cb => cb.value);
+
     const dados = {
-        hospital: window.currentHospital,
-        leito: window.selectedLeito
+        nome: document.getElementById(`${prefixo}Nome`).value,
+        idade: document.getElementById(`${prefixo}Idade`).value,
+        matricula: document.getElementById(`${prefixo}Matricula`).value,
+        genero: document.getElementById(`${prefixo}Genero`).value,
+        regiao: document.getElementById(`${prefixo}Regiao`).value,
+        isolamento: document.getElementById(`${prefixo}Isolamento`).value,
+        medicoResp: document.getElementById(`${prefixo}Medico`).value,
+        pps: document.getElementById(`${prefixo}Pps`).value,
+        previsaoAlta: document.getElementById(`${prefixo}PrevisaoAlta`).value,
+        diretivas: document.getElementById(`${prefixo}Diretivas`).value,
+        spict: document.getElementById(`${prefixo}Spict`).checked,
+        concessoes: concessoesSelecionadas,
+        linhas: linhasSelecionadas
     };
-    
-    if (tipo === 'admissao') {
-        dados.nome = modal.querySelector('#admNome')?.value?.trim() || '';
-        dados.matricula = modal.querySelector('#admMatricula')?.value?.trim() || '';
-        dados.idade = parseInt(modal.querySelector('#admIdade')?.value) || null;
-        dados.pps = modal.querySelector('#admPPS')?.value?.replace('%', '') || null;
-        dados.spict = modal.querySelector('#admSPICT')?.value || 'nao_elegivel';
-        dados.prevAlta = modal.querySelector('#admPrevAlta')?.value || 'SP';
-        dados.isolamento = modal.querySelector('#admIsolamento')?.value || 'Não Isolamento';
-        dados.identificacaoLeito = modal.querySelector('#admIdentificacaoLeito')?.value?.trim().toUpperCase() || '';
-        dados.regiao = modal.querySelector('#admRegiao')?.value || '';
-        dados.sexo = modal.querySelector('#admSexo')?.value || '';
-        dados.diretivas = modal.querySelector('#admDiretivas')?.value || 'Não se aplica'; // ⭐ NOVO V3.3
-        
-        dados.concessoes = coletarCheckboxesSelecionados(modal, '#admConcessoes');
-        dados.linhas = coletarCheckboxesSelecionados(modal, '#admLinhas');
-        
-    } else {
-        dados.idade = parseInt(modal.querySelector('#updIdade')?.value) || null;
-        dados.pps = modal.querySelector('#updPPS')?.value?.replace('%', '') || null;
-        dados.spict = modal.querySelector('#updSPICT')?.value || 'nao_elegivel';
-        dados.prevAlta = modal.querySelector('#updPrevAlta')?.value || 'SP';
-        dados.isolamento = modal.querySelector('#updIsolamento')?.value || 'Não Isolamento';
-        dados.identificacaoLeito = modal.querySelector('#updIdentificacaoLeito')?.value?.trim().toUpperCase() || '';
-        dados.regiao = modal.querySelector('#updRegiao')?.value || '';
-        dados.sexo = modal.querySelector('#updSexo')?.value || '';
-        dados.diretivas = modal.querySelector('#updDiretivas')?.value || 'Não se aplica'; // ⭐ NOVO V3.3
-        
-        dados.concessoes = coletarCheckboxesSelecionados(modal, '#updConcessoes');
-        dados.linhas = coletarCheckboxesSelecionados(modal, '#updLinhas');
+
+    // Adicionar categoriaEscolhida apenas para hospitais híbridos
+    const categoriaSelect = document.getElementById(`${prefixo}CategoriaEscolhida`);
+    if (categoriaSelect) {
+        dados.categoriaEscolhida = categoriaSelect.value;
     }
-    
-    logInfo('Dados V3.3 FINAL coletados (COM DIRETIVAS):', {
-        isolamento: dados.isolamento,
-        identificacaoLeito: dados.identificacaoLeito,
-        regiao: dados.regiao,
-        sexo: dados.sexo,
-        diretivas: dados.diretivas, // ⭐ NOVO
-        concessoes: dados.concessoes.length,
-        linhas: dados.linhas.length
-    });
-    
+
     return dados;
-}
+};
 
-// =================== COLETAR CHECKBOXES SELECIONADOS ===================
-function coletarCheckboxesSelecionados(modal, seletor) {
-    const checkboxes = modal.querySelectorAll(`${seletor} input[type="checkbox"]`);
-    const selecionados = [];
-    
-    checkboxes.forEach(checkbox => {
-        if (checkbox.checked) {
-            selecionados.push(checkbox.value);
-        }
-    });
-    
-    return selecionados;
-}
-
-// =================== FORMATAÇÃO AUTOMÁTICA MATRÍCULA ===================
+// =================== FUNÇÃO: FORMATAR MATRÍCULA ===================
 function formatarMatricula(input) {
     let valor = input.value.replace(/\D/g, '');
     
-    if (valor.length > 6) {
-        valor = valor.substring(0, 6);
-    }
-    
     if (valor.length > 5) {
-        valor = valor.substring(0, 5) + '-' + valor.substring(5);
+        valor = valor.slice(0, 5) + '-' + valor.slice(5, 6);
     }
     
     input.value = valor;
 }
 
+// =================== FUNÇÃO: PRÉ-MARCAÇÃO ===================
+window.forcarPreMarcacao = function(modal, dadosLeito) {
+    // Implementar se necessário
+};
+
 // =================== FUNÇÕES AUXILIARES ===================
-function showButtonLoading(button, loadingText) {
-    if (button) {
-        button.disabled = true;
-        button.innerHTML = loadingText;
-        button.style.opacity = '0.7';
+function formatarDataHora(dataString) {
+    if (!dataString) return '—';
+    const data = new Date(dataString);
+    return data.toLocaleString('pt-BR', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+    });
+}
+
+function calcularTempoInternacao(dataAdmissao) {
+    if (!dataAdmissao) return '';
+    
+    const agora = new Date();
+    const admissao = new Date(dataAdmissao);
+    const diffMs = agora - admissao;
+    const diffHoras = Math.floor(diffMs / (1000 * 60 * 60));
+    const diffDias = Math.floor(diffHoras / 24);
+    const horasRestantes = diffHoras % 24;
+    
+    if (diffDias > 0) {
+        return `${diffDias}d ${horasRestantes}h`;
+    } else {
+        return `${diffHoras}h`;
     }
-}
-
-function hideButtonLoading(button, originalText) {
-    if (button) {
-        button.disabled = false;
-        button.innerHTML = originalText;
-        button.style.opacity = '1';
-    }
-}
-
-function showSuccessMessage(message) {
-    const toast = document.createElement('div');
-    toast.innerHTML = message;
-    toast.style.cssText = `
-        position: fixed; top: 20px; right: 20px; background: #16a34a;
-        color: white; padding: 15px 20px; border-radius: 8px; font-weight: 500;
-        z-index: 10000; animation: slideIn 0.3s ease;
-    `;
-    document.body.appendChild(toast);
-    setTimeout(() => toast.remove(), 4000);
-}
-
-function showErrorMessage(message) {
-    const toast = document.createElement('div');
-    toast.innerHTML = message;
-    toast.style.cssText = `
-        position: fixed; top: 20px; right: 20px; background: #dc2626;
-        color: white; padding: 15px 20px; border-radius: 8px; font-weight: 500;
-        z-index: 10000; animation: slideIn 0.3s ease;
-    `;
-    document.body.appendChild(toast);
-    setTimeout(() => toast.remove(), 5000);
 }
 
 function getIniciais(nomeCompleto) {
     if (!nomeCompleto) return '—';
-    return nomeCompleto.split(' ')
-        .filter(part => part.length > 0)
-        .map(part => part.charAt(0).toUpperCase())
-        .slice(0, 3)
-        .join(' ');
-}
-
-function calcularTempoInternacao(admissao) {
-    if (!admissao) return '';
     
-    try {
-        let dataAdmissao;
-        
-        if (typeof admissao === 'string') {
-            if (admissao.includes('/')) {
-                const [datePart] = admissao.split(' ');
-                const [dia, mes, ano] = datePart.split('/');
-                
-                if (dia && mes && ano) {
-                    const d = parseInt(dia);
-                    const m = parseInt(mes);
-                    const a = parseInt(ano);
-                    
-                    if (!isNaN(d) && !isNaN(m) && !isNaN(a) && 
-                        d >= 1 && d <= 31 && m >= 1 && m <= 12 && a >= 1900) {
-                        dataAdmissao = new Date(a, m - 1, d);
-                    } else {
-                        return 'Data inválida';
-                    }
-                } else {
-                    return 'Data incompleta';
-                }
-            } else {
-                dataAdmissao = new Date(admissao);
-            }
-        } else {
-            dataAdmissao = new Date(admissao);
-        }
-        
-        if (!dataAdmissao || isNaN(dataAdmissao.getTime())) {
-            return 'Data inválida';
-        }
-        
-        const agora = new Date();
-        const diffTime = agora - dataAdmissao;
-        
-        if (diffTime < 0) return 'Data futura';
-        if (diffTime > (2 * 365 * 24 * 60 * 60 * 1000)) return 'Data antiga';
-        
-        const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
-        const diffHours = Math.floor((diffTime % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-        
-        if (diffDays === 0) return `${diffHours}h`;
-        if (diffDays === 1) return `1d ${diffHours}h`;
-        return `${diffDays}d ${diffHours}h`;
-        
-    } catch (error) {
-        logError('Erro ao calcular tempo internação:', error);
-        return 'Erro no cálculo';
-    }
-}
-
-function formatarDataHora(dataISO) {
-    if (!dataISO) return '—';
+    const palavras = nomeCompleto.trim().split(' ').filter(p => p.length > 0);
+    if (palavras.length === 0) return '—';
+    if (palavras.length === 1) return palavras[0].substring(0, 2).toUpperCase();
     
-    try {
-        const data = new Date(dataISO);
-        return data.toLocaleString('pt-BR', {
-            day: '2-digit',
-            month: '2-digit', 
-            year: 'numeric',
-            hour: '2-digit',
-            minute: '2-digit'
-        });
-    } catch (error) {
-        logError('Erro ao formatar data:', error);
-        return '—';
-    }
+    return (palavras[0][0] + palavras[palavras.length - 1][0]).toUpperCase();
 }
 
-// =================== FUNÇÕES DE LOG ===================
-function logInfo(message, data = null) {
-    console.log(`🔵 [CARDS V3.3 FINAL] ${message}`, data || '');
+function showButtonLoading(button, text) {
+    button.disabled = true;
+    button.innerHTML = `<span style="display: inline-block; width: 12px; height: 12px; border: 2px solid rgba(255,255,255,0.3); border-top-color: #ffffff; border-radius: 50%; animation: spin 0.6s linear infinite;"></span>`;
 }
 
-function logError(message, error = null) {
-    console.error(`🔴 [CARDS V3.3 FINAL ERROR] ${message}`, error || '');
+function hideButtonLoading(button, originalText) {
+    button.disabled = false;
+    button.innerHTML = originalText;
 }
 
-function logSuccess(message) {
-    console.log(`🟢 [CARDS V3.3 FINAL SUCCESS] ${message}`);
-}
-
-function logDebug(message, data = null) {
-    console.log(`🟡 [CARDS V3.3 FINAL DEBUG] ${message}`, data || '');
-}
-
-// =================== CSS CONSOLIDADO COMPLETO V3.3 FINAL ===================
-if (!document.getElementById('cardsConsolidadoCSS')) {
+// =================== CSS INLINE COMPLETO ===================
+(function injectStyles() {
     const style = document.createElement('style');
-    style.id = 'cardsConsolidadoCSS';
     style.textContent = `
-        /* =================== ANIMAÇÕES =================== */
-        @keyframes slideIn {
-            from { transform: translateX(100%); opacity: 0; }
-            to { transform: translateX(0); opacity: 1; }
-        }
-        
         @keyframes fadeIn {
-            from { opacity: 0; transform: scale(0.9); }
-            to { opacity: 1; transform: scale(1); }
+            from { opacity: 0; }
+            to { opacity: 1; }
         }
         
-        @keyframes fadeOut {
-            from { opacity: 1; transform: scale(1); }
-            to { opacity: 0; transform: scale(0.9); }
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
         }
         
-        /* =================== DESKTOP =================== */
-        .btn-action {
-            transition: all 0.2s ease;
+        .modal-overlay {
+            animation: fadeIn 0.3s ease;
         }
         
-        .btn-action:hover {
-            transform: translateY(-1px);
-            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        .modal-content {
+            animation: slideUp 0.3s ease;
         }
         
-        .btn-action:disabled {
-            cursor: not-allowed;
-            transform: none !important;
+        @keyframes slideUp {
+            from {
+                transform: translateY(30px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+        
+        input, select {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif !important;
         }
         
         select {
-            background-color: #374151 !important;
-            color: #ffffff !important;
-            border: 1px solid rgba(255,255,255,0.3) !important;
-            border-radius: 6px !important;
-            appearance: none !important;
-            -webkit-appearance: none !important;
-            -moz-appearance: none !important;
-            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+            appearance: none;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            background-image: url('data:image/svg+xml;charset=UTF-8,%3csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"%3e%3cpolyline points="6 9 12 15 18 9"%3e%3c/polyline%3e%3c/svg%3e');
             background-repeat: no-repeat;
             background-position: right 0.7rem center;
             background-size: 1em;
             padding-right: 2.5rem !important;
         }
-
+        
         select option {
-            background-color: #374151 !important;
+            background-color: #2d3748 !important;
             color: #ffffff !important;
         }
-
-        select:focus {
+        
+        select:focus, input:focus {
             outline: none !important;
             border-color: #60a5fa !important;
             box-shadow: 0 0 0 2px rgba(96, 165, 250, 0.2) !important;
         }
-
+        
         input[type="checkbox"] {
-            width: 16px;
-            height: 16px;
             accent-color: #60a5fa;
             cursor: pointer;
         }
         
-        label:has(input[type="checkbox"]) {
-            cursor: pointer;
-            transition: background-color 0.2s ease;
-            border-radius: 4px;
-            padding: 4px !important;
-        }
-        
         label:has(input[type="checkbox"]):hover {
-            background-color: rgba(96, 165, 250, 0.1);
-        }
-
-        .card {
-            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            background-color: rgba(96, 165, 250, 0.08);
         }
         
-        .card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+        .btn-submit:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(16,185,129,0.4);
         }
         
-        .form-grid-3-cols {
-            display: grid !important;
-            grid-template-columns: 1fr 1fr 1fr !important;
-            gap: 15px !important;
+        .btn-cancelar:hover {
+            background: rgba(255,255,255,0.15);
         }
         
-        /* =================== TABLET (768px - 1024px) =================== */
-        @media (max-width: 1024px) and (min-width: 769px) {
-            .cards-grid {
-                grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
-                gap: 18px;
-            }
-            
-            .form-grid-3-cols {
-                grid-template-columns: 1fr 1fr 1fr !important;
-                gap: 12px !important;
-            }
+        .btn-alta:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(239,68,68,0.4);
         }
-
-        /* =================== MOBILE (≤768px) =================== */
+        
+        /* RESPONSIVO */
         @media (max-width: 768px) {
-            .cards-grid {
-                grid-template-columns: 1fr !important;
-                gap: 15px !important;
-            }
-            
-            .card-row,
-            .card-row-pessoa {
-                display: grid !important;
-                grid-template-columns: 100px 1fr 1fr !important;
-                gap: 8px !important;
-            }
-            
-            .pessoa-circle {
-                width: 100px !important;
-                height: 100px !important;
-            }
-            
-            .modal-overlay .modal-content {
-                width: 95% !important;
-                max-width: none !important;
-                margin: 10px !important;
-                max-height: 95vh !important;
-                padding: 20px !important;
-            }
-            
             .form-grid-3-cols {
-                display: grid !important;
-                grid-template-columns: 1fr 1fr 1fr !important;
-                gap: 8px !important;
-            }
-            
-            .form-grid-3-cols input,
-            .form-grid-3-cols select {
-                padding: 8px 6px !important;
-                font-size: 12px !important;
-            }
-            
-            .form-grid-3-cols label {
-                font-size: 10px !important;
-                margin-bottom: 3px !important;
-            }
-            
-            .modal-content div[id$="Concessoes"], 
-            .modal-content div[id$="Linhas"] {
                 grid-template-columns: 1fr !important;
-                max-height: 120px !important;
-            }
-            
-            input[type="checkbox"] {
-                width: 18px !important;
-                height: 18px !important;
-                margin-right: 10px !important;
-            }
-            
-            label:has(input[type="checkbox"]) {
-                padding: 8px !important;
-                font-size: 12px !important;
-            }
-        }
-        
-        /* =================== MOBILE PEQUENO (≤480px) =================== */
-        @media (max-width: 480px) {
-            .card {
-                padding: 12px !important;
-            }
-            
-            .card-row,
-            .card-row-pessoa {
-                gap: 6px !important;
             }
             
             .modal-content {
-                padding: 15px !important;
-            }
-            
-            .form-grid-3-cols {
-                gap: 6px !important;
-            }
-        }
-        
-        /* =================== LANDSCAPE =================== */
-        @media (max-width: 768px) and (orientation: landscape) {
-            .cards-grid {
-                grid-template-columns: repeat(2, 1fr) !important;
-                gap: 12px !important;
+                padding: 20px !important;
             }
         }
     `;
     document.head.appendChild(style);
-}
+})();
 
 // =================== INICIALIZAÇÃO V3.3 FINAL ===================
 document.addEventListener('DOMContentLoaded', function() {
-    logSuccess('✅ CARDS.JS V3.3 FINAL CARREGADO');
+    logSuccess('✅ CARDS.JS V3.3 FINAL CORRIGIDO CARREGADO');
     
-    // Verificar listas
-    if (window.CONCESSOES_LIST.length !== 11) {
-        logError(`ERRO: Esperadas 11 concessões, encontradas ${window.CONCESSOES_LIST.length}`);
-    } else {
-        logSuccess(`✅ ${window.CONCESSOES_LIST.length} concessões confirmadas`);
-    }
+    logSuccess(`✅ ${window.CONCESSOES_LIST.length} concessões`);
+    logSuccess(`✅ ${window.LINHAS_CUIDADO_LIST.length} linhas de cuidado`);
+    logSuccess(`✅ ${window.REGIAO_OPTIONS.length} regiões`);
+    logSuccess(`✅ ${window.SEXO_OPTIONS.length} opções de gênero`);
+    logSuccess(`✅ ${window.DIRETIVAS_OPTIONS.length} opções de diretivas`);
     
-    if (window.LINHAS_CUIDADO_LIST.length !== 45) {
-        logError(`ERRO: Esperadas 45 linhas, encontradas ${window.LINHAS_CUIDADO_LIST.length}`);
-    } else {
-        logSuccess(`✅ ${window.LINHAS_CUIDADO_LIST.length} linhas de cuidado confirmadas`);
-    }
-    
-    if (window.REGIAO_OPTIONS.length !== 9) {
-        logError(`ERRO: Esperadas 9 regiões, encontradas ${window.REGIAO_OPTIONS.length}`);
-    } else {
-        logSuccess(`✅ ${window.REGIAO_OPTIONS.length} regiões confirmadas`);
-    }
-    
-    if (window.SEXO_OPTIONS.length !== 2) {
-        logError(`ERRO: Esperadas 2 opções sexo, encontradas ${window.SEXO_OPTIONS.length}`);
-    } else {
-        logSuccess(`✅ ${window.SEXO_OPTIONS.length} opções de gênero confirmadas (por extenso)`);
-    }
-    
-    if (window.DIRETIVAS_OPTIONS.length !== 3) {
-        logError(`ERRO: Esperadas 3 opções diretivas, encontradas ${window.DIRETIVAS_OPTIONS.length}`);
-    } else {
-        logSuccess(`✅ ${window.DIRETIVAS_OPTIONS.length} opções de diretivas confirmadas (NOVO V3.3)`);
-    }
-    
-    logInfo('🚀 ESTRUTURA V3.3 FINAL (MOCKUP):');
-    logInfo('  • ✅ HEADER: Hospital fora dos boxes');
-    logInfo('  • ✅ LINHA 1: Leito | Tipo | Status');
-    logInfo('  • ✅ LINHA 2: Gênero | Isolamento | Prev Alta');
-    logInfo('  • ✅ LINHA DIVISÓRIA horizontal');
-    logInfo('  • ✅ SEÇÃO PESSOA: Círculo 100px + Grid 2x2');
-    logInfo('  • ✅ LINHA 3: PPS | SPICT-BR | DIRETIVAS ⭐ NOVO!');
-    logInfo('  • ✅ CORES ORIGINAIS: #1a1f2e + rgba(255,255,255,0.05)');
-    logInfo('  • ✅ Círculo pessoa com cores: verde/azul/rosa');
-    logInfo('  • ✅ Badges com cores específicas (isolamento/gênero/diretivas)');
-    logInfo('  • ✅ 74 colunas (A-BV) | BV/73 = DIRETIVAS');
-    logInfo('  • ✅ CSS responsivo completo inline');
-    logInfo('  • ✅ Validações obrigatórias: isolamento + região + gênero');
+    logInfo('🎯 CORREÇÕES APLICADAS:');
+    logInfo('  • ✅ Box TIPO reflete categoria escolhida (coluna C)');
+    logInfo('  • ✅ Header: "LEITO HÍBRIDO" na mesma linha sem emoji');
+    logInfo('  • ✅ Diretivas: seção duplicada removida');
+    logInfo('  • ✅ Modal atualização: layout igual admitir + info internação no rodapé');
 });
 
 // =================== EXPORTS ===================
@@ -1616,26 +1442,4 @@ window.getBadgeGenero = getBadgeGenero;
 window.getBadgeDiretivas = getBadgeDiretivas;
 window.formatarMatricula = formatarMatricula;
 
-logSuccess('🎉 CARDS.JS V3.3 FINAL COMPLETO E PRONTO!');
-logInfo('📋 RESUMO V3.3:');
-logInfo('  • ✅ Layout MOCKUP implementado 100%');
-logInfo('  • ✅ Hospital FORA dos boxes');
-logInfo('  • ✅ Linha divisória horizontal');
-logInfo('  • ✅ Círculo pessoa 100px com SVG ícone');
-logInfo('  • ✅ DIRETIVAS na Linha 3 (coluna BV/73)');
-logInfo('  • ✅ PREV ALTA movida para Linha 2');
-logInfo('  • ✅ Cores originais do projeto (#1a1f2e)');
-logInfo('  • ✅ 11 concessões + 45 linhas + 9 regiões + 2 gêneros + 3 diretivas');
-logInfo('  • ✅ TODO CSS responsivo consolidado');
-logInfo('  • ✅ 1600+ linhas completas do arquivo original');
-
-// =================== LOG INICIALIZAÇÃO V3.3 CORRIGIDO ===================
-console.log('✅ CARDS.JS V3.3 COMPLETO CARREGADO!');
-console.log('📊 11 Concessões + 45 Linhas de Cuidado + Diretivas (BV/73)');
-console.log('🏥 Hospitais Híbridos:', window.HOSPITAIS_HIBRIDOS);
-console.log('⭐ Correções V3.3 aplicadas:');
-console.log('   1. Gênero: leito.genero (não leito.sexo)');
-console.log('   2. Categoria: leito.categoriaEscolhida (não categoria_escolhida)');
-console.log('   3. Indicador "Leito Híbrido" para H1/H3/H5');
-console.log('   4. Linha 898 corrigida (erro de sintaxe no PPS select)');
-console.log('📁 Arquivo completo e funcional!');
+logSuccess('🎉 CARDS.JS V3.3 FINAL CORRIGIDO - COMPLETO!');
