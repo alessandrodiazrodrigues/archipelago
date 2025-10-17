@@ -332,7 +332,7 @@ function createCard(leito, hospitalNome) {
     
     // Dados V3.3
     const isolamento = leito.isolamento || 'Não Isolamento';
-    const identificacaoLeito = leito.identificacaoLeito || '';
+    const identificacaoLeito = leito.identificacaoLeito || leito.identificacao_leito || ''; // ⭐ ACEITA AMBOS OS FORMATOS
     const regiao = leito.regiao || '';
     const sexo = leito.genero || ''; // ✅ CORRIGIDO: leito.genero (não leito.sexo)
     const diretivas = leito.diretivas || 'Não se aplica'; // ⭐ NOVO V3.3
@@ -374,9 +374,17 @@ function createCard(leito, hospitalNome) {
     
     // ID sequencial e leito personalizado
     const idSequencial = String(numeroLeito).padStart(2, '0');
-    const leitoPersonalizado = (identificacaoLeito && identificacaoLeito.trim()) 
+    
+    // ⭐ NOVO: Para Cruz Azul enfermarias, usar identificação fixa como display principal
+    let leitoDisplay = identificacaoLeito && identificacaoLeito.trim() 
         ? identificacaoLeito.trim().toUpperCase()
         : `LEITO ${numeroLeito}`;
+    
+    // ⭐ Se for Cruz Azul enfermaria (21-36) e tiver identificação, usar ela
+    const isCruzAzulEnfermaria = (hospitalId === 'H2' && numeroLeito >= 21 && numeroLeito <= 36);
+    if (isCruzAzulEnfermaria && identificacaoLeito && identificacaoLeito.trim()) {
+        leitoDisplay = identificacaoLeito.trim().toUpperCase();
+    }
     
     // COR DO CÍRCULO PESSOA
     let circuloCor = '#C1FF72'; // VERDE (vago)
@@ -404,7 +412,7 @@ function createCard(leito, hospitalNome) {
         <div class="card-row" style="display: grid; grid-template-columns: 100px 1fr 1fr; gap: 8px; margin-bottom: 10px;">
             <div class="card-box" style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; padding: 8px; min-height: 45px; display: flex; flex-direction: column; justify-content: center;">
                 <div class="box-label" style="font-size: 9px; color: rgba(255,255,255,0.8); font-weight: 700; text-transform: uppercase; margin-bottom: 3px; letter-spacing: 0.5px;">LEITO</div>
-                <div class="box-value" style="color: #ffffff; font-weight: 700; font-size: 11px; line-height: 1.2;">${leitoPersonalizado}</div>
+                <div class="box-value" style="color: #ffffff; font-weight: 700; font-size: 11px; line-height: 1.2;">${leitoDisplay}</div>
             </div>
             
             <div class="card-box" style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; padding: 8px; min-height: 45px; display: flex; flex-direction: column; justify-content: center;">
@@ -651,8 +659,17 @@ function createAdmissaoForm(hospitalNome, leitoNumero, hospitalId) {
     // ⭐ NOVO: Buscar identificação fixa do leito (se existir na planilha)
     let identificacaoFixa = '';
     if (isCruzAzulEnfermaria && window.hospitalData?.H2?.leitos) {
-        const leitoData = window.hospitalData.H2.leitos.find(l => l.leito == leitoNumero);
-        identificacaoFixa = leitoData?.identificacaoLeito || '';
+        const leitoData = window.hospitalData.H2.leitos.find(l => {
+            const numLeito = parseInt(l.leito) || parseInt(l.numero);
+            return numLeito === parseInt(leitoNumero);
+        });
+        if (leitoData) {
+            // ⭐ ACEITA AMBOS OS FORMATOS: camelCase ou snake_case
+            identificacaoFixa = leitoData.identificacaoLeito || leitoData.identificacao_leito || '';
+            logInfo(`🔒 Leito fixo encontrado - H2 Leito ${leitoNumero}: ${identificacaoFixa}`);
+        } else {
+            logError(`❌ Leito H2-${leitoNumero} não encontrado nos dados`);
+        }
     }
     
     return `
@@ -675,10 +692,10 @@ function createAdmissaoForm(hospitalNome, leitoNumero, hospitalId) {
                     <div>
                         <label style="display: block; margin-bottom: 5px; color: #e2e8f0; font-weight: 600; font-size: 11px; text-transform: uppercase;">IDENTIFICAÇÃO DO LEITO <span style="color: #ef4444;">*</span></label>
                         ${isCruzAzulEnfermaria && identificacaoFixa 
-                            ? `<input id="admIdentificacaoLeito" type="text" value="${identificacaoFixa}" readonly style="width: 100%; padding: 12px; background: #1f2937; color: #9ca3af; border: 1px solid rgba(255,255,255,0.2); border-radius: 6px; font-size: 14px; cursor: not-allowed;">`
+                            ? `<input id="admIdentificacaoLeito" type="text" value="${identificacaoFixa}" readonly style="width: 100%; padding: 12px; background: #1f2937; color: #9ca3af; border: 1px solid rgba(255,255,255,0.2); border-radius: 6px; font-size: 14px; cursor: not-allowed;">
+                               <div style="font-size: 10px; color: rgba(255,255,255,0.5); margin-top: 3px;">🔒 Identificação fixa deste leito</div>`
                             : `<input id="admIdentificacaoLeito" type="text" placeholder="Ex: NEO1 (máx. 6)" maxlength="6" required style="width: 100%; padding: 12px; background: #374151; color: #ffffff; border: 1px solid rgba(255,255,255,0.3); border-radius: 6px; font-size: 14px;">`
                         }
-                        ${isCruzAzulEnfermaria ? '<div style="font-size: 10px; color: rgba(255,255,255,0.5); margin-top: 3px;">🔒 Identificação fixa</div>' : ''}
                     </div>
                     
                     <!-- DIRETIVAS -->
@@ -827,7 +844,7 @@ function createAtualizacaoForm(hospitalNome, leitoNumero, dadosLeito) {
     const concessoesAtuais = Array.isArray(dadosLeito?.concessoes) ? dadosLeito.concessoes : [];
     const linhasAtuais = Array.isArray(dadosLeito?.linhas) ? dadosLeito.linhas : [];
     const isolamentoAtual = dadosLeito?.isolamento || 'Não Isolamento';
-    const identificacaoAtual = dadosLeito?.identificacaoLeito || '';
+    const identificacaoAtual = dadosLeito?.identificacaoLeito || dadosLeito?.identificacao_leito || ''; // ⭐ ACEITA AMBOS OS FORMATOS
     const regiaoAtual = dadosLeito?.regiao || '';
     const sexoAtual = dadosLeito?.sexo || '';
     const diretivasAtual = dadosLeito?.diretivas || 'Não se aplica';
