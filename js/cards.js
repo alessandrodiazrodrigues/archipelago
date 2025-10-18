@@ -120,14 +120,14 @@ window.PREVISAO_ALTA_OPTIONS = [
 ];
 
 // ISOLAMENTO: 3 OPÇÕES
-window.ISOLAMENTO_OPTIONS = [
+window.ISOLAMENTO_OPCOES = [
     'Não Isolamento',
     'Isolamento de Contato', 
     'Isolamento Respiratório'
 ];
 
 // REGIÃO: 9 OPÇÕES (CONFIRMADAS)
-window.REGIAO_OPTIONS = [
+window.REGIOES_OPCOES = [
     'Zona Central',
     'Zona Sul',
     'Zona Norte',
@@ -140,13 +140,13 @@ window.REGIAO_OPTIONS = [
 ];
 
 // GÊNERO: 2 OPÇÕES (POR EXTENSO CONFIRMADO)
-window.SEXO_OPTIONS = [
+window.GENERO_OPCOES = [
     'Masculino',
     'Feminino'
 ];
 
 // ⭐ NOVO V3.3: DIRETIVAS ANTECIPADAS (BV/73)
-window.DIRETIVAS_OPTIONS = [
+window.DIRETIVAS_OPCOES = [
     'Não se aplica',
     'Sim',
     'Não'
@@ -292,15 +292,16 @@ function getBadgeDiretivas(diretivas) {
 }
 
 // ⭐ CORREÇÃO V3.3: DETERMINAR TIPO REAL DO LEITO
+// ⭐ CORREÇÃO V3.3: DETERMINAR TIPO REAL DO LEITO
 function getTipoLeito(leito, hospitalId) {
-    // Se for híbrido, verificar categoria escolhida da coluna C
+    // Se for híbrido, verificar categoria escolhida (coluna BU/72)
     if (window.HOSPITAIS_HIBRIDOS.includes(hospitalId)) {
-        // Se tem tipo definido (coluna C da planilha), usar ele
-        if (leito.tipo && leito.tipo !== 'Híbrido') {
-            return leito.tipo;
+        // Ler categoriaEscolhida (BU/72) ao invés de tipo (C/2)
+        if (leito.categoriaEscolhida) {
+            return leito.categoriaEscolhida;
         }
-        // Se não tem, exibir "Híbrido"
-        return 'Híbrido';
+        // Se não tiver categoria escolhida, retornar tipo padrão
+        return leito.tipo || 'Híbrido';
     }
     
     // Se não for híbrido, retornar o tipo fixo
@@ -716,7 +717,7 @@ function createAdmissaoForm(hospitalNome, leitoNumero, hospitalId) {
                     <div>
                         <label style="display: block; margin-bottom: 5px; color: #e2e8f0; font-weight: 600; font-size: 11px; text-transform: uppercase;">DIRETIVAS</label>
                         <select id="admDiretivas" style="width: 100%; padding: 12px; background: #374151 !important; color: #ffffff !important; border: 1px solid rgba(255,255,255,0.3); border-radius: 6px; font-size: 14px;">
-                            ${window.DIRETIVAS_OPTIONS.map((opcao, index) => `<option value="${opcao}" ${index === 0 ? 'selected' : ''}>${opcao}</option>`).join('')}
+                            ${window.DIRETIVAS_OPCOES.map((opcao, index) => `<option value="${opcao}" ${index === 0 ? 'selected' : ''}>${opcao}</option>`).join('')}
                         </select>
                     </div>
                     
@@ -751,21 +752,21 @@ function createAdmissaoForm(hospitalNome, leitoNumero, hospitalId) {
                     <div>
                         <label style="display: block; margin-bottom: 5px; color: #e2e8f0; font-weight: 600;">ISOLAMENTO <span style="color: #ef4444;">*</span></label>
                         <select id="admIsolamento" required style="width: 100%; padding: 12px; background: #374151 !important; color: #ffffff !important; border: 1px solid rgba(255,255,255,0.3); border-radius: 6px; font-size: 14px;">
-                            ${window.ISOLAMENTO_OPTIONS.map((opcao, index) => `<option value="${opcao}" ${index === 0 ? 'selected' : ''}>${opcao}</option>`).join('')}
+                            ${window.ISOLAMENTO_OPCOES.map((opcao, index) => `<option value="${opcao}" ${index === 0 ? 'selected' : ''}>${opcao}</option>`).join('')}
                         </select>
                     </div>
                     <div>
                         <label style="display: block; margin-bottom: 5px; color: #e2e8f0; font-weight: 600;">REGIÃO <span style="color: #ef4444;">*</span></label>
                         <select id="admRegiao" required style="width: 100%; padding: 12px; background: #374151 !important; color: #ffffff !important; border: 1px solid rgba(255,255,255,0.3); border-radius: 6px; font-size: 14px;">
                             <option value="">Selecionar...</option>
-                            ${window.REGIAO_OPTIONS.map(regiao => `<option value="${regiao}">${regiao}</option>`).join('')}
+                            ${window.REGIOES_OPCOES.map(regiao => `<option value="${regiao}">${regiao}</option>`).join('')}
                         </select>
                     </div>
                     <div>
                         <label style="display: block; margin-bottom: 5px; color: #e2e8f0; font-weight: 600;">GÊNERO <span style="color: #ef4444;">*</span></label>
                         <select id="admSexo" required style="width: 100%; padding: 12px; background: #374151 !important; color: #ffffff !important; border: 1px solid rgba(255,255,255,0.3); border-radius: 6px; font-size: 14px;">
                             <option value="">Selecionar...</option>
-                            ${window.SEXO_OPTIONS.map(sexo => `<option value="${sexo}">${sexo}</option>`).join('')}
+                            ${window.GENERO_OPCOES.map(sexo => `<option value="${sexo}">${sexo}</option>`).join('')}
                         </select>
                     </div>
                 </div>
@@ -887,13 +888,13 @@ function createAtualizacaoForm(hospitalNome, leitoNumero, dadosLeito) {
     }
     
     const regiaoAtual = dadosLeito?.regiao || '';
-    const sexoAtual = dadosLeito?.sexo || '';
+    const generoAtual = dadosLeito?.genero || '';
     const diretivasAtual = dadosLeito?.diretivas || 'Não se aplica';
     const admissaoData = dadosLeito?.admAt || '';
     
     // Verificar se o leito é híbrido
     const isHibrido = window.HOSPITAIS_HIBRIDOS.includes(hospitalId);
-    const tipoAtual = dadosLeito?.tipo || '';
+    const categoriaAtual = dadosLeito?.categoriaEscolhida || '';
     
     return `
         <div class="modal-content" style="background: #1a1f2e; border-radius: 12px; padding: 30px; max-width: 700px; width: 95%; max-height: 90vh; overflow-y: auto; color: #ffffff;">
@@ -924,7 +925,7 @@ function createAtualizacaoForm(hospitalNome, leitoNumero, dadosLeito) {
                     <div>
                         <label style="display: block; margin-bottom: 5px; color: #e2e8f0; font-weight: 600; font-size: 11px; text-transform: uppercase;">DIRETIVAS</label>
                         <select id="updDiretivas" style="width: 100%; padding: 12px; background: #374151 !important; color: #ffffff !important; border: 1px solid rgba(255,255,255,0.3); border-radius: 6px; font-size: 14px;">
-                            ${window.DIRETIVAS_OPTIONS.map(opcao => `<option value="${opcao}" ${diretivasAtual === opcao ? 'selected' : ''}>${opcao}</option>`).join('')}
+                            ${window.DIRETIVAS_OPCOES.map(opcao => `<option value="${opcao}" ${diretivasAtual === opcao ? 'selected' : ''}>${opcao}</option>`).join('')}
                         </select>
                     </div>
                     
@@ -944,7 +945,7 @@ function createAtualizacaoForm(hospitalNome, leitoNumero, dadosLeito) {
                                <div style="font-size: 10px; color: rgba(255,255,255,0.5); margin-top: 3px;">🔒 Tipo fixo (Apartamento)</div>`
                             : `<select id="updTipoQuarto" style="width: 100%; padding: 12px; background: #374151 !important; color: #ffffff !important; border: 1px solid rgba(255,255,255,0.3); border-radius: 6px; font-size: 14px;">
                                 <option value="">Selecionar...</option>
-                                ${window.TIPO_QUARTO_OPTIONS.map(tipo => `<option value="${tipo}" ${tipoAtual === tipo ? 'selected' : ''}>${tipo}</option>`).join('')}
+                                ${window.TIPO_QUARTO_OPTIONS.map(tipo => `<option value="${tipo}" ${categoriaAtual === tipo ? 'selected' : ''}>${tipo}</option>`).join('')}
                                </select>`
                         }
                     </div>
@@ -958,21 +959,21 @@ function createAtualizacaoForm(hospitalNome, leitoNumero, dadosLeito) {
                     <div>
                         <label style="display: block; margin-bottom: 5px; color: #e2e8f0; font-weight: 600;">ISOLAMENTO <span style="color: #ef4444;">*</span></label>
                         <select id="updIsolamento" required style="width: 100%; padding: 12px; background: #374151 !important; color: #ffffff !important; border: 1px solid rgba(255,255,255,0.3); border-radius: 6px; font-size: 14px;">
-                            ${window.ISOLAMENTO_OPTIONS.map(opcao => `<option value="${opcao}" ${isolamentoAtual === opcao ? 'selected' : ''}>${opcao}</option>`).join('')}
+                            ${window.ISOLAMENTO_OPCOES.map(opcao => `<option value="${opcao}" ${isolamentoAtual === opcao ? 'selected' : ''}>${opcao}</option>`).join('')}
                         </select>
                     </div>
                     <div>
                         <label style="display: block; margin-bottom: 5px; color: #e2e8f0; font-weight: 600;">REGIÃO <span style="color: #ef4444;">*</span></label>
                         <select id="updRegiao" required style="width: 100%; padding: 12px; background: #374151 !important; color: #ffffff !important; border: 1px solid rgba(255,255,255,0.3); border-radius: 6px; font-size: 14px;">
                             <option value="">Selecionar...</option>
-                            ${window.REGIAO_OPTIONS.map(regiao => `<option value="${regiao}" ${regiaoAtual === regiao ? 'selected' : ''}>${regiao}</option>`).join('')}
+                            ${window.REGIOES_OPCOES.map(regiao => `<option value="${regiao}" ${regiaoAtual === regiao ? 'selected' : ''}>${regiao}</option>`).join('')}
                         </select>
                     </div>
                     <div>
                         <label style="display: block; margin-bottom: 5px; color: #e2e8f0; font-weight: 600;">GÊNERO <span style="color: #ef4444;">*</span></label>
                         <select id="updSexo" required style="width: 100%; padding: 12px; background: #374151 !important; color: #ffffff !important; border: 1px solid rgba(255,255,255,0.3); border-radius: 6px; font-size: 14px;">
                             <option value="">Selecionar...</option>
-                            ${window.SEXO_OPTIONS.map(sexo => `<option value="${sexo}" ${sexoAtual === sexo ? 'selected' : ''}>${sexo}</option>`).join('')}
+                            ${window.GENERO_OPCOES.map(genero => `<option value="${sexo}" ${generoAtual === genero ? 'selected' : ''}>${sexo}</option>`).join('')}
                         </select>
                     </div>
                 </div>
@@ -1721,22 +1722,22 @@ document.addEventListener('DOMContentLoaded', function() {
         logSuccess(`✅ ${window.LINHAS_CUIDADO_LIST.length} linhas de cuidado confirmadas`);
     }
     
-    if (window.REGIAO_OPTIONS.length !== 9) {
-        logError(`ERRO: Esperadas 9 regiões, encontradas ${window.REGIAO_OPTIONS.length}`);
+    if (window.REGIOES_OPCOES.length !== 9) {
+        logError(`ERRO: Esperadas 9 regiões, encontradas ${window.REGIOES_OPCOES.length}`);
     } else {
-        logSuccess(`✅ ${window.REGIAO_OPTIONS.length} regiões confirmadas`);
+        logSuccess(`✅ ${window.REGIOES_OPCOES.length} regiões confirmadas`);
     }
     
-    if (window.SEXO_OPTIONS.length !== 2) {
-        logError(`ERRO: Esperadas 2 opções sexo, encontradas ${window.SEXO_OPTIONS.length}`);
+    if (window.GENERO_OPCOES.length !== 2) {
+        logError(`ERRO: Esperadas 2 opções sexo, encontradas ${window.GENERO_OPCOES.length}`);
     } else {
-        logSuccess(`✅ ${window.SEXO_OPTIONS.length} opções de gênero confirmadas (por extenso)`);
+        logSuccess(`✅ ${window.GENERO_OPCOES.length} opções de gênero confirmadas (por extenso)`);
     }
     
-    if (window.DIRETIVAS_OPTIONS.length !== 3) {
-        logError(`ERRO: Esperadas 3 opções diretivas, encontradas ${window.DIRETIVAS_OPTIONS.length}`);
+    if (window.DIRETIVAS_OPCOES.length !== 3) {
+        logError(`ERRO: Esperadas 3 opções diretivas, encontradas ${window.DIRETIVAS_OPCOES.length}`);
     } else {
-        logSuccess(`✅ ${window.DIRETIVAS_OPTIONS.length} opções de diretivas confirmadas (NOVO V3.3)`);
+        logSuccess(`✅ ${window.DIRETIVAS_OPCOES.length} opções de diretivas confirmadas (NOVO V3.3)`);
     }
     
     logInfo('🚀 ESTRUTURA V3.3 FINAL (MOCKUP):');
