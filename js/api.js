@@ -117,7 +117,7 @@ window.TIMELINE_OPCOES = [
 // =================== ISOLAMENTO (3 OPÇÕES - COLUNA AR) ===================
 window.ISOLAMENTO_OPCOES = [
     "Não Isolamento",
-    "Isolamento De Contato", 
+    "Isolamento de Contato",  // ✅ CORRIGIDO: "de" minúsculo (cards.js envia assim)
     "Isolamento Respiratório"
 ];
 
@@ -312,7 +312,39 @@ function validarLinhas(linhas) {
 }
 
 function validarIsolamento(isolamento) {
-    return window.ISOLAMENTO_OPCOES.includes(isolamento) ? isolamento : 'Não Isolamento';
+    // ✅ CORREÇÃO: Normalização case-insensitive para aceitar variações
+    if (!isolamento || typeof isolamento !== 'string') {
+        return 'Não Isolamento';
+    }
+    
+    const isolamentoNormalizado = isolamento.trim();
+    const isolamentoLower = isolamentoNormalizado.toLowerCase();
+    
+    // Aceitar variações de "Isolamento de Contato"
+    if (isolamentoLower === 'isolamento de contato' || 
+        isolamentoLower === 'isolamento contato') {
+        return 'Isolamento de Contato';
+    }
+    
+    // Aceitar variações de "Isolamento Respiratório"
+    if (isolamentoLower === 'isolamento respiratório' || 
+        isolamentoLower === 'isolamento respiratorio') {
+        return 'Isolamento Respiratório';
+    }
+    
+    // Aceitar variações de "Não Isolamento"
+    if (isolamentoLower === 'não isolamento' || 
+        isolamentoLower === 'nao isolamento') {
+        return 'Não Isolamento';
+    }
+    
+    // Fallback: tentar match exato com as opções válidas
+    if (window.ISOLAMENTO_OPCOES.includes(isolamentoNormalizado)) {
+        return isolamentoNormalizado;
+    }
+    
+    // Padrão se nada corresponder
+    return 'Não Isolamento';
 }
 
 function validarIdentificacaoLeito(identificacao) {
@@ -584,8 +616,10 @@ window.loadHospitalData = async function() {
                     
                     if (leito.categoriaEscolhida) {
                         leito.categoriaEscolhida = validarCategoriaEscolhida(leito.categoriaEscolhida);
+                        leito.categoria = leito.categoriaEscolhida; // ✅ ALIAS para cards.js
                     } else {
                         leito.categoriaEscolhida = '';
+                        leito.categoria = ''; // ✅ ALIAS para cards.js
                     }
                     
                     // *** NOVA V3.3: VALIDAR DIRETIVAS (COLUNA BV/73) ***
