@@ -897,13 +897,13 @@ function createAtualizacaoForm(hospitalNome, leitoNumero, dadosLeito) {
     }
     
     const regiaoAtual = dadosLeito?.regiao || '';
-    const sexoAtual = dadosLeito?.sexo || '';
+    const sexoAtual = dadosLeito?.genero || ''; // ⭐ CORRIGIDO: era .sexo
     const diretivasAtual = dadosLeito?.diretivas || 'Não se aplica';
     const admissaoData = dadosLeito?.admAt || '';
     
     // Verificar se o leito é híbrido
     const isHibrido = window.HOSPITAIS_HIBRIDOS.includes(hospitalId);
-    const tipoAtual = dadosLeito?.tipo || '';
+    const tipoAtual = dadosLeito?.categoriaEscolhida || ''; // ⭐ CORRIGIDO: era .tipo
     
     return `
         <div class="modal-content" style="background: #1a1f2e; border-radius: 12px; padding: 30px; max-width: 700px; width: 95%; max-height: 90vh; overflow-y: auto; color: #ffffff;">
@@ -941,7 +941,7 @@ function createAtualizacaoForm(hospitalNome, leitoNumero, dadosLeito) {
                     <!-- ⭐ TIPO DE QUARTO -->
                     ${(isHibrido || isCruzAzulEnfermaria || isApartamentoFixo || hospitalId === 'H4') ? `
                     <div>
-                        <label style="display: block; margin-bottom: 5px; color: #e2e8f0; font-weight: 600; font-size: 11px; text-transform: uppercase;">TIPO DE QUARTO</label>
+                        <label style="display: block; margin-bottom: 5px; color: #e2e8f0; font-weight: 600; font-size: 11px; text-transform: uppercase;">TIPO DE QUARTO <span style="color: #ef4444;">*</span></label>
                         ${isCruzAzulEnfermaria 
                             ? `<select id="updTipoQuarto" disabled style="width: 100%; padding: 12px; background: #1f2937 !important; color: #9ca3af !important; border: 1px solid rgba(255,255,255,0.2); border-radius: 6px; font-size: 14px; cursor: not-allowed;">
                                 <option value="Enfermaria" selected>Enfermaria</option>
@@ -952,7 +952,7 @@ function createAtualizacaoForm(hospitalNome, leitoNumero, dadosLeito) {
                                 <option value="Apartamento" selected>Apartamento</option>
                                </select>
                                <div style="font-size: 10px; color: rgba(255,255,255,0.5); margin-top: 3px;">🔒 Tipo fixo (Apartamento)</div>`
-                            : `<select id="updTipoQuarto" style="width: 100%; padding: 12px; background: #374151 !important; color: #ffffff !important; border: 1px solid rgba(255,255,255,0.3); border-radius: 6px; font-size: 14px;">
+                            : `<select id="updTipoQuarto" required style="width: 100%; padding: 12px; background: #374151 !important; color: #ffffff !important; border: 1px solid rgba(255,255,255,0.3); border-radius: 6px; font-size: 14px;">
                                 <option value="">Selecionar...</option>
                                 ${window.TIPO_QUARTO_OPTIONS.map(tipo => `<option value="${tipo}" ${tipoAtual === tipo ? 'selected' : ''}>${tipo}</option>`).join('')}
                                </select>`
@@ -1165,6 +1165,18 @@ function setupModalEventListeners(modal, tipo) {
                 showErrorMessage('❌ Campo "Gênero" é obrigatório!');
                 sexoField.focus();
                 return;
+            }
+            
+            // ⭐ VALIDAÇÃO: Tipo de Quarto obrigatório para híbridos
+            const hospitalId = window.currentHospital;
+            const isHibrido = window.HOSPITAIS_HIBRIDOS.includes(hospitalId);
+            if (isHibrido) {
+                const tipoQuartoField = modal.querySelector(tipo === 'admissao' ? '#admTipoQuarto' : '#updTipoQuarto');
+                if (tipoQuartoField && !tipoQuartoField.disabled && !tipoQuartoField.value) {
+                    showErrorMessage('❌ Campo "Tipo de Quarto" é obrigatório para hospitais híbridos!');
+                    tipoQuartoField.focus();
+                    return;
+                }
             }
             
             const originalText = this.innerHTML;
