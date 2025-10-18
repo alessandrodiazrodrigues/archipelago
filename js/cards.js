@@ -973,7 +973,7 @@ function createAtualizacaoForm(hospitalNome, leitoNumero, dadosLeito) {
                         <label style="display: block; margin-bottom: 5px; color: #e2e8f0; font-weight: 600;">GÊNERO <span style="color: #ef4444;">*</span></label>
                         <select id="updSexo" required style="width: 100%; padding: 12px; background: #374151 !important; color: #ffffff !important; border: 1px solid rgba(255,255,255,0.3); border-radius: 6px; font-size: 14px;">
                             <option value="">Selecionar...</option>
-                            ${window.GENERO_OPCOES.map(genero => `<option value="${sexo}" ${generoAtual === genero ? 'selected' : ''}>${sexo}</option>`).join('')}
+                            ${window.GENERO_OPCOES.map(genero => `<option value="${genero}" ${generoAtual === genero ? 'selected' : ''}>${genero}</option>`).join('')}
                         </select>
                     </div>
                 </div>
@@ -1253,7 +1253,7 @@ function coletarDadosFormulario(modal, tipo) {
         dados.isolamento = modal.querySelector('#admIsolamento')?.value || 'Não Isolamento';
         dados.identificacaoLeito = modal.querySelector('#admIdentificacaoLeito')?.value?.trim().toUpperCase() || '';
         dados.regiao = modal.querySelector('#admRegiao')?.value || '';
-        dados.sexo = modal.querySelector('#admSexo')?.value || '';
+        dados.genero = modal.querySelector('#admSexo')?.value || '';
         dados.diretivas = modal.querySelector('#admDiretivas')?.value || 'Não se aplica'; // ⭐ NOVO V3.3
         
         // Tipo de quarto para híbridos
@@ -1273,7 +1273,7 @@ function coletarDadosFormulario(modal, tipo) {
         dados.isolamento = modal.querySelector('#updIsolamento')?.value || 'Não Isolamento';
         dados.identificacaoLeito = modal.querySelector('#updIdentificacaoLeito')?.value?.trim().toUpperCase() || '';
         dados.regiao = modal.querySelector('#updRegiao')?.value || '';
-        dados.sexo = modal.querySelector('#updSexo')?.value || '';
+        dados.genero = modal.querySelector('#updSexo')?.value || '';
         dados.diretivas = modal.querySelector('#updDiretivas')?.value || 'Não se aplica'; // ⭐ NOVO V3.3
         
         // ⭐ NOVO: Tipo de quarto para híbridos no ATUALIZAR
@@ -1290,7 +1290,7 @@ function coletarDadosFormulario(modal, tipo) {
         isolamento: dados.isolamento,
         identificacaoLeito: dados.identificacaoLeito,
         regiao: dados.regiao,
-        sexo: dados.sexo,
+        genero: dados.genero,
         diretivas: dados.diretivas, // ⭐ NOVO
         tipoQuarto: dados.tipoQuarto || 'N/A',
         concessoes: dados.concessoes.length,
