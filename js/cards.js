@@ -18,6 +18,10 @@ window.HOSPITAL_MAPPING = {
 // ⭐ NOVO V3.3: IDENTIFICAR HOSPITAIS HÍBRIDOS
 window.HOSPITAIS_HIBRIDOS = ['H1', 'H3', 'H5'];
 
+// ⭐ NOVO V3.3: SANTA CLARA - TODOS OS LEITOS SÃO HÍBRIDOS (1-13)
+// Mas com limite máximo de 4 enfermarias ocupadas simultaneamente
+window.SANTA_CLARA_TOTAL_LEITOS = 13;
+
 // ⭐ NOVO V3.3: TIPO DE QUARTO (2 OPÇÕES - APENAS PARA HÍBRIDOS)
 window.TIPO_QUARTO_OPTIONS = ['Apartamento', 'Enfermaria'];
 
@@ -41,6 +45,18 @@ window.CRUZ_AZUL_NUMERACAO = {
     34: '723.2',
     35: '725.1',
     36: '725.2'
+};
+
+// ⭐ NOVO V3.3: MAPEAMENTO DE LEITOS IRMÃOS (CRUZ AZUL)
+window.CRUZ_AZUL_IRMAOS = {
+    21: 22, 22: 21,  // 711.1 ↔ 711.2
+    23: 24, 24: 23,  // 713.1 ↔ 713.2
+    25: 26, 26: 25,  // 715.1 ↔ 715.2
+    27: 28, 28: 27,  // 717.1 ↔ 717.2
+    29: 30, 30: 29,  // 719.1 ↔ 719.2
+    31: 32, 32: 31,  // 721.1 ↔ 721.2
+    33: 34, 34: 33,  // 723.1 ↔ 723.2
+    35: 36, 36: 35   // 725.1 ↔ 725.2
 };
 
 // =================== LISTAS FINAIS CONFIRMADAS V3.3 ===================
@@ -300,12 +316,16 @@ function getTipoLeito(leito, hospitalId) {
                           leito.tipo_quarto ||
                           leito.tipoQuarto;
     
+    const numeroLeito = parseInt(leito.leito);
+    
     // ⭐ DEBUG FORÇADO - Sempre mostrar
     console.log('🔍 getTipoLeito DEBUG COMPLETO:', {
         hospital: hospitalId,
         leito: leito.leito,
+        numeroLeito: numeroLeito,
         status: leito.status,
         isHibrido: window.HOSPITAIS_HIBRIDOS.includes(hospitalId),
+        isSantaClaraHibrido: hospitalId === 'H4' && window.SANTA_CLARA_HIBRIDOS.includes(numeroLeito),
         tipo_coluna_C: leito.tipo,
         '🎯 categoriaEscolhida': leito.categoriaEscolhida,
         '❓ categoria': leito.categoria,
@@ -314,6 +334,19 @@ function getTipoLeito(leito, hospitalId) {
         'status_is_vago': leito.status === 'Vago' || leito.status === 'vago',
         'status_is_ocupado': leito.status === 'Em uso' || leito.status === 'ocupado' || leito.status === 'Ocupado'
     });
+    
+    // ⭐ SANTA CLARA: TODOS os leitos são híbridos (1-13)
+    if (hospitalId === 'H4') {
+        const isVago = leito.status === 'Vago' || leito.status === 'vago';
+        if (isVago) {
+            return 'Híbrido';
+        }
+        // Se ocupado, usar categoria escolhida
+        if (categoriaValue && categoriaValue.trim() !== '') {
+            return categoriaValue;
+        }
+        return 'Apartamento'; // Fallback
+    }
     
     // Para leitos VAGOS de hospitais híbridos, mostrar "Híbrido"
     const isVago = leito.status === 'Vago' || leito.status === 'vago';
@@ -365,6 +398,78 @@ function formatarTipoTexto(tipo) {
             // Capitalizar primeira letra
             return tipo.charAt(0).toUpperCase() + tipo.slice(1).toLowerCase();
     }
+}
+
+// ⭐ NOVO V3.3: VALIDAÇÃO DE BLOQUEIO CRUZ AZUL
+function validarAdmissaoCruzAzul(leitoNumero, generoNovo) {
+    // Só valida enfermarias (21-36)
+    if (window.currentHospital !== 'H2' || leitoNumero < 21 || leitoNumero > 36) {
+        return { permitido: true };
+    }
+    
+    // Encontrar leito irmão
+    const leitoIrmao = window.CRUZ_AZUL_IRMAOS[leitoNumero];
+    if (!leitoIrmao) {
+        return { permitido: true }; // Se não tem irmão mapeado, permite
+    }
+    
+    // Buscar dados do leito irmão
+    const leitosHospital = window.hospitalData['H2']?.leitos || [];
+    const dadosLeitoIrmao = leitosHospital.find(l => l.leito == leitoIrmao);
+    
+    if (!dadosLeitoIrmao || dadosLeitoIrmao.status === 'Vago' || dadosLeitoIrmao.status === 'vago') {
+        return { permitido: true }; // Leito irmão vago, permite
+    }
+    
+    // REGRA 1: Se leito irmão tem isolamento, BLOQUEIA
+    const isolamentoIrmao = dadosLeitoIrmao.isolamento || '';
+    if (isolamentoIrmao && isolamentoIrmao !== 'Não Isolamento' && isolamentoIrmao !== '') {
+        return {
+            permitido: false,
+            motivo: `Leito bloqueado! O leito ${window.CRUZ_AZUL_NUMERACAO[leitoIrmao]} está com isolamento: ${isolamentoIrmao}`,
+            tipo: 'isolamento'
+        };
+    }
+    
+    // REGRA 2: Se leito irmão tem gênero diferente, BLOQUEIA
+    const generoIrmao = dadosLeitoIrmao.genero || '';
+    if (generoIrmao && generoNovo && generoIrmao !== generoNovo) {
+        return {
+            permitido: false,
+            motivo: `Leito bloqueado! O leito ${window.CRUZ_AZUL_NUMERACAO[leitoIrmao]} está ocupado por paciente do gênero ${generoIrmao}`,
+            tipo: 'genero'
+        };
+    }
+    
+    return { permitido: true };
+}
+
+// ⭐ NOVO V3.3: VALIDAÇÃO LIMITE SANTA CLARA
+function validarLimiteSantaClara(tipoQuarto) {
+    // Só valida se for Santa Clara e escolheu Enfermaria
+    if (window.currentHospital !== 'H4' || tipoQuarto !== 'Enfermaria') {
+        return { permitido: true };
+    }
+    
+    // Contar TODAS as enfermarias ocupadas (qualquer leito 1-13)
+    const leitosHospital = window.hospitalData['H4']?.leitos || [];
+    let enfermariaCount = 0;
+    
+    leitosHospital.forEach(leito => {
+        if ((leito.status === 'Em uso' || leito.status === 'ocupado' || leito.status === 'Ocupado') &&
+            leito.categoriaEscolhida === 'Enfermaria') {
+            enfermariaCount++;
+        }
+    });
+    
+    if (enfermariaCount >= 4) {
+        return {
+            permitido: false,
+            motivo: 'Limite de enfermarias atingido! Santa Clara permite no máximo 4 enfermarias ocupadas simultaneamente.'
+        };
+    }
+    
+    return { permitido: true };
 }
 
 // =================== CRIAR CARD INDIVIDUAL V3.3 FINAL - LAYOUT MOCKUP ===================
@@ -762,6 +867,8 @@ function createModalOverlay() {
 function createAdmissaoForm(hospitalNome, leitoNumero, hospitalId) {
     const idSequencial = String(leitoNumero).padStart(2, '0');
     const isHibrido = window.HOSPITAIS_HIBRIDOS.includes(hospitalId);
+    const isSantaClara = hospitalId === 'H4'; // TODO Santa Clara é híbrido
+    const mostrarTipoQuarto = isHibrido || isSantaClara;
     
     // ⭐ CORREÇÃO V3.3: Verificar se é Cruz Azul Enfermaria (leitos 21-36)
     const isCruzAzulEnfermaria = (hospitalId === 'H2' && leitoNumero >= 21 && leitoNumero <= 36);
@@ -1264,11 +1371,37 @@ function setupModalEventListeners(modal, tipo) {
             // ⭐ VALIDAÇÃO: Tipo de Quarto obrigatório para híbridos
             const hospitalId = window.currentHospital;
             const isHibrido = window.HOSPITAIS_HIBRIDOS.includes(hospitalId);
-            if (isHibrido) {
+            const leitoNumero = parseInt(modal.querySelector('h3')?.textContent?.match(/\d+/)?.[0] || 0);
+            const isSantaClara = hospitalId === 'H4';
+            
+            if (isHibrido || isSantaClara) {
                 const tipoQuartoField = modal.querySelector(tipo === 'admissao' ? '#admTipoQuarto' : '#updTipoQuarto');
                 if (tipoQuartoField && !tipoQuartoField.disabled && !tipoQuartoField.value) {
                     showErrorMessage('❌ Campo "Tipo de Quarto" é obrigatório para hospitais híbridos!');
                     tipoQuartoField.focus();
+                    return;
+                }
+            }
+            
+            // ⭐ NOVO V3.3: VALIDAÇÃO CRUZ AZUL - BLOQUEIO LEITOS IRMÃOS
+            if (tipo === 'admissao' && hospitalId === 'H2') {
+                const generoNovo = sexoField.value;
+                const validacaoCruz = validarAdmissaoCruzAzul(leitoNumero, generoNovo);
+                
+                if (!validacaoCruz.permitido) {
+                    showErrorMessage('❌ ' + validacaoCruz.motivo);
+                    return;
+                }
+            }
+            
+            // ⭐ NOVO V3.3: VALIDAÇÃO SANTA CLARA - LIMITE 4 ENFERMARIAS
+            if (tipo === 'admissao' && hospitalId === 'H4') {
+                const tipoQuartoField = modal.querySelector('#admTipoQuarto');
+                const tipoEscolhido = tipoQuartoField?.value;
+                const validacaoSanta = validarLimiteSantaClara(tipoEscolhido);
+                
+                if (!validacaoSanta.permitido) {
+                    showErrorMessage('❌ ' + validacaoSanta.motivo);
                     return;
                 }
             }
