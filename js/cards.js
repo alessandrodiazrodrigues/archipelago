@@ -322,25 +322,46 @@ function getTipoLeito(leito, hospitalId) {
         // Se tem categoria (qualquer variação), usar ela
         if (categoriaValue && categoriaValue.trim() !== '' && categoriaValue !== 'Híbrido') {
             const resultado = categoriaValue.toUpperCase();
-            console.log('✅ RETORNANDO (híbrido ocupado):', resultado);
+            console.log(`✅ getTipoLeito FINAL: ${hospitalId}-${leito.leito} → "${resultado}" (categoria escolhida)`);
             return resultado;
         }
         
         // Fallback: usar coluna C se não tem categoria
         if (leito.tipo && leito.tipo !== 'Híbrido') {
-            console.log('⚠️ FALLBACK coluna C:', leito.tipo);
+            console.log(`⚠️ getTipoLeito FALLBACK coluna C: ${hospitalId}-${leito.leito} → "${leito.tipo}"`);
             return leito.tipo;
         }
         
         // Último fallback
-        console.log('⚠️ FALLBACK padrão: Apartamento');
+        console.log(`⚠️ getTipoLeito FALLBACK padrão: ${hospitalId}-${leito.leito} → "Apartamento"`);
         return 'Apartamento';
     }
     
     // Para hospitais não-híbridos, retornar o tipo fixo
     const tipoFixo = leito.tipo || 'Apartamento';
-    console.log('✅ RETORNANDO (não-híbrido):', tipoFixo);
+    console.log(`✅ getTipoLeito FINAL (não-híbrido): ${hospitalId}-${leito.leito} → "${tipoFixo}"`);
     return tipoFixo;
+}
+
+// ⭐ FORMATAÇÃO DO TIPO COM ÍCONE
+function formatarTipoComIcone(tipo) {
+    const tipoUpper = (tipo || '').toUpperCase().trim();
+    
+    switch(tipoUpper) {
+        case 'APARTAMENTO':
+            return '🏠 Apartamento';
+        case 'ENFERMARIA':
+            return '🛏️ Enfermaria';
+        case 'HÍBRIDO':
+        case 'HIBRIDO':
+            return '🔀 Híbrido';
+        case 'APTO':
+            return '🏠 Apartamento';
+        case 'ENF':
+            return '🛏️ Enfermaria';
+        default:
+            return `🔀 ${tipo}`;
+    }
 }
 
 // =================== CRIAR CARD INDIVIDUAL V3.3 FINAL - LAYOUT MOCKUP ===================
@@ -485,18 +506,6 @@ function createCard(leito, hospitalNome) {
         }
     }
     
-    // LOG CRITICO - Ver tipoReal antes de renderizar
-    console.log('[RENDERIZANDO CARD]', {
-        hospital: hospitalId,
-        leito: numeroLeito,
-        status: leito.status,
-        isHibrido: isHibrido,
-        tipo_coluna_C: leito.tipo,
-        categoria_api: leito.categoria,
-        categoriaEscolhida: leito.categoriaEscolhida,
-        tipoReal_vai_para_html: tipoReal
-    });
-    
     // HTML do Card V3.3 FINAL (estrutura MOCKUP aprovada)
     card.innerHTML = `
         <!-- HEADER: HOSPITAL FORA DOS BOXES -->
@@ -515,7 +524,7 @@ function createCard(leito, hospitalNome) {
             
             <div class="card-box" style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; padding: 8px; min-height: 45px; display: flex; flex-direction: column; justify-content: center;">
                 <div class="box-label" style="font-size: 9px; color: rgba(255,255,255,0.8); font-weight: 700; text-transform: uppercase; margin-bottom: 3px; letter-spacing: 0.5px;">TIPO</div>
-                <div class="box-value" style="color: #ffffff; font-weight: 700; font-size: 11px; line-height: 1.2;">${tipoReal}</div>
+                <div class="box-value" style="color: #ffffff; font-weight: 700; font-size: 11px; line-height: 1.2;">${formatarTipoComIcone(tipoReal)}</div>
             </div>
             
             <div class="status-badge" style="background: ${statusBgColor}; color: ${statusTextColor}; padding: 12px 6px; border-radius: 6px; font-weight: 800; text-transform: uppercase; text-align: center; font-size: 11px; letter-spacing: 0.5px; min-height: 45px; display: flex; flex-direction: column; align-items: center; justify-content: center;">
