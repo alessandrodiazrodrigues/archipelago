@@ -293,17 +293,26 @@ function getBadgeDiretivas(diretivas) {
 
 // ⭐ CORREÇÃO V3.3: DETERMINAR TIPO REAL DO LEITO
 function getTipoLeito(leito, hospitalId) {
-    // Se for híbrido, verificar categoria escolhida da coluna C
-    if (window.HOSPITAIS_HIBRIDOS.includes(hospitalId)) {
-        // Se tem tipo definido (coluna C da planilha), usar ele
-        if (leito.tipo && leito.tipo !== 'Híbrido') {
-            return leito.tipo;
-        }
-        // Se não tem, exibir "Híbrido"
+    // Para leitos VAGOS de hospitais híbridos, mostrar "Híbrido"
+    if (window.HOSPITAIS_HIBRIDOS.includes(hospitalId) && leito.status === 'Vago') {
         return 'Híbrido';
     }
     
-    // Se não for híbrido, retornar o tipo fixo
+    // ⭐ CORREÇÃO: Para leitos OCUPADOS de hospitais híbridos, usar categoriaEscolhida (coluna BU)
+    if (window.HOSPITAIS_HIBRIDOS.includes(hospitalId) && leito.status === 'Em uso') {
+        // Se tem categoriaEscolhida (coluna BU), usar ela
+        if (leito.categoriaEscolhida && leito.categoriaEscolhida.trim() !== '') {
+            return leito.categoriaEscolhida.toUpperCase(); // "APARTAMENTO" ou "ENFERMARIA"
+        }
+        // Fallback: usar coluna C se não tem categoriaEscolhida
+        if (leito.tipo && leito.tipo !== 'Híbrido') {
+            return leito.tipo;
+        }
+        // Se não tem nada, mostrar "Apartamento" por padrão
+        return 'Apartamento';
+    }
+    
+    // Para hospitais não-híbridos, retornar o tipo fixo
     return leito.tipo || 'Apartamento';
 }
 
@@ -751,7 +760,8 @@ function createAdmissaoForm(hospitalNome, leitoNumero, hospitalId) {
                     <div>
                         <label style="display: block; margin-bottom: 5px; color: #e2e8f0; font-weight: 600;">ISOLAMENTO <span style="color: #ef4444;">*</span></label>
                         <select id="admIsolamento" required style="width: 100%; padding: 12px; background: #374151 !important; color: #ffffff !important; border: 1px solid rgba(255,255,255,0.3); border-radius: 6px; font-size: 14px;">
-                            ${window.ISOLAMENTO_OPTIONS.map((opcao, index) => `<option value="${opcao}" ${index === 0 ? 'selected' : ''}>${opcao}</option>`).join('')}
+                            <option value="">Selecione...</option>
+                            ${window.ISOLAMENTO_OPTIONS.map(opcao => `<option value="${opcao}">${opcao}</option>`).join('')}
                         </select>
                     </div>
                     <div>
@@ -1249,7 +1259,7 @@ function coletarDadosFormulario(modal, tipo) {
         dados.pps = modal.querySelector('#admPPS')?.value?.replace('%', '') || null;
         dados.spict = modal.querySelector('#admSPICT')?.value || 'nao_elegivel';
         dados.prevAlta = modal.querySelector('#admPrevAlta')?.value || 'SP';
-        dados.isolamento = modal.querySelector('#admIsolamento')?.value || 'Não Isolamento';
+        dados.isolamento = modal.querySelector('#admIsolamento')?.value || '';
         dados.identificacaoLeito = modal.querySelector('#admIdentificacaoLeito')?.value?.trim().toUpperCase() || '';
         dados.regiao = modal.querySelector('#admRegiao')?.value || '';
         dados.genero = modal.querySelector('#admSexo')?.value || '';
@@ -1269,7 +1279,7 @@ function coletarDadosFormulario(modal, tipo) {
         dados.pps = modal.querySelector('#updPPS')?.value?.replace('%', '') || null;
         dados.spict = modal.querySelector('#updSPICT')?.value || 'nao_elegivel';
         dados.prevAlta = modal.querySelector('#updPrevAlta')?.value || 'SP';
-        dados.isolamento = modal.querySelector('#updIsolamento')?.value || 'Não Isolamento';
+        dados.isolamento = modal.querySelector('#updIsolamento')?.value || '';
         dados.identificacaoLeito = modal.querySelector('#updIdentificacaoLeito')?.value?.trim().toUpperCase() || '';
         dados.regiao = modal.querySelector('#updRegiao')?.value || '';
         dados.genero = modal.querySelector('#updSexo')?.value || '';
