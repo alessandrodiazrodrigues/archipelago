@@ -343,24 +343,23 @@ function getTipoLeito(leito, hospitalId) {
     return tipoFixo;
 }
 
-// ⭐ FORMATAÇÃO DO TIPO COM ÍCONE
-function formatarTipoComIcone(tipo) {
+// ⭐ FORMATAÇÃO DO TIPO (SEM EMOJI)
+function formatarTipoTexto(tipo) {
     const tipoUpper = (tipo || '').toUpperCase().trim();
     
     switch(tipoUpper) {
         case 'APARTAMENTO':
-            return '🏠 Apartamento';
+        case 'APTO':
+            return 'Apartamento';
         case 'ENFERMARIA':
-            return '🛏️ Enfermaria';
+        case 'ENF':
+            return 'Enfermaria';
         case 'HÍBRIDO':
         case 'HIBRIDO':
-            return '🔀 Híbrido';
-        case 'APTO':
-            return '🏠 Apartamento';
-        case 'ENF':
-            return '🛏️ Enfermaria';
+            return 'Híbrido';
         default:
-            return `🔀 ${tipo}`;
+            // Capitalizar primeira letra
+            return tipo.charAt(0).toUpperCase() + tipo.slice(1).toLowerCase();
     }
 }
 
@@ -524,7 +523,7 @@ function createCard(leito, hospitalNome) {
             
             <div class="card-box" style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; padding: 8px; min-height: 45px; display: flex; flex-direction: column; justify-content: center;">
                 <div class="box-label" style="font-size: 9px; color: rgba(255,255,255,0.8); font-weight: 700; text-transform: uppercase; margin-bottom: 3px; letter-spacing: 0.5px;">TIPO</div>
-                <div class="box-value" style="color: #ffffff; font-weight: 700; font-size: 11px; line-height: 1.2;">${formatarTipoComIcone(tipoReal)}</div>
+                <div class="box-value" style="color: #ffffff; font-weight: 700; font-size: 11px; line-height: 1.2;">${formatarTipoTexto(tipoReal)}</div>
             </div>
             
             <div class="status-badge" style="background: ${statusBgColor}; color: ${statusTextColor}; padding: 12px 6px; border-radius: 6px; font-weight: 800; text-transform: uppercase; text-align: center; font-size: 11px; letter-spacing: 0.5px; min-height: 45px; display: flex; flex-direction: column; align-items: center; justify-content: center;">
