@@ -350,7 +350,16 @@ function createCard(leito, hospitalNome) {
     const previsaoAlta = leito.prevAlta || '';
     
     // Dados V3.3
-    const isolamento = leito.isolamento || 'Não Isolamento';
+    // ⭐ CORREÇÃO: Normalizar isolamento para formato correto
+    let isolamento = leito.isolamento || 'Não Isolamento';
+    // Normalizar primeira letra maiúscula em cada palavra (Title Case)
+    if (isolamento && isolamento.toLowerCase() === 'isolamento de contato') {
+        isolamento = 'Isolamento de Contato';
+    } else if (isolamento && isolamento.toLowerCase() === 'isolamento respiratório') {
+        isolamento = 'Isolamento Respiratório';
+    } else if (isolamento && isolamento.toLowerCase() === 'não isolamento') {
+        isolamento = 'Não Isolamento';
+    }
     // ⭐ CORREÇÃO V3.3: Numeração fixa para Cruz Azul enfermarias (leitos 21-36)
     let identificacaoLeito = '';
     const numeroLeito = leito.leito || leito.numero || 'N/A';
@@ -369,8 +378,27 @@ function createCard(leito, hospitalNome) {
     
     // ⭐ CORREÇÃO 1: Usar tipo real do leito (coluna C da planilha)
     const hospitalId = leito.hospital || window.currentHospital;
+    
+    // ⭐ DEBUG: Garantir que categoriaEscolhida seja lida corretamente
+    // A planilha pode retornar com nomes diferentes (snake_case ou camelCase)
+    if (!leito.categoriaEscolhida && leito.categoria_escolhida) {
+        leito.categoriaEscolhida = leito.categoria_escolhida;
+    }
+    
     const tipoReal = getTipoLeito(leito, hospitalId);
     const isHibrido = window.HOSPITAIS_HIBRIDOS.includes(hospitalId); // ✅ NOVO: detectar se é híbrido
+    
+    // ⭐ DEBUG TEMPORÁRIO - REMOVER APÓS TESTES
+    if (leito.status === 'Em uso' && isHibrido) {
+        console.log('🔍 DEBUG CARD:', {
+            hospital: hospitalId,
+            leito: leito.leito,
+            status: leito.status,
+            tipo_coluna_C: leito.tipo,
+            categoriaEscolhida: leito.categoriaEscolhida,
+            tipoReal_calculado: tipoReal
+        });
+    }
     
     // Badges
     const badgeIsolamento = getBadgeIsolamento(isolamento);
@@ -878,7 +906,16 @@ function createAtualizacaoForm(hospitalNome, leitoNumero, dadosLeito) {
     
     const concessoesAtuais = Array.isArray(dadosLeito?.concessoes) ? dadosLeito.concessoes : [];
     const linhasAtuais = Array.isArray(dadosLeito?.linhas) ? dadosLeito.linhas : [];
-    const isolamentoAtual = dadosLeito?.isolamento || 'Não Isolamento';
+    
+    // ⭐ CORREÇÃO: Normalizar isolamento para formato correto
+    let isolamentoAtual = dadosLeito?.isolamento || 'Não Isolamento';
+    if (isolamentoAtual && isolamentoAtual.toLowerCase() === 'isolamento de contato') {
+        isolamentoAtual = 'Isolamento de Contato';
+    } else if (isolamentoAtual && isolamentoAtual.toLowerCase() === 'isolamento respiratório') {
+        isolamentoAtual = 'Isolamento Respiratório';
+    } else if (isolamentoAtual && isolamentoAtual.toLowerCase() === 'não isolamento') {
+        isolamentoAtual = 'Não Isolamento';
+    }
     
     // ⭐ CORREÇÃO: Verificar tipos de leito fixos
     const hospitalId = window.currentHospital;
