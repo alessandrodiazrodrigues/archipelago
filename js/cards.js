@@ -674,6 +674,11 @@ function createAdmissaoForm(hospitalNome, leitoNumero, hospitalId) {
     // ⭐ CORREÇÃO V3.3: Verificar se é Cruz Azul Enfermaria (leitos 21-36)
     const isCruzAzulEnfermaria = (hospitalId === 'H2' && leitoNumero >= 21 && leitoNumero <= 36);
     
+    // ⭐ NOVO: Verificar se é Apartamento fixo (H2: 1-20, H4: 1-9)
+    const isCruzAzulApartamento = (hospitalId === 'H2' && leitoNumero >= 1 && leitoNumero <= 20);
+    const isSantaClaraApartamento = (hospitalId === 'H4' && leitoNumero >= 1 && leitoNumero <= 9);
+    const isApartamentoFixo = isCruzAzulApartamento || isSantaClaraApartamento;
+    
     // ✅ Se for Cruz Azul enfermaria, usar numeração HARDCODED
     let identificacaoFixa = '';
     if (isCruzAzulEnfermaria) {
@@ -852,19 +857,30 @@ function createAtualizacaoForm(hospitalNome, leitoNumero, dadosLeito) {
     const concessoesAtuais = Array.isArray(dadosLeito?.concessoes) ? dadosLeito.concessoes : [];
     const linhasAtuais = Array.isArray(dadosLeito?.linhas) ? dadosLeito.linhas : [];
     const isolamentoAtual = dadosLeito?.isolamento || 'Não Isolamento';
-    const identificacaoAtual = dadosLeito?.identificacaoLeito || dadosLeito?.identificacao_leito || ''; // ⭐ ACEITA AMBOS OS FORMATOS
+    
+    // ⭐ CORREÇÃO: Verificar tipos de leito fixos
+    const hospitalId = window.currentHospital;
+    const isCruzAzulEnfermaria = (hospitalId === 'H2' && leitoNumero >= 21 && leitoNumero <= 36);
+    const isCruzAzulApartamento = (hospitalId === 'H2' && leitoNumero >= 1 && leitoNumero <= 20);
+    const isSantaClaraApartamento = (hospitalId === 'H4' && leitoNumero >= 1 && leitoNumero <= 9);
+    const isApartamentoFixo = isCruzAzulApartamento || isSantaClaraApartamento;
+    
+    // ✅ Se Cruz Azul enfermaria, usar numeração do mapeamento hardcoded
+    let identificacaoAtual = '';
+    if (isCruzAzulEnfermaria) {
+        identificacaoAtual = window.CRUZ_AZUL_NUMERACAO[leitoNumero] || '';
+    } else {
+        identificacaoAtual = dadosLeito?.identificacaoLeito || dadosLeito?.identificacao_leito || '';
+    }
+    
     const regiaoAtual = dadosLeito?.regiao || '';
     const sexoAtual = dadosLeito?.sexo || '';
     const diretivasAtual = dadosLeito?.diretivas || 'Não se aplica';
     const admissaoData = dadosLeito?.admAt || '';
     
     // Verificar se o leito é híbrido
-    const hospitalId = window.currentHospital;
     const isHibrido = window.HOSPITAIS_HIBRIDOS.includes(hospitalId);
     const tipoAtual = dadosLeito?.tipo || '';
-    
-    // ⭐ NOVO: Verificar se é Cruz Azul Enfermaria (leitos 21-36 com ID fixa)
-    const isCruzAzulEnfermaria = (hospitalId === 'H2' && leitoNumero >= 21 && leitoNumero <= 36);
     
     return `
         <div class="modal-content" style="background: #1a1f2e; border-radius: 12px; padding: 30px; max-width: 700px; width: 95%; max-height: 90vh; overflow-y: auto; color: #ffffff;">
@@ -899,14 +915,25 @@ function createAtualizacaoForm(hospitalNome, leitoNumero, dadosLeito) {
                         </select>
                     </div>
                     
-                    <!-- ⭐ TIPO DE QUARTO (APENAS PARA HÍBRIDOS) -->
-                    ${isHibrido ? `
+                    <!-- ⭐ TIPO DE QUARTO -->
+                    ${(isHibrido || isCruzAzulEnfermaria || isApartamentoFixo) ? `
                     <div>
                         <label style="display: block; margin-bottom: 5px; color: #e2e8f0; font-weight: 600; font-size: 11px; text-transform: uppercase;">TIPO DE QUARTO</label>
-                        <select id="updTipoQuarto" style="width: 100%; padding: 12px; background: #374151 !important; color: #ffffff !important; border: 1px solid rgba(255,255,255,0.3); border-radius: 6px; font-size: 14px;">
-                            <option value="">Selecionar...</option>
-                            ${window.TIPO_QUARTO_OPTIONS.map(tipo => `<option value="${tipo}" ${tipoAtual === tipo ? 'selected' : ''}>${tipo}</option>`).join('')}
-                        </select>
+                        ${isCruzAzulEnfermaria 
+                            ? `<select id="updTipoQuarto" disabled style="width: 100%; padding: 12px; background: #1f2937 !important; color: #9ca3af !important; border: 1px solid rgba(255,255,255,0.2); border-radius: 6px; font-size: 14px; cursor: not-allowed;">
+                                <option value="Enfermaria" selected>Enfermaria</option>
+                               </select>
+                               <div style="font-size: 10px; color: rgba(255,255,255,0.5); margin-top: 3px;">🔒 Tipo fixo (Enfermaria)</div>`
+                            : isApartamentoFixo
+                            ? `<select id="updTipoQuarto" disabled style="width: 100%; padding: 12px; background: #1f2937 !important; color: #9ca3af !important; border: 1px solid rgba(255,255,255,0.2); border-radius: 6px; font-size: 14px; cursor: not-allowed;">
+                                <option value="Apartamento" selected>Apartamento</option>
+                               </select>
+                               <div style="font-size: 10px; color: rgba(255,255,255,0.5); margin-top: 3px;">🔒 Tipo fixo (Apartamento)</div>`
+                            : `<select id="updTipoQuarto" style="width: 100%; padding: 12px; background: #374151 !important; color: #ffffff !important; border: 1px solid rgba(255,255,255,0.3); border-radius: 6px; font-size: 14px;">
+                                <option value="">Selecionar...</option>
+                                ${window.TIPO_QUARTO_OPTIONS.map(tipo => `<option value="${tipo}" ${tipoAtual === tipo ? 'selected' : ''}>${tipo}</option>`).join('')}
+                               </select>`
+                        }
                     </div>
                     ` : ''}
                 </div>
