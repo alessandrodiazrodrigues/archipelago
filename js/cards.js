@@ -350,14 +350,16 @@ function createCard(leito, hospitalNome) {
     const previsaoAlta = leito.prevAlta || '';
     
     // Dados V3.3
-    // ⭐ CORREÇÃO: Normalizar isolamento para formato correto
+    // ⭐ CORREÇÃO: Normalizar isolamento para formato correto (case-insensitive)
     let isolamento = leito.isolamento || 'Não Isolamento';
-    // Normalizar primeira letra maiúscula em cada palavra (Title Case)
-    if (isolamento && isolamento.toLowerCase() === 'isolamento de contato') {
+    // Converter para lowercase primeiro para comparar
+    const isolamentoLower = isolamento.toLowerCase().trim();
+    
+    if (isolamentoLower === 'isolamento de contato' || isolamentoLower === 'isolamento contato') {
         isolamento = 'Isolamento de Contato';
-    } else if (isolamento && isolamento.toLowerCase() === 'isolamento respiratório') {
+    } else if (isolamentoLower === 'isolamento respiratório' || isolamentoLower === 'isolamento respiratorio') {
         isolamento = 'Isolamento Respiratório';
-    } else if (isolamento && isolamento.toLowerCase() === 'não isolamento') {
+    } else if (isolamentoLower === 'não isolamento' || isolamentoLower === 'nao isolamento' || isolamentoLower.includes('não isol')) {
         isolamento = 'Não Isolamento';
     }
     // ⭐ CORREÇÃO V3.3: Numeração fixa para Cruz Azul enfermarias (leitos 21-36)
@@ -379,8 +381,11 @@ function createCard(leito, hospitalNome) {
     // ⭐ CORREÇÃO 1: Usar tipo real do leito (coluna C da planilha)
     const hospitalId = leito.hospital || window.currentHospital;
     
-    // ⭐ DEBUG: Garantir que categoriaEscolhida seja lida corretamente
-    // A planilha pode retornar com nomes diferentes (snake_case ou camelCase)
+    // ⭐ CORREÇÃO CRÍTICA: API retorna "categoria", mas esperamos "categoriaEscolhida"
+    if (!leito.categoriaEscolhida && leito.categoria) {
+        leito.categoriaEscolhida = leito.categoria;
+    }
+    // Fallback para snake_case também
     if (!leito.categoriaEscolhida && leito.categoria_escolhida) {
         leito.categoriaEscolhida = leito.categoria_escolhida;
     }
@@ -395,7 +400,8 @@ function createCard(leito, hospitalNome) {
             leito: leito.leito,
             status: leito.status,
             tipo_coluna_C: leito.tipo,
-            categoriaEscolhida: leito.categoriaEscolhida,
+            categoria_api: leito.categoria,
+            categoriaEscolhida_final: leito.categoriaEscolhida,
             tipoReal_calculado: tipoReal
         });
     }
@@ -907,13 +913,15 @@ function createAtualizacaoForm(hospitalNome, leitoNumero, dadosLeito) {
     const concessoesAtuais = Array.isArray(dadosLeito?.concessoes) ? dadosLeito.concessoes : [];
     const linhasAtuais = Array.isArray(dadosLeito?.linhas) ? dadosLeito.linhas : [];
     
-    // ⭐ CORREÇÃO: Normalizar isolamento para formato correto
+    // ⭐ CORREÇÃO: Normalizar isolamento para formato correto (case-insensitive)
     let isolamentoAtual = dadosLeito?.isolamento || 'Não Isolamento';
-    if (isolamentoAtual && isolamentoAtual.toLowerCase() === 'isolamento de contato') {
+    const isolamentoLower = isolamentoAtual.toLowerCase().trim();
+    
+    if (isolamentoLower === 'isolamento de contato' || isolamentoLower === 'isolamento contato') {
         isolamentoAtual = 'Isolamento de Contato';
-    } else if (isolamentoAtual && isolamentoAtual.toLowerCase() === 'isolamento respiratório') {
+    } else if (isolamentoLower === 'isolamento respiratório' || isolamentoLower === 'isolamento respiratorio') {
         isolamentoAtual = 'Isolamento Respiratório';
-    } else if (isolamentoAtual && isolamentoAtual.toLowerCase() === 'não isolamento') {
+    } else if (isolamentoLower === 'não isolamento' || isolamentoLower === 'nao isolamento' || isolamentoLower.includes('não isol')) {
         isolamentoAtual = 'Não Isolamento';
     }
     
