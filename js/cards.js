@@ -1258,7 +1258,7 @@ function coletarDadosFormulario(modal, tipo) {
         // Tipo de quarto para híbridos
         const tipoQuartoField = modal.querySelector('#admTipoQuarto');
         if (tipoQuartoField) {
-            dados.tipoQuarto = tipoQuartoField.value || '';
+            dados.categoriaEscolhida = tipoQuartoField.value || '';
         }
         
         dados.concessoes = coletarCheckboxesSelecionados(modal, '#admConcessoes');
@@ -1278,7 +1278,7 @@ function coletarDadosFormulario(modal, tipo) {
         // ⭐ NOVO: Tipo de quarto para híbridos no ATUALIZAR
         const tipoQuartoField = modal.querySelector('#updTipoQuarto');
         if (tipoQuartoField) {
-            dados.tipoQuarto = tipoQuartoField.value || '';
+            dados.categoriaEscolhida = tipoQuartoField.value || '';
         }
         
         dados.concessoes = coletarCheckboxesSelecionados(modal, '#updConcessoes');
@@ -1291,7 +1291,7 @@ function coletarDadosFormulario(modal, tipo) {
         regiao: dados.regiao,
         sexo: dados.sexo,
         diretivas: dados.diretivas, // ⭐ NOVO
-        tipoQuarto: dados.tipoQuarto || 'N/A',
+        categoriaEscolhida: dados.categoriaEscolhida || 'N/A',
         concessoes: dados.concessoes.length,
         linhas: dados.linhas.length
     });
