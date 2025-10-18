@@ -674,10 +674,11 @@ function createAdmissaoForm(hospitalNome, leitoNumero, hospitalId) {
     // ⭐ CORREÇÃO V3.3: Verificar se é Cruz Azul Enfermaria (leitos 21-36)
     const isCruzAzulEnfermaria = (hospitalId === 'H2' && leitoNumero >= 21 && leitoNumero <= 36);
     
-    // ⭐ NOVO: Verificar se é Apartamento fixo (H2: 1-20, H4: 1-9)
+    // ⭐ Apartamentos fixos: apenas Cruz Azul (H2: 1-20)
     const isCruzAzulApartamento = (hospitalId === 'H2' && leitoNumero >= 1 && leitoNumero <= 20);
-    const isSantaClaraApartamento = (hospitalId === 'H4' && leitoNumero >= 1 && leitoNumero <= 9);
-    const isApartamentoFixo = isCruzAzulApartamento || isSantaClaraApartamento;
+    const isApartamentoFixo = isCruzAzulApartamento;
+    
+    // ⭐ Santa Clara (H4): sem tipo fixo, opera com LIMITE de 4 enfermarias
     
     // ✅ Se for Cruz Azul enfermaria, usar numeração HARDCODED
     let identificacaoFixa = '';
@@ -873,8 +874,9 @@ function createAtualizacaoForm(hospitalNome, leitoNumero, dadosLeito) {
     const hospitalId = window.currentHospital;
     const isCruzAzulEnfermaria = (hospitalId === 'H2' && leitoNumero >= 21 && leitoNumero <= 36);
     const isCruzAzulApartamento = (hospitalId === 'H2' && leitoNumero >= 1 && leitoNumero <= 20);
-    const isSantaClaraApartamento = (hospitalId === 'H4' && leitoNumero >= 1 && leitoNumero <= 9);
-    const isApartamentoFixo = isCruzAzulApartamento || isSantaClaraApartamento;
+    const isApartamentoFixo = isCruzAzulApartamento;
+    
+    // ⭐ Santa Clara (H4): sem tipo fixo, mas TEM limite de 4 enfermarias
     
     // ✅ Se Cruz Azul enfermaria, usar numeração do mapeamento hardcoded
     let identificacaoAtual = '';
@@ -1298,6 +1300,41 @@ function coletarDadosFormulario(modal, tipo) {
 }
 
 // =================== COLETAR CHECKBOXES SELECIONADOS ===================
+// =================== VALIDAR LIMITE ENFERMARIAS SANTA CLARA ===================
+function validarLimiteEnfermarias(hospitalId, tipoQuarto) {
+    // Só valida se for Santa Clara tentando admitir Enfermaria
+    if (hospitalId !== 'H4' || tipoQuarto !== 'Enfermaria') {
+        return { valido: true };
+    }
+    
+    // Contar enfermarias ocupadas no Santa Clara
+    const santaClara = window.hospitalData?.H4;
+    if (!santaClara || !santaClara.leitos) {
+        return { valido: true };
+    }
+    
+    let enfermariasOcupadas = 0;
+    santaClara.leitos.forEach(leito => {
+        const statusOcupado = leito.status === 'Em uso' || leito.status === 'Ocupado' || leito.status === 'ocupado';
+        const tipoEnfermaria = leito.tipo === 'Enfermaria';
+        
+        if (statusOcupado && tipoEnfermaria) {
+            enfermariasOcupadas++;
+        }
+    });
+    
+    logInfo(`Santa Clara: ${enfermariasOcupadas} enfermarias ocupadas (limite: 4)`);
+    
+    if (enfermariasOcupadas >= 4) {
+        return {
+            valido: false,
+            mensagem: `❌ LIMITE ATINGIDO!\n\nO Santa Clara já possui 4 enfermarias ocupadas (máximo permitido).\n\nAguarde uma alta ou admita como Apartamento.`
+        };
+    }
+    
+    return { valido: true };
+}
+
 function coletarCheckboxesSelecionados(modal, seletor) {
     const checkboxes = modal.querySelectorAll(`${seletor} input[type="checkbox"]`);
     const selecionados = [];
