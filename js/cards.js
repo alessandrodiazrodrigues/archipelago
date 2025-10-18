@@ -485,6 +485,18 @@ function createCard(leito, hospitalNome) {
         }
     }
     
+    // LOG CRITICO - Ver tipoReal antes de renderizar
+    console.log('[RENDERIZANDO CARD]', {
+        hospital: hospitalId,
+        leito: numeroLeito,
+        status: leito.status,
+        isHibrido: isHibrido,
+        tipo_coluna_C: leito.tipo,
+        categoria_api: leito.categoria,
+        categoriaEscolhida: leito.categoriaEscolhida,
+        tipoReal_vai_para_html: tipoReal
+    });
+    
     // HTML do Card V3.3 FINAL (estrutura MOCKUP aprovada)
     card.innerHTML = `
         <!-- HEADER: HOSPITAL FORA DOS BOXES -->
