@@ -325,7 +325,7 @@ function getTipoLeito(leito, hospitalId) {
         numeroLeito: numeroLeito,
         status: leito.status,
         isHibrido: window.HOSPITAIS_HIBRIDOS.includes(hospitalId),
-        isSantaClaraHibrido: hospitalId === 'H4' && window.SANTA_CLARA_HIBRIDOS.includes(numeroLeito),
+        isSantaClara: hospitalId === 'H4',
         tipo_coluna_C: leito.tipo,
         '🎯 categoriaEscolhida': leito.categoriaEscolhida,
         '❓ categoria': leito.categoria,
