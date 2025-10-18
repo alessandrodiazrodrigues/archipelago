@@ -1252,7 +1252,7 @@ function coletarDadosFormulario(modal, tipo) {
         dados.isolamento = modal.querySelector('#admIsolamento')?.value || 'Não Isolamento';
         dados.identificacaoLeito = modal.querySelector('#admIdentificacaoLeito')?.value?.trim().toUpperCase() || '';
         dados.regiao = modal.querySelector('#admRegiao')?.value || '';
-        dados.sexo = modal.querySelector('#admSexo')?.value || '';
+        dados.genero = modal.querySelector('#admSexo')?.value || '';
         dados.diretivas = modal.querySelector('#admDiretivas')?.value || 'Não se aplica'; // ⭐ NOVO V3.3
         
         // Tipo de quarto para híbridos
@@ -1272,7 +1272,7 @@ function coletarDadosFormulario(modal, tipo) {
         dados.isolamento = modal.querySelector('#updIsolamento')?.value || 'Não Isolamento';
         dados.identificacaoLeito = modal.querySelector('#updIdentificacaoLeito')?.value?.trim().toUpperCase() || '';
         dados.regiao = modal.querySelector('#updRegiao')?.value || '';
-        dados.sexo = modal.querySelector('#updSexo')?.value || '';
+        dados.genero = modal.querySelector('#updSexo')?.value || '';
         dados.diretivas = modal.querySelector('#updDiretivas')?.value || 'Não se aplica'; // ⭐ NOVO V3.3
         
         // ⭐ NOVO: Tipo de quarto para híbridos no ATUALIZAR
@@ -1289,7 +1289,7 @@ function coletarDadosFormulario(modal, tipo) {
         isolamento: dados.isolamento,
         identificacaoLeito: dados.identificacaoLeito,
         regiao: dados.regiao,
-        sexo: dados.sexo,
+        genero: dados.genero,
         diretivas: dados.diretivas, // ⭐ NOVO
         categoriaEscolhida: dados.categoriaEscolhida || 'N/A',
         concessoes: dados.concessoes.length,
