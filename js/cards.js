@@ -701,7 +701,7 @@ function createAdmissaoForm(hospitalNome, leitoNumero, hospitalId) {
             
             <!-- ID LEITO | DIRETIVAS | TIPO DE QUARTO (3 COLUNAS) -->
             <div style="margin-bottom: 20px;">
-                <div class="form-grid-3-cols" style="display: grid; grid-template-columns: ${(isHibrido || isCruzAzulEnfermaria || isApartamentoFixo) ? '1fr 1fr 1fr' : '1fr 1fr'}; gap: 15px;">
+                <div class="form-grid-3-cols" style="display: grid; grid-template-columns: ${(isHibrido || isCruzAzulEnfermaria || isApartamentoFixo || hospitalId === 'H4') ? '1fr 1fr 1fr' : '1fr 1fr'}; gap: 15px;">
                     <!-- IDENTIFICAÇÃO DO LEITO -->
                     <div>
                         <label style="display: block; margin-bottom: 5px; color: #e2e8f0; font-weight: 600; font-size: 11px; text-transform: uppercase;">IDENTIFICAÇÃO DO LEITO <span style="color: #ef4444;">*</span></label>
@@ -721,7 +721,7 @@ function createAdmissaoForm(hospitalNome, leitoNumero, hospitalId) {
                     </div>
                     
                     <!-- ⭐ TIPO DE QUARTO -->
-                    ${(isHibrido || isCruzAzulEnfermaria || isApartamentoFixo) ? `
+                    ${(isHibrido || isCruzAzulEnfermaria || isApartamentoFixo || hospitalId === 'H4') ? `
                     <div>
                         <label style="display: block; margin-bottom: 5px; color: #e2e8f0; font-weight: 600; font-size: 11px; text-transform: uppercase;">TIPO DE QUARTO <span style="color: #ef4444;">*</span></label>
                         ${isCruzAzulEnfermaria 
@@ -909,7 +909,7 @@ function createAtualizacaoForm(hospitalNome, leitoNumero, dadosLeito) {
             
             <!-- ID LEITO | DIRETIVAS | TIPO DE QUARTO (3 COLUNAS) -->
             <div style="margin-bottom: 20px;">
-                <div class="form-grid-3-cols" style="display: grid; grid-template-columns: ${(isHibrido || isCruzAzulEnfermaria || isApartamentoFixo) ? '1fr 1fr 1fr' : '1fr 1fr'}; gap: 15px;">
+                <div class="form-grid-3-cols" style="display: grid; grid-template-columns: ${(isHibrido || isCruzAzulEnfermaria || isApartamentoFixo || hospitalId === 'H4') ? '1fr 1fr 1fr' : '1fr 1fr'}; gap: 15px;">
                     <!-- IDENTIFICAÇÃO DO LEITO -->
                     <div>
                         <label style="display: block; margin-bottom: 5px; color: #e2e8f0; font-weight: 600; font-size: 11px; text-transform: uppercase;">IDENTIFICAÇÃO DO LEITO <span style="color: #ef4444;">*</span></label>
@@ -929,7 +929,7 @@ function createAtualizacaoForm(hospitalNome, leitoNumero, dadosLeito) {
                     </div>
                     
                     <!-- ⭐ TIPO DE QUARTO -->
-                    ${(isHibrido || isCruzAzulEnfermaria || isApartamentoFixo) ? `
+                    ${(isHibrido || isCruzAzulEnfermaria || isApartamentoFixo || hospitalId === 'H4') ? `
                     <div>
                         <label style="display: block; margin-bottom: 5px; color: #e2e8f0; font-weight: 600; font-size: 11px; text-transform: uppercase;">TIPO DE QUARTO</label>
                         ${isCruzAzulEnfermaria 
