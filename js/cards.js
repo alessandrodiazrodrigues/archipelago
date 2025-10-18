@@ -293,27 +293,54 @@ function getBadgeDiretivas(diretivas) {
 
 // ⭐ CORREÇÃO V3.3: DETERMINAR TIPO REAL DO LEITO
 function getTipoLeito(leito, hospitalId) {
+    // ⭐ CORREÇÃO AGRESSIVA: Tentar TODOS os nomes possíveis
+    const categoriaValue = leito.categoriaEscolhida || 
+                          leito.categoria || 
+                          leito.categoria_escolhida || 
+                          leito.tipo_quarto ||
+                          leito.tipoQuarto;
+    
+    // ⭐ DEBUG FORÇADO - Sempre mostrar
+    console.log('🔍 getTipoLeito DEBUG:', {
+        hospital: hospitalId,
+        leito: leito.leito,
+        status: leito.status,
+        tipo_coluna_C: leito.tipo,
+        '❓ categoriaEscolhida': leito.categoriaEscolhida,
+        '❓ categoria': leito.categoria,
+        '❓ categoria_escolhida': leito.categoria_escolhida,
+        '✅ categoriaValue_final': categoriaValue
+    });
+    
     // Para leitos VAGOS de hospitais híbridos, mostrar "Híbrido"
     if (window.HOSPITAIS_HIBRIDOS.includes(hospitalId) && leito.status === 'Vago') {
         return 'Híbrido';
     }
     
-    // ⭐ CORREÇÃO: Para leitos OCUPADOS de hospitais híbridos, usar categoriaEscolhida (coluna BU)
+    // ⭐ Para leitos OCUPADOS de hospitais híbridos, usar categoria
     if (window.HOSPITAIS_HIBRIDOS.includes(hospitalId) && leito.status === 'Em uso') {
-        // Se tem categoriaEscolhida (coluna BU), usar ela
-        if (leito.categoriaEscolhida && leito.categoriaEscolhida.trim() !== '') {
-            return leito.categoriaEscolhida.toUpperCase(); // "APARTAMENTO" ou "ENFERMARIA"
+        // Se tem categoria (qualquer variação), usar ela
+        if (categoriaValue && categoriaValue.trim() !== '' && categoriaValue !== 'Híbrido') {
+            const resultado = categoriaValue.toUpperCase();
+            console.log('✅ RETORNANDO (híbrido ocupado):', resultado);
+            return resultado;
         }
-        // Fallback: usar coluna C se não tem categoriaEscolhida
+        
+        // Fallback: usar coluna C se não tem categoria
         if (leito.tipo && leito.tipo !== 'Híbrido') {
+            console.log('⚠️ FALLBACK coluna C:', leito.tipo);
             return leito.tipo;
         }
-        // Se não tem nada, mostrar "Apartamento" por padrão
+        
+        // Último fallback
+        console.log('⚠️ FALLBACK padrão: Apartamento');
         return 'Apartamento';
     }
     
     // Para hospitais não-híbridos, retornar o tipo fixo
-    return leito.tipo || 'Apartamento';
+    const tipoFixo = leito.tipo || 'Apartamento';
+    console.log('✅ RETORNANDO (não-híbrido):', tipoFixo);
+    return tipoFixo;
 }
 
 // =================== CRIAR CARD INDIVIDUAL V3.3 FINAL - LAYOUT MOCKUP ===================
@@ -381,30 +408,28 @@ function createCard(leito, hospitalNome) {
     // ⭐ CORREÇÃO 1: Usar tipo real do leito (coluna C da planilha)
     const hospitalId = leito.hospital || window.currentHospital;
     
-    // ⭐ CORREÇÃO CRÍTICA: API retorna "categoria", mas esperamos "categoriaEscolhida"
-    if (!leito.categoriaEscolhida && leito.categoria) {
-        leito.categoriaEscolhida = leito.categoria;
+    // ⭐ CORREÇÃO CRÍTICA AGRESSIVA: Garantir que categoria seja copiada
+    // Tentar TODOS os nomes possíveis
+    if (!leito.categoriaEscolhida) {
+        leito.categoriaEscolhida = leito.categoria || 
+                                   leito.categoria_escolhida || 
+                                   leito.tipo_quarto ||
+                                   leito.tipoQuarto;
     }
-    // Fallback para snake_case também
-    if (!leito.categoriaEscolhida && leito.categoria_escolhida) {
-        leito.categoriaEscolhida = leito.categoria_escolhida;
-    }
+    
+    // ⭐ DEBUG CRÍTICO - Sempre logar
+    console.log('🔍 ANTES getTipoLeito:', {
+        hospital: hospitalId,
+        leito: leito.leito,
+        status: leito.status,
+        'leito.categoria': leito.categoria,
+        'leito.categoriaEscolhida': leito.categoriaEscolhida,
+        'leito.categoria_escolhida': leito.categoria_escolhida
+    });
     
     const tipoReal = getTipoLeito(leito, hospitalId);
     const isHibrido = window.HOSPITAIS_HIBRIDOS.includes(hospitalId); // ✅ NOVO: detectar se é híbrido
     
-    // ⭐ DEBUG TEMPORÁRIO - REMOVER APÓS TESTES
-    if (leito.status === 'Em uso' && isHibrido) {
-        console.log('🔍 DEBUG CARD:', {
-            hospital: hospitalId,
-            leito: leito.leito,
-            status: leito.status,
-            tipo_coluna_C: leito.tipo,
-            categoria_api: leito.categoria,
-            categoriaEscolhida_final: leito.categoriaEscolhida,
-            tipoReal_calculado: tipoReal
-        });
-    }
     
     // Badges
     const badgeIsolamento = getBadgeIsolamento(isolamento);
