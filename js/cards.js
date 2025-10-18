@@ -700,7 +700,7 @@ function createAdmissaoForm(hospitalNome, leitoNumero, hospitalId) {
             
             <!-- ID LEITO | DIRETIVAS | TIPO DE QUARTO (3 COLUNAS) -->
             <div style="margin-bottom: 20px;">
-                <div class="form-grid-3-cols" style="display: grid; grid-template-columns: ${isHibrido ? '1fr 1fr 1fr' : '1fr 1fr'}; gap: 15px;">
+                <div class="form-grid-3-cols" style="display: grid; grid-template-columns: ${(isHibrido || isCruzAzulEnfermaria || isApartamentoFixo) ? '1fr 1fr 1fr' : '1fr 1fr'}; gap: 15px;">
                     <!-- IDENTIFICAÇÃO DO LEITO -->
                     <div>
                         <label style="display: block; margin-bottom: 5px; color: #e2e8f0; font-weight: 600; font-size: 11px; text-transform: uppercase;">IDENTIFICAÇÃO DO LEITO <span style="color: #ef4444;">*</span></label>
@@ -719,14 +719,25 @@ function createAdmissaoForm(hospitalNome, leitoNumero, hospitalId) {
                         </select>
                     </div>
                     
-                    <!-- ⭐ NOVO: TIPO DE QUARTO (APENAS PARA HÍBRIDOS) -->
-                    ${isHibrido ? `
+                    <!-- ⭐ TIPO DE QUARTO -->
+                    ${(isHibrido || isCruzAzulEnfermaria || isApartamentoFixo) ? `
                     <div>
                         <label style="display: block; margin-bottom: 5px; color: #e2e8f0; font-weight: 600; font-size: 11px; text-transform: uppercase;">TIPO DE QUARTO <span style="color: #ef4444;">*</span></label>
-                        <select id="admTipoQuarto" required style="width: 100%; padding: 12px; background: #374151 !important; color: #ffffff !important; border: 1px solid rgba(255,255,255,0.3); border-radius: 6px; font-size: 14px;">
-                            <option value="">Selecionar...</option>
-                            ${window.TIPO_QUARTO_OPTIONS.map(tipo => `<option value="${tipo}">${tipo}</option>`).join('')}
-                        </select>
+                        ${isCruzAzulEnfermaria 
+                            ? `<select id="admTipoQuarto" disabled style="width: 100%; padding: 12px; background: #1f2937 !important; color: #9ca3af !important; border: 1px solid rgba(255,255,255,0.2); border-radius: 6px; font-size: 14px; cursor: not-allowed;">
+                                <option value="Enfermaria" selected>Enfermaria</option>
+                               </select>
+                               <div style="font-size: 10px; color: rgba(255,255,255,0.5); margin-top: 3px;">🔒 Tipo fixo (Enfermaria)</div>`
+                            : isApartamentoFixo
+                            ? `<select id="admTipoQuarto" disabled style="width: 100%; padding: 12px; background: #1f2937 !important; color: #9ca3af !important; border: 1px solid rgba(255,255,255,0.2); border-radius: 6px; font-size: 14px; cursor: not-allowed;">
+                                <option value="Apartamento" selected>Apartamento</option>
+                               </select>
+                               <div style="font-size: 10px; color: rgba(255,255,255,0.5); margin-top: 3px;">🔒 Tipo fixo (Apartamento)</div>`
+                            : `<select id="admTipoQuarto" required style="width: 100%; padding: 12px; background: #374151 !important; color: #ffffff !important; border: 1px solid rgba(255,255,255,0.3); border-radius: 6px; font-size: 14px;">
+                                <option value="">Selecionar...</option>
+                                ${window.TIPO_QUARTO_OPTIONS.map(tipo => `<option value="${tipo}">${tipo}</option>`).join('')}
+                               </select>`
+                        }
                     </div>
                     ` : ''}
                 </div>
@@ -896,7 +907,7 @@ function createAtualizacaoForm(hospitalNome, leitoNumero, dadosLeito) {
             
             <!-- ID LEITO | DIRETIVAS | TIPO DE QUARTO (3 COLUNAS) -->
             <div style="margin-bottom: 20px;">
-                <div class="form-grid-3-cols" style="display: grid; grid-template-columns: ${isHibrido ? '1fr 1fr 1fr' : '1fr 1fr'}; gap: 15px;">
+                <div class="form-grid-3-cols" style="display: grid; grid-template-columns: ${(isHibrido || isCruzAzulEnfermaria || isApartamentoFixo) ? '1fr 1fr 1fr' : '1fr 1fr'}; gap: 15px;">
                     <!-- IDENTIFICAÇÃO DO LEITO -->
                     <div>
                         <label style="display: block; margin-bottom: 5px; color: #e2e8f0; font-weight: 600; font-size: 11px; text-transform: uppercase;">IDENTIFICAÇÃO DO LEITO <span style="color: #ef4444;">*</span></label>
