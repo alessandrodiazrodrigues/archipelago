@@ -557,8 +557,7 @@ function createCard(leito, hospitalNome) {
     }
     // ⭐ CORREÇÃO V3.3: Numeração fixa para Cruz Azul enfermarias (leitos 21-36)
     let identificacaoLeito = '';
-    const numeroLeito = leito.leito || leito.numero || 'N/A';
-    const isCruzAzulEnfermaria = (window.currentHospital === 'H2' && numeroLeito >= 21 && numeroLeito <= 36);
+    // numeroLeito e isCruzAzulEnfermaria já foram declarados anteriormente
     
     if (isCruzAzulEnfermaria && window.CRUZ_AZUL_NUMERACAO[numeroLeito]) {
         // ✅ HARDCODED - Usar numeração fixa do mapeamento
@@ -572,7 +571,7 @@ function createCard(leito, hospitalNome) {
     const diretivas = leito.diretivas || 'Não se aplica'; // ⭐ NOVO V3.3
     
     // ⭐ CORREÇÃO 1: Usar tipo real do leito (coluna C da planilha)
-    const hospitalId = leito.hospital || window.currentHospital;
+    // hospitalId já foi declarado anteriormente
     
     // ⭐ CORREÇÃO CRÍTICA AGRESSIVA: Garantir que categoria seja copiada
     // Tentar TODOS os nomes possíveis
