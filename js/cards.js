@@ -301,29 +301,33 @@ function getTipoLeito(leito, hospitalId) {
                           leito.tipoQuarto;
     
     // ⭐ DEBUG FORÇADO - Sempre mostrar
-    console.log('🔍 getTipoLeito DEBUG:', {
+    console.log('🔍 getTipoLeito DEBUG COMPLETO:', {
         hospital: hospitalId,
         leito: leito.leito,
         status: leito.status,
+        isHibrido: window.HOSPITAIS_HIBRIDOS.includes(hospitalId),
         tipo_coluna_C: leito.tipo,
-        '❓ categoriaEscolhida': leito.categoriaEscolhida,
+        '🎯 categoriaEscolhida': leito.categoriaEscolhida,
         '❓ categoria': leito.categoria,
         '❓ categoria_escolhida': leito.categoria_escolhida,
-        '✅ categoriaValue_final': categoriaValue
+        '✅ categoriaValue_final': categoriaValue,
+        'status_is_vago': leito.status === 'Vago' || leito.status === 'vago',
+        'status_is_ocupado': leito.status === 'Em uso' || leito.status === 'ocupado' || leito.status === 'Ocupado'
     });
     
     // Para leitos VAGOS de hospitais híbridos, mostrar "Híbrido"
-    if (window.HOSPITAIS_HIBRIDOS.includes(hospitalId) && leito.status === 'Vago') {
+    const isVago = leito.status === 'Vago' || leito.status === 'vago';
+    if (window.HOSPITAIS_HIBRIDOS.includes(hospitalId) && isVago) {
         return 'Híbrido';
     }
     
     // ⭐ Para leitos OCUPADOS de hospitais híbridos, usar categoria
-    if (window.HOSPITAIS_HIBRIDOS.includes(hospitalId) && leito.status === 'Em uso') {
+    const isOcupado = leito.status === 'Em uso' || leito.status === 'ocupado' || leito.status === 'Ocupado';
+    if (window.HOSPITAIS_HIBRIDOS.includes(hospitalId) && isOcupado) {
         // Se tem categoria (qualquer variação), usar ela
         if (categoriaValue && categoriaValue.trim() !== '' && categoriaValue !== 'Híbrido') {
-            const resultado = categoriaValue.toUpperCase();
-            console.log(`✅ getTipoLeito FINAL: ${hospitalId}-${leito.leito} → "${resultado}" (categoria escolhida)`);
-            return resultado;
+            console.log(`✅ getTipoLeito FINAL: ${hospitalId}-${leito.leito} → "${categoriaValue}" (categoria escolhida)`);
+            return categoriaValue; // Retornar como está, formatarTipoTexto() vai formatar
         }
         
         // Fallback: usar coluna C se não tem categoria
