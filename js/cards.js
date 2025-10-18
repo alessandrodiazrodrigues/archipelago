@@ -1273,7 +1273,7 @@ function coletarDadosFormulario(modal, tipo) {
         // Tipo de quarto para híbridos
         const tipoQuartoField = modal.querySelector('#admTipoQuarto');
         if (tipoQuartoField) {
-            dados.categoriaEscolhida = tipoQuartoField.value || ''; // ✅ CORRIGIDO V3.3: era tipoQuarto
+            dados.categoriaEscolhida = tipoQuartoField.value || ''; // ✅ CORRIGIDO: tipoQuarto → categoriaEscolhida
         }
         
         dados.concessoes = coletarCheckboxesSelecionados(modal, '#admConcessoes');
@@ -1293,7 +1293,7 @@ function coletarDadosFormulario(modal, tipo) {
         // ⭐ NOVO: Tipo de quarto para híbridos no ATUALIZAR
         const tipoQuartoField = modal.querySelector('#updTipoQuarto');
         if (tipoQuartoField) {
-            dados.categoriaEscolhida = tipoQuartoField.value || ''; // ✅ CORRIGIDO V3.3: era tipoQuarto
+            dados.categoriaEscolhida = tipoQuartoField.value || ''; // ✅ CORRIGIDO: tipoQuarto → categoriaEscolhida
         }
         
         dados.concessoes = coletarCheckboxesSelecionados(modal, '#updConcessoes');
@@ -1306,7 +1306,7 @@ function coletarDadosFormulario(modal, tipo) {
         regiao: dados.regiao,
         genero: dados.genero,
         diretivas: dados.diretivas, // ⭐ NOVO
-        categoriaEscolhida: dados.categoriaEscolhida || 'N/A', // ✅ CORRIGIDO V3.3: era tipoQuarto
+        categoriaEscolhida: dados.categoriaEscolhida || 'N/A', // ✅ CORRIGIDO: tipoQuarto → categoriaEscolhida
         concessoes: dados.concessoes.length,
         linhas: dados.linhas.length
     });
