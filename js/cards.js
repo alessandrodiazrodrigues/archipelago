@@ -478,22 +478,59 @@ function createCard(leito, hospitalNome) {
     card.className = 'card';
     card.style.cssText = 'background: var(--card); border-radius: 12px; padding: 18px; color: var(--text-white); box-shadow: 0 4px 6px rgba(0,0,0,0.1);';
     
+    // ⭐ VERIFICAR BLOQUEIO CRUZ AZUL
+    let bloqueadoPorIsolamento = false;
+    let bloqueadoPorGenero = false;
+    let generoPermitido = null;
+    let motivoBloqueio = '';
+    
+    const hospitalId = window.currentHospital;
+    const numeroLeito = parseInt(leito.leito);
+    const isCruzAzulEnfermaria = (hospitalId === 'H2' && numeroLeito >= 21 && numeroLeito <= 36);
+    
+    if (isCruzAzulEnfermaria && (leito.status === 'Vago' || leito.status === 'vago')) {
+        // Verificar leito irmão
+        const leitoIrmao = window.CRUZ_AZUL_IRMAOS[numeroLeito];
+        if (leitoIrmao) {
+            const leitosHospital = window.hospitalData['H2']?.leitos || [];
+            const dadosLeitoIrmao = leitosHospital.find(l => l.leito == leitoIrmao);
+            
+            if (dadosLeitoIrmao && (dadosLeitoIrmao.status === 'Em uso' || dadosLeitoIrmao.status === 'ocupado')) {
+                // Verificar isolamento
+                const isolamentoIrmao = dadosLeitoIrmao.isolamento || '';
+                if (isolamentoIrmao && isolamentoIrmao !== 'Não Isolamento') {
+                    bloqueadoPorIsolamento = true;
+                    motivoBloqueio = `Isolamento no ${window.CRUZ_AZUL_NUMERACAO[leitoIrmao]}`;
+                } else if (dadosLeitoIrmao.genero) {
+                    // Se não tem isolamento, verificar gênero
+                    bloqueadoPorGenero = true;
+                    generoPermitido = dadosLeitoIrmao.genero;
+                }
+            }
+        }
+    }
+    
     // Determinar status
     let isVago = false;
     let statusBgColor = '#22c55e'; // VERDE PADRÃO
     let statusTextColor = '#000000';
     let statusTexto = 'Disponível';
     
-    if (leito.status === 'Em uso' || leito.status === 'ocupado' || leito.status === 'Ocupado') {
+    if (bloqueadoPorIsolamento) {
+        // BLOQUEADO POR ISOLAMENTO
+        statusBgColor = '#dc2626'; // VERMELHO
+        statusTextColor = '#ffffff';
+        statusTexto = 'BLOQUEADO';
+    } else if (leito.status === 'Em uso' || leito.status === 'ocupado' || leito.status === 'Ocupado') {
         isVago = false;
         statusBgColor = '#fbbf24'; // AMARELO PARA OCUPADO
         statusTextColor = '#000000';
         statusTexto = 'Ocupado';
     } else if (leito.status === 'Vago' || leito.status === 'vago') {
         isVago = true;
-        statusBgColor = '#22c55e'; // VERDE PARA VAGO
-        statusTextColor = '#000000';
-        statusTexto = 'Disponível';
+        if (bloqueadoPorGenero) {
+            statusTexto = `Disp. ${generoPermitido === 'Masculino' ? 'Masc' : 'Fem'}`;
+        }
     }
     
     // Dados do paciente
@@ -604,7 +641,17 @@ function createCard(leito, hospitalNome) {
     // COR DO CÍRCULO PESSOA
     let circuloCor = '#C1FF72'; // VERDE (vago)
     let circuloStroke = '#7A9B4D';
-    if (!isVago) {
+    
+    // ⭐ CRUZ AZUL: Se bloqueado por gênero, mostrar cor do gênero permitido
+    if (isVago && bloqueadoPorGenero && generoPermitido) {
+        if (generoPermitido === 'Masculino') {
+            circuloCor = '#38BDF8'; // AZUL
+            circuloStroke = '#0369A1';
+        } else if (generoPermitido === 'Feminino') {
+            circuloCor = '#EC4899'; // ROSA
+            circuloStroke = '#9333EA';
+        }
+    } else if (!isVago) {
         if (sexo === 'Masculino') {
             circuloCor = '#38BDF8'; // AZUL
             circuloStroke = '#0369A1';
@@ -638,6 +685,7 @@ function createCard(leito, hospitalNome) {
             <div class="status-badge" style="background: ${statusBgColor}; color: ${statusTextColor}; padding: 12px 6px; border-radius: 6px; font-weight: 800; text-transform: uppercase; text-align: center; font-size: 11px; letter-spacing: 0.5px; min-height: 45px; display: flex; flex-direction: column; align-items: center; justify-content: center;">
                 <div class="box-label" style="font-size: 9px; font-weight: 700; text-transform: uppercase; margin-bottom: 3px; letter-spacing: 0.5px; color: ${statusTextColor};">STATUS</div>
                 <div class="box-value" style="font-weight: 700; font-size: 11px; line-height: 1.2; color: ${statusTextColor};">${statusTexto}</div>
+                ${motivoBloqueio ? `<div style="font-size: 8px; margin-top: 2px; color: ${statusTextColor};">${motivoBloqueio}</div>` : ''}
             </div>
         </div>
 
@@ -766,8 +814,25 @@ function createCard(leito, hospitalNome) {
                 ` : ''}
             </div>
             
-            <button class="btn-action" data-action="${isVago ? 'admitir' : 'atualizar'}" data-leito="${numeroLeito}" style="padding: 10px 18px; background: ${isVago ? '#C1FF72' : '#374151'}; color: ${isVago ? '#000000' : '#ffffff'}; border: none; border-radius: 6px; cursor: pointer; font-weight: 800; text-transform: uppercase; font-size: 11px; transition: all 0.2s ease; letter-spacing: 0.5px; white-space: nowrap; flex-shrink: 0;">
-                ${isVago ? 'ADMITIR' : 'ATUALIZAR'}
+            <button class="btn-action" 
+                    data-action="${isVago ? 'admitir' : 'atualizar'}" 
+                    data-leito="${numeroLeito}" 
+                    ${bloqueadoPorIsolamento ? 'disabled' : ''}
+                    style="padding: 10px 18px; 
+                           background: ${bloqueadoPorIsolamento ? '#6b7280' : (isVago ? '#C1FF72' : '#374151')}; 
+                           color: ${isVago && !bloqueadoPorIsolamento ? '#000000' : '#ffffff'}; 
+                           border: none; 
+                           border-radius: 6px; 
+                           cursor: ${bloqueadoPorIsolamento ? 'not-allowed' : 'pointer'}; 
+                           font-weight: 800; 
+                           text-transform: uppercase; 
+                           font-size: 11px; 
+                           transition: all 0.2s ease; 
+                           letter-spacing: 0.5px; 
+                           white-space: nowrap; 
+                           flex-shrink: 0;
+                           opacity: ${bloqueadoPorIsolamento ? '0.5' : '1'};">
+                ${bloqueadoPorIsolamento ? 'BLOQUEADO' : (isVago ? 'ADMITIR' : 'ATUALIZAR')}
             </button>
         </div>
     `;
@@ -873,6 +938,29 @@ function createAdmissaoForm(hospitalNome, leitoNumero, hospitalId) {
     // ⭐ CORREÇÃO V3.3: Verificar se é Cruz Azul Enfermaria (leitos 21-36)
     const isCruzAzulEnfermaria = (hospitalId === 'H2' && leitoNumero >= 21 && leitoNumero <= 36);
     
+    // ⭐ VERIFICAR BLOQUEIO POR GÊNERO
+    let generoPreDefinido = null;
+    let generoDisabled = false;
+    
+    if (isCruzAzulEnfermaria) {
+        const leitoIrmao = window.CRUZ_AZUL_IRMAOS[leitoNumero];
+        if (leitoIrmao) {
+            const leitosHospital = window.hospitalData['H2']?.leitos || [];
+            const dadosLeitoIrmao = leitosHospital.find(l => l.leito == leitoIrmao);
+            
+            if (dadosLeitoIrmao && (dadosLeitoIrmao.status === 'Em uso' || dadosLeitoIrmao.status === 'ocupado')) {
+                const isolamentoIrmao = dadosLeitoIrmao.isolamento || '';
+                if (!isolamentoIrmao || isolamentoIrmao === 'Não Isolamento') {
+                    // Só bloqueia gênero se NÃO tem isolamento
+                    if (dadosLeitoIrmao.genero) {
+                        generoPreDefinido = dadosLeitoIrmao.genero;
+                        generoDisabled = true;
+                    }
+                }
+            }
+        }
+    }
+    
     // ⭐ Apartamentos fixos: apenas Cruz Azul (H2: 1-20)
     const isCruzAzulApartamento = (hospitalId === 'H2' && leitoNumero >= 1 && leitoNumero <= 20);
     const isApartamentoFixo = isCruzAzulApartamento;
@@ -963,10 +1051,14 @@ function createAdmissaoForm(hospitalNome, leitoNumero, hospitalId) {
                     </div>
                     <div>
                         <label style="display: block; margin-bottom: 5px; color: #e2e8f0; font-weight: 600;">GÊNERO <span style="color: #ef4444;">*</span></label>
-                        <select id="admSexo" required style="width: 100%; padding: 12px; background: #374151 !important; color: #ffffff !important; border: 1px solid rgba(255,255,255,0.3); border-radius: 6px; font-size: 14px;">
-                            <option value="">Selecionar...</option>
-                            ${window.SEXO_OPTIONS.map(sexo => `<option value="${sexo}">${sexo}</option>`).join('')}
+                        <select id="admSexo" required ${generoDisabled ? 'disabled' : ''} style="width: 100%; padding: 12px; background: ${generoDisabled ? '#1f2937' : '#374151'} !important; color: ${generoDisabled ? '#9ca3af' : '#ffffff'} !important; border: 1px solid rgba(255,255,255,0.3); border-radius: 6px; font-size: 14px;">
+                            ${generoPreDefinido 
+                                ? `<option value="${generoPreDefinido}" selected>${generoPreDefinido}</option>`
+                                : `<option value="">Selecionar...</option>
+                                   ${window.SEXO_OPTIONS.map(sexo => `<option value="${sexo}">${sexo}</option>`).join('')}`
+                            }
                         </select>
+                        ${generoDisabled ? '<div style="font-size: 10px; color: rgba(255,255,255,0.5); margin-top: 3px;">🔒 Gênero definido pelo leito irmão</div>' : ''}
                     </div>
                 </div>
             </div>
@@ -1411,6 +1503,23 @@ function setupModalEventListeners(modal, tipo) {
             
             try {
                 const dadosFormulario = coletarDadosFormulario(modal, tipo);
+                
+                // ⭐ VALIDAÇÃO SANTA CLARA NA ATUALIZAÇÃO
+                if ((tipo === 'atualizacao' || tipo === 'atualizar') && hospitalId === 'H4') {
+                    const tipoQuartoField = modal.querySelector('#updTipoQuarto');
+                    const tipoAtual = dadosFormulario.categoriaEscolhida || tipoQuartoField?.value;
+                    const tipoAnterior = window.selectedLeito?.categoriaEscolhida || window.selectedLeito?.categoria;
+                    
+                    // Se está mudando PARA enfermaria
+                    if (tipoAtual === 'Enfermaria' && tipoAnterior !== 'Enfermaria') {
+                        const validacaoSanta = validarLimiteSantaClara(tipoAtual);
+                        if (!validacaoSanta.permitido) {
+                            showErrorMessage('❌ ' + validacaoSanta.motivo);
+                            hideButtonLoading(this, originalText);
+                            return;
+                        }
+                    }
+                }
                 
                 if (tipo === 'admissao') {
                     await window.admitirPaciente(dadosFormulario.hospital, dadosFormulario.leito, dadosFormulario);
