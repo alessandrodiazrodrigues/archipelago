@@ -1,0 +1,147 @@
+/* =================== DASHBOARD CLÁSSICO - ESTILOS ADICIONAIS =================== */
+/* Estilos para legendas verticais e layout clássico */
+/* ============================================================================== */
+
+/* =================== LEGENDAS VERTICAIS (ESTILO ANTIGO) =================== */
+.legend-items-vertical {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-top: 15px;
+    padding: 15px;
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 8px;
+}
+
+.legend-item-vertical {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 12px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 6px;
+    transition: all 0.3s ease;
+    font-size: 13px;
+}
+
+.legend-item-vertical:hover {
+    background: rgba(255, 255, 255, 0.1);
+    transform: translateX(5px);
+}
+
+.legend-item-vertical .legend-color {
+    width: 20px;
+    height: 20px;
+    border-radius: 4px;
+    flex-shrink: 0;
+}
+
+.legend-item-vertical .legend-label {
+    flex: 1;
+    color: #e2e8f0;
+    font-weight: 500;
+    font-size: 13px;
+}
+
+.legend-item-vertical .legend-value {
+    color: #60a5fa;
+    font-weight: 600;
+    font-size: 14px;
+}
+
+/* =================== AJUSTES PARA GRÁFICOS DE BARRAS =================== */
+.chart-wrapper.chart-wide .chart-container {
+    height: 400px;
+}
+
+.chart-wrapper.chart-wide canvas {
+    max-height: 400px !important;
+}
+
+/* Remover rotação dos labels no eixo X para concessões e linhas */
+#chartConcessoes,
+#chartLinhas {
+    max-height: 350px !important;
+}
+
+/* =================== ÍCONES SEM EMOJI =================== */
+.kpi-icon {
+    font-family: monospace;
+    font-size: 32px;
+    color: #60a5fa;
+    font-weight: normal;
+}
+
+.kpi-ocupacao .kpi-icon::before { content: "●"; }
+.kpi-vagos .kpi-icon::before { content: "○"; }
+.kpi-isolamento .kpi-icon::before { content: "!"; }
+.kpi-alta .kpi-icon::before { content: "↗"; }
+
+/* =================== AJUSTES PARA MODO CLARO =================== */
+body.fundo-branco .legend-item-vertical {
+    background: #f3f4f6;
+    border-color: #e5e7eb;
+}
+
+body.fundo-branco .legend-item-vertical:hover {
+    background: #e5e7eb;
+}
+
+body.fundo-branco .legend-item-vertical .legend-label {
+    color: #1e293b;
+}
+
+body.fundo-branco .legend-item-vertical .legend-value {
+    color: #3b82f6;
+}
+
+body.fundo-branco .legend-items-vertical {
+    background: #f9fafb;
+}
+
+/* =================== RESPONSIVIDADE =================== */
+@media (max-width: 768px) {
+    .legend-items-vertical {
+        max-height: 300px;
+        overflow-y: auto;
+        padding: 10px;
+    }
+    
+    .legend-item-vertical {
+        padding: 6px 10px;
+        font-size: 12px;
+    }
+    
+    .legend-item-vertical .legend-color {
+        width: 16px;
+        height: 16px;
+    }
+    
+    .legend-item-vertical .legend-label {
+        font-size: 12px;
+    }
+    
+    .legend-item-vertical .legend-value {
+        font-size: 12px;
+    }
+}
+
+/* =================== SCROLLBAR PERSONALIZADA PARA LEGENDAS =================== */
+.legend-items-vertical::-webkit-scrollbar {
+    width: 6px;
+}
+
+.legend-items-vertical::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 3px;
+}
+
+.legend-items-vertical::-webkit-scrollbar-thumb {
+    background: rgba(96, 165, 250, 0.5);
+    border-radius: 3px;
+}
+
+.legend-items-vertical::-webkit-scrollbar-thumb:hover {
+    background: rgba(96, 165, 250, 0.7);
+}
