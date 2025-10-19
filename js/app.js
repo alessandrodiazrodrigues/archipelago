@@ -148,6 +148,10 @@ window.logError = function(msg, error = null) {
     console.error(`❌ [ERROR V3.3.2] ${msg}`, error || '');
 };
 
+window.logWarn = function(msg) {
+    console.warn(`⚠️ [WARNING V3.3.2] ${msg}`);
+};
+
 // =================== SISTEMA DE LOADING MELHORADO COM BLOQUEIO ===================
 window.showLoading = function(container = null, message = 'Carregando dados...') {
     window.isLoading = true;
@@ -397,7 +401,7 @@ window.initSystem = async function() {
     }
 };
 
-// =================== ATUALIZAÇÃO DE DADOS V3.3.2 ===================
+// =================== ATUALIZAÇÃO DE DADOS V3.3.2 - ✅ CORRIGIDO ===================
 window.updateData = async function() {
     if (window.isLoading) {
         logInfo('Atualização já em andamento, aguardando...');
@@ -421,7 +425,8 @@ window.updateData = async function() {
             }, 500);
         } else if (window.currentView === 'dash1' && window.renderDashboardHospitalar) {
             setTimeout(() => {
-                window.renderDashboardHospitalar();
+                // ✅ CORREÇÃO: Passar currentHospital como parâmetro
+                window.renderDashboardHospitalar(window.currentHospital);
             }, 500);
         } else if (window.currentView === 'dash2' && window.renderDashboardExecutivo) {
             setTimeout(() => {
@@ -444,7 +449,7 @@ window.updateData = async function() {
     }
 };
 
-// =================== NAVEGAÇÃO ENTRE ABAS V3.3.2 ===================
+// =================== NAVEGAÇÃO ENTRE ABAS V3.3.2 - ✅ CORRIGIDO ===================
 window.setActiveTab = function(tabName) {
     if (window.isLoading) return;
     
@@ -478,7 +483,8 @@ window.setActiveTab = function(tabName) {
         if (window.renderDashboardHospitalar) {
             showLoading(null, 'Carregando Dashboard Hospitalar V3.3.2...');
             setTimeout(() => {
-                window.renderDashboardHospitalar();
+                // ✅ CORREÇÃO: Passar currentHospital como parâmetro
+                window.renderDashboardHospitalar(window.currentHospital);
                 hideLoading();
             }, 800);
         }
@@ -493,14 +499,16 @@ window.setActiveTab = function(tabName) {
         }
     }
     
-    // Fechar menu mobile
-    window.toggleMenu(false);
+    // ✅ CORREÇÃO: Fechar menu lateral após clicar
+    setTimeout(() => {
+        window.toggleMenu(false);
+    }, 200);
     
-    logSuccess(`Aba alterada para: ${tabName}`);
+    logSuccess(`✅ Aba alterada para: ${tabName} - Menu lateral fechado`);
 };
 
-// =================== MENU LATERAL ===================
-window.toggleMenu = function(forceClose = null) {
+// =================== MENU LATERAL - ✅ CORRIGIDO ===================
+window.toggleMenu = function(forceState = null) {
     if (window.isLoading) return;
     
     const menu = document.getElementById('sideMenu');
@@ -508,19 +516,26 @@ window.toggleMenu = function(forceClose = null) {
     
     if (!menu || !overlay) return;
     
-    if (forceClose === false) {
+    // forceState: true = abrir, false = fechar, null = toggle
+    if (forceState === false) {
+        // Forçar fechamento
         menu.classList.remove('open');
         overlay.classList.remove('active');
-    } else if (forceClose === true) {
+        logInfo('Menu lateral fechado (forçado)');
+    } else if (forceState === true) {
+        // Forçar abertura
         menu.classList.add('open');
         overlay.classList.add('active');
+        logInfo('Menu lateral aberto (forçado)');
     } else {
-        menu.classList.toggle('open');
+        // Toggle normal
+        const isOpen = menu.classList.toggle('open');
         overlay.classList.toggle('active');
+        logInfo(`Menu lateral ${isOpen ? 'aberto' : 'fechado'} (toggle)`);
     }
 };
 
-// =================== SELEÇÃO DE HOSPITAL V3.3.2 ===================
+// =================== SELEÇÃO DE HOSPITAL V3.3.2 - ✅ CORRIGIDO ===================
 window.selectHospital = function(hospitalId) {
     if (window.isLoading) return;
     
@@ -549,6 +564,16 @@ window.selectHospital = function(hospitalId) {
         showLoading(null, `Carregando ${hospitalConfig.leitos} leitos do ${hospitalConfig.nome}...`);
         setTimeout(() => {
             window.renderCards();
+            hideLoading();
+        }, 800);
+    }
+    
+    // *** SE ESTIVER NO DASHBOARD HOSPITALAR, ATUALIZAR ***
+    if (window.currentView === 'dash1' && window.renderDashboardHospitalar) {
+        showLoading(null, `Atualizando Dashboard do ${hospitalConfig.nome}...`);
+        setTimeout(() => {
+            // ✅ CORREÇÃO: Passar hospitalId para renderizar dashboard do hospital selecionado
+            window.renderDashboardHospitalar(hospitalId);
             hideLoading();
         }, 800);
     }
@@ -761,6 +786,12 @@ window.validarDiretivas = function(diretivas) {
     return DIRETIVAS_OPCOES.includes(diretivas);
 };
 
+// =================== ABRIR QR CODES ===================
+window.openQRCodes = function() {
+    window.open('index-qr.html', '_blank');
+    logInfo('Abrindo gerador de QR Codes...');
+};
+
 // =================== LOG DE INICIALIZAÇÃO V3.3.2 ===================
 logSuccess('📋 App.js V3.3.2 carregado com sucesso!');
 logSuccess('');
@@ -784,3 +815,9 @@ logSuccess('👤 Cliente: Guilherme Santoro');
 logSuccess('👨‍💻 Desenvolvedor: Alessandro Rodrigues');
 logSuccess('📅 Versão: V3.3.2 - Outubro/2025');
 logSuccess('✅ Sistema 100% operacional - QR Code sincronizado');
+logSuccess('');
+logSuccess('✅ CORREÇÕES V3.3.2:');
+logSuccess('   • setActiveTab passa currentHospital para renderDashboardHospitalar');
+logSuccess('   • Menu lateral fecha automaticamente após clicar em qualquer aba');
+logSuccess('   • selectHospital atualiza dashboard hospitalar se estiver ativo');
+logSuccess('   • toggleMenu aceita forceState (true/false/null)');
