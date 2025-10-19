@@ -51,20 +51,20 @@
         </div>
         
         <nav class="menu-items">
-            <a href="#" class="side-menu-item active" data-tab="leitos" onclick="setActiveTab('leitos')">
+            <a href="#" class="side-menu-item active" data-tab="leitos" onclick="setActiveTabAndCloseMenu('leitos')">
                 Leitos
             </a>
-            <a href="#" class="side-menu-item" data-tab="dash1" onclick="setActiveTab('dash1')">
+            <a href="#" class="side-menu-item" data-tab="dash1" onclick="setActiveTabAndCloseMenu('dash1')">
                 Dashboard Hospitalar
             </a>
-            <a href="#" class="side-menu-item" data-tab="dash2" onclick="setActiveTab('dash2')">
+            <a href="#" class="side-menu-item" data-tab="dash2" onclick="setActiveTabAndCloseMenu('dash2')">
                 Dashboard Executivo
             </a>
         </nav>
         
         <div class="menu-footer">
             <div class="menu-divider"></div>
-            <a href="#" class="menu-qr" onclick="openQRCodes()">
+            <a href="#" class="menu-qr" onclick="openQRCodesAndCloseMenu()">
                 <span>📱</span> Gerar QR Codes
             </a>
         </div>
@@ -135,13 +135,13 @@
         </div>
     </div>
 
-    <!-- =================== SCRIPTS MODULARES V3.3.2 ATUALIZADOS =================== -->
+    <!-- =================== SCRIPTS MODULARES V3.3.2 CORRIGIDOS =================== -->
     
     <!-- Scripts Core -->
     <script src="js/app.js"></script>
     <script src="js/api.js"></script>
     
-    <!-- Scripts de Dashboards - CORRIGIDO V3.3.2: Usar arquivos separados -->
+    <!-- ✅ Scripts de Dashboards - CORRIGIDO V3.3.2: Usar arquivos separados -->
     <script src="js/dashboards/dashboard-hospital.js"></script>
     <script src="js/dashboards/dashboard-executive.js"></script>
     
@@ -154,16 +154,60 @@
     <!-- Script de Inicialização -->
     <script src="js/main.js"></script>
     
-    <!-- =================== INICIALIZAÇÃO V3.3.2 =================== -->
+    <!-- =================== FUNÇÕES AUXILIARES MENU V3.3.2 =================== -->
+    <script>
+        /**
+         * Função que combina mudança de aba + fechamento do menu
+         * Chamada pelos itens do menu lateral
+         */
+        function setActiveTabAndCloseMenu(tabName) {
+            // Primeiro, muda a aba
+            if (typeof setActiveTab === 'function') {
+                setActiveTab(tabName);
+            }
+            
+            // Depois, fecha o menu com delay mínimo para garantir animação
+            setTimeout(() => {
+                if (typeof toggleMenu === 'function') {
+                    const menu = document.getElementById('sideMenu');
+                    if (menu && menu.classList.contains('open')) {
+                        toggleMenu();
+                    }
+                }
+            }, 100);
+        }
+        
+        /**
+         * Função para abrir QR Codes e fechar menu
+         */
+        function openQRCodesAndCloseMenu() {
+            // Abre QR Codes
+            if (typeof openQRCodes === 'function') {
+                openQRCodes();
+            }
+            
+            // Fecha o menu
+            setTimeout(() => {
+                if (typeof toggleMenu === 'function') {
+                    const menu = document.getElementById('sideMenu');
+                    if (menu && menu.classList.contains('open')) {
+                        toggleMenu();
+                    }
+                }
+            }, 100);
+        }
+    </script>
+    
+    <!-- =================== INICIALIZAÇÃO V3.3.2 FINAL =================== -->
     <script>
         // Verificar se QRCode.js foi carregada
         document.addEventListener('DOMContentLoaded', function() {
             console.log('🚀 Archipelago Dashboard V3.3.2 - Inicializando...');
             console.log('👨‍💼 Criado por: Guilherme Santoro');
             console.log('👨‍💻 Desenvolvido por: Alessandro Rodrigues');
-            console.log('📅 Outubro/2025 - Versão V3.3.2');
+            console.log('📅 Outubro/2025 - Versão V3.3.2 FINAL');
             console.log('');
-            console.log('✅ IMPLEMENTAÇÕES V3.3.2:');
+            console.log('✅ IMPLEMENTAÇÕES V3.3.2 FINAL:');
             console.log('   • ✅ Sistema 100% funcional - QR Code sincronizado');
             console.log('   • ✅ 79 leitos operacionais (H1:10, H2:36, H3:7, H4:13, H5:13)');
             console.log('   • ✅ 74 colunas na planilha (A-BV)');
@@ -171,6 +215,8 @@
             console.log('   • ✅ Dashboard Hospitalar com 5 gráficos');
             console.log('   • ✅ Dashboard Executivo consolidado');
             console.log('   • ✅ Dashboards separados (hospital + executive)');
+            console.log('   • ✅ Menu lateral auto-retrátil ao clicar');
+            console.log('   • ✅ Scripts de dashboard corrigidos (dois arquivos)');
             console.log('');
             
             // Verificar biblioteca QRCode
@@ -184,27 +230,28 @@
             setTimeout(() => {
                 if (typeof window.initApp === 'function') {
                     window.initApp();
-                    console.log('✅ Sistema V3.3.2 inicializado com sucesso');
+                    console.log('✅ Sistema V3.3.2 FINAL inicializado com sucesso');
                 } else {
                     console.error('❌ initApp não encontrada');
                     // Retry
                     setTimeout(() => {
                         if (typeof window.initApp === 'function') {
                             window.initApp();
-                            console.log('✅ Sistema V3.3.2 inicializado após retry');
+                            console.log('✅ Sistema V3.3.2 FINAL inicializado após retry');
                         }
                     }, 1000);
                 }
             }, 200);
         });
         
-        // Log de informações importantes V3.3.2
+        // Log de informações importantes V3.3.2 FINAL
         console.log('📱 QR Codes apontam para: https://alessandrodiazrodrigues.github.io/qrcode');
         console.log('🖨️ Impressão configurada: 12 QR codes por A4 (3x4)');
         console.log('📊 Planilha V3.3.2: 74 colunas (A-BV)');
         console.log('🏥 Hospitais configurados: 79 leitos totais (5 hospitais)');
         console.log('🔧 Status: Sistema 100% operacional');
         console.log('📈 Gráficos: Gênero, Região, Idade (área), Isolamento, Diretivas');
+        console.log('🎯 Menu lateral: Fecha automaticamente ao selecionar opção');
     </script>
     
     <!-- =================== CSS BASE V3.3.2 =================== -->
@@ -403,11 +450,16 @@
         .menu-close {
             background: none;
             border: none;
-            color: #e2e8f0;
+            color: white;
             font-size: 28px;
             cursor: pointer;
-            padding: 5px;
-            border-radius: 4px;
+            padding: 0;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 6px;
             transition: background 0.3s;
         }
         
@@ -421,7 +473,7 @@
         
         .side-menu-item {
             display: block;
-            padding: 15px 20px;
+            padding: 12px 20px;
             color: #e2e8f0;
             text-decoration: none;
             transition: all 0.3s;
@@ -445,36 +497,34 @@
             bottom: 0;
             width: 100%;
             padding: 20px;
-            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            background: #1e293b;
         }
         
         .menu-divider {
             height: 1px;
             background: rgba(255, 255, 255, 0.1);
-            margin-bottom: 15px;
+            margin-bottom: 20px;
         }
         
         .menu-qr {
             display: flex;
             align-items: center;
             gap: 10px;
-            padding: 12px;
-            background: rgba(96, 165, 250, 0.1);
-            border-radius: 8px;
-            color: #60a5fa;
+            padding: 12px 20px;
+            color: #e2e8f0;
             text-decoration: none;
-            transition: background 0.3s;
+            border-radius: 6px;
+            transition: all 0.3s;
+            margin: 0 -20px;
         }
         
         .menu-qr:hover {
-            background: rgba(96, 165, 250, 0.2);
-        }
-        
-        .menu-qr span {
-            font-size: 20px;
+            background: rgba(255, 255, 255, 0.05);
+            color: #60a5fa;
         }
         
         .menu-overlay {
+            display: none;
             position: fixed;
             top: 0;
             left: 0;
@@ -482,314 +532,34 @@
             height: 100%;
             background: rgba(0, 0, 0, 0.5);
             z-index: 1500;
-            display: none;
         }
         
-        .menu-overlay.active {
+        .side-menu.open ~ .menu-overlay {
             display: block;
         }
         
-        /* Main Content */
+        /* Conteúdo Principal */
         .main-content {
             padding: 30px;
-            max-width: 1600px;
-            margin: 0 auto;
-        }
-        
-        .section-leitos {
-            animation: fadeIn 0.5s ease-out;
-        }
-        
-        .leitos-header {
-            margin-bottom: 30px;
-        }
-        
-        .leitos-header h2 {
-            color: #60a5fa;
-            margin: 0 0 20px 0;
-            font-size: 28px;
-            font-weight: 700;
-        }
-        
-        .hospital-selector {
-            display: flex;
-            gap: 12px;
-            flex-wrap: wrap;
-        }
-        
-        .hospital-btn {
-            padding: 12px 24px;
-            background: rgba(255, 255, 255, 0.05);
-            border: 2px solid rgba(255, 255, 255, 0.1);
-            border-radius: 8px;
-            color: #e2e8f0;
-            cursor: pointer;
-            font-weight: 600;
-            transition: all 0.3s;
-        }
-        
-        .hospital-btn:hover {
-            background: rgba(255, 255, 255, 0.1);
-            border-color: #60a5fa;
-        }
-        
-        .hospital-btn.active {
-            background: #60a5fa;
-            border-color: #60a5fa;
-            color: white;
+            min-height: calc(100vh - 200px);
         }
         
         /* Footer */
         .footer {
             background: #1e293b;
-            padding: 30px;
+            padding: 20px;
             text-align: center;
-            margin-top: 50px;
+            color: #9ca3af;
+            font-size: 13px;
             border-top: 1px solid rgba(255, 255, 255, 0.1);
         }
         
         .footer p {
-            margin: 8px 0;
-            color: #9ca3af;
-            font-size: 13px;
-            line-height: 1.5;
+            margin: 5px 0;
         }
         
-        .footer p strong {
-            color: #60a5fa;
-            font-weight: 600;
-        }
-        
-        /* Cards Grid */
-        .cards-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-            gap: 20px;
-            padding: 20px 0;
-        }
-        
-        /* Modal Styles */
-        .modal {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.8);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 10000;
-        }
-        
-        .modal-content {
-            background: #1e293b;
-            border-radius: 12px;
-            max-width: 600px;
-            width: 90%;
-            max-height: 90vh;
-            overflow-y: auto;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-        }
-        
-        .modal-header {
-            padding: 20px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        
-        .modal-header h2 {
-            color: #60a5fa;
-            margin: 0;
-            font-size: 18px;
-        }
-        
-        .modal-close {
-            background: none;
-            border: none;
+        .footer strong {
             color: #e2e8f0;
-            font-size: 24px;
-            cursor: pointer;
-            padding: 5px;
-            border-radius: 4px;
-            transition: background 0.3s;
-        }
-        
-        .modal-close:hover {
-            background: rgba(255, 255, 255, 0.1);
-        }
-        
-        .modal-body {
-            padding: 20px;
-        }
-        
-        .modal-footer {
-            padding: 20px;
-            border-top: 1px solid rgba(255, 255, 255, 0.1);
-            display: flex;
-            gap: 10px;
-            justify-content: flex-end;
-        }
-        
-        .modal-footer button {
-            padding: 10px 20px;
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 14px;
-            font-weight: 500;
-            transition: background 0.3s;
-        }
-        
-        .btn-cancel {
-            background: rgba(255, 255, 255, 0.1);
-            color: #e2e8f0;
-        }
-        
-        .btn-cancel:hover {
-            background: rgba(255, 255, 255, 0.2);
-        }
-        
-        .btn-save {
-            background: #10b981;
-            color: white;
-        }
-        
-        .btn-save:hover {
-            background: #059669;
-        }
-        
-        .btn-alta {
-            background: #f59e0b;
-            color: white;
-        }
-        
-        .btn-alta:hover {
-            background: #d97706;
-        }
-        
-        /* Responsividade V3.3.2 */
-        @media (max-width: 768px) {
-            .header {
-                flex-direction: column;
-                gap: 10px;
-                padding: 15px 10px;
-            }
-            
-            .header-left h1 {
-                font-size: 18px;
-            }
-            
-            .side-menu {
-                width: 100%;
-                left: -100%;
-            }
-            
-            .side-menu.open {
-                left: 0;
-            }
-            
-            .hospital-selector {
-                flex-direction: column;
-                gap: 10px;
-            }
-            
-            .hospital-btn {
-                width: 100%;
-                text-align: center;
-            }
-            
-            .main-content {
-                padding: 15px 10px;
-            }
-            
-            .cards-grid {
-                grid-template-columns: 1fr;
-                gap: 15px;
-                padding: 15px 0;
-            }
-            
-            .footer {
-                padding: 20px 15px;
-            }
-            
-            .footer p {
-                font-size: 12px;
-                line-height: 1.4;
-            }
-            
-            .modal-content {
-                width: 95%;
-                margin: 10px;
-            }
-            
-            .modal-header,
-            .modal-body,
-            .modal-footer {
-                padding: 15px;
-            }
-            
-            .modal-footer {
-                flex-direction: column;
-            }
-            
-            .modal-footer button {
-                width: 100%;
-            }
-        }
-        
-        @media (max-width: 480px) {
-            .header-left h1 {
-                font-size: 16px;
-            }
-            
-            .auth-container {
-                padding: 30px 20px;
-            }
-            
-            .main-content {
-                padding: 10px 5px;
-            }
-            
-            .footer p {
-                font-size: 11px;
-            }
-        }
-        
-        /* Animações suaves */
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        
-        .main-content {
-            animation: fadeIn 0.5s ease-out;
-        }
-        
-        /* Estados de carregamento */
-        .loading {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            min-height: 200px;
-            color: #9ca3af;
-        }
-        
-        .loading::before {
-            content: '';
-            width: 20px;
-            height: 20px;
-            border: 2px solid #334155;
-            border-top-color: #60a5fa;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-            margin-right: 10px;
-        }
-        
-        @keyframes spin {
-            to { transform: rotate(360deg); }
         }
     </style>
 </body>
