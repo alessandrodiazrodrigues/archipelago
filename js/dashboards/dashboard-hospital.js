@@ -7,15 +7,15 @@
 // =================== CONFIGURAÇÃO GLOBAL ===================
 const CONFIG_DASHBOARD_HOSPITAL = {
     REGIOES: [
-        'Centro',
+        'Zona Central',
         'Zona Sul',
         'Zona Norte',
-        'Zona Oeste',
         'Zona Leste',
-        'Santo Amaro',
-        'Vila Mariana',
-        'Santana',
-        'Pinheiros'
+        'Zona Oeste',
+        'ABC',
+        'Guarulhos',
+        'Osasco',
+        'Outra'
     ],
     FAIXAS_ETARIAS: ['0-20', '21-40', '41-60', '61-80', '80+'],
     ISOLAMENTO_TIPOS: [
