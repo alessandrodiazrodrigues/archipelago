@@ -1,433 +1,432 @@
-/* =================== DASHBOARD-HOSPITALAR-STYLES.CSS V3.3.2 =================== */
-/* Estilos específicos para o Dashboard Hospitalar com visual do sistema antigo */
-/* ============================================================================== */
+/* =================== DASHBOARD HOSPITALAR V3.3 - CSS ===================
+   Cliente: Guilherme Santoro
+   Desenvolvedor: Alessandro Rodrigues
+   Data: Outubro/2025
+   Versão: V3.3 FINAL
+   ======================================================================= */
 
-/* =================== CONTAINER PRINCIPAL DO DASHBOARD =================== */
-.dashboard-container {
+/* Container principal */
+.dashboard-hospitalar-container {
+    width: 100%;
     padding: 20px;
-    background: #0f172a;
-    color: #e2e8f0;
-    min-height: 100vh;
 }
 
-/* =================== HEADER DO DASHBOARD =================== */
-.dashboard-header {
-    background: #1a1f2e;
-    padding: 20px;
-    border-radius: 12px;
-    margin-bottom: 25px;
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+/* Seção de cada hospital */
+.hospital-section {
+    margin-bottom: 50px;
+    padding: 30px;
+    background: linear-gradient(135deg, #1f2937 0%, #111827 100%);
+    border-radius: 16px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
 }
 
-.dashboard-header h2 {
+/* Header do hospital */
+.hospital-header {
+    margin-bottom: 30px;
+    padding-bottom: 20px;
+    border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+}
+
+.hospital-header h2 {
     margin: 0 0 10px 0;
-    font-size: 24px;
+    font-size: 28px;
     font-weight: 700;
-    color: #60a5fa;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
+    color: #ffffff;
 }
 
-.dashboard-controls {
-    position: absolute;
-    top: 20px;
-    right: 20px;
-}
-
-.btn-toggle-fundo {
-    padding: 8px 16px;
-    background: rgba(255, 255, 255, 0.1);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    border-radius: 6px;
-    color: #e2e8f0;
-    cursor: pointer;
-    font-size: 14px;
-    transition: all 0.3s ease;
-}
-
-.btn-toggle-fundo:hover {
-    background: rgba(255, 255, 255, 0.2);
-    border-color: #60a5fa;
-}
-
-.dashboard-subtitle {
+.hospital-stats {
     display: flex;
     gap: 15px;
+    align-items: center;
     color: #9ca3af;
     font-size: 14px;
 }
 
-.dashboard-subtitle .separator {
+.hospital-stats .separator {
     color: #4b5563;
 }
 
-/* =================== GRID DE KPIs PRINCIPAIS =================== */
-.kpis-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-    gap: 20px;
-    margin-bottom: 30px;
+/* ============ KPIs ============ */
+
+.kpis-container {
+    margin-bottom: 40px;
 }
 
-.kpi-card {
-    background: #1a1f2e;
+/* Grid principal de KPIs (5 boxes) */
+.kpis-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 20px;
+    margin-bottom: 20px;
+}
+
+.kpi-box {
+    background: rgba(255, 255, 255, 0.05);
     border-radius: 12px;
     padding: 20px;
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
-    display: flex;
-    align-items: center;
-    gap: 15px;
+    text-align: center;
     transition: all 0.3s ease;
 }
 
-.kpi-card:hover {
-    transform: translateY(-3px);
+.kpi-box:hover {
+    transform: translateY(-4px);
     box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+    background: rgba(255, 255, 255, 0.08);
 }
 
 .kpi-icon {
-    font-size: 40px;
-    opacity: 0.8;
-}
-
-.kpi-info h3 {
-    margin: 0 0 5px 0;
-    font-size: 14px;
-    color: #9ca3af;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
+    font-size: 32px;
+    margin-bottom: 10px;
 }
 
 .kpi-value {
-    font-size: 28px;
+    font-size: 32px;
     font-weight: 700;
-    color: #60a5fa;
-    margin: 0;
+    color: #ffffff;
+    margin-bottom: 5px;
 }
 
-.kpi-percentage {
-    font-size: 18px;
+.kpi-label {
+    font-size: 12px;
+    text-transform: uppercase;
+    color: #9ca3af;
     font-weight: 600;
-    color: #22c55e;
+    letter-spacing: 0.5px;
+}
+
+/* Gauge especial */
+.kpi-gauge {
+    background: linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(16, 185, 129, 0.1) 100%);
+}
+
+.gauge-container {
+    position: relative;
+}
+
+.gauge-svg {
+    width: 100%;
+    max-width: 200px;
+    height: auto;
+    margin: 0 auto;
+    display: block;
+}
+
+.gauge-value {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -20%);
+    font-size: 36px;
+    font-weight: 700;
+    color: #ffffff;
+}
+
+.gauge-label {
+    font-size: 12px;
+    text-transform: uppercase;
+    color: #9ca3af;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    margin-top: 10px;
+}
+
+/* KPIs Secundários (novos V3.3) */
+.kpis-secondary {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 15px;
+}
+
+.kpi-card {
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 10px;
+    padding: 15px;
+    border-left: 3px solid #3b82f6;
+}
+
+.kpi-card.kpi-destaque {
+    border-left-color: #f59e0b;
+    background: rgba(245, 158, 11, 0.05);
+}
+
+.kpi-card h4 {
+    margin: 0 0 10px 0;
+    font-size: 12px;
+    text-transform: uppercase;
+    color: #9ca3af;
+    font-weight: 600;
+    letter-spacing: 0.5px;
 }
 
 .kpi-detail {
     display: flex;
-    gap: 15px;
-    font-size: 12px;
-    color: #9ca3af;
-    margin-top: 5px;
+    flex-direction: column;
+    gap: 8px;
 }
 
-/* Cores específicas para cada tipo de KPI */
-.kpi-ocupacao .kpi-icon { color: #60a5fa; }
-.kpi-vagos .kpi-icon { color: #22c55e; }
-.kpi-isolamento .kpi-icon { color: #f97316; }
-.kpi-alta .kpi-icon { color: #8b5cf6; }
+.kpi-detail span {
+    font-size: 14px;
+    color: #e5e7eb;
+}
 
-/* =================== KPIs SECUNDÁRIOS =================== */
-.kpis-secondary {
+.kpi-detail strong {
+    color: #ffffff;
+    font-weight: 700;
+}
+
+.kpi-valor-grande {
+    font-size: 28px;
+    font-weight: 700;
+    color: #ffffff;
+    text-align: center;
+    padding: 10px 0;
+}
+
+/* ============ GRÁFICOS ============ */
+
+.graficos-section {
+    margin-top: 40px;
+}
+
+.section-title {
+    margin: 0 0 25px 0;
+    font-size: 20px;
+    font-weight: 600;
+    color: #ffffff;
+    padding-bottom: 15px;
+    border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+}
+
+.graficos-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    gap: 20px;
-    margin-bottom: 30px;
+    grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+    gap: 30px;
 }
 
-.kpi-group {
-    background: #1a1f2e;
+.grafico-container {
+    background: rgba(255, 255, 255, 0.03);
     border-radius: 12px;
-    padding: 20px;
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 25px;
+    transition: all 0.3s ease;
 }
 
-.kpi-group h4 {
-    margin: 0 0 15px 0;
+.grafico-container:hover {
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.grafico-container h4 {
+    margin: 0 0 20px 0;
     font-size: 16px;
-    color: #60a5fa;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
+    font-weight: 600;
+    color: #ffffff;
+    text-align: center;
 }
 
-.kpi-items {
+.grafico-container canvas {
+    max-height: 300px;
+}
+
+/* Legendas customizadas */
+.custom-legend {
+    margin-top: 20px;
+    padding-top: 15px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.legend-items {
     display: flex;
     flex-direction: column;
     gap: 10px;
 }
 
-.kpi-item {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 8px 0;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-}
-
-.kpi-item:last-child {
-    border-bottom: none;
-}
-
-.kpi-label {
-    color: #9ca3af;
-    font-size: 14px;
-}
-
-.kpi-item .kpi-value {
-    font-weight: 600;
-    color: #e2e8f0;
-    font-size: 14px;
-}
-
-/* =================== CONTAINER DOS GRÁFICOS =================== */
-.charts-container {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
-    gap: 25px;
-}
-
-.chart-wrapper {
-    background: #1a1f2e;
-    border-radius: 12px;
-    padding: 20px;
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
-}
-
-.chart-wrapper.chart-wide {
-    grid-column: 1 / -1;
-}
-
-.chart-wrapper h3 {
-    margin: 0 0 15px 0;
-    font-size: 16px;
-    color: #60a5fa;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-}
-
-/* =================== CONTAINER DOS GRÁFICOS COM ALTURA FIXA =================== */
-.chart-container {
-    position: relative;
-    height: 350px;
-    margin-bottom: 15px;
-}
-
-.chart-container canvas {
-    max-height: 350px !important;
-}
-
-/* =================== TOGGLE DOS GRÁFICOS =================== */
-.chart-toggle {
-    display: flex;
-    gap: 8px;
-    margin-bottom: 15px;
-    justify-content: center;
-}
-
-.toggle-btn {
-    padding: 8px 16px;
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 6px;
-    color: #9ca3af;
-    cursor: pointer;
-    font-size: 13px;
-    transition: all 0.3s ease;
-}
-
-.toggle-btn:hover {
-    background: rgba(255, 255, 255, 0.1);
-    border-color: rgba(255, 255, 255, 0.2);
-    color: #e2e8f0;
-}
-
-.toggle-btn.active {
-    background: #60a5fa;
-    border-color: #60a5fa;
-    color: white;
-}
-
-/* =================== LEGENDAS HTML CUSTOMIZADAS =================== */
-.chart-legend {
-    display: flex;
-    justify-content: center;
-    flex-wrap: wrap;
-    gap: 8px;
-    margin-top: 10px;
-    padding: 15px;
-    background: rgba(255, 255, 255, 0.03);
-    border-radius: 8px;
-}
-
-.legend-items {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 10px;
-    justify-content: center;
-}
-
 .legend-item {
     display: flex;
     align-items: center;
-    gap: 6px;
-    padding: 6px 12px;
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    gap: 10px;
+    padding: 8px 12px;
     border-radius: 6px;
+    transition: all 0.2s ease;
     cursor: pointer;
-    transition: all 0.3s ease;
-    font-size: 13px;
 }
 
 .legend-item:hover {
-    background: rgba(255, 255, 255, 0.1);
-    transform: translateY(-2px);
-}
-
-.legend-item.disabled {
-    opacity: 0.4;
-    text-decoration: line-through;
+    background: rgba(255, 255, 255, 0.05);
 }
 
 .legend-color {
-    width: 16px;
-    height: 16px;
+    width: 20px;
+    height: 20px;
     border-radius: 4px;
     flex-shrink: 0;
 }
 
 .legend-label {
-    color: #e2e8f0;
-    font-weight: 500;
+    flex: 1;
+    font-size: 14px;
+    color: #e5e7eb;
 }
 
 .legend-value {
+    font-size: 14px;
+    font-weight: 600;
     color: #9ca3af;
-    font-size: 12px;
 }
 
-/* =================== FOOTER DO DASHBOARD =================== */
-.dashboard-footer {
+/* Mensagens de estado */
+.no-data {
     text-align: center;
-    padding: 30px;
-    color: #6b7280;
-    font-size: 13px;
-    border-top: 1px solid rgba(255, 255, 255, 0.1);
-    margin-top: 40px;
+    color: #9ca3af;
+    font-style: italic;
+    padding: 20px;
 }
 
-.dashboard-footer p {
-    margin: 5px 0;
+.loading-message,
+.error-message {
+    text-align: center;
+    padding: 60px 20px;
+    color: #9ca3af;
 }
 
-/* =================== MODO CLARO (FUNDO BRANCO) =================== */
-body.fundo-branco {
-    background: #f8fafc;
+.spinner {
+    width: 50px;
+    height: 50px;
+    margin: 0 auto 20px;
+    border: 4px solid rgba(255, 255, 255, 0.1);
+    border-top-color: #3b82f6;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
 }
 
-body.fundo-branco .dashboard-container {
-    background: #f8fafc;
-    color: #1e293b;
+@keyframes spin {
+    to { transform: rotate(360deg); }
 }
 
-body.fundo-branco .dashboard-header,
-body.fundo-branco .kpi-card,
-body.fundo-branco .kpi-group,
-body.fundo-branco .chart-wrapper {
-    background: white;
-    border-color: #e5e7eb;
-    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
-}
+/* ============ RESPONSIVIDADE ============ */
 
-body.fundo-branco .dashboard-header h2,
-body.fundo-branco .kpi-value {
-    color: #3b82f6;
-}
-
-body.fundo-branco .kpi-info h3,
-body.fundo-branco .kpi-label,
-body.fundo-branco .dashboard-subtitle {
-    color: #6b7280;
-}
-
-body.fundo-branco .legend-label,
-body.fundo-branco .kpi-item .kpi-value {
-    color: #1e293b;
-}
-
-body.fundo-branco .toggle-btn,
-body.fundo-branco .legend-item {
-    background: #f3f4f6;
-    border-color: #e5e7eb;
-    color: #4b5563;
-}
-
-body.fundo-branco .toggle-btn:hover,
-body.fundo-branco .legend-item:hover {
-    background: #e5e7eb;
-}
-
-body.fundo-branco .toggle-btn.active {
-    background: #3b82f6;
-    color: white;
-}
-
-body.fundo-branco .chart-legend {
-    background: #f9fafb;
-}
-
-/* =================== RESPONSIVIDADE =================== */
-@media (max-width: 1200px) {
-    .charts-container {
-        grid-template-columns: 1fr;
+/* Tablet */
+@media (max-width: 1024px) {
+    .kpis-grid {
+        grid-template-columns: repeat(3, 1fr);
     }
     
-    .kpis-grid {
+    .graficos-grid {
         grid-template-columns: repeat(2, 1fr);
     }
 }
 
+/* Mobile */
 @media (max-width: 768px) {
-    .dashboard-container {
-        padding: 15px;
+    .dashboard-hospitalar-container {
+        padding: 10px;
     }
     
+    .hospital-section {
+        padding: 20px;
+        margin-bottom: 30px;
+    }
+    
+    .hospital-header h2 {
+        font-size: 22px;
+    }
+    
+    .hospital-stats {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 5px;
+    }
+    
+    .hospital-stats .separator {
+        display: none;
+    }
+    
+    /* KPIs Mobile: Gauge sozinho, depois 2x2 */
     .kpis-grid {
         grid-template-columns: 1fr;
+        grid-template-areas:
+            "gauge"
+            "box1"
+            "box2"
+            "box3"
+            "box4";
+    }
+    
+    .kpi-gauge {
+        grid-area: gauge;
+    }
+    
+    .kpi-box:nth-child(2) { grid-area: box1; }
+    .kpi-box:nth-child(3) { grid-area: box2; }
+    .kpi-box:nth-child(4) { grid-area: box3; }
+    .kpi-box:nth-child(5) { grid-area: box4; }
+    
+    /* Ou layout alternativo: Gauge + 2 linhas de 2 */
+    @supports (display: grid) {
+        .kpis-grid {
+            grid-template-columns: 1fr 1fr;
+            grid-template-areas:
+                "gauge gauge"
+                "box1 box2"
+                "box3 box4";
+        }
     }
     
     .kpis-secondary {
         grid-template-columns: 1fr;
     }
     
-    .chart-container {
-        height: 250px;
+    .graficos-grid {
+        grid-template-columns: 1fr;
     }
     
-    .chart-container canvas {
-        max-height: 250px !important;
-    }
-    
-    .legend-items {
-        font-size: 11px;
-    }
-    
-    .legend-item {
-        padding: 4px 8px;
-    }
-    
-    .dashboard-controls {
-        position: static;
-        margin-top: 15px;
+    .grafico-container canvas {
+        max-height: 250px;
     }
 }
 
-/* =================== ANIMAÇÕES =================== */
+/* Mobile pequeno */
+@media (max-width: 480px) {
+    .hospital-header h2 {
+        font-size: 18px;
+    }
+    
+    .kpi-value {
+        font-size: 24px;
+    }
+    
+    .kpi-label {
+        font-size: 10px;
+    }
+    
+    .gauge-value {
+        font-size: 28px;
+    }
+    
+    .kpis-grid {
+        grid-template-columns: 1fr;
+        grid-template-areas:
+            "gauge"
+            "box1"
+            "box2"
+            "box3"
+            "box4";
+    }
+    
+    .grafico-container {
+        padding: 15px;
+    }
+    
+    .grafico-container h4 {
+        font-size: 14px;
+    }
+}
+
+/* ============ ANIMAÇÕES ============ */
+
 @keyframes fadeIn {
     from {
         opacity: 0;
-        transform: translateY(10px);
+        transform: translateY(20px);
     }
     to {
         opacity: 1;
@@ -435,36 +434,39 @@ body.fundo-branco .chart-legend {
     }
 }
 
+.hospital-section {
+    animation: fadeIn 0.5s ease;
+}
+
+.kpi-box,
 .kpi-card,
-.chart-wrapper {
-    animation: fadeIn 0.5s ease-out;
+.grafico-container {
+    animation: fadeIn 0.6s ease;
 }
 
-/* =================== UTILIDADES =================== */
-.error-message {
-    background: #ef4444;
-    color: white;
-    padding: 20px;
-    border-radius: 8px;
-    text-align: center;
-    margin: 20px 0;
+/* ============ ACESSIBILIDADE ============ */
+
+.kpi-box:focus,
+.legend-item:focus {
+    outline: 2px solid #3b82f6;
+    outline-offset: 2px;
 }
 
-/* =================== SCROLLBAR PERSONALIZADA =================== */
-::-webkit-scrollbar {
-    width: 8px;
-    height: 8px;
-}
+/* ============ IMPRESSÃO ============ */
 
-::-webkit-scrollbar-track {
-    background: #1a1f2e;
-}
-
-::-webkit-scrollbar-thumb {
-    background: #60a5fa;
-    border-radius: 4px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-    background: #3b82f6;
+@media print {
+    .dashboard-hospitalar-container {
+        padding: 0;
+    }
+    
+    .hospital-section {
+        page-break-after: always;
+        box-shadow: none;
+    }
+    
+    .kpi-box:hover,
+    .grafico-container:hover {
+        transform: none;
+        box-shadow: none;
+    }
 }
