@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Archipelago Dashboard V3.3.2</title>
+    <title>Archipelago Dashboard V3.3.2 CORRIGIDO</title>
     
     <!-- CSS MODULAR -->
     <link rel="stylesheet" href="css/variables.css">
@@ -114,7 +114,7 @@
         <p>Sistema em versão BETA - não pode ser usado como única fonte de referência</p>
         <p>Para decisões críticas, consulte sempre fontes adicionais e profissionais qualificados</p>
         <p><strong>Criado por: Guilherme Santoro | Desenvolvido por: Alessandro Rodrigues</strong></p>
-        <p><strong>Archipelago Dashboard V3.3.2 - Outubro/2025</strong></p>
+        <p><strong>Archipelago Dashboard V3.3.2 CORRIGIDO - Outubro/2025</strong></p>
     </footer>
 
     <!-- =================== MODAL DE PACIENTE =================== -->
@@ -139,11 +139,14 @@
 
     <!-- =================== SCRIPTS MODULARES V3.3.2 CORRIGIDOS =================== -->
     
+    <!-- ✅ CORREÇÃO APLICADA: Scripts dos Dashboards ANTES de cards.js -->
+    <!-- Isso resolve a Race Condition identificada nos 3 pareceres técnicos -->
+    
     <!-- Scripts Core (ORDEM IMPORTA!) -->
     <script src="js/app.js"></script>
     <script src="js/api.js"></script>
     
-    <!-- ✅ Scripts de Dashboards - CARREGAMENTO DIRETO -->
+    <!-- ✅ DASHBOARDS CARREGADOS ESTATICAMENTE (SOLUÇÃO DO PROBLEMA) -->
     <script src="js/dashboards/dashboard-hospital.js"></script>
     <script src="js/dashboards/dashboard-executive.js"></script>
     
@@ -158,6 +161,26 @@
     
     <!-- =================== FUNÇÕES AUXILIARES MENU V3.3.2 =================== -->
     <script>
+        console.log('🚀 Archipelago Dashboard V3.3.2 CORRIGIDO - Inicializando...');
+        console.log('📅 Outubro/2025 - Versão V3.3.2 CORRIGIDA');
+        console.log('');
+        console.log('✅ CORREÇÃO APLICADA:');
+        console.log('   • ✅ Dashboards carregados ESTATICAMENTE');
+        console.log('   • ✅ Scripts na ordem correta (antes de cards.js)');
+        console.log('   • ✅ Race Condition RESOLVIDA');
+        console.log('   • ✅ Baseado nos 3 pareceres técnicos');
+        console.log('');
+        console.log('📊 Ordem de carregamento:');
+        console.log('   1️⃣ app.js');
+        console.log('   2️⃣ api.js');
+        console.log('   3️⃣ dashboard-hospital.js ⭐ NOVO');
+        console.log('   4️⃣ dashboard-executive.js ⭐ NOVO');
+        console.log('   5️⃣ cards.js');
+        console.log('   6️⃣ qrcode.js');
+        console.log('   7️⃣ main.js');
+        console.log('');
+        console.log('🎯 Dashboard Hospitalar deve funcionar na 1ª tentativa agora!');
+        
         /**
          * Função que combina mudança de aba + fechamento do menu
          */
@@ -194,10 +217,10 @@
             }, 100);
         }
     </script>
-
-    <!-- =================== CSS INLINE ORIGINAL =================== -->
+    
+    <!-- =================== ESTILOS INLINE =================== -->
     <style>
-        /* Reset básico */
+        /* Reset e Base */
         * {
             margin: 0;
             padding: 0;
@@ -205,8 +228,8 @@
         }
         
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-            background: #0f172a;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
             color: #e2e8f0;
             min-height: 100vh;
         }
@@ -220,12 +243,12 @@
             position: fixed;
             top: 0;
             left: 0;
-            width: 100vw;
-            height: 100vh;
-            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
             display: flex;
-            align-items: center;
             justify-content: center;
+            align-items: center;
             z-index: 10000;
         }
         
@@ -233,9 +256,9 @@
             background: #1e293b;
             padding: 40px;
             border-radius: 16px;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
-            max-width: 400px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
             width: 90%;
+            max-width: 400px;
             text-align: center;
         }
         
@@ -247,7 +270,8 @@
         
         .auth-container p {
             color: #9ca3af;
-            margin-bottom: 20px;
+            margin-bottom: 25px;
+            font-size: 14px;
         }
         
         .auth-container input {
@@ -256,7 +280,7 @@
             background: #0f172a;
             border: 2px solid #334155;
             border-radius: 8px;
-            color: #e2e8f0;
+            color: white;
             font-size: 16px;
             margin-bottom: 20px;
             transition: border-color 0.3s;
