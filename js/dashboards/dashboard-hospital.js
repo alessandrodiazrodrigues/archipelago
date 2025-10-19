@@ -53,7 +53,7 @@ function renderizarDashboard(hospitalId) {
         
         // Aguardar DOM e renderizar gráficos
         setTimeout(() => {
-            renderizarGraficos(hospitalId, dadosGraficos, kpis);
+            window.renderizarGraficos(hospitalId, dadosGraficos, kpis);
             
             // Adicionar event listeners para os toggles
             adicionarEventListenersToggles(hospitalId);
@@ -481,34 +481,34 @@ function gerarHTMLDashboard(hospitalId, nomeHospital, kpis, dadosGraficos) {
 /**
  * Renderiza todos os gráficos
  */
-function renderizarGraficos(hospitalId, dadosGraficos, kpis) {
+window.renderizarGraficos = function(hospitalId, dadosGraficos, kpis) {
     console.log('[DASH HOSP] Iniciando renderização dos gráficos');
     
     // Destruir gráficos existentes
-    destruirGraficosExistentes();
+    window.destruirGraficosExistentes();
     
     // 1. Gráfico de Pizza - Tipo de Leito
-    renderizarGraficoTipoLeito(kpis);
+    window.renderizarGraficoTipoLeito(kpis);
     
     // 2. Gráfico de Barras - Gênero
-    renderizarGraficoGenero(kpis);
+    window.renderizarGraficoGenero(kpis);
     
     // 3. Gráfico de Barras - Faixa Etária
-    renderizarGraficoIdade(dadosGraficos.faixasEtarias);
+    window.renderizarGraficoIdade(dadosGraficos.faixasEtarias);
     
     // 4. Gráfico de Concessões (com toggle)
-    renderizarGraficoConcessoes(hospitalId, dadosGraficos.concessoesTop);
+    window.renderizarGraficoConcessoes(hospitalId, dadosGraficos.concessoesTop);
     
     // 5. Gráfico de Linhas de Cuidado (com toggle)
-    renderizarGraficoLinhas(hospitalId, dadosGraficos.linhasTop);
+    window.renderizarGraficoLinhas(hospitalId, dadosGraficos.linhasTop);
     
     console.log('[DASH HOSP] ✅ Todos os gráficos renderizados');
-}
+};
 
 /**
  * Destruir gráficos existentes
  */
-function destruirGraficosExistentes() {
+window.destruirGraficosExistentes = function() {
     const charts = ['chartTipoLeito', 'chartGenero', 'chartIdade', 'chartConcessoes', 'chartLinhas'];
     
     charts.forEach(chartId => {
@@ -520,12 +520,12 @@ function destruirGraficosExistentes() {
             }
         }
     });
-}
+};
 
 /**
  * Gráfico de Pizza - Tipo de Leito
  */
-function renderizarGraficoTipoLeito(kpis) {
+window.renderizarGraficoTipoLeito = function(kpis) {
     const ctx = document.getElementById('chartTipoLeito');
     if (!ctx) return;
     
@@ -564,13 +564,13 @@ function renderizarGraficoTipoLeito(kpis) {
     });
     
     // Criar legenda HTML customizada
-    criarLegendaHTML('legendaTipoLeito', data.labels, data.datasets[0].backgroundColor, data.datasets[0].data);
-}
+    window.criarLegendaHTML('legendaTipoLeito', data.labels, data.datasets[0].backgroundColor, data.datasets[0].data);
+};
 
 /**
  * Gráfico de Barras - Gênero
  */
-function renderizarGraficoGenero(kpis) {
+window.renderizarGraficoGenero = function(kpis) {
     const ctx = document.getElementById('chartGenero');
     if (!ctx) return;
     
@@ -620,7 +620,7 @@ function renderizarGraficoGenero(kpis) {
 /**
  * Gráfico de Barras - Faixa Etária
  */
-function renderizarGraficoIdade(faixasEtarias) {
+window.renderizarGraficoIdade = function(faixasEtarias) {
     const ctx = document.getElementById('chartIdade');
     if (!ctx) return;
     
@@ -673,7 +673,7 @@ function renderizarGraficoIdade(faixasEtarias) {
 /**
  * Gráfico de Concessões (com toggle)
  */
-function renderizarGraficoConcessoes(hospitalId, concessoesTop) {
+window.renderizarGraficoConcessoes = function(hospitalId, concessoesTop) {
     const ctx = document.getElementById('chartConcessoes');
     if (!ctx) return;
     
@@ -796,16 +796,16 @@ function renderizarGraficoConcessoes(hospitalId, concessoesTop) {
     
     // Criar legenda HTML customizada
     if (tipo === 'bar') {
-        criarLegendaHTML('legendaConcessoes', labels, cores, data);
+        window.criarLegendaHTML('legendaConcessoes', labels, cores, data);
     } else {
         document.getElementById('legendaConcessoes').innerHTML = '';
     }
-}
+};
 
 /**
  * Gráfico de Linhas de Cuidado (com toggle)
  */
-function renderizarGraficoLinhas(hospitalId, linhasTop) {
+window.renderizarGraficoLinhas = function(hospitalId, linhasTop) {
     const ctx = document.getElementById('chartLinhas');
     if (!ctx) return;
     
@@ -938,16 +938,16 @@ function renderizarGraficoLinhas(hospitalId, linhasTop) {
     
     // Criar legenda HTML customizada
     if (tipo === 'bar') {
-        criarLegendaHTML('legendaLinhas', labels, cores, data);
+        window.criarLegendaHTML('legendaLinhas', labels, cores, data);
     } else {
         document.getElementById('legendaLinhas').innerHTML = '';
     }
-}
+};
 
 /**
  * Criar legenda HTML customizada
  */
-function criarLegendaHTML(containerId, labels, colors, values) {
+window.criarLegendaHTML = function(containerId, labels, colors, values) {
     const container = document.getElementById(containerId);
     if (!container) return;
     
@@ -1023,11 +1023,11 @@ window.toggleGrafico = function(hospitalId, tipo, novoTipo) {
     if (tipo === 'concessoes') {
         const hospital = window.hospitalData[hospitalId];
         const dados = prepararDadosGraficos(hospital);
-        renderizarGraficoConcessoes(hospitalId, dados.concessoesTop);
+        window.renderizarGraficoConcessoes(hospitalId, dados.concessoesTop);
     } else if (tipo === 'linhas') {
         const hospital = window.hospitalData[hospitalId];
         const dados = prepararDadosGraficos(hospital);
-        renderizarGraficoLinhas(hospitalId, dados.linhasTop);
+        window.renderizarGraficoLinhas(hospitalId, dados.linhasTop);
     }
 };
 
