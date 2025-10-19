@@ -1,701 +1,539 @@
-// =====================================================
-// ARCHIPELAGO DASHBOARD - HOSPITAL VIEW V3.3.2 FINAL
-// =====================================================
+// =================== DASHBOARD HOSPITALAR V3.3.2 ===================
 // Cliente: Guilherme Santoro
 // Desenvolvedor: Alessandro Rodrigues
 // Data: Outubro/2025
-// Versão: V3.3.2 (74 colunas A-BV completas)
-//
-// FUNCIONALIDADES:
-// ✅ 5 hospitais funcionando (H1, H2, H3, H4, H5)
-// ✅ 9 gráficos completos com dados V3.3.2
-// ✅ 74 colunas suportadas (A-BV)
-// ✅ Logs profissionais e debug detalhado
-// ✅ Tratamento robusto de erros
-// ✅ Cores Pantone sincronizadas com api.js
-// =====================================================
+// Versão: V3.3.2 CORRIGIDA - Compatível com app.js
+// ==================================================================================
 
-console.log('📊 [DASH-HOSP] ========================================');
-console.log('📊 [DASH-HOSP] Módulo dashboard-hospital.js V3.3.2 carregado');
-console.log('📊 [DASH-HOSP] Cliente: Guilherme Santoro');
-console.log('📊 [DASH-HOSP] Desenvolvedor: Alessandro Rodrigues');
-console.log('📊 [DASH-HOSP] ========================================');
-
-// =====================================================
-// VARIÁVEIS GLOBAIS DE GRÁFICOS
-// =====================================================
-let chartOcupacao = null;
-let chartStatusLeitos = null;
-let chartLinhas = null;
-let chartConcessoes = null;
-let chartIsolamento = null;
-let chartGenero = null;
-let chartRegiao = null;
-let chartCategoria = null;
-let chartDiretivas = null;
-
-// Estado dos gráficos por hospital (para gráficos alternáveis)
-window.graficosState = window.graficosState || {
-    H1: { concessoes: 'bar', linhas: 'bar', regiao: 'doughnut' },
-    H2: { concessoes: 'bar', linhas: 'bar', regiao: 'doughnut' },
-    H3: { concessoes: 'bar', linhas: 'bar', regiao: 'doughnut' },
-    H4: { concessoes: 'bar', linhas: 'bar', regiao: 'doughnut' },
-    H5: { concessoes: 'bar', linhas: 'bar', regiao: 'doughnut' }
-};
-
-// =====================================================
-// CORES PANTONE V3.3.2 - SINCRONIZADAS COM API.JS
-// =====================================================
-
-// 11 Cores de Concessões
-const CORES_CONCESSOES_HOSP = {
-    'Transição Domiciliar': '#007A53',
-    'Aplicação domiciliar de medicamentos': '#582C83',
-    'Aspiração': '#2E1A47',
-    'Banho': '#8FD3F4',
-    'Curativo': '#00BFB3',
-    'Curativo PICC': '#E03C31',
-    'Fisioterapia Domiciliar': '#009639',
-    'Fonoaudiologia Domiciliar': '#FF671F',
-    'Oxigenoterapia': '#64A70B',
-    'Remoção': '#FFB81C',
-    'Solicitação domiciliar de exames': '#546E7A'
-};
-
-// 45 Cores de Linhas de Cuidado
-const CORES_LINHAS_HOSP = {
-    'Assiste': '#ED0A72',
-    'APS SP': '#007A33',
-    'Cuidados Paliativos': '#00B5A2',
-    'ICO (Insuficiência Coronariana)': '#A6192E',
-    'Nexus SP Cardiologia': '#C8102E',
-    'Nexus SP Gastroentereologia': '#455A64',
-    'Nexus SP Geriatria': '#E35205',
-    'Nexus SP Pneumologia': '#4A148C',
-    'Nexus SP Psiquiatria': '#3E2723',
-    'Nexus SP Reumatologia': '#E91E63',
-    'Nexus SP Saúde do Fígado': '#556F44',
-    'Generalista': '#FFC72C',
-    'Bucomaxilofacial': '#D81B60',
-    'Cardiologia': '#5A0020',
-    'Cirurgia Cardíaca': '#9CCC65',
-    'Cirurgia de Cabeça e Pescoço': '#7CB342',
-    'Cirurgia do Aparelho Digestivo': '#00263A',
-    'Cirurgia Geral': '#00AEEF',
-    'Cirurgia Oncológica': '#0072CE',
-    'Cirurgia Plástica': '#8E24AA',
-    'Cirurgia Torácica': '#BA68C8',
-    'Cirurgia Vascular': '#AED581',
-    'Clínica Médica': '#F4E285',
-    'Coloproctologia': '#C2185B',
-    'Dermatologia': '#9C27B0',
-    'Endocrinologia': '#37474F',
-    'Fisiatria': '#E8927C',
-    'Gastroenterologia': '#003C57',
-    'Geriatria': '#FF6F1D',
-    'Ginecologia e Obstetrícia': '#582D40',
-    'Hematologia': '#1E88E5',
-    'Infectologia': '#4A7C59',
-    'Mastologia': '#5C5EBE',
-    'Nefrologia': '#7B1FA2',
-    'Neurocirurgia': '#1565C0',
-    'Neurologia': '#64B5F6',
-    'Oftalmologia': '#6D4C41',
-    'Oncologia Clínica': '#6A1B9A',
-    'Ortopedia': '#42A5F5',
-    'Otorrinolaringologia': '#AD1457',
-    'Pediatria': '#5A646B',
-    'Pneumologia': '#1976D2',
-    'Psiquiatria': '#4E342E',
-    'Reumatologia': '#880E4F',
-    'Urologia': '#2D5016'
-};
-
-// =====================================================
-// FUNÇÃO: OBTER COR COM LOGS
-// =====================================================
-function getCorExataHosp(itemName, tipo = 'concessao') {
-    if (!itemName || typeof itemName !== 'string') {
-        console.warn(`⚠️ [CORES HOSP] Item inválido: "${itemName}" (tipo: ${typeof itemName})`);
-        return '#6b7280'; // Cor fallback cinza
-    }
-    
-    const paleta = tipo === 'concessao' ? CORES_CONCESSOES_HOSP : CORES_LINHAS_HOSP;
-    
-    // Busca exata
-    let cor = paleta[itemName];
-    if (cor) {
-        console.log(`✅ [CORES HOSP] "${itemName}" → ${cor}`);
-        return cor;
-    }
-    
-    // Se não encontrar, tentar normalizar
-    const itemNormalizado = itemName.trim();
-    cor = paleta[itemNormalizado];
-    if (cor) {
-        console.log(`✅ [CORES HOSP] "${itemName}" (normalizado) → ${cor}`);
-        return cor;
-    }
-    
-    // Cor não encontrada
-    console.error(`❌ [CORES HOSP] COR NÃO ENCONTRADA: "${itemName}" (tipo: ${tipo})`);
-    console.error(`❌ [CORES HOSP] Cores disponíveis (${Object.keys(paleta).length}):`, Object.keys(paleta));
-    return '#999999'; // Fallback cinza claro
-}
-
-// =====================================================
-// FUNÇÃO: DESTRUIR GRÁFICO
-// =====================================================
-function destruirGrafico(chart) {
-    if (chart) {
-        try {
-            chart.destroy();
-            console.log('🗑️ [DASH-HOSP] Gráfico anterior destruído');
-        } catch (e) {
-            console.warn('⚠️ [DASH-HOSP] Erro ao destruir gráfico:', e);
-        }
-    }
-}
-
-// =====================================================
-// FUNÇÃO PRINCIPAL: RENDERIZAR DASHBOARD HOSPITALAR
-// =====================================================
-window.renderDashboardHospitalar = function() {
-    console.log('');
-    console.log('🏥 [DASH-HOSP] ========================================');
-    console.log('🏥 [DASH-HOSP] FUNÇÃO renderDashboardHospitalar() CHAMADA');
-    console.log('🏥 [DASH-HOSP] ========================================');
-    
-    const startTime = Date.now();
-    const timestamp = new Date().toISOString().replace('T', ' ').substring(0, 19);
-    console.log('🏥 [DASH-HOSP] Timestamp:', timestamp);
-    
-    // ========================================
-    // 1. VALIDAÇÕES INICIAIS
-    // ========================================
-    console.log('🔍 [DASH-HOSP] --- VALIDAÇÕES INICIAIS ---');
-    
-    // Validar hospitalData
-    if (!window.hospitalData) {
-        console.error('❌ [DASH-HOSP] ERRO CRÍTICO: window.hospitalData não existe!');
-        mostrarErroHospital('Dados não carregados. Recarregue a página.');
-        return;
-    }
-    console.log('✅ [DASH-HOSP] window.hospitalData existe');
-    
-    // Validar currentHospital
-    const hospitalId = window.currentHospital;
-    if (!hospitalId) {
-        console.error('❌ [DASH-HOSP] ERRO: Hospital não selecionado!');
-        mostrarErroHospital('Selecione um hospital');
-        return;
-    }
-    console.log('✅ [DASH-HOSP] Hospital selecionado:', hospitalId);
-    
-    // Validar dados do hospital
-    const hospitalDados = window.hospitalData[hospitalId];
-    if (!hospitalDados) {
-        console.error(`❌ [DASH-HOSP] ERRO: Dados do hospital ${hospitalId} não encontrados!`);
-        console.error('❌ [DASH-HOSP] Hospitais disponíveis:', Object.keys(window.hospitalData));
-        mostrarErroHospital(`Dados do ${hospitalId} indisponíveis`);
-        return;
-    }
-    console.log(`✅ [DASH-HOSP] Dados do ${hospitalId} encontrados`);
-    
-    // Validar leitos
-    const leitos = hospitalDados.leitos;
-    if (!leitos || !Array.isArray(leitos)) {
-        console.error(`❌ [DASH-HOSP] ERRO: Leitos do ${hospitalId} inválidos!`);
-        mostrarErroHospital('Estrutura de dados incorreta');
-        return;
-    }
-    console.log(`✅ [DASH-HOSP] Total de leitos: ${leitos.length}`);
-    
-    // ========================================
-    // 2. OBTER NOME DO HOSPITAL
-    // ========================================
-    let hospitalNome = hospitalId;
-    if (window.CONFIG && window.CONFIG.HOSPITAIS && window.CONFIG.HOSPITAIS[hospitalId]) {
-        hospitalNome = window.CONFIG.HOSPITAIS[hospitalId].nome;
-        console.log(`✅ [DASH-HOSP] Nome do hospital: ${hospitalNome}`);
-    } else {
-        console.warn(`⚠️ [DASH-HOSP] Nome do hospital não encontrado em CONFIG, usando ID: ${hospitalId}`);
-    }
-    
-    // ========================================
-    // 3. PROCESSAR DADOS DOS LEITOS
-    // ========================================
-    console.log('📊 [DASH-HOSP] --- PROCESSANDO DADOS ---');
-    
-    let totalVagos = 0;
-    let totalOcupados = 0;
-    let totalBloqueados = 0;
-    
-    const concessoesMap = {};
-    const linhasMap = {};
-    const isolamentoMap = { 'Não Isolamento': 0, 'Isolamento de Contato': 0, 'Isolamento Respiratório': 0 };
-    const generoMap = { 'Masculino': 0, 'Feminino': 0, 'Não informado': 0 };
-    const regiaoMap = {};
-    const categoriaMap = { 'Apartamento': 0, 'Enfermaria': 0, 'Não informado': 0 };
-    const diretivasMap = { 'Sim': 0, 'Não': 0, 'Não se aplica': 0 };
-    
-    // Processar cada leito
-    leitos.forEach((leito, index) => {
-        console.log(`📋 [DASH-HOSP] Leito ${index + 1}/${leitos.length}:`, {
-            leito: leito.leito,
-            status: leito.status,
-            nome: leito.nome || '(vago)',
-            tipo: leito.tipo
-        });
-        
-        // Status
-        const status = String(leito.status || '').toLowerCase();
-        if (status === 'vago') {
-            totalVagos++;
-        } else if (status === 'ocupado' || status === 'em uso') {
-            totalOcupados++;
-            
-            // Concessões
-            if (leito.concessoes && Array.isArray(leito.concessoes)) {
-                leito.concessoes.forEach(c => {
-                    concessoesMap[c] = (concessoesMap[c] || 0) + 1;
-                });
-            }
-            
-            // Linhas de Cuidado
-            if (leito.linhas && Array.isArray(leito.linhas)) {
-                leito.linhas.forEach(l => {
-                    linhasMap[l] = (linhasMap[l] || 0) + 1;
-                });
-            }
-            
-            // Isolamento
-            const isolamento = leito.isolamento || 'Não Isolamento';
-            if (isolamentoMap.hasOwnProperty(isolamento)) {
-                isolamentoMap[isolamento]++;
-            }
-            
-            // Gênero
-            const genero = leito.genero || 'Não informado';
-            if (generoMap.hasOwnProperty(genero)) {
-                generoMap[genero]++;
-            } else {
-                generoMap['Não informado']++;
-            }
-            
-            // Região
-            const regiao = leito.regiao || 'Não informado';
-            regiaoMap[regiao] = (regiaoMap[regiao] || 0) + 1;
-            
-            // Categoria
-            const categoria = leito.categoriaEscolhida || leito.categoria || 'Não informado';
-            if (categoriaMap.hasOwnProperty(categoria)) {
-                categoriaMap[categoria]++;
-            } else {
-                categoriaMap['Não informado']++;
-            }
-            
-            // Diretivas
-            const diretivas = leito.diretivas || 'Não se aplica';
-            if (diretivasMap.hasOwnProperty(diretivas)) {
-                diretivasMap[diretivas]++;
-            }
-            
-        } else if (status === 'bloqueado') {
-            totalBloqueados++;
-        }
-    });
-    
-    const totalLeitos = leitos.length;
-    const taxaOcupacao = totalLeitos > 0 ? ((totalOcupados / totalLeitos) * 100).toFixed(1) : 0;
-    
-    console.log('📊 [DASH-HOSP] Resumo processado:', {
-        total: totalLeitos,
-        vagos: totalVagos,
-        ocupados: totalOcupados,
-        bloqueados: totalBloqueados,
-        taxaOcupacao: taxaOcupacao + '%',
-        concessoes: Object.keys(concessoesMap).length,
-        linhas: Object.keys(linhasMap).length
-    });
-    
-    // ========================================
-    // 4. ATUALIZAR TÍTULO E MÉTRICAS
-    // ========================================
-    console.log('📝 [DASH-HOSP] --- ATUALIZANDO TÍTULO E MÉTRICAS ---');
-    
-    const tituloElement = document.getElementById('hospitalTituloDash');
-    if (tituloElement) {
-        tituloElement.textContent = `Dashboard: ${hospitalNome} (${hospitalId})`;
-        console.log('✅ [DASH-HOSP] Título atualizado');
-    } else {
-        console.warn('⚠️ [DASH-HOSP] Elemento #hospitalTituloDash não encontrado');
-    }
-    
-    // Atualizar métricas
-    atualizarMetrica('metricaVagos', totalVagos, totalLeitos);
-    atualizarMetrica('metricaOcupados', totalOcupados, totalLeitos);
-    atualizarMetrica('metricaBloqueados', totalBloqueados, totalLeitos);
-    atualizarMetrica('metricaTaxa', taxaOcupacao, 100, '%');
-    
-    // ========================================
-    // 5. CRIAR GRÁFICOS
-    // ========================================
-    console.log('📈 [DASH-HOSP] --- CRIANDO GRÁFICOS ---');
+/**
+ * Renderiza o dashboard para um hospital específico
+ * @param {string} hospitalId - ID do hospital (H1, H2, H3, H4, H5)
+ */
+function renderizarDashboard(hospitalId) {
+    console.log(`[DASH HOSP] Iniciando renderização para ${hospitalId}`);
     
     try {
-        // Destruir gráficos anteriores
-        console.log('🗑️ [DASH-HOSP] Destruindo gráficos antigos...');
-        destruirGrafico(chartOcupacao);
-        destruirGrafico(chartStatusLeitos);
-        destruirGrafico(chartLinhas);
-        destruirGrafico(chartConcessoes);
-        destruirGrafico(chartIsolamento);
-        destruirGrafico(chartGenero);
-        destruirGrafico(chartRegiao);
-        destruirGrafico(chartCategoria);
-        destruirGrafico(chartDiretivas);
+        // Verificar se temos dados
+        if (!window.hospitalData || !window.hospitalData[hospitalId]) {
+            console.error(`[DASH HOSP] Dados não encontrados para ${hospitalId}`);
+            document.getElementById('dashHospitalarContent').innerHTML = 
+                '<div class="error-message">Nenhum dado disponível para este hospital</div>';
+            return;
+        }
         
-        // 1. Gráfico Taxa de Ocupação
-        console.log('📊 [DASH-HOSP] Criando gráfico: Taxa de Ocupação');
-        chartOcupacao = criarGraficoOcupacao(taxaOcupacao);
-        console.log('✅ [DASH-HOSP] Gráfico Taxa de Ocupação criado');
+        const hospital = window.hospitalData[hospitalId];
+        console.log('[DASH HOSP] Dados do hospital:', hospital);
         
-        // 2. Gráfico Status dos Leitos
-        console.log('📊 [DASH-HOSP] Criando gráfico: Status dos Leitos');
-        chartStatusLeitos = criarGraficoStatus(totalVagos, totalOcupados, totalBloqueados);
-        console.log('✅ [DASH-HOSP] Gráfico Status dos Leitos criado');
+        // Mapear nome correto do hospital
+        const nomeHospital = getNomeHospital(hospitalId);
         
-        // 3. Gráfico Linhas de Cuidado
-        console.log('📊 [DASH-HOSP] Criando gráfico: Linhas de Cuidado');
-        chartLinhas = criarGraficoLinhas(linhasMap, hospitalId);
-        console.log('✅ [DASH-HOSP] Gráfico Linhas de Cuidado criado');
+        // Calcular todos os KPIs
+        const kpis = calcularKPIs(hospital);
+        console.log('[DASH HOSP] KPIs calculados:', kpis);
         
-        // 4. Gráfico Concessões
-        console.log('📊 [DASH-HOSP] Criando gráfico: Concessões');
-        chartConcessoes = criarGraficoConcessoes(concessoesMap, hospitalId);
-        console.log('✅ [DASH-HOSP] Gráfico Concessões criado');
+        // Preparar dados para gráficos
+        const dadosGraficos = prepararDadosGraficos(hospital);
+        console.log('[DASH HOSP] Dados dos gráficos preparados');
         
-        // 5. Gráfico Isolamento
-        console.log('📊 [DASH-HOSP] Criando gráfico: Isolamento');
-        chartIsolamento = criarGraficoIsolamento(isolamentoMap);
-        console.log('✅ [DASH-HOSP] Gráfico Isolamento criado');
+        // Renderizar HTML
+        const html = gerarHTMLDashboard(hospitalId, nomeHospital, kpis, dadosGraficos);
+        document.getElementById('dashHospitalarContent').innerHTML = html;
         
-        // 6. Gráfico Gênero (NOVO V3.3.2)
-        console.log('📊 [DASH-HOSP] Criando gráfico: Gênero');
-        chartGenero = criarGraficoGenero(generoMap);
-        console.log('✅ [DASH-HOSP] Gráfico Gênero criado');
+        // Aguardar DOM e renderizar gráficos
+        setTimeout(() => {
+            renderizarGraficos(dadosGraficos);
+        }, 100);
         
-        // 7. Gráfico Região (NOVO V3.3.2)
-        console.log('📊 [DASH-HOSP] Criando gráfico: Região');
-        chartRegiao = criarGraficoRegiao(regiaoMap, hospitalId);
-        console.log('✅ [DASH-HOSP] Gráfico Região criado');
-        
-        // 8. Gráfico Categoria (NOVO V3.3.2)
-        console.log('📊 [DASH-HOSP] Criando gráfico: Categoria');
-        chartCategoria = criarGraficoCategoria(categoriaMap);
-        console.log('✅ [DASH-HOSP] Gráfico Categoria criado');
-        
-        // 9. Gráfico Diretivas (NOVO V3.3.2)
-        console.log('📊 [DASH-HOSP] Criando gráfico: Diretivas');
-        chartDiretivas = criarGraficoDiretivas(diretivasMap);
-        console.log('✅ [DASH-HOSP] Gráfico Diretivas criado');
+        console.log(`[DASH HOSP] ✅ Dashboard renderizado com sucesso para ${hospitalId}`);
         
     } catch (error) {
-        console.error('❌ [DASH-HOSP] ERRO ao criar gráficos:', error);
-        console.error('❌ [DASH-HOSP] Stack trace:', error.stack);
-        mostrarErroHospital('Erro ao criar gráficos');
-    }
-    
-    // ========================================
-    // 6. FINALIZAÇÃO
-    // ========================================
-    const endTime = Date.now();
-    const totalTime = endTime - startTime;
-    
-    console.log('');
-    console.log('✅ [DASH-HOSP] ========================================');
-    console.log('✅ [DASH-HOSP] DASHBOARD RENDERIZADO COM SUCESSO!');
-    console.log('✅ [DASH-HOSP] ========================================');
-    console.log(`⏱️ [DASH-HOSP] Tempo total: ${totalTime}ms`);
-    console.log(`📊 [DASH-HOSP] Gráficos criados: 9`);
-    console.log(`🏥 [DASH-HOSP] Hospital: ${hospitalNome} (${hospitalId})`);
-    console.log(`📋 [DASH-HOSP] Total leitos: ${totalLeitos}`);
-    console.log(`✅ [DASH-HOSP] Taxa ocupação: ${taxaOcupacao}%`);
-    console.log('✅ [DASH-HOSP] ========================================');
-    console.log('');
-};
-
-// =====================================================
-// FUNÇÃO: ATUALIZAR MÉTRICA
-// =====================================================
-function atualizarMetrica(elementId, valor, total, sufixo = '') {
-    const element = document.getElementById(elementId);
-    if (element) {
-        const percentual = total > 0 ? ((valor / total) * 100).toFixed(1) : 0;
-        element.textContent = `${valor}${sufixo}${total ? ` (${percentual}%)` : ''}`;
-        console.log(`✅ [DASH-HOSP] Métrica ${elementId} atualizada: ${valor}${sufixo}`);
-    } else {
-        console.warn(`⚠️ [DASH-HOSP] Elemento #${elementId} não encontrado`);
+        console.error('[DASH HOSP] Erro ao renderizar dashboard:', error);
+        document.getElementById('dashHospitalarContent').innerHTML = 
+            '<div class="error-message">Erro ao carregar dashboard. Por favor, recarregue a página.</div>';
     }
 }
 
-// =====================================================
-// FUNÇÃO: MOSTRAR ERRO
-// =====================================================
-function mostrarErroHospital(mensagem) {
-    console.error(`❌ [DASH-HOSP] ERRO EXIBIDO: ${mensagem}`);
-    const container = document.getElementById('dashHospitalarContent');
-    if (container) {
-        container.innerHTML = `
-            <div style="display: flex; align-items: center; justify-content: center; height: 400px; flex-direction: column;">
-                <div style="font-size: 48px; margin-bottom: 20px;">⚠️</div>
-                <h3 style="color: #ef4444; margin-bottom: 10px;">Erro ao carregar dashboard</h3>
-                <p style="color: #9ca3af;">${mensagem}</p>
-                <button onclick="window.renderDashboardHospitalar()" style="margin-top: 20px; padding: 10px 20px; background: #3b82f6; color: white; border: none; border-radius: 8px; cursor: pointer;">
-                    Tentar novamente
-                </button>
-            </div>
-        `;
-    }
+/**
+ * Retorna o nome correto do hospital
+ */
+function getNomeHospital(hospitalId) {
+    const nomes = {
+        'H1': 'Neomater',
+        'H2': 'Cruz Azul',
+        'H3': 'Santa Marcelina',
+        'H4': 'Santa Clara',
+        'H5': 'Hospital Adventista'
+    };
+    return nomes[hospitalId] || hospitalId;
 }
 
-// =====================================================
-// GRÁFICO 1: TAXA DE OCUPAÇÃO
-// =====================================================
-function criarGraficoOcupacao(taxaOcupacao) {
-    const ctx = document.getElementById('chartOcupacaoHospital');
-    if (!ctx) {
-        console.error('❌ [DASH-HOSP] Canvas #chartOcupacaoHospital não encontrado');
-        return null;
-    }
+/**
+ * Calcula os KPIs do hospital
+ */
+function calcularKPIs(hospital) {
+    const leitos = hospital.leitos || [];
+    const totalLeitos = leitos.length;
     
-    const taxa = parseFloat(taxaOcupacao) || 0;
-    const livre = 100 - taxa;
+    // KPIs básicos
+    const ocupados = leitos.filter(l => l.status === 'ocupado').length;
+    const vagos = totalLeitos - ocupados;
+    const taxaOcupacao = totalLeitos > 0 ? Math.round((ocupados / totalLeitos) * 100) : 0;
     
-    return new Chart(ctx, {
-        type: 'doughnut',
-        data: {
-            labels: ['Ocupada', 'Livre'],
-            datasets: [{
-                data: [taxa, livre],
-                backgroundColor: ['#3b82f6', '#e5e7eb'],
-                borderWidth: 0
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: {
-                    position: 'bottom',
-                    labels: { color: '#9ca3af', font: { size: 12 } }
-                },
-                title: {
-                    display: true,
-                    text: 'Taxa de Ocupação',
-                    color: '#e5e7eb',
-                    font: { size: 16, weight: 'bold' }
-                }
-            }
+    // KPIs por tipo
+    const apartamentos = leitos.filter(l => l.tipo === 'Apartamento' || l.categoria === 'Apartamento').length;
+    const enfermarias = leitos.filter(l => l.tipo === 'Enfermaria' || l.categoria === 'Enfermaria').length;
+    const hibridos = leitos.filter(l => l.tipo === 'Híbrido').length;
+    
+    // KPIs ocupados por tipo
+    const apartamentosOcupados = leitos.filter(l => 
+        (l.tipo === 'Apartamento' || l.categoria === 'Apartamento') && l.status === 'ocupado'
+    ).length;
+    const enfermariasOcupadas = leitos.filter(l => 
+        (l.tipo === 'Enfermaria' || l.categoria === 'Enfermaria') && l.status === 'ocupado'
+    ).length;
+    
+    // KPIs de isolamento
+    const isolamentoContato = leitos.filter(l => 
+        l.status === 'ocupado' && l.isolamento === 'Isolamento de Contato'
+    ).length;
+    const isolamentoRespiratorio = leitos.filter(l => 
+        l.status === 'ocupado' && l.isolamento === 'Isolamento Respiratório'
+    ).length;
+    const totalIsolamento = isolamentoContato + isolamentoRespiratorio;
+    
+    // KPIs de gênero
+    const masculino = leitos.filter(l => l.status === 'ocupado' && l.genero === 'Masculino').length;
+    const feminino = leitos.filter(l => l.status === 'ocupado' && l.genero === 'Feminino').length;
+    
+    // KPIs de idade
+    const idadeTotal = leitos
+        .filter(l => l.status === 'ocupado' && l.idade)
+        .reduce((sum, l) => sum + parseInt(l.idade), 0);
+    const idadeCount = leitos.filter(l => l.status === 'ocupado' && l.idade).length;
+    const idadeMedia = idadeCount > 0 ? Math.round(idadeTotal / idadeCount) : 0;
+    
+    // KPIs de complexidade
+    const complexidadeI = leitos.filter(l => l.status === 'ocupado' && l.complexidade === 'I').length;
+    const complexidadeII = leitos.filter(l => l.status === 'ocupado' && l.complexidade === 'II').length;
+    const complexidadeIII = leitos.filter(l => l.status === 'ocupado' && l.complexidade === 'III').length;
+    const complexidadeIV = leitos.filter(l => l.status === 'ocupado' && l.complexidade === 'IV').length;
+    const complexidadeV = leitos.filter(l => l.status === 'ocupado' && l.complexidade === 'V').length;
+    
+    // KPIs de diretivas
+    const diretivasSim = leitos.filter(l => l.status === 'ocupado' && l.diretivas === 'Sim').length;
+    const diretivasNao = leitos.filter(l => l.status === 'ocupado' && l.diretivas === 'Não').length;
+    
+    // KPIs de SPICT
+    const spictElegivel = leitos.filter(l => l.status === 'ocupado' && l.spict === 'elegivel').length;
+    const spictNaoElegivel = leitos.filter(l => l.status === 'ocupado' && l.spict === 'nao_elegivel').length;
+    
+    // KPIs de previsão de alta
+    const altaHoje = leitos.filter(l => 
+        l.status === 'ocupado' && l.prevAlta && l.prevAlta.includes('Hoje')
+    ).length;
+    const alta24h = leitos.filter(l => l.status === 'ocupado' && l.prevAlta === '24H').length;
+    const alta48h = leitos.filter(l => l.status === 'ocupado' && l.prevAlta === '48H').length;
+    
+    return {
+        totalLeitos,
+        ocupados,
+        vagos,
+        taxaOcupacao,
+        apartamentos,
+        enfermarias,
+        hibridos,
+        apartamentosOcupados,
+        enfermariasOcupadas,
+        isolamentoContato,
+        isolamentoRespiratorio,
+        totalIsolamento,
+        masculino,
+        feminino,
+        idadeMedia,
+        complexidadeI,
+        complexidadeII,
+        complexidadeIII,
+        complexidadeIV,
+        complexidadeV,
+        diretivasSim,
+        diretivasNao,
+        spictElegivel,
+        spictNaoElegivel,
+        altaHoje,
+        alta24h,
+        alta48h
+    };
+}
+
+/**
+ * Prepara dados para os gráficos
+ */
+function prepararDadosGraficos(hospital) {
+    const leitos = hospital.leitos || [];
+    const leitosOcupados = leitos.filter(l => l.status === 'ocupado');
+    
+    // 1. Dados para gráfico de distribuição por região
+    const regioes = {};
+    leitosOcupados.forEach(leito => {
+        const regiao = leito.regiao || 'Não informado';
+        regioes[regiao] = (regioes[regiao] || 0) + 1;
+    });
+    
+    // 2. Dados para gráfico de concessões (top 10)
+    const concessoes = {};
+    leitosOcupados.forEach(leito => {
+        if (leito.concessoes && Array.isArray(leito.concessoes)) {
+            leito.concessoes.forEach(concessao => {
+                concessoes[concessao] = (concessoes[concessao] || 0) + 1;
+            });
         }
     });
-}
-
-// =====================================================
-// GRÁFICO 2: STATUS DOS LEITOS
-// =====================================================
-function criarGraficoStatus(vagos, ocupados, bloqueados) {
-    const ctx = document.getElementById('chartStatusHospital');
-    if (!ctx) {
-        console.error('❌ [DASH-HOSP] Canvas #chartStatusHospital não encontrado');
-        return null;
-    }
     
-    return new Chart(ctx, {
-        type: 'bar',
-        data: {
-            labels: ['Vagos', 'Ocupados', 'Bloqueados'],
-            datasets: [{
-                label: 'Leitos',
-                data: [vagos, ocupados, bloqueados],
-                backgroundColor: ['#10b981', '#3b82f6', '#ef4444'],
-                borderWidth: 0
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: { display: false },
-                title: {
-                    display: true,
-                    text: 'Status dos Leitos',
-                    color: '#e5e7eb',
-                    font: { size: 16, weight: 'bold' }
-                }
-            },
-            scales: {
-                y: {
-                    beginAtZero: true,
-                    ticks: { color: '#9ca3af', stepSize: 1 },
-                    grid: { color: 'rgba(156, 163, 175, 0.1)' }
-                },
-                x: {
-                    ticks: { color: '#9ca3af' },
-                    grid: { display: false }
-                }
-            }
-        }
-    });
-}
-
-// =====================================================
-// GRÁFICO 3: LINHAS DE CUIDADO
-// =====================================================
-function criarGraficoLinhas(linhasMap, hospitalId) {
-    const ctx = document.getElementById('chartLinhasHospital');
-    if (!ctx) {
-        console.error('❌ [DASH-HOSP] Canvas #chartLinhasHospital não encontrado');
-        return null;
-    }
-    
-    const linhasOrdenadas = Object.entries(linhasMap)
+    const concessoesTop = Object.entries(concessoes)
         .sort((a, b) => b[1] - a[1])
-        .slice(0, 10); // Top 10
+        .slice(0, 10);
     
-    if (linhasOrdenadas.length === 0) {
-        console.warn('⚠️ [DASH-HOSP] Nenhuma linha de cuidado para exibir');
-        return null;
-    }
+    // 3. Dados para gráfico de linhas de cuidado (top 15)
+    const linhasCuidado = {};
+    leitosOcupados.forEach(leito => {
+        if (leito.linhas && Array.isArray(leito.linhas)) {
+            leito.linhas.forEach(linha => {
+                linhasCuidado[linha] = (linhasCuidado[linha] || 0) + 1;
+            });
+        }
+    });
     
-    const labels = linhasOrdenadas.map(([nome]) => nome);
-    const data = linhasOrdenadas.map(([, qtd]) => qtd);
-    const colors = labels.map(nome => getCorExataHosp(nome, 'linha'));
+    const linhasTop = Object.entries(linhasCuidado)
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, 15);
     
-    const tipoGrafico = window.graficosState[hospitalId]?.linhas || 'bar';
+    // 4. Dados para gráfico de faixa etária
+    const faixasEtarias = {
+        '0-17': 0,
+        '18-30': 0,
+        '31-50': 0,
+        '51-65': 0,
+        '66-80': 0,
+        '80+': 0
+    };
     
-    return new Chart(ctx, {
-        type: tipoGrafico,
-        data: {
-            labels: labels,
-            datasets: [{
-                label: 'Pacientes',
-                data: data,
-                backgroundColor: colors,
-                borderWidth: 0
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: { display: tipoGrafico === 'doughnut' },
-                title: {
-                    display: true,
-                    text: 'Top 10 Linhas de Cuidado',
-                    color: '#e5e7eb',
-                    font: { size: 16, weight: 'bold' }
-                }
-            },
-            scales: tipoGrafico === 'bar' ? {
-                y: {
-                    beginAtZero: true,
-                    ticks: { color: '#9ca3af', stepSize: 1 },
-                    grid: { color: 'rgba(156, 163, 175, 0.1)' }
-                },
-                x: {
-                    ticks: { color: '#9ca3af', maxRotation: 45, minRotation: 45 },
-                    grid: { display: false }
-                }
-            } : {}
+    leitosOcupados.forEach(leito => {
+        const idade = parseInt(leito.idade);
+        if (!isNaN(idade)) {
+            if (idade <= 17) faixasEtarias['0-17']++;
+            else if (idade <= 30) faixasEtarias['18-30']++;
+            else if (idade <= 50) faixasEtarias['31-50']++;
+            else if (idade <= 65) faixasEtarias['51-65']++;
+            else if (idade <= 80) faixasEtarias['66-80']++;
+            else faixasEtarias['80+']++;
+        }
+    });
+    
+    // 5. Dados para gráfico de PPS (Performance Status)
+    const ppsDistribuicao = {
+        '100%': 0,
+        '90%': 0,
+        '80%': 0,
+        '70%': 0,
+        '60%': 0,
+        '50%': 0,
+        '40%': 0,
+        '30%': 0,
+        '20%': 0,
+        '10%': 0
+    };
+    
+    leitosOcupados.forEach(leito => {
+        if (leito.pps && ppsDistribuicao.hasOwnProperty(leito.pps)) {
+            ppsDistribuicao[leito.pps]++;
+        }
+    });
+    
+    return {
+        regioes,
+        concessoesTop,
+        linhasTop,
+        faixasEtarias,
+        ppsDistribuicao
+    };
+}
+
+/**
+ * Gera o HTML do dashboard
+ */
+function gerarHTMLDashboard(hospitalId, nomeHospital, kpis, dadosGraficos) {
+    return `
+        <div class="dashboard-container">
+            <!-- HEADER -->
+            <div class="dashboard-header">
+                <h2>Dashboard Hospitalar - ${nomeHospital}</h2>
+                <div class="dashboard-subtitle">
+                    <span>Total de Leitos: ${kpis.totalLeitos}</span>
+                    <span class="separator">|</span>
+                    <span>Taxa de Ocupação: ${kpis.taxaOcupacao}%</span>
+                </div>
+            </div>
+            
+            <!-- KPIS PRINCIPAIS -->
+            <div class="kpis-grid">
+                <!-- Ocupação -->
+                <div class="kpi-card kpi-ocupacao">
+                    <div class="kpi-icon">🏥</div>
+                    <div class="kpi-info">
+                        <h3>Ocupação</h3>
+                        <div class="kpi-value">${kpis.ocupados}/${kpis.totalLeitos}</div>
+                        <div class="kpi-percentage">${kpis.taxaOcupacao}%</div>
+                    </div>
+                </div>
+                
+                <!-- Vagos -->
+                <div class="kpi-card kpi-vagos">
+                    <div class="kpi-icon">✅</div>
+                    <div class="kpi-info">
+                        <h3>Leitos Vagos</h3>
+                        <div class="kpi-value">${kpis.vagos}</div>
+                        <div class="kpi-percentage">${100 - kpis.taxaOcupacao}%</div>
+                    </div>
+                </div>
+                
+                <!-- Isolamento -->
+                <div class="kpi-card kpi-isolamento">
+                    <div class="kpi-icon">⚠️</div>
+                    <div class="kpi-info">
+                        <h3>Em Isolamento</h3>
+                        <div class="kpi-value">${kpis.totalIsolamento}</div>
+                        <div class="kpi-detail">
+                            <span>Contato: ${kpis.isolamentoContato}</span>
+                            <span>Respiratório: ${kpis.isolamentoRespiratorio}</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Previsão Alta Hoje -->
+                <div class="kpi-card kpi-alta">
+                    <div class="kpi-icon">🏠</div>
+                    <div class="kpi-info">
+                        <h3>Alta Hoje</h3>
+                        <div class="kpi-value">${kpis.altaHoje}</div>
+                        <div class="kpi-detail">
+                            <span>24H: ${kpis.alta24h}</span>
+                            <span>48H: ${kpis.alta48h}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- KPIS SECUNDÁRIOS -->
+            <div class="kpis-secondary">
+                <!-- Distribuição por Tipo -->
+                <div class="kpi-group">
+                    <h4>Distribuição por Tipo</h4>
+                    <div class="kpi-items">
+                        <div class="kpi-item">
+                            <span class="kpi-label">Apartamentos:</span>
+                            <span class="kpi-value">${kpis.apartamentosOcupados}/${kpis.apartamentos}</span>
+                        </div>
+                        <div class="kpi-item">
+                            <span class="kpi-label">Enfermarias:</span>
+                            <span class="kpi-value">${kpis.enfermariasOcupadas}/${kpis.enfermarias}</span>
+                        </div>
+                        ${kpis.hibridos > 0 ? `
+                        <div class="kpi-item">
+                            <span class="kpi-label">Híbridos:</span>
+                            <span class="kpi-value">${kpis.apartamentosOcupados + kpis.enfermariasOcupadas}/${kpis.hibridos}</span>
+                        </div>
+                        ` : ''}
+                    </div>
+                </div>
+                
+                <!-- Distribuição por Gênero -->
+                <div class="kpi-group">
+                    <h4>Distribuição por Gênero</h4>
+                    <div class="kpi-items">
+                        <div class="kpi-item">
+                            <span class="kpi-label">Masculino:</span>
+                            <span class="kpi-value">${kpis.masculino}</span>
+                        </div>
+                        <div class="kpi-item">
+                            <span class="kpi-label">Feminino:</span>
+                            <span class="kpi-value">${kpis.feminino}</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Complexidade -->
+                <div class="kpi-group">
+                    <h4>Complexidade</h4>
+                    <div class="kpi-items">
+                        <div class="kpi-item">
+                            <span class="kpi-label">I:</span>
+                            <span class="kpi-value">${kpis.complexidadeI}</span>
+                        </div>
+                        <div class="kpi-item">
+                            <span class="kpi-label">II:</span>
+                            <span class="kpi-value">${kpis.complexidadeII}</span>
+                        </div>
+                        <div class="kpi-item">
+                            <span class="kpi-label">III:</span>
+                            <span class="kpi-value">${kpis.complexidadeIII}</span>
+                        </div>
+                        <div class="kpi-item">
+                            <span class="kpi-label">IV:</span>
+                            <span class="kpi-value">${kpis.complexidadeIV}</span>
+                        </div>
+                        <div class="kpi-item">
+                            <span class="kpi-label">V:</span>
+                            <span class="kpi-value">${kpis.complexidadeV}</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Diretivas e SPICT -->
+                <div class="kpi-group">
+                    <h4>Indicadores Paliativos</h4>
+                    <div class="kpi-items">
+                        <div class="kpi-item">
+                            <span class="kpi-label">Diretivas (Sim):</span>
+                            <span class="kpi-value">${kpis.diretivasSim}</span>
+                        </div>
+                        <div class="kpi-item">
+                            <span class="kpi-label">SPICT Elegível:</span>
+                            <span class="kpi-value">${kpis.spictElegivel}</span>
+                        </div>
+                        <div class="kpi-item">
+                            <span class="kpi-label">Idade Média:</span>
+                            <span class="kpi-value">${kpis.idadeMedia} anos</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- GRÁFICOS -->
+            <div class="charts-container">
+                <!-- Primeira linha de gráficos -->
+                <div class="charts-row">
+                    <!-- Gráfico de Regiões -->
+                    <div class="chart-wrapper">
+                        <h3>Distribuição por Região</h3>
+                        <div class="chart-container">
+                            <canvas id="chartRegioes"></canvas>
+                        </div>
+                    </div>
+                    
+                    <!-- Gráfico de Faixa Etária -->
+                    <div class="chart-wrapper">
+                        <h3>Distribuição por Faixa Etária</h3>
+                        <div class="chart-container">
+                            <canvas id="chartIdade"></canvas>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Segunda linha de gráficos -->
+                <div class="charts-row">
+                    <!-- Gráfico de Concessões -->
+                    <div class="chart-wrapper">
+                        <h3>Top 10 Concessões de Alta</h3>
+                        <div class="chart-container">
+                            <canvas id="chartConcessoes"></canvas>
+                        </div>
+                    </div>
+                    
+                    <!-- Gráfico de PPS -->
+                    <div class="chart-wrapper">
+                        <h3>Distribuição PPS (Performance Status)</h3>
+                        <div class="chart-container">
+                            <canvas id="chartPPS"></canvas>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Terceira linha - gráfico maior -->
+                <div class="charts-row">
+                    <div class="chart-wrapper chart-wide">
+                        <h3>Top 15 Linhas de Cuidado</h3>
+                        <div class="chart-container">
+                            <canvas id="chartLinhas"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- FOOTER DO DASHBOARD -->
+            <div class="dashboard-footer">
+                <p>Última atualização: ${new Date().toLocaleString('pt-BR')}</p>
+                <p>Dashboard Hospitalar ${nomeHospital} - Archipelago V3.3.2</p>
+            </div>
+        </div>
+    `;
+}
+
+/**
+ * Renderiza todos os gráficos
+ */
+function renderizarGraficos(dadosGraficos) {
+    console.log('[DASH HOSP] Iniciando renderização dos gráficos');
+    
+    // Destruir gráficos existentes
+    destruirGraficosExistentes();
+    
+    // 1. Gráfico de Regiões
+    renderizarGraficoRegioes(dadosGraficos.regioes);
+    
+    // 2. Gráfico de Faixa Etária
+    renderizarGraficoIdade(dadosGraficos.faixasEtarias);
+    
+    // 3. Gráfico de Concessões
+    renderizarGraficoConcessoes(dadosGraficos.concessoesTop);
+    
+    // 4. Gráfico de PPS
+    renderizarGraficoPPS(dadosGraficos.ppsDistribuicao);
+    
+    // 5. Gráfico de Linhas de Cuidado
+    renderizarGraficoLinhas(dadosGraficos.linhasTop);
+    
+    console.log('[DASH HOSP] ✅ Todos os gráficos renderizados');
+}
+
+/**
+ * Destruir gráficos existentes
+ */
+function destruirGraficosExistentes() {
+    const charts = ['chartRegioes', 'chartIdade', 'chartConcessoes', 'chartPPS', 'chartLinhas'];
+    
+    charts.forEach(chartId => {
+        const canvas = document.getElementById(chartId);
+        if (canvas && canvas.chart) {
+            canvas.chart.destroy();
         }
     });
 }
 
-// =====================================================
-// GRÁFICO 4: CONCESSÕES
-// =====================================================
-function criarGraficoConcessoes(concessoesMap, hospitalId) {
-    const ctx = document.getElementById('chartConcessoesHospital');
-    if (!ctx) {
-        console.error('❌ [DASH-HOSP] Canvas #chartConcessoesHospital não encontrado');
-        return null;
-    }
+/**
+ * Gráfico de Regiões (Pizza)
+ */
+function renderizarGraficoRegioes(regioes) {
+    const ctx = document.getElementById('chartRegioes');
+    if (!ctx) return;
     
-    const concessoesOrdenadas = Object.entries(concessoesMap)
-        .sort((a, b) => b[1] - a[1]);
+    const labels = Object.keys(regioes);
+    const data = Object.values(regioes);
     
-    if (concessoesOrdenadas.length === 0) {
-        console.warn('⚠️ [DASH-HOSP] Nenhuma concessão para exibir');
-        return null;
-    }
+    // Cores para as regiões
+    const cores = [
+        '#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', 
+        '#9966FF', '#FF9F40', '#FF6384', '#C9CBCF', '#4BC0C0'
+    ];
     
-    const labels = concessoesOrdenadas.map(([nome]) => nome);
-    const data = concessoesOrdenadas.map(([, qtd]) => qtd);
-    const colors = labels.map(nome => getCorExataHosp(nome, 'concessao'));
-    
-    const tipoGrafico = window.graficosState[hospitalId]?.concessoes || 'bar';
-    
-    return new Chart(ctx, {
-        type: tipoGrafico,
-        data: {
-            labels: labels,
-            datasets: [{
-                label: 'Pacientes',
-                data: data,
-                backgroundColor: colors,
-                borderWidth: 0
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: { display: tipoGrafico === 'doughnut' },
-                title: {
-                    display: true,
-                    text: 'Concessões de Alta',
-                    color: '#e5e7eb',
-                    font: { size: 16, weight: 'bold' }
-                }
-            },
-            scales: tipoGrafico === 'bar' ? {
-                y: {
-                    beginAtZero: true,
-                    ticks: { color: '#9ca3af', stepSize: 1 },
-                    grid: { color: 'rgba(156, 163, 175, 0.1)' }
-                },
-                x: {
-                    ticks: { color: '#9ca3af', maxRotation: 45, minRotation: 45 },
-                    grid: { display: false }
-                }
-            } : {}
-        }
-    });
-}
-
-// =====================================================
-// GRÁFICO 5: ISOLAMENTO
-// =====================================================
-function criarGraficoIsolamento(isolamentoMap) {
-    const ctx = document.getElementById('chartIsolamentoHospital');
-    if (!ctx) {
-        console.error('❌ [DASH-HOSP] Canvas #chartIsolamentoHospital não encontrado');
-        return null;
-    }
-    
-    const labels = Object.keys(isolamentoMap);
-    const data = Object.values(isolamentoMap);
-    
-    return new Chart(ctx, {
+    ctx.chart = new Chart(ctx, {
         type: 'doughnut',
         data: {
             labels: labels,
             datasets: [{
                 data: data,
-                backgroundColor: ['#10b981', '#f59e0b', '#ef4444'],
-                borderWidth: 0
+                backgroundColor: cores,
+                borderWidth: 2,
+                borderColor: '#fff'
             }]
         },
         options: {
@@ -704,258 +542,233 @@ function criarGraficoIsolamento(isolamentoMap) {
             plugins: {
                 legend: {
                     position: 'bottom',
-                    labels: { color: '#9ca3af', font: { size: 11 } }
+                    labels: {
+                        padding: 10,
+                        font: { size: 11 }
+                    }
                 },
-                title: {
-                    display: true,
-                    text: 'Status de Isolamento',
-                    color: '#e5e7eb',
-                    font: { size: 16, weight: 'bold' }
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                            const percentage = ((context.parsed / total) * 100).toFixed(1);
+                            return `${context.label}: ${context.parsed} (${percentage}%)`;
+                        }
+                    }
                 }
             }
         }
     });
 }
 
-// =====================================================
-// GRÁFICO 6: GÊNERO (NOVO V3.3.2)
-// =====================================================
-function criarGraficoGenero(generoMap) {
-    const ctx = document.getElementById('chartGeneroHospital');
-    if (!ctx) {
-        console.error('❌ [DASH-HOSP] Canvas #chartGeneroHospital não encontrado');
-        return null;
-    }
+/**
+ * Gráfico de Faixa Etária (Barras)
+ */
+function renderizarGraficoIdade(faixasEtarias) {
+    const ctx = document.getElementById('chartIdade');
+    if (!ctx) return;
     
-    const labels = Object.keys(generoMap);
-    const data = Object.values(generoMap);
+    const labels = Object.keys(faixasEtarias);
+    const data = Object.values(faixasEtarias);
     
-    return new Chart(ctx, {
-        type: 'pie',
-        data: {
-            labels: labels,
-            datasets: [{
-                data: data,
-                backgroundColor: ['#3b82f6', '#ec4899', '#9ca3af'],
-                borderWidth: 0
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: {
-                    position: 'bottom',
-                    labels: { color: '#9ca3af', font: { size: 12 } }
-                },
-                title: {
-                    display: true,
-                    text: 'Distribuição por Gênero',
-                    color: '#e5e7eb',
-                    font: { size: 16, weight: 'bold' }
-                }
-            }
-        }
-    });
-}
-
-// =====================================================
-// GRÁFICO 7: REGIÃO (NOVO V3.3.2)
-// =====================================================
-function criarGraficoRegiao(regiaoMap, hospitalId) {
-    const ctx = document.getElementById('chartRegiaoHospital');
-    if (!ctx) {
-        console.error('❌ [DASH-HOSP] Canvas #chartRegiaoHospital não encontrado');
-        return null;
-    }
-    
-    const regioesOrdenadas = Object.entries(regiaoMap)
-        .sort((a, b) => b[1] - a[1]);
-    
-    if (regioesOrdenadas.length === 0) {
-        console.warn('⚠️ [DASH-HOSP] Nenhuma região para exibir');
-        return null;
-    }
-    
-    const labels = regioesOrdenadas.map(([nome]) => nome);
-    const data = regioesOrdenadas.map(([, qtd]) => qtd);
-    
-    const tipoGrafico = window.graficosState[hospitalId]?.regiao || 'doughnut';
-    
-    return new Chart(ctx, {
-        type: tipoGrafico,
-        data: {
-            labels: labels,
-            datasets: [{
-                label: 'Pacientes',
-                data: data,
-                backgroundColor: [
-                    '#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6',
-                    '#ec4899', '#06b6d4', '#84cc16', '#f97316', '#6366f1'
-                ],
-                borderWidth: 0
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: {
-                    position: 'right',
-                    labels: { color: '#9ca3af', font: { size: 11 } }
-                },
-                title: {
-                    display: true,
-                    text: 'Distribuição por Região',
-                    color: '#e5e7eb',
-                    font: { size: 16, weight: 'bold' }
-                }
-            },
-            scales: tipoGrafico === 'bar' ? {
-                y: {
-                    beginAtZero: true,
-                    ticks: { color: '#9ca3af', stepSize: 1 },
-                    grid: { color: 'rgba(156, 163, 175, 0.1)' }
-                },
-                x: {
-                    ticks: { color: '#9ca3af' },
-                    grid: { display: false }
-                }
-            } : {}
-        }
-    });
-}
-
-// =====================================================
-// GRÁFICO 8: CATEGORIA (NOVO V3.3.2)
-// =====================================================
-function criarGraficoCategoria(categoriaMap) {
-    const ctx = document.getElementById('chartCategoriaHospital');
-    if (!ctx) {
-        console.error('❌ [DASH-HOSP] Canvas #chartCategoriaHospital não encontrado');
-        return null;
-    }
-    
-    const labels = Object.keys(categoriaMap);
-    const data = Object.values(categoriaMap);
-    
-    return new Chart(ctx, {
+    ctx.chart = new Chart(ctx, {
         type: 'bar',
         data: {
             labels: labels,
             datasets: [{
                 label: 'Pacientes',
                 data: data,
-                backgroundColor: ['#3b82f6', '#f59e0b', '#9ca3af'],
-                borderWidth: 0
+                backgroundColor: '#36A2EB',
+                borderColor: '#2980B9',
+                borderWidth: 1
             }]
         },
         options: {
             responsive: true,
             maintainAspectRatio: false,
-            plugins: {
-                legend: { display: false },
-                title: {
-                    display: true,
-                    text: 'Distribuição por Categoria',
-                    color: '#e5e7eb',
-                    font: { size: 16, weight: 'bold' }
-                }
-            },
             scales: {
                 y: {
                     beginAtZero: true,
-                    ticks: { color: '#9ca3af', stepSize: 1 },
-                    grid: { color: 'rgba(156, 163, 175, 0.1)' }
-                },
-                x: {
-                    ticks: { color: '#9ca3af' },
-                    grid: { display: false }
+                    ticks: {
+                        stepSize: 1
+                    }
+                }
+            },
+            plugins: {
+                legend: {
+                    display: false
                 }
             }
         }
     });
 }
 
-// =====================================================
-// GRÁFICO 9: DIRETIVAS (NOVO V3.3.2)
-// =====================================================
-function criarGraficoDiretivas(diretivasMap) {
-    const ctx = document.getElementById('chartDiretivasHospital');
-    if (!ctx) {
-        console.error('❌ [DASH-HOSP] Canvas #chartDiretivasHospital não encontrado');
-        return null;
-    }
+/**
+ * Gráfico de Concessões (Barras Horizontais)
+ */
+function renderizarGraficoConcessoes(concessoesTop) {
+    const ctx = document.getElementById('chartConcessoes');
+    if (!ctx) return;
     
-    const labels = Object.keys(diretivasMap);
-    const data = Object.values(diretivasMap);
+    const labels = concessoesTop.map(c => c[0]);
+    const data = concessoesTop.map(c => c[1]);
     
-    return new Chart(ctx, {
-        type: 'doughnut',
+    // Buscar cores das concessões
+    const cores = labels.map(label => {
+        const cor = window.CORES_CONCESSOES && window.CORES_CONCESSOES[label];
+        if (!cor) {
+            console.warn(`[CORES] Cor não encontrada para concessão: "${label}"`);
+            return '#999999';
+        }
+        return cor;
+    });
+    
+    ctx.chart = new Chart(ctx, {
+        type: 'bar',
         data: {
             labels: labels,
             datasets: [{
+                label: 'Concessões',
                 data: data,
-                backgroundColor: ['#10b981', '#ef4444', '#9ca3af'],
-                borderWidth: 0
+                backgroundColor: cores,
+                borderColor: cores.map(c => c + '99'),
+                borderWidth: 1
+            }]
+        },
+        options: {
+            indexAxis: 'y',
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                x: {
+                    beginAtZero: true,
+                    ticks: {
+                        stepSize: 1
+                    }
+                }
+            },
+            plugins: {
+                legend: {
+                    display: false
+                }
+            }
+        }
+    });
+}
+
+/**
+ * Gráfico de PPS (Linha)
+ */
+function renderizarGraficoPPS(ppsDistribuicao) {
+    const ctx = document.getElementById('chartPPS');
+    if (!ctx) return;
+    
+    const labels = Object.keys(ppsDistribuicao).reverse();
+    const data = labels.map(l => ppsDistribuicao[l]);
+    
+    ctx.chart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Pacientes por PPS',
+                data: data,
+                backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                borderColor: 'rgba(255, 99, 132, 1)',
+                borderWidth: 2,
+                tension: 0.4
             }]
         },
         options: {
             responsive: true,
             maintainAspectRatio: false,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        stepSize: 1
+                    }
+                }
+            },
             plugins: {
                 legend: {
-                    position: 'bottom',
-                    labels: { color: '#9ca3af', font: { size: 11 } }
-                },
-                title: {
-                    display: true,
-                    text: 'Diretivas Antecipadas',
-                    color: '#e5e7eb',
-                    font: { size: 16, weight: 'bold' }
+                    display: false
                 }
             }
         }
     });
 }
 
-// =====================================================
-// FUNÇÕES AUXILIARES: ALTERNAR TIPO DE GRÁFICO
-// =====================================================
-window.alternarGraficoLinhas = function() {
-    const hospitalId = window.currentHospital;
-    const tipoAtual = window.graficosState[hospitalId]?.linhas || 'bar';
-    const novoTipo = tipoAtual === 'bar' ? 'doughnut' : 'bar';
-    window.graficosState[hospitalId].linhas = novoTipo;
-    console.log(`🔄 [DASH-HOSP] Gráfico Linhas alterado: ${tipoAtual} → ${novoTipo}`);
-    window.renderDashboardHospitalar();
+/**
+ * Gráfico de Linhas de Cuidado (Barras Horizontais)
+ */
+function renderizarGraficoLinhas(linhasTop) {
+    const ctx = document.getElementById('chartLinhas');
+    if (!ctx) return;
+    
+    const labels = linhasTop.map(l => l[0]);
+    const data = linhasTop.map(l => l[1]);
+    
+    // Buscar cores das linhas de cuidado
+    const cores = labels.map(label => {
+        const cor = window.CORES_LINHAS && window.CORES_LINHAS[label];
+        if (!cor) {
+            console.warn(`[CORES] Cor não encontrada para linha: "${label}"`);
+            return '#666666';
+        }
+        return cor;
+    });
+    
+    ctx.chart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Linhas de Cuidado',
+                data: data,
+                backgroundColor: cores,
+                borderColor: cores.map(c => c + '99'),
+                borderWidth: 1
+            }]
+        },
+        options: {
+            indexAxis: 'y',
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                x: {
+                    beginAtZero: true,
+                    ticks: {
+                        stepSize: 1
+                    }
+                }
+            },
+            plugins: {
+                legend: {
+                    display: false
+                }
+            }
+        }
+    });
+}
+
+// =================== EXPORTS GLOBAIS ===================
+
+// Definir a função com o nome que o app.js espera
+window.renderizarDashboardHospital = renderizarDashboard;
+
+// Também manter o nome original para compatibilidade
+window.renderizarDashboard = renderizarDashboard;
+
+// Para debug
+window.dashboardHospitalar = {
+    versao: 'V3.3.2',
+    funcoes: {
+        renderizar: renderizarDashboard,
+        calcularKPIs: calcularKPIs,
+        prepararDadosGraficos: prepararDadosGraficos
+    }
 };
 
-window.alternarGraficoConcessoes = function() {
-    const hospitalId = window.currentHospital;
-    const tipoAtual = window.graficosState[hospitalId]?.concessoes || 'bar';
-    const novoTipo = tipoAtual === 'bar' ? 'doughnut' : 'bar';
-    window.graficosState[hospitalId].concessoes = novoTipo;
-    console.log(`🔄 [DASH-HOSP] Gráfico Concessões alterado: ${tipoAtual} → ${novoTipo}`);
-    window.renderDashboardHospitalar();
-};
-
-window.alternarGraficoRegiao = function() {
-    const hospitalId = window.currentHospital;
-    const tipoAtual = window.graficosState[hospitalId]?.regiao || 'doughnut';
-    const novoTipo = tipoAtual === 'doughnut' ? 'bar' : 'doughnut';
-    window.graficosState[hospitalId].regiao = novoTipo;
-    console.log(`🔄 [DASH-HOSP] Gráfico Região alterado: ${tipoAtual} → ${novoTipo}`);
-    window.renderDashboardHospitalar();
-};
-
-// =====================================================
-// LOG FINAL DE CARREGAMENTO DO MÓDULO
-// =====================================================
-console.log('✅ [DASH-HOSP] ========================================');
-console.log('✅ [DASH-HOSP] Módulo dashboard-hospital.js V3.3.2 PRONTO');
-console.log('✅ [DASH-HOSP] Função window.renderDashboardHospitalar EXPOSTA');
-console.log('✅ [DASH-HOSP] 9 tipos de gráficos disponíveis');
-console.log('✅ [DASH-HOSP] Suporte completo a 74 colunas (A-BV)');
-console.log('✅ [DASH-HOSP] ========================================');
-console.log('');
+console.log('[DASH HOSP] ✅ Dashboard Hospitalar V3.3.2 carregado com sucesso');
+console.log('[DASH HOSP] Funções disponíveis: renderizarDashboardHospital, renderizarDashboard');
