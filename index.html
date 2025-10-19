@@ -137,17 +137,18 @@
         </div>
     </div>
 
-    <!-- =================== SCRIPTS MODULARES V3.3.2 COM FORÇA DE RELOAD =================== -->
+    <!-- =================== SCRIPTS MODULARES V3.3.2 CORRIGIDOS =================== -->
     
-    <!-- Scripts Core -->
+    <!-- Scripts Core (ORDEM IMPORTA!) -->
     <script src="js/app.js"></script>
     <script src="js/api.js"></script>
-    <script src="js/cores-patch-completo.js"></script>
+    
+    <!-- ❌ REMOVIDO: cores-patch-completo.js (404) -->
     
     <!-- Scripts de Interface -->
     <script src="js/cards.js"></script>
     
-    <!-- Scripts de Funcionalidades - QRCode.js DEVE vir APÓS a biblioteca -->
+    <!-- Scripts de Funcionalidades -->
     <script src="js/qrcode.js"></script>
     
     <!-- Script de Inicialização -->
@@ -157,15 +158,12 @@
     <script>
         /**
          * Função que combina mudança de aba + fechamento do menu
-         * Chamada pelos itens do menu lateral
          */
         function setActiveTabAndCloseMenu(tabName) {
-            // Primeiro, muda a aba
             if (typeof setActiveTab === 'function') {
                 setActiveTab(tabName);
             }
             
-            // Depois, fecha o menu com delay mínimo para garantir animação
             setTimeout(() => {
                 if (typeof toggleMenu === 'function') {
                     const menu = document.getElementById('sideMenu');
@@ -180,12 +178,10 @@
          * Função para abrir QR Codes e fechar menu
          */
         function openQRCodesAndCloseMenu() {
-            // Abre QR Codes
             if (typeof openQRCodes === 'function') {
                 openQRCodes();
             }
             
-            // Fecha o menu
             setTimeout(() => {
                 if (typeof toggleMenu === 'function') {
                     const menu = document.getElementById('sideMenu');
@@ -197,41 +193,108 @@
         }
     </script>
     
-    <!-- =================== CARREGAMENTO FORÇADO DOS DASHBOARDS =================== -->
+    <!-- =================== CARREGAMENTO SINCRONIZADO DOS DASHBOARDS =================== -->
     <script>
-        // Força reload dos scripts de dashboard com timestamp
+        /**
+         * CARREGAMENTO SINCRONIZADO COM DEPENDÊNCIAS
+         * 
+         * PROBLEMA IDENTIFICADO:
+         * - dashboard-hospital.js precisa de window.hospitalData (carregado no main.js)
+         * - Se carregar antes, renderizarDashboardHospital não funciona
+         * 
+         * SOLUÇÃO:
+         * - Carregar APÓS o main.js ter inicializado os dados
+         * - Usar evento customizado para sinalizar quando dados estão prontos
+         */
+        
         (function() {
-            const timestamp = Date.now();
+            console.log('🔄 Sistema de carregamento de dashboards iniciado');
             
-            // Carrega dashboard-hospital.js com timestamp
-            const scriptHospital = document.createElement('script');
-            scriptHospital.src = `js/dashboards/dashboard-hospital.js?v=${timestamp}`;
-            scriptHospital.onload = function() {
-                console.log('✅ dashboard-hospital.js carregado');
-                console.log('renderizarDashboardHospital existe?', typeof window.renderizarDashboardHospital);
-            };
-            scriptHospital.onerror = function() {
-                console.error('❌ Erro ao carregar dashboard-hospital.js');
-            };
-            document.head.appendChild(scriptHospital);
+            let dashboardHospitalCarregado = false;
+            let dashboardExecutiveCarregado = false;
+            let tentativas = 0;
+            const MAX_TENTATIVAS = 10;
             
-            // Carrega dashboard-executive.js com timestamp
-            const scriptExecutive = document.createElement('script');
-            scriptExecutive.src = `js/dashboards/dashboard-executive.js?v=${timestamp}`;
-            scriptExecutive.onload = function() {
-                console.log('✅ dashboard-executive.js carregado');
-                console.log('renderizarDashboardExecutivo existe?', typeof window.renderizarDashboardExecutivo);
-            };
-            scriptExecutive.onerror = function() {
-                console.error('❌ Erro ao carregar dashboard-executive.js');
-            };
-            document.head.appendChild(scriptExecutive);
+            /**
+             * Tenta carregar os dashboards
+             */
+            function carregarDashboards() {
+                tentativas++;
+                
+                // Verificar se window.hospitalData existe
+                if (!window.hospitalData || Object.keys(window.hospitalData).length === 0) {
+                    console.log(`⏳ Aguardando dados... (tentativa ${tentativas}/${MAX_TENTATIVAS})`);
+                    
+                    if (tentativas < MAX_TENTATIVAS) {
+                        setTimeout(carregarDashboards, 500);
+                    } else {
+                        console.error('❌ Timeout: Dados não carregados após', MAX_TENTATIVAS, 'tentativas');
+                    }
+                    return;
+                }
+                
+                console.log('✅ Dados disponíveis! Carregando dashboards...');
+                
+                const timestamp = Date.now();
+                
+                // Carregar dashboard-hospital.js
+                if (!dashboardHospitalCarregado) {
+                    const scriptHospital = document.createElement('script');
+                    scriptHospital.src = `js/dashboards/dashboard-hospital.js?v=${timestamp}`;
+                    scriptHospital.onload = function() {
+                        dashboardHospitalCarregado = true;
+                        console.log('✅ dashboard-hospital.js carregado');
+                        console.log('   renderizarDashboardHospital:', typeof window.renderizarDashboardHospital);
+                        verificarCarregamentoCompleto();
+                    };
+                    scriptHospital.onerror = function() {
+                        console.error('❌ Erro ao carregar dashboard-hospital.js');
+                    };
+                    document.body.appendChild(scriptHospital);
+                }
+                
+                // Carregar dashboard-executive.js
+                if (!dashboardExecutiveCarregado) {
+                    const scriptExecutive = document.createElement('script');
+                    scriptExecutive.src = `js/dashboards/dashboard-executive.js?v=${timestamp}`;
+                    scriptExecutive.onload = function() {
+                        dashboardExecutiveCarregado = true;
+                        console.log('✅ dashboard-executive.js carregado');
+                        console.log('   renderizarDashboardExecutivo:', typeof window.renderizarDashboardExecutivo);
+                        verificarCarregamentoCompleto();
+                    };
+                    scriptExecutive.onerror = function() {
+                        console.error('❌ Erro ao carregar dashboard-executive.js');
+                    };
+                    document.body.appendChild(scriptExecutive);
+                }
+            }
+            
+            /**
+             * Verifica se ambos os dashboards foram carregados
+             */
+            function verificarCarregamentoCompleto() {
+                if (dashboardHospitalCarregado && dashboardExecutiveCarregado) {
+                    console.log('');
+                    console.log('🎉 TODOS OS DASHBOARDS CARREGADOS COM SUCESSO!');
+                    console.log('');
+                    console.log('📊 Funções disponíveis:');
+                    console.log('   • renderizarDashboardHospital():', typeof window.renderizarDashboardHospital === 'function' ? '✅' : '❌');
+                    console.log('   • renderizarDashboardExecutivo():', typeof window.renderizarDashboardExecutivo === 'function' ? '✅' : '❌');
+                    console.log('');
+                    
+                    // Disparar evento customizado
+                    window.dispatchEvent(new Event('dashboardsReady'));
+                }
+            }
+            
+            // Iniciar tentativas de carregamento
+            carregarDashboards();
         })();
     </script>
     
     <!-- =================== INICIALIZAÇÃO V3.3.2 FINAL =================== -->
     <script>
-        // Verificar se QRCode.js foi carregada
         document.addEventListener('DOMContentLoaded', function() {
             console.log('🚀 Archipelago Dashboard V3.3.2 - Inicializando...');
             console.log('👨‍💼 Criado por: Guilherme Santoro');
@@ -245,7 +308,7 @@
             console.log('   • ✅ Novos campos: Gênero, Região, Categoria, Diretivas');
             console.log('   • ✅ Dashboard Hospitalar com gráficos clássicos');
             console.log('   • ✅ Dashboard Executivo consolidado');
-            console.log('   • ✅ Scripts de dashboard com força de reload');
+            console.log('   • ✅ Carregamento sincronizado de dashboards');
             console.log('   • ✅ Menu lateral auto-retrátil ao clicar');
             console.log('');
             
@@ -256,15 +319,6 @@
                 console.warn('⚠️ QRCode.js não encontrada - QR Codes podem não funcionar');
             }
             
-            // Verificar se os dashboards foram carregados
-            setTimeout(() => {
-                console.log('');
-                console.log('🔍 VERIFICAÇÃO DOS DASHBOARDS:');
-                console.log('dashboard-hospital.js:', typeof window.renderizarDashboardHospital === 'function' ? '✅' : '❌');
-                console.log('dashboard-executive.js:', typeof window.renderizarDashboardExecutivo === 'function' ? '✅' : '❌');
-                console.log('');
-            }, 1000);
-            
             // Inicialização normal do sistema
             setTimeout(() => {
                 if (typeof window.initApp === 'function') {
@@ -274,6 +328,11 @@
                     console.error('❌ Função initApp não encontrada');
                 }
             }, 500);
+        });
+        
+        // Listener para quando os dashboards estiverem prontos
+        window.addEventListener('dashboardsReady', function() {
+            console.log('🎯 Evento dashboardsReady disparado - Sistema 100% pronto!');
         });
     </script>
     
