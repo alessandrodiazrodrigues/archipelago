@@ -12,6 +12,7 @@
     <link rel="stylesheet" href="css/modals.css">
     <link rel="stylesheet" href="css/dashboards.css">
     <link rel="stylesheet" href="css/dashboard-hospitalar-styles.css">
+    <link rel="stylesheet" href="css/dashboard-classico-styles.css">
     
     <!-- BIBLIOTECAS EXTERNAS -->
     <!-- Chart.js para gráficos -->
@@ -136,16 +137,12 @@
         </div>
     </div>
 
-    <!-- =================== SCRIPTS MODULARES V3.3.2 CORRIGIDOS =================== -->
+    <!-- =================== SCRIPTS MODULARES V3.3.2 COM FORÇA DE RELOAD =================== -->
     
     <!-- Scripts Core -->
     <script src="js/app.js"></script>
     <script src="js/api.js"></script>
     <script src="js/cores-patch-completo.js"></script>
-    
-    <!-- ✅ Scripts de Dashboards - CORRIGIDO V3.3.2: Usar arquivos separados -->
-    <script src="js/dashboards/dashboard-hospital.js"></script>
-    <script src="js/dashboards/dashboard-executive.js"></script>
     
     <!-- Scripts de Interface -->
     <script src="js/cards.js"></script>
@@ -200,6 +197,38 @@
         }
     </script>
     
+    <!-- =================== CARREGAMENTO FORÇADO DOS DASHBOARDS =================== -->
+    <script>
+        // Força reload dos scripts de dashboard com timestamp
+        (function() {
+            const timestamp = Date.now();
+            
+            // Carrega dashboard-hospital.js com timestamp
+            const scriptHospital = document.createElement('script');
+            scriptHospital.src = `js/dashboards/dashboard-hospital.js?v=${timestamp}`;
+            scriptHospital.onload = function() {
+                console.log('✅ dashboard-hospital.js carregado');
+                console.log('renderizarDashboardHospital existe?', typeof window.renderizarDashboardHospital);
+            };
+            scriptHospital.onerror = function() {
+                console.error('❌ Erro ao carregar dashboard-hospital.js');
+            };
+            document.head.appendChild(scriptHospital);
+            
+            // Carrega dashboard-executive.js com timestamp
+            const scriptExecutive = document.createElement('script');
+            scriptExecutive.src = `js/dashboards/dashboard-executive.js?v=${timestamp}`;
+            scriptExecutive.onload = function() {
+                console.log('✅ dashboard-executive.js carregado');
+                console.log('renderizarDashboardExecutivo existe?', typeof window.renderizarDashboardExecutivo);
+            };
+            scriptExecutive.onerror = function() {
+                console.error('❌ Erro ao carregar dashboard-executive.js');
+            };
+            document.head.appendChild(scriptExecutive);
+        })();
+    </script>
+    
     <!-- =================== INICIALIZAÇÃO V3.3.2 FINAL =================== -->
     <script>
         // Verificar se QRCode.js foi carregada
@@ -214,11 +243,10 @@
             console.log('   • ✅ 79 leitos operacionais (H1:10, H2:36, H3:7, H4:13, H5:13)');
             console.log('   • ✅ 74 colunas na planilha (A-BV)');
             console.log('   • ✅ Novos campos: Gênero, Região, Categoria, Diretivas');
-            console.log('   • ✅ Dashboard Hospitalar com 5 gráficos');
+            console.log('   • ✅ Dashboard Hospitalar com gráficos clássicos');
             console.log('   • ✅ Dashboard Executivo consolidado');
-            console.log('   • ✅ Dashboards separados (hospital + executive)');
+            console.log('   • ✅ Scripts de dashboard com força de reload');
             console.log('   • ✅ Menu lateral auto-retrátil ao clicar');
-            console.log('   • ✅ Scripts de dashboard corrigidos (dois arquivos)');
             console.log('');
             
             // Verificar biblioteca QRCode
@@ -228,99 +256,91 @@
                 console.warn('⚠️ QRCode.js não encontrada - QR Codes podem não funcionar');
             }
             
+            // Verificar se os dashboards foram carregados
+            setTimeout(() => {
+                console.log('');
+                console.log('🔍 VERIFICAÇÃO DOS DASHBOARDS:');
+                console.log('dashboard-hospital.js:', typeof window.renderizarDashboardHospital === 'function' ? '✅' : '❌');
+                console.log('dashboard-executive.js:', typeof window.renderizarDashboardExecutivo === 'function' ? '✅' : '❌');
+                console.log('');
+            }, 1000);
+            
             // Inicialização normal do sistema
             setTimeout(() => {
                 if (typeof window.initApp === 'function') {
                     window.initApp();
                     console.log('✅ Sistema V3.3.2 FINAL inicializado com sucesso');
                 } else {
-                    console.error('❌ initApp não encontrada');
-                    // Retry
-                    setTimeout(() => {
-                        if (typeof window.initApp === 'function') {
-                            window.initApp();
-                            console.log('✅ Sistema V3.3.2 FINAL inicializado após retry');
-                        }
-                    }, 1000);
+                    console.error('❌ Função initApp não encontrada');
                 }
-            }, 200);
+            }, 500);
         });
-        
-        // Log de informações importantes V3.3.2 FINAL
-        console.log('📱 QR Codes apontam para: https://alessandrodiazrodrigues.github.io/qrcode');
-        console.log('🖨️ Impressão configurada: 12 QR codes por A4 (3x4)');
-        console.log('📊 Planilha V3.3.2: 74 colunas (A-BV)');
-        console.log('🏥 Hospitais configurados: 79 leitos totais (5 hospitais)');
-        console.log('🔧 Status: Sistema 100% operacional');
-        console.log('📈 Gráficos: Gênero, Região, Idade (área), Isolamento, Diretivas');
-        console.log('🎯 Menu lateral: Fecha automaticamente ao selecionar opção');
     </script>
     
-    <!-- =================== CSS BASE V3.3.2 =================== -->
+    <!-- =================== ESTILOS INLINE PARA AUTENTICAÇÃO =================== -->
     <style>
+        /* Reset e base */
         * {
+            margin: 0;
+            padding: 0;
             box-sizing: border-box;
         }
         
         body {
-            margin: 0;
-            padding: 0;
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
-            color: white;
-            min-height: 100vh;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: #0f172a;
+            color: #e2e8f0;
         }
         
         .hidden {
             display: none !important;
         }
         
-        /* Modal de autenticação */
+        /* Modal de Autenticação */
         .modal-auth {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(15, 23, 42, 0.95);
+            background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
             display: flex;
-            align-items: center;
             justify-content: center;
+            align-items: center;
             z-index: 10000;
         }
         
         .auth-container {
             background: #1e293b;
-            padding: 40px;
+            padding: 50px;
             border-radius: 16px;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-            max-width: 400px;
-            width: 90%;
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+            text-align: center;
+            min-width: 400px;
         }
         
         .auth-container h1 {
             color: #60a5fa;
-            margin: 0 0 10px 0;
-            font-size: 24px;
-            text-align: center;
+            margin-bottom: 10px;
+            font-size: 32px;
+            font-weight: 700;
         }
         
         .auth-container p {
-            color: #e2e8f0;
-            margin: 0 0 20px 0;
-            text-align: center;
+            color: #9ca3af;
+            margin-bottom: 30px;
+            font-size: 16px;
         }
         
         .auth-container input {
             width: 100%;
             padding: 12px;
-            border: 1px solid rgba(255, 255, 255, 0.2);
+            background: #0f172a;
+            border: 2px solid #334155;
             border-radius: 8px;
-            background: rgba(255, 255, 255, 0.05);
-            color: white;
+            color: #e2e8f0;
             font-size: 16px;
-            margin-bottom: 15px;
+            margin-bottom: 20px;
             transition: border-color 0.3s;
         }
         
