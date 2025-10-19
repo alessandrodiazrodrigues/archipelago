@@ -1,9 +1,21 @@
-// =================== DASHBOARD HOSPITALAR V3.3.2 ===================
+// =================== DASHBOARD HOSPITALAR V3.3.2 - ESTILO CORRETO ===================
 // Cliente: Guilherme Santoro
 // Desenvolvedor: Alessandro Rodrigues
 // Data: Outubro/2025
-// Versão: V3.3.2 CORRIGIDA - Compatível com app.js
+// Versão: V3.3.2 - Com gráficos no estilo correto e legendas HTML
 // ==================================================================================
+
+// Estado dos gráficos selecionados por hospital
+window.graficosState = {
+    H1: { concessoes: 'bar', linhas: 'bar' },
+    H2: { concessoes: 'bar', linhas: 'bar' },
+    H3: { concessoes: 'bar', linhas: 'bar' },
+    H4: { concessoes: 'bar', linhas: 'bar' },
+    H5: { concessoes: 'bar', linhas: 'bar' }
+};
+
+// Estado global para fundo branco
+window.fundoBranco = false;
 
 /**
  * Renderiza o dashboard para um hospital específico
@@ -41,7 +53,10 @@ function renderizarDashboard(hospitalId) {
         
         // Aguardar DOM e renderizar gráficos
         setTimeout(() => {
-            renderizarGraficos(dadosGraficos);
+            renderizarGraficos(hospitalId, dadosGraficos, kpis);
+            
+            // Adicionar event listeners para os toggles
+            adicionarEventListenersToggles(hospitalId);
         }, 100);
         
         console.log(`[DASH HOSP] ✅ Dashboard renderizado com sucesso para ${hospitalId}`);
@@ -80,16 +95,31 @@ function calcularKPIs(hospital) {
     const taxaOcupacao = totalLeitos > 0 ? Math.round((ocupados / totalLeitos) * 100) : 0;
     
     // KPIs por tipo
-    const apartamentos = leitos.filter(l => l.tipo === 'Apartamento' || l.categoria === 'Apartamento').length;
-    const enfermarias = leitos.filter(l => l.tipo === 'Enfermaria' || l.categoria === 'Enfermaria').length;
+    const apartamentos = leitos.filter(l => 
+        l.tipo === 'Apartamento' || l.categoria === 'Apartamento' || 
+        (l.tipo === 'Híbrido' && l.categoriaEscolhida === 'Apartamento')
+    ).length;
+    
+    const enfermarias = leitos.filter(l => 
+        l.tipo === 'Enfermaria' || l.categoria === 'Enfermaria' ||
+        (l.tipo === 'Híbrido' && l.categoriaEscolhida === 'Enfermaria')
+    ).length;
+    
     const hibridos = leitos.filter(l => l.tipo === 'Híbrido').length;
     
     // KPIs ocupados por tipo
     const apartamentosOcupados = leitos.filter(l => 
-        (l.tipo === 'Apartamento' || l.categoria === 'Apartamento') && l.status === 'ocupado'
+        l.status === 'ocupado' && (
+            l.tipo === 'Apartamento' || l.categoria === 'Apartamento' ||
+            (l.tipo === 'Híbrido' && l.categoriaEscolhida === 'Apartamento')
+        )
     ).length;
+    
     const enfermariasOcupadas = leitos.filter(l => 
-        (l.tipo === 'Enfermaria' || l.categoria === 'Enfermaria') && l.status === 'ocupado'
+        l.status === 'ocupado' && (
+            l.tipo === 'Enfermaria' || l.categoria === 'Enfermaria' ||
+            (l.tipo === 'Híbrido' && l.categoriaEscolhida === 'Enfermaria')
+        )
     ).length;
     
     // KPIs de isolamento
@@ -193,7 +223,7 @@ function prepararDadosGraficos(hospital) {
         .sort((a, b) => b[1] - a[1])
         .slice(0, 10);
     
-    // 3. Dados para gráfico de linhas de cuidado (top 15)
+    // 3. Dados para gráfico de linhas de cuidado (top 10)
     const linhasCuidado = {};
     leitosOcupados.forEach(leito => {
         if (leito.linhas && Array.isArray(leito.linhas)) {
@@ -205,7 +235,7 @@ function prepararDadosGraficos(hospital) {
     
     const linhasTop = Object.entries(linhasCuidado)
         .sort((a, b) => b[1] - a[1])
-        .slice(0, 15);
+        .slice(0, 10);
     
     // 4. Dados para gráfico de faixa etária
     const faixasEtarias = {
@@ -229,32 +259,11 @@ function prepararDadosGraficos(hospital) {
         }
     });
     
-    // 5. Dados para gráfico de PPS (Performance Status)
-    const ppsDistribuicao = {
-        '100%': 0,
-        '90%': 0,
-        '80%': 0,
-        '70%': 0,
-        '60%': 0,
-        '50%': 0,
-        '40%': 0,
-        '30%': 0,
-        '20%': 0,
-        '10%': 0
-    };
-    
-    leitosOcupados.forEach(leito => {
-        if (leito.pps && ppsDistribuicao.hasOwnProperty(leito.pps)) {
-            ppsDistribuicao[leito.pps]++;
-        }
-    });
-    
     return {
         regioes,
         concessoesTop,
         linhasTop,
-        faixasEtarias,
-        ppsDistribuicao
+        faixasEtarias
     };
 }
 
@@ -267,6 +276,11 @@ function gerarHTMLDashboard(hospitalId, nomeHospital, kpis, dadosGraficos) {
             <!-- HEADER -->
             <div class="dashboard-header">
                 <h2>Dashboard Hospitalar - ${nomeHospital}</h2>
+                <div class="dashboard-controls">
+                    <button id="toggleFundo" onclick="toggleFundoBranco()" class="btn-toggle-fundo">
+                        ${window.fundoBranco ? '🌙 Modo Escuro' : '☀️ Modo Claro'}
+                    </button>
+                </div>
                 <div class="dashboard-subtitle">
                     <span>Total de Leitos: ${kpis.totalLeitos}</span>
                     <span class="separator">|</span>
@@ -340,7 +354,7 @@ function gerarHTMLDashboard(hospitalId, nomeHospital, kpis, dadosGraficos) {
                         ${kpis.hibridos > 0 ? `
                         <div class="kpi-item">
                             <span class="kpi-label">Híbridos:</span>
-                            <span class="kpi-value">${kpis.apartamentosOcupados + kpis.enfermariasOcupadas}/${kpis.hibridos}</span>
+                            <span class="kpi-value">${kpis.ocupados}/${kpis.hibridos}</span>
                         </div>
                         ` : ''}
                     </div>
@@ -361,34 +375,7 @@ function gerarHTMLDashboard(hospitalId, nomeHospital, kpis, dadosGraficos) {
                     </div>
                 </div>
                 
-                <!-- Complexidade -->
-                <div class="kpi-group">
-                    <h4>Complexidade</h4>
-                    <div class="kpi-items">
-                        <div class="kpi-item">
-                            <span class="kpi-label">I:</span>
-                            <span class="kpi-value">${kpis.complexidadeI}</span>
-                        </div>
-                        <div class="kpi-item">
-                            <span class="kpi-label">II:</span>
-                            <span class="kpi-value">${kpis.complexidadeII}</span>
-                        </div>
-                        <div class="kpi-item">
-                            <span class="kpi-label">III:</span>
-                            <span class="kpi-value">${kpis.complexidadeIII}</span>
-                        </div>
-                        <div class="kpi-item">
-                            <span class="kpi-label">IV:</span>
-                            <span class="kpi-value">${kpis.complexidadeIV}</span>
-                        </div>
-                        <div class="kpi-item">
-                            <span class="kpi-label">V:</span>
-                            <span class="kpi-value">${kpis.complexidadeV}</span>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Diretivas e SPICT -->
+                <!-- Indicadores Paliativos -->
                 <div class="kpi-group">
                     <h4>Indicadores Paliativos</h4>
                     <div class="kpi-items">
@@ -410,52 +397,75 @@ function gerarHTMLDashboard(hospitalId, nomeHospital, kpis, dadosGraficos) {
             
             <!-- GRÁFICOS -->
             <div class="charts-container">
-                <!-- Primeira linha de gráficos -->
-                <div class="charts-row">
-                    <!-- Gráfico de Regiões -->
-                    <div class="chart-wrapper">
-                        <h3>Distribuição por Região</h3>
-                        <div class="chart-container">
-                            <canvas id="chartRegioes"></canvas>
-                        </div>
+                <!-- Gráfico de Pizza - Ocupação por Tipo -->
+                <div class="chart-wrapper">
+                    <h3>Ocupação por Tipo de Leito</h3>
+                    <div class="chart-container">
+                        <canvas id="chartTipoLeito"></canvas>
                     </div>
-                    
-                    <!-- Gráfico de Faixa Etária -->
-                    <div class="chart-wrapper">
-                        <h3>Distribuição por Faixa Etária</h3>
-                        <div class="chart-container">
-                            <canvas id="chartIdade"></canvas>
-                        </div>
+                    <div id="legendaTipoLeito" class="chart-legend"></div>
+                </div>
+                
+                <!-- Gráfico de Barras - Gênero -->
+                <div class="chart-wrapper">
+                    <h3>Distribuição por Gênero</h3>
+                    <div class="chart-container">
+                        <canvas id="chartGenero"></canvas>
                     </div>
                 </div>
                 
-                <!-- Segunda linha de gráficos -->
-                <div class="charts-row">
-                    <!-- Gráfico de Concessões -->
-                    <div class="chart-wrapper">
-                        <h3>Top 10 Concessões de Alta</h3>
-                        <div class="chart-container">
-                            <canvas id="chartConcessoes"></canvas>
-                        </div>
-                    </div>
-                    
-                    <!-- Gráfico de PPS -->
-                    <div class="chart-wrapper">
-                        <h3>Distribuição PPS (Performance Status)</h3>
-                        <div class="chart-container">
-                            <canvas id="chartPPS"></canvas>
-                        </div>
+                <!-- Gráfico de Barras - Faixa Etária -->
+                <div class="chart-wrapper">
+                    <h3>Distribuição por Faixa Etária</h3>
+                    <div class="chart-container">
+                        <canvas id="chartIdade"></canvas>
                     </div>
                 </div>
                 
-                <!-- Terceira linha - gráfico maior -->
-                <div class="charts-row">
-                    <div class="chart-wrapper chart-wide">
-                        <h3>Top 15 Linhas de Cuidado</h3>
-                        <div class="chart-container">
-                            <canvas id="chartLinhas"></canvas>
-                        </div>
+                <!-- Gráfico de Concessões com Toggle -->
+                <div class="chart-wrapper chart-wide">
+                    <h3>Top 10 Concessões de Alta</h3>
+                    <div class="chart-toggle">
+                        <button onclick="toggleGrafico('${hospitalId}', 'concessoes', 'bar')" 
+                                class="toggle-btn ${window.graficosState[hospitalId].concessoes === 'bar' ? 'active' : ''}">
+                            📊 Barras
+                        </button>
+                        <button onclick="toggleGrafico('${hospitalId}', 'concessoes', 'polar')" 
+                                class="toggle-btn ${window.graficosState[hospitalId].concessoes === 'polar' ? 'active' : ''}">
+                            🎯 Polar
+                        </button>
+                        <button onclick="toggleGrafico('${hospitalId}', 'concessoes', 'radar')" 
+                                class="toggle-btn ${window.graficosState[hospitalId].concessoes === 'radar' ? 'active' : ''}">
+                            🕸️ Radar
+                        </button>
                     </div>
+                    <div class="chart-container">
+                        <canvas id="chartConcessoes"></canvas>
+                    </div>
+                    <div id="legendaConcessoes" class="chart-legend"></div>
+                </div>
+                
+                <!-- Gráfico de Linhas com Toggle -->
+                <div class="chart-wrapper chart-wide">
+                    <h3>Top 10 Linhas de Cuidado</h3>
+                    <div class="chart-toggle">
+                        <button onclick="toggleGrafico('${hospitalId}', 'linhas', 'bar')" 
+                                class="toggle-btn ${window.graficosState[hospitalId].linhas === 'bar' ? 'active' : ''}">
+                            📊 Barras
+                        </button>
+                        <button onclick="toggleGrafico('${hospitalId}', 'linhas', 'polar')" 
+                                class="toggle-btn ${window.graficosState[hospitalId].linhas === 'polar' ? 'active' : ''}">
+                            🎯 Polar
+                        </button>
+                        <button onclick="toggleGrafico('${hospitalId}', 'linhas', 'radar')" 
+                                class="toggle-btn ${window.graficosState[hospitalId].linhas === 'radar' ? 'active' : ''}">
+                            🕸️ Radar
+                        </button>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="chartLinhas"></canvas>
+                    </div>
+                    <div id="legendaLinhas" class="chart-legend"></div>
                 </div>
             </div>
             
@@ -471,26 +481,26 @@ function gerarHTMLDashboard(hospitalId, nomeHospital, kpis, dadosGraficos) {
 /**
  * Renderiza todos os gráficos
  */
-function renderizarGraficos(dadosGraficos) {
+function renderizarGraficos(hospitalId, dadosGraficos, kpis) {
     console.log('[DASH HOSP] Iniciando renderização dos gráficos');
     
     // Destruir gráficos existentes
     destruirGraficosExistentes();
     
-    // 1. Gráfico de Regiões
-    renderizarGraficoRegioes(dadosGraficos.regioes);
+    // 1. Gráfico de Pizza - Tipo de Leito
+    renderizarGraficoTipoLeito(kpis);
     
-    // 2. Gráfico de Faixa Etária
+    // 2. Gráfico de Barras - Gênero
+    renderizarGraficoGenero(kpis);
+    
+    // 3. Gráfico de Barras - Faixa Etária
     renderizarGraficoIdade(dadosGraficos.faixasEtarias);
     
-    // 3. Gráfico de Concessões
-    renderizarGraficoConcessoes(dadosGraficos.concessoesTop);
+    // 4. Gráfico de Concessões (com toggle)
+    renderizarGraficoConcessoes(hospitalId, dadosGraficos.concessoesTop);
     
-    // 4. Gráfico de PPS
-    renderizarGraficoPPS(dadosGraficos.ppsDistribuicao);
-    
-    // 5. Gráfico de Linhas de Cuidado
-    renderizarGraficoLinhas(dadosGraficos.linhasTop);
+    // 5. Gráfico de Linhas de Cuidado (com toggle)
+    renderizarGraficoLinhas(hospitalId, dadosGraficos.linhasTop);
     
     console.log('[DASH HOSP] ✅ Todos os gráficos renderizados');
 }
@@ -499,62 +509,108 @@ function renderizarGraficos(dadosGraficos) {
  * Destruir gráficos existentes
  */
 function destruirGraficosExistentes() {
-    const charts = ['chartRegioes', 'chartIdade', 'chartConcessoes', 'chartPPS', 'chartLinhas'];
+    const charts = ['chartTipoLeito', 'chartGenero', 'chartIdade', 'chartConcessoes', 'chartLinhas'];
     
     charts.forEach(chartId => {
         const canvas = document.getElementById(chartId);
-        if (canvas && canvas.chart) {
-            canvas.chart.destroy();
+        if (canvas) {
+            const chart = Chart.getChart(canvas);
+            if (chart) {
+                chart.destroy();
+            }
         }
     });
 }
 
 /**
- * Gráfico de Regiões (Pizza)
+ * Gráfico de Pizza - Tipo de Leito
  */
-function renderizarGraficoRegioes(regioes) {
-    const ctx = document.getElementById('chartRegioes');
+function renderizarGraficoTipoLeito(kpis) {
+    const ctx = document.getElementById('chartTipoLeito');
     if (!ctx) return;
     
-    const labels = Object.keys(regioes);
-    const data = Object.values(regioes);
+    const data = {
+        labels: ['Apartamentos', 'Enfermarias'],
+        datasets: [{
+            data: [kpis.apartamentosOcupados, kpis.enfermariasOcupadas],
+            backgroundColor: ['#36A2EB', '#FF6384'],
+            borderWidth: 2,
+            borderColor: window.fundoBranco ? '#333' : '#fff'
+        }]
+    };
     
-    // Cores para as regiões
-    const cores = [
-        '#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', 
-        '#9966FF', '#FF9F40', '#FF6384', '#C9CBCF', '#4BC0C0'
-    ];
-    
-    ctx.chart = new Chart(ctx, {
+    new Chart(ctx, {
         type: 'doughnut',
-        data: {
-            labels: labels,
-            datasets: [{
-                data: data,
-                backgroundColor: cores,
-                borderWidth: 2,
-                borderColor: '#fff'
-            }]
-        },
+        data: data,
         options: {
             responsive: true,
             maintainAspectRatio: false,
             plugins: {
                 legend: {
-                    position: 'bottom',
-                    labels: {
-                        padding: 10,
-                        font: { size: 11 }
-                    }
+                    display: false
                 },
                 tooltip: {
                     callbacks: {
                         label: function(context) {
-                            const total = context.dataset.data.reduce((a, b) => a + b, 0);
-                            const percentage = ((context.parsed / total) * 100).toFixed(1);
-                            return `${context.label}: ${context.parsed} (${percentage}%)`;
+                            const total = kpis.ocupados;
+                            const value = context.parsed;
+                            const percentage = total > 0 ? ((value / total) * 100).toFixed(1) : 0;
+                            return `${context.label}: ${value} (${percentage}%)`;
                         }
                     }
+                }
+            }
+        }
+    });
+    
+    // Criar legenda HTML customizada
+    criarLegendaHTML('legendaTipoLeito', data.labels, data.datasets[0].backgroundColor, data.datasets[0].data);
+}
+
+/**
+ * Gráfico de Barras - Gênero
+ */
+function renderizarGraficoGenero(kpis) {
+    const ctx = document.getElementById('chartGenero');
+    if (!ctx) return;
+    
+    new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: ['Masculino', 'Feminino'],
+            datasets: [{
+                data: [kpis.masculino, kpis.feminino],
+                backgroundColor: ['#36A2EB', '#FF6384'],
+                borderColor: ['#2980B9', '#E74C3C'],
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        stepSize: 1,
+                        color: window.fundoBranco ? '#333' : '#ccc'
+                    },
+                    grid: {
+                        color: window.fundoBranco ? '#ddd' : 'rgba(255, 255, 255, 0.1)'
+                    }
+                },
+                x: {
+                    ticks: {
+                        color: window.fundoBranco ? '#333' : '#ccc'
+                    },
+                    grid: {
+                        display: false
+                    }
+                }
+            },
+            plugins: {
+                legend: {
+                    display: false
                 }
             }
         }
@@ -562,7 +618,7 @@ function renderizarGraficoRegioes(regioes) {
 }
 
 /**
- * Gráfico de Faixa Etária (Barras)
+ * Gráfico de Barras - Faixa Etária
  */
 function renderizarGraficoIdade(faixasEtarias) {
     const ctx = document.getElementById('chartIdade');
@@ -571,12 +627,11 @@ function renderizarGraficoIdade(faixasEtarias) {
     const labels = Object.keys(faixasEtarias);
     const data = Object.values(faixasEtarias);
     
-    ctx.chart = new Chart(ctx, {
+    new Chart(ctx, {
         type: 'bar',
         data: {
             labels: labels,
             datasets: [{
-                label: 'Pacientes',
                 data: data,
                 backgroundColor: '#36A2EB',
                 borderColor: '#2980B9',
@@ -590,7 +645,19 @@ function renderizarGraficoIdade(faixasEtarias) {
                 y: {
                     beginAtZero: true,
                     ticks: {
-                        stepSize: 1
+                        stepSize: 1,
+                        color: window.fundoBranco ? '#333' : '#ccc'
+                    },
+                    grid: {
+                        color: window.fundoBranco ? '#ddd' : 'rgba(255, 255, 255, 0.1)'
+                    }
+                },
+                x: {
+                    ticks: {
+                        color: window.fundoBranco ? '#333' : '#ccc'
+                    },
+                    grid: {
+                        display: false
                     }
                 }
             },
@@ -604,12 +671,13 @@ function renderizarGraficoIdade(faixasEtarias) {
 }
 
 /**
- * Gráfico de Concessões (Barras Horizontais)
+ * Gráfico de Concessões (com toggle)
  */
-function renderizarGraficoConcessoes(concessoesTop) {
+function renderizarGraficoConcessoes(hospitalId, concessoesTop) {
     const ctx = document.getElementById('chartConcessoes');
     if (!ctx) return;
     
+    const tipo = window.graficosState[hospitalId].concessoes;
     const labels = concessoesTop.map(c => c[0]);
     const data = concessoesTop.map(c => c[1]);
     
@@ -623,95 +691,141 @@ function renderizarGraficoConcessoes(concessoesTop) {
         return cor;
     });
     
-    ctx.chart = new Chart(ctx, {
-        type: 'bar',
-        data: {
-            labels: labels,
-            datasets: [{
-                label: 'Concessões',
-                data: data,
-                backgroundColor: cores,
-                borderColor: cores.map(c => c + '99'),
-                borderWidth: 1
-            }]
-        },
-        options: {
-            indexAxis: 'y',
-            responsive: true,
-            maintainAspectRatio: false,
-            scales: {
-                x: {
-                    beginAtZero: true,
-                    ticks: {
-                        stepSize: 1
+    // Destruir gráfico anterior
+    const chartExistente = Chart.getChart(ctx);
+    if (chartExistente) {
+        chartExistente.destroy();
+    }
+    
+    let config;
+    
+    if (tipo === 'bar') {
+        config = {
+            type: 'bar',
+            data: {
+                labels: labels,
+                datasets: [{
+                    data: data,
+                    backgroundColor: cores,
+                    borderColor: cores.map(c => c + '99'),
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                indexAxis: 'y',
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    x: {
+                        beginAtZero: true,
+                        ticks: {
+                            stepSize: 1,
+                            color: window.fundoBranco ? '#333' : '#ccc'
+                        },
+                        grid: {
+                            color: window.fundoBranco ? '#ddd' : 'rgba(255, 255, 255, 0.1)'
+                        }
+                    },
+                    y: {
+                        ticks: {
+                            color: window.fundoBranco ? '#333' : '#ccc'
+                        },
+                        grid: {
+                            display: false
+                        }
+                    }
+                },
+                plugins: {
+                    legend: {
+                        display: false
                     }
                 }
+            }
+        };
+    } else if (tipo === 'polar') {
+        config = {
+            type: 'polarArea',
+            data: {
+                labels: labels,
+                datasets: [{
+                    data: data,
+                    backgroundColor: cores.map(c => c + 'CC'),
+                    borderColor: cores,
+                    borderWidth: 1
+                }]
             },
-            plugins: {
-                legend: {
-                    display: false
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false
+                    }
                 }
             }
-        }
-    });
+        };
+    } else if (tipo === 'radar') {
+        config = {
+            type: 'radar',
+            data: {
+                labels: labels,
+                datasets: [{
+                    data: data,
+                    backgroundColor: cores[0] + '33',
+                    borderColor: cores[0],
+                    borderWidth: 2,
+                    pointBackgroundColor: cores[0],
+                    pointBorderColor: '#fff',
+                    pointHoverBackgroundColor: '#fff',
+                    pointHoverBorderColor: cores[0]
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                }
+            }
+        };
+    }
+    
+    new Chart(ctx, config);
+    
+    // Criar legenda HTML customizada
+    if (tipo === 'bar') {
+        criarLegendaHTML('legendaConcessoes', labels, cores, data);
+    } else {
+        document.getElementById('legendaConcessoes').innerHTML = '';
+    }
 }
 
 /**
- * Gráfico de PPS (Linha)
+ * Gráfico de Linhas de Cuidado (com toggle)
  */
-function renderizarGraficoPPS(ppsDistribuicao) {
-    const ctx = document.getElementById('chartPPS');
-    if (!ctx) return;
-    
-    const labels = Object.keys(ppsDistribuicao).reverse();
-    const data = labels.map(l => ppsDistribuicao[l]);
-    
-    ctx.chart = new Chart(ctx, {
-        type: 'line',
-        data: {
-            labels: labels,
-            datasets: [{
-                label: 'Pacientes por PPS',
-                data: data,
-                backgroundColor: 'rgba(255, 99, 132, 0.2)',
-                borderColor: 'rgba(255, 99, 132, 1)',
-                borderWidth: 2,
-                tension: 0.4
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            scales: {
-                y: {
-                    beginAtZero: true,
-                    ticks: {
-                        stepSize: 1
-                    }
-                }
-            },
-            plugins: {
-                legend: {
-                    display: false
-                }
-            }
-        }
-    });
-}
-
-/**
- * Gráfico de Linhas de Cuidado (Barras Horizontais)
- */
-function renderizarGraficoLinhas(linhasTop) {
+function renderizarGraficoLinhas(hospitalId, linhasTop) {
     const ctx = document.getElementById('chartLinhas');
     if (!ctx) return;
     
+    const tipo = window.graficosState[hospitalId].linhas;
     const labels = linhasTop.map(l => l[0]);
     const data = linhasTop.map(l => l[1]);
     
     // Buscar cores das linhas de cuidado
     const cores = labels.map(label => {
-        const cor = window.CORES_LINHAS && window.CORES_LINHAS[label];
+        // Tentar busca direta
+        let cor = window.CORES_LINHAS && window.CORES_LINHAS[label];
+        
+        // Se não encontrar, tentar variações
+        if (!cor) {
+            // Tentar com Colorproctologia
+            if (label === 'Colorproctologia' || label === 'Coloproctologia') {
+                cor = window.CORES_LINHAS['Coloproctologia'] || window.CORES_LINHAS['Colorproctologia'];
+            }
+        }
+        
         if (!cor) {
             console.warn(`[CORES] Cor não encontrada para linha: "${label}"`);
             return '#666666';
@@ -719,37 +833,234 @@ function renderizarGraficoLinhas(linhasTop) {
         return cor;
     });
     
-    ctx.chart = new Chart(ctx, {
-        type: 'bar',
-        data: {
-            labels: labels,
-            datasets: [{
-                label: 'Linhas de Cuidado',
-                data: data,
-                backgroundColor: cores,
-                borderColor: cores.map(c => c + '99'),
-                borderWidth: 1
-            }]
-        },
-        options: {
-            indexAxis: 'y',
-            responsive: true,
-            maintainAspectRatio: false,
-            scales: {
-                x: {
-                    beginAtZero: true,
-                    ticks: {
-                        stepSize: 1
+    // Destruir gráfico anterior
+    const chartExistente = Chart.getChart(ctx);
+    if (chartExistente) {
+        chartExistente.destroy();
+    }
+    
+    let config;
+    
+    if (tipo === 'bar') {
+        config = {
+            type: 'bar',
+            data: {
+                labels: labels,
+                datasets: [{
+                    data: data,
+                    backgroundColor: cores,
+                    borderColor: cores.map(c => c + '99'),
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                indexAxis: 'y',
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    x: {
+                        beginAtZero: true,
+                        ticks: {
+                            stepSize: 1,
+                            color: window.fundoBranco ? '#333' : '#ccc'
+                        },
+                        grid: {
+                            color: window.fundoBranco ? '#ddd' : 'rgba(255, 255, 255, 0.1)'
+                        }
+                    },
+                    y: {
+                        ticks: {
+                            color: window.fundoBranco ? '#333' : '#ccc'
+                        },
+                        grid: {
+                            display: false
+                        }
+                    }
+                },
+                plugins: {
+                    legend: {
+                        display: false
                     }
                 }
+            }
+        };
+    } else if (tipo === 'polar') {
+        config = {
+            type: 'polarArea',
+            data: {
+                labels: labels,
+                datasets: [{
+                    data: data,
+                    backgroundColor: cores.map(c => c + 'CC'),
+                    borderColor: cores,
+                    borderWidth: 1
+                }]
             },
-            plugins: {
-                legend: {
-                    display: false
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false
+                    }
                 }
+            }
+        };
+    } else if (tipo === 'radar') {
+        config = {
+            type: 'radar',
+            data: {
+                labels: labels,
+                datasets: [{
+                    data: data,
+                    backgroundColor: cores[0] + '33',
+                    borderColor: cores[0],
+                    borderWidth: 2,
+                    pointBackgroundColor: cores[0],
+                    pointBorderColor: '#fff',
+                    pointHoverBackgroundColor: '#fff',
+                    pointHoverBorderColor: cores[0]
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                }
+            }
+        };
+    }
+    
+    new Chart(ctx, config);
+    
+    // Criar legenda HTML customizada
+    if (tipo === 'bar') {
+        criarLegendaHTML('legendaLinhas', labels, cores, data);
+    } else {
+        document.getElementById('legendaLinhas').innerHTML = '';
+    }
+}
+
+/**
+ * Criar legenda HTML customizada
+ */
+function criarLegendaHTML(containerId, labels, colors, values) {
+    const container = document.getElementById(containerId);
+    if (!container) return;
+    
+    let html = '<div class="legend-items">';
+    
+    labels.forEach((label, index) => {
+        const color = colors[index];
+        const value = values[index];
+        
+        html += `
+            <div class="legend-item" onclick="toggleLegendItem(this, '${containerId}')" data-index="${index}">
+                <span class="legend-color" style="background-color: ${color}"></span>
+                <span class="legend-label">${label}</span>
+                <span class="legend-value">(${value})</span>
+            </div>
+        `;
+    });
+    
+    html += '</div>';
+    container.innerHTML = html;
+}
+
+/**
+ * Toggle item da legenda
+ */
+window.toggleLegendItem = function(element, containerId) {
+    element.classList.toggle('disabled');
+    
+    // Encontrar o canvas associado
+    let canvasId = '';
+    if (containerId === 'legendaTipoLeito') canvasId = 'chartTipoLeito';
+    else if (containerId === 'legendaConcessoes') canvasId = 'chartConcessoes';
+    else if (containerId === 'legendaLinhas') canvasId = 'chartLinhas';
+    
+    const canvas = document.getElementById(canvasId);
+    if (!canvas) return;
+    
+    const chart = Chart.getChart(canvas);
+    if (!chart) return;
+    
+    const index = parseInt(element.dataset.index);
+    const isHidden = element.classList.contains('disabled');
+    
+    // Toggle visibilidade dos dados
+    if (chart.config.type === 'doughnut' || chart.config.type === 'polarArea') {
+        const meta = chart.getDatasetMeta(0);
+        meta.data[index].hidden = isHidden;
+    } else {
+        chart.toggleDataVisibility(index);
+    }
+    
+    chart.update();
+};
+
+/**
+ * Toggle tipo de gráfico
+ */
+window.toggleGrafico = function(hospitalId, tipo, novoTipo) {
+    window.graficosState[hospitalId][tipo] = novoTipo;
+    
+    // Atualizar botões
+    const buttons = document.querySelectorAll(`.chart-toggle button`);
+    buttons.forEach(btn => {
+        if (btn.onclick && btn.onclick.toString().includes(tipo)) {
+            btn.classList.remove('active');
+            if (btn.onclick.toString().includes(novoTipo)) {
+                btn.classList.add('active');
             }
         }
     });
+    
+    // Re-renderizar gráfico
+    if (tipo === 'concessoes') {
+        const hospital = window.hospitalData[hospitalId];
+        const dados = prepararDadosGraficos(hospital);
+        renderizarGraficoConcessoes(hospitalId, dados.concessoesTop);
+    } else if (tipo === 'linhas') {
+        const hospital = window.hospitalData[hospitalId];
+        const dados = prepararDadosGraficos(hospital);
+        renderizarGraficoLinhas(hospitalId, dados.linhasTop);
+    }
+};
+
+/**
+ * Toggle fundo branco
+ */
+window.toggleFundoBranco = function() {
+    window.fundoBranco = !window.fundoBranco;
+    
+    // Atualizar classe do body
+    if (window.fundoBranco) {
+        document.body.classList.add('fundo-branco');
+    } else {
+        document.body.classList.remove('fundo-branco');
+    }
+    
+    // Atualizar texto do botão
+    const btn = document.getElementById('toggleFundo');
+    if (btn) {
+        btn.textContent = window.fundoBranco ? '🌙 Modo Escuro' : '☀️ Modo Claro';
+    }
+    
+    // Re-renderizar dashboard atual
+    const hospitalAtual = window.currentHospital || 'H1';
+    renderizarDashboard(hospitalAtual);
+};
+
+/**
+ * Adicionar event listeners para toggles
+ */
+function adicionarEventListenersToggles(hospitalId) {
+    // Os event listeners são adicionados inline no HTML
+    console.log('[DASH HOSP] Event listeners configurados para', hospitalId);
 }
 
 // =================== EXPORTS GLOBAIS ===================
@@ -766,7 +1077,10 @@ window.dashboardHospitalar = {
     funcoes: {
         renderizar: renderizarDashboard,
         calcularKPIs: calcularKPIs,
-        prepararDadosGraficos: prepararDadosGraficos
+        prepararDadosGraficos: prepararDadosGraficos,
+        toggleGrafico: window.toggleGrafico,
+        toggleFundoBranco: window.toggleFundoBranco,
+        toggleLegendItem: window.toggleLegendItem
     }
 };
 
