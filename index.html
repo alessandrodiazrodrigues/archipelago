@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Archipelago Dashboard</title>
+    <title>Archipelago Dashboard V3.3.2</title>
     
     <!-- CSS MODULAR -->
     <link rel="stylesheet" href="css/variables.css">
@@ -107,12 +107,12 @@
         
     </main>
 
-    <!-- =================== FOOTER V3.2 COM CRÉDITOS COMPLETOS =================== -->
+    <!-- =================== FOOTER V3.3.2 COM CRÉDITOS COMPLETOS =================== -->
     <footer id="mainFooter" class="footer hidden">
         <p>Sistema em versão BETA - não pode ser usado como única fonte de referência</p>
         <p>Para decisões críticas, consulte sempre fontes adicionais e profissionais qualificados</p>
         <p><strong>Criado por: Guilherme Santoro | Desenvolvido por: Alessandro Rodrigues</strong></p>
-        <p><strong>Archipelago Dashboard V3.2 - Outubro/2025</strong></p>
+        <p><strong>Archipelago Dashboard V3.3.2 - Outubro/2025</strong></p>
     </footer>
 
     <!-- =================== MODAL DE PACIENTE =================== -->
@@ -135,14 +135,15 @@
         </div>
     </div>
 
-    <!-- =================== SCRIPTS MODULARES V3.2 CORRIGIDOS =================== -->
+    <!-- =================== SCRIPTS MODULARES V3.3.2 ATUALIZADOS =================== -->
     
     <!-- Scripts Core -->
     <script src="js/app.js"></script>
     <script src="js/api.js"></script>
     
-    <!-- Scripts de Dashboards - CORRIGIDO: Usar dashboard.js (arquivo que existe) -->
-    <script src="js/dashboards/dashboard.js"></script>
+    <!-- Scripts de Dashboards - CORRIGIDO V3.3.2: Usar arquivos separados -->
+    <script src="js/dashboards/dashboard-hospital.js"></script>
+    <script src="js/dashboards/dashboard-executive.js"></script>
     
     <!-- Scripts de Interface -->
     <script src="js/cards.js"></script>
@@ -153,22 +154,23 @@
     <!-- Script de Inicialização -->
     <script src="js/main.js"></script>
     
-    <!-- =================== INICIALIZAÇÃO V3.2 =================== -->
+    <!-- =================== INICIALIZAÇÃO V3.3.2 =================== -->
     <script>
         // Verificar se QRCode.js foi carregada
         document.addEventListener('DOMContentLoaded', function() {
-            console.log('🚀 Archipelago Dashboard V3.2 - Inicializando...');
+            console.log('🚀 Archipelago Dashboard V3.3.2 - Inicializando...');
             console.log('👨‍💼 Criado por: Guilherme Santoro');
             console.log('👨‍💻 Desenvolvido por: Alessandro Rodrigues');
-            console.log('📅 Outubro/2025 - Versão V3.2');
+            console.log('📅 Outubro/2025 - Versão V3.3.2');
             console.log('');
-            console.log('✅ CORREÇÕES V3.2 IMPLEMENTADAS:');
-            console.log('   • ✅ Cards.js corrigido (erro sintaxe linha 896)');
-            console.log('   • ✅ Index.html corrigido (removido charts-config.js e admin.js)');
-            console.log('   • ✅ Hospital H5 adicionado (Hospital Adventista - 13 leitos)');
-            console.log('   • ✅ Total atualizado: 79 leitos (H1:10, H2:36, H3:13, H4:13, H5:13)');
-            console.log('   • ✅ Estrutura de arquivos corrigida (17 módulos)');
-            console.log('   • ✅ Créditos: Guilherme Santoro + Alessandro Rodrigues');
+            console.log('✅ IMPLEMENTAÇÕES V3.3.2:');
+            console.log('   • ✅ Sistema 100% funcional - QR Code sincronizado');
+            console.log('   • ✅ 79 leitos operacionais (H1:10, H2:36, H3:7, H4:13, H5:13)');
+            console.log('   • ✅ 74 colunas na planilha (A-BV)');
+            console.log('   • ✅ Novos campos: Gênero, Região, Categoria, Diretivas');
+            console.log('   • ✅ Dashboard Hospitalar com 5 gráficos');
+            console.log('   • ✅ Dashboard Executivo consolidado');
+            console.log('   • ✅ Dashboards separados (hospital + executive)');
             console.log('');
             
             // Verificar biblioteca QRCode
@@ -182,29 +184,30 @@
             setTimeout(() => {
                 if (typeof window.initApp === 'function') {
                     window.initApp();
-                    console.log('✅ Sistema V3.2 inicializado com sucesso');
+                    console.log('✅ Sistema V3.3.2 inicializado com sucesso');
                 } else {
                     console.error('❌ initApp não encontrada');
                     // Retry
                     setTimeout(() => {
                         if (typeof window.initApp === 'function') {
                             window.initApp();
-                            console.log('✅ Sistema V3.2 inicializado após retry');
+                            console.log('✅ Sistema V3.3.2 inicializado após retry');
                         }
                     }, 1000);
                 }
             }, 200);
         });
         
-        // Log de informações importantes V3.2
-        console.log('📱 QR Codes apontam para: https://qrcode-seven-gamma.vercel.app');
+        // Log de informações importantes V3.3.2
+        console.log('📱 QR Codes apontam para: https://alessandrodiazrodrigues.github.io/qrcode');
         console.log('🖨️ Impressão configurada: 12 QR codes por A4 (3x4)');
-        console.log('📊 Planilha V3.2: 47 colunas (A-AV)');
+        console.log('📊 Planilha V3.3.2: 74 colunas (A-BV)');
         console.log('🏥 Hospitais configurados: 79 leitos totais (5 hospitais)');
-        console.log('🔧 Status: Arquivos corrigidos - Sistema funcional');
+        console.log('🔧 Status: Sistema 100% operacional');
+        console.log('📈 Gráficos: Gênero, Região, Idade (área), Isolamento, Diretivas');
     </script>
     
-    <!-- =================== CSS BASE V3.2 =================== -->
+    <!-- =================== CSS BASE V3.3.2 =================== -->
     <style>
         * {
             box-sizing: border-box;
@@ -241,7 +244,7 @@
             background: #1e293b;
             padding: 40px;
             border-radius: 16px;
-            text-align: center;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
             max-width: 400px;
             width: 90%;
             border: 1px solid rgba(255, 255, 255, 0.1);
@@ -249,53 +252,56 @@
         
         .auth-container h1 {
             color: #60a5fa;
-            margin-bottom: 10px;
-            font-size: 28px;
+            margin: 0 0 10px 0;
+            font-size: 24px;
+            text-align: center;
         }
         
         .auth-container p {
             color: #e2e8f0;
-            margin-bottom: 20px;
+            margin: 0 0 20px 0;
+            text-align: center;
         }
         
         .auth-container input {
             width: 100%;
             padding: 12px;
             border: 1px solid rgba(255, 255, 255, 0.2);
-            background: #334155;
-            color: white;
             border-radius: 8px;
+            background: rgba(255, 255, 255, 0.05);
+            color: white;
             font-size: 16px;
             margin-bottom: 15px;
+            transition: border-color 0.3s;
         }
         
         .auth-container input:focus {
             outline: none;
             border-color: #60a5fa;
-            box-shadow: 0 0 0 2px rgba(96, 165, 250, 0.2);
         }
         
         .auth-container button {
             width: 100%;
             padding: 12px;
-            background: #3b82f6;
+            background: #60a5fa;
             color: white;
             border: none;
             border-radius: 8px;
             font-size: 16px;
-            cursor: pointer;
             font-weight: 600;
+            cursor: pointer;
             transition: background 0.3s;
         }
         
         .auth-container button:hover {
-            background: #2563eb;
+            background: #3b82f6;
         }
         
         .error-msg {
-            color: #ef4444;
+            color: #f87171;
+            text-align: center;
+            margin-top: 15px;
             font-size: 14px;
-            margin-top: 10px;
         }
         
         /* Header */
@@ -305,7 +311,10 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
         }
         
         .header-left {
@@ -315,15 +324,22 @@
         }
         
         .hamburger {
-            font-size: 28px;
+            font-size: 24px;
             cursor: pointer;
-            color: #60a5fa;
+            padding: 8px;
+            border-radius: 6px;
+            transition: background 0.3s;
+        }
+        
+        .hamburger:hover {
+            background: rgba(255, 255, 255, 0.1);
         }
         
         .header-left h1 {
-            font-size: 24px;
-            color: #60a5fa;
             margin: 0;
+            font-size: 22px;
+            color: #60a5fa;
+            font-weight: 700;
         }
         
         .header-right {
@@ -332,37 +348,42 @@
             gap: 15px;
         }
         
+        #updateTimer {
+            color: #9ca3af;
+            font-size: 14px;
+        }
+        
         .header-right button {
-            padding: 10px 20px;
-            background: #3b82f6;
+            background: #60a5fa;
             color: white;
             border: none;
+            padding: 10px 20px;
             border-radius: 6px;
             cursor: pointer;
-            font-weight: 500;
+            font-weight: 600;
             transition: background 0.3s;
         }
         
         .header-right button:hover {
-            background: #2563eb;
+            background: #3b82f6;
         }
         
-        /* Side Menu */
+        /* Menu Lateral */
         .side-menu {
             position: fixed;
-            left: 0;
+            left: -280px;
             top: 0;
-            height: 100%;
             width: 280px;
+            height: 100vh;
             background: #1e293b;
-            border-right: 1px solid rgba(255, 255, 255, 0.1);
-            z-index: 1000;
-            transform: translateX(-100%);
-            transition: transform 0.3s ease;
+            box-shadow: 2px 0 8px rgba(0, 0, 0, 0.2);
+            transition: left 0.3s ease;
+            z-index: 2000;
+            overflow-y: auto;
         }
         
         .side-menu.open {
-            transform: translateX(0);
+            left: 0;
         }
         
         .menu-header {
@@ -374,8 +395,8 @@
         }
         
         .menu-header h2 {
-            color: #60a5fa;
             margin: 0;
+            color: #60a5fa;
             font-size: 20px;
         }
         
@@ -383,13 +404,19 @@
             background: none;
             border: none;
             color: #e2e8f0;
-            font-size: 32px;
+            font-size: 28px;
             cursor: pointer;
-            padding: 0;
+            padding: 5px;
+            border-radius: 4px;
+            transition: background 0.3s;
+        }
+        
+        .menu-close:hover {
+            background: rgba(255, 255, 255, 0.1);
         }
         
         .menu-items {
-            padding: 10px 0;
+            padding: 20px 0;
         }
         
         .side-menu-item {
@@ -397,18 +424,20 @@
             padding: 15px 20px;
             color: #e2e8f0;
             text-decoration: none;
-            transition: background 0.3s, color 0.3s;
+            transition: all 0.3s;
+            border-left: 3px solid transparent;
         }
         
         .side-menu-item:hover {
-            background: rgba(96, 165, 250, 0.1);
-            color: #60a5fa;
+            background: rgba(255, 255, 255, 0.05);
+            border-left-color: #60a5fa;
         }
         
         .side-menu-item.active {
-            background: rgba(96, 165, 250, 0.2);
+            background: rgba(96, 165, 250, 0.1);
+            border-left-color: #60a5fa;
             color: #60a5fa;
-            border-left: 3px solid #60a5fa;
+            font-weight: 600;
         }
         
         .menu-footer {
@@ -416,12 +445,13 @@
             bottom: 0;
             width: 100%;
             padding: 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
         }
         
         .menu-divider {
             height: 1px;
             background: rgba(255, 255, 255, 0.1);
-            margin-bottom: 20px;
+            margin-bottom: 15px;
         }
         
         .menu-qr {
@@ -431,14 +461,17 @@
             padding: 12px;
             background: rgba(96, 165, 250, 0.1);
             border-radius: 8px;
-            text-decoration: none;
             color: #60a5fa;
-            font-weight: 500;
+            text-decoration: none;
             transition: background 0.3s;
         }
         
         .menu-qr:hover {
             background: rgba(96, 165, 250, 0.2);
+        }
+        
+        .menu-qr span {
+            font-size: 20px;
         }
         
         .menu-overlay {
@@ -448,17 +481,23 @@
             width: 100%;
             height: 100%;
             background: rgba(0, 0, 0, 0.5);
-            z-index: 999;
+            z-index: 1500;
             display: none;
         }
         
-        .menu-overlay.show {
+        .menu-overlay.active {
             display: block;
         }
         
         /* Main Content */
         .main-content {
             padding: 30px;
+            max-width: 1600px;
+            margin: 0 auto;
+        }
+        
+        .section-leitos {
+            animation: fadeIn 0.5s ease-out;
         }
         
         .leitos-header {
@@ -467,34 +506,36 @@
         
         .leitos-header h2 {
             color: #60a5fa;
-            margin-bottom: 20px;
+            margin: 0 0 20px 0;
+            font-size: 28px;
+            font-weight: 700;
         }
         
         .hospital-selector {
             display: flex;
-            gap: 10px;
+            gap: 12px;
             flex-wrap: wrap;
         }
         
         .hospital-btn {
             padding: 12px 24px;
             background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            color: #e2e8f0;
+            border: 2px solid rgba(255, 255, 255, 0.1);
             border-radius: 8px;
+            color: #e2e8f0;
             cursor: pointer;
-            font-weight: 500;
+            font-weight: 600;
             transition: all 0.3s;
         }
         
         .hospital-btn:hover {
-            background: rgba(96, 165, 250, 0.1);
+            background: rgba(255, 255, 255, 0.1);
             border-color: #60a5fa;
         }
         
         .hospital-btn.active {
-            background: #3b82f6;
-            border-color: #3b82f6;
+            background: #60a5fa;
+            border-color: #60a5fa;
             color: white;
         }
         
@@ -503,14 +544,14 @@
             background: #1e293b;
             padding: 30px;
             text-align: center;
+            margin-top: 50px;
             border-top: 1px solid rgba(255, 255, 255, 0.1);
-            margin-top: 40px;
         }
         
         .footer p {
-            color: #e2e8f0;
             margin: 8px 0;
-            font-size: 14px;
+            color: #9ca3af;
+            font-size: 13px;
             line-height: 1.5;
         }
         
@@ -629,7 +670,7 @@
             background: #d97706;
         }
         
-        /* Responsividade V3.2 */
+        /* Responsividade V3.3.2 */
         @media (max-width: 768px) {
             .header {
                 flex-direction: column;
