@@ -143,7 +143,9 @@
     <script src="js/app.js"></script>
     <script src="js/api.js"></script>
     
-    <!-- ❌ REMOVIDO: cores-patch-completo.js (404) -->
+    <!-- ✅ Scripts de Dashboards - CARREGAMENTO DIRETO -->
+    <script src="js/dashboards/dashboard-hospital.js"></script>
+    <script src="js/dashboards/dashboard-executive.js"></script>
     
     <!-- Scripts de Interface -->
     <script src="js/cards.js"></script>
@@ -192,153 +194,10 @@
             }, 100);
         }
     </script>
-    
-    <!-- =================== CARREGAMENTO SINCRONIZADO DOS DASHBOARDS =================== -->
-    <script>
-        /**
-         * CARREGAMENTO SINCRONIZADO COM DEPENDÊNCIAS
-         * 
-         * PROBLEMA IDENTIFICADO:
-         * - dashboard-hospital.js precisa de window.hospitalData (carregado no main.js)
-         * - Se carregar antes, renderizarDashboardHospital não funciona
-         * 
-         * SOLUÇÃO:
-         * - Carregar APÓS o main.js ter inicializado os dados
-         * - Usar evento customizado para sinalizar quando dados estão prontos
-         */
-        
-        (function() {
-            console.log('🔄 Sistema de carregamento de dashboards iniciado');
-            
-            let dashboardHospitalCarregado = false;
-            let dashboardExecutiveCarregado = false;
-            let tentativas = 0;
-            const MAX_TENTATIVAS = 10;
-            
-            /**
-             * Tenta carregar os dashboards
-             */
-            function carregarDashboards() {
-                tentativas++;
-                
-                // Verificar se window.hospitalData existe
-                if (!window.hospitalData || Object.keys(window.hospitalData).length === 0) {
-                    console.log(`⏳ Aguardando dados... (tentativa ${tentativas}/${MAX_TENTATIVAS})`);
-                    
-                    if (tentativas < MAX_TENTATIVAS) {
-                        setTimeout(carregarDashboards, 500);
-                    } else {
-                        console.error('❌ Timeout: Dados não carregados após', MAX_TENTATIVAS, 'tentativas');
-                    }
-                    return;
-                }
-                
-                console.log('✅ Dados disponíveis! Carregando dashboards...');
-                
-                const timestamp = Date.now();
-                
-                // Carregar dashboard-hospital.js
-                if (!dashboardHospitalCarregado) {
-                    const scriptHospital = document.createElement('script');
-                    scriptHospital.src = `js/dashboards/dashboard-hospital.js?v=${timestamp}`;
-                    scriptHospital.onload = function() {
-                        dashboardHospitalCarregado = true;
-                        console.log('✅ dashboard-hospital.js carregado');
-                        console.log('   renderizarDashboardHospital:', typeof window.renderizarDashboardHospital);
-                        verificarCarregamentoCompleto();
-                    };
-                    scriptHospital.onerror = function() {
-                        console.error('❌ Erro ao carregar dashboard-hospital.js');
-                    };
-                    document.body.appendChild(scriptHospital);
-                }
-                
-                // Carregar dashboard-executive.js
-                if (!dashboardExecutiveCarregado) {
-                    const scriptExecutive = document.createElement('script');
-                    scriptExecutive.src = `js/dashboards/dashboard-executive.js?v=${timestamp}`;
-                    scriptExecutive.onload = function() {
-                        dashboardExecutiveCarregado = true;
-                        console.log('✅ dashboard-executive.js carregado');
-                        console.log('   renderizarDashboardExecutivo:', typeof window.renderizarDashboardExecutivo);
-                        verificarCarregamentoCompleto();
-                    };
-                    scriptExecutive.onerror = function() {
-                        console.error('❌ Erro ao carregar dashboard-executive.js');
-                    };
-                    document.body.appendChild(scriptExecutive);
-                }
-            }
-            
-            /**
-             * Verifica se ambos os dashboards foram carregados
-             */
-            function verificarCarregamentoCompleto() {
-                if (dashboardHospitalCarregado && dashboardExecutiveCarregado) {
-                    console.log('');
-                    console.log('🎉 TODOS OS DASHBOARDS CARREGADOS COM SUCESSO!');
-                    console.log('');
-                    console.log('📊 Funções disponíveis:');
-                    console.log('   • renderizarDashboardHospital():', typeof window.renderizarDashboardHospital === 'function' ? '✅' : '❌');
-                    console.log('   • renderizarDashboardExecutivo():', typeof window.renderizarDashboardExecutivo === 'function' ? '✅' : '❌');
-                    console.log('');
-                    
-                    // Disparar evento customizado
-                    window.dispatchEvent(new Event('dashboardsReady'));
-                }
-            }
-            
-            // Iniciar tentativas de carregamento
-            carregarDashboards();
-        })();
-    </script>
-    
-    <!-- =================== INICIALIZAÇÃO V3.3.2 FINAL =================== -->
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            console.log('🚀 Archipelago Dashboard V3.3.2 - Inicializando...');
-            console.log('👨‍💼 Criado por: Guilherme Santoro');
-            console.log('👨‍💻 Desenvolvido por: Alessandro Rodrigues');
-            console.log('📅 Outubro/2025 - Versão V3.3.2 FINAL');
-            console.log('');
-            console.log('✅ IMPLEMENTAÇÕES V3.3.2 FINAL:');
-            console.log('   • ✅ Sistema 100% funcional - QR Code sincronizado');
-            console.log('   • ✅ 79 leitos operacionais (H1:10, H2:36, H3:7, H4:13, H5:13)');
-            console.log('   • ✅ 74 colunas na planilha (A-BV)');
-            console.log('   • ✅ Novos campos: Gênero, Região, Categoria, Diretivas');
-            console.log('   • ✅ Dashboard Hospitalar com gráficos clássicos');
-            console.log('   • ✅ Dashboard Executivo consolidado');
-            console.log('   • ✅ Carregamento sincronizado de dashboards');
-            console.log('   • ✅ Menu lateral auto-retrátil ao clicar');
-            console.log('');
-            
-            // Verificar biblioteca QRCode
-            if (typeof QRCode !== 'undefined') {
-                console.log('✅ QRCode.js carregada com sucesso');
-            } else {
-                console.warn('⚠️ QRCode.js não encontrada - QR Codes podem não funcionar');
-            }
-            
-            // Inicialização normal do sistema
-            setTimeout(() => {
-                if (typeof window.initApp === 'function') {
-                    window.initApp();
-                    console.log('✅ Sistema V3.3.2 FINAL inicializado com sucesso');
-                } else {
-                    console.error('❌ Função initApp não encontrada');
-                }
-            }, 500);
-        });
-        
-        // Listener para quando os dashboards estiverem prontos
-        window.addEventListener('dashboardsReady', function() {
-            console.log('🎯 Evento dashboardsReady disparado - Sistema 100% pronto!');
-        });
-    </script>
-    
-    <!-- =================== ESTILOS INLINE PARA AUTENTICAÇÃO =================== -->
+
+    <!-- =================== CSS INLINE ORIGINAL =================== -->
     <style>
-        /* Reset e base */
+        /* Reset básico */
         * {
             margin: 0;
             padding: 0;
@@ -346,9 +205,10 @@
         }
         
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
             background: #0f172a;
             color: #e2e8f0;
+            min-height: 100vh;
         }
         
         .hidden {
@@ -360,35 +220,34 @@
             position: fixed;
             top: 0;
             left: 0;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+            width: 100vw;
+            height: 100vh;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
             display: flex;
-            justify-content: center;
             align-items: center;
+            justify-content: center;
             z-index: 10000;
         }
         
         .auth-container {
             background: #1e293b;
-            padding: 50px;
+            padding: 40px;
             border-radius: 16px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+            max-width: 400px;
+            width: 90%;
             text-align: center;
-            min-width: 400px;
         }
         
         .auth-container h1 {
             color: #60a5fa;
             margin-bottom: 10px;
-            font-size: 32px;
-            font-weight: 700;
+            font-size: 28px;
         }
         
         .auth-container p {
             color: #9ca3af;
-            margin-bottom: 30px;
-            font-size: 16px;
+            margin-bottom: 20px;
         }
         
         .auth-container input {
