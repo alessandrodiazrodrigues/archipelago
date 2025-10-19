@@ -1,0 +1,470 @@
+/* =================== DASHBOARD-HOSPITALAR-STYLES.CSS V3.3.2 =================== */
+/* Estilos específicos para o Dashboard Hospitalar com visual do sistema antigo */
+/* ============================================================================== */
+
+/* =================== CONTAINER PRINCIPAL DO DASHBOARD =================== */
+.dashboard-container {
+    padding: 20px;
+    background: #0f172a;
+    color: #e2e8f0;
+    min-height: 100vh;
+}
+
+/* =================== HEADER DO DASHBOARD =================== */
+.dashboard-header {
+    background: #1a1f2e;
+    padding: 20px;
+    border-radius: 12px;
+    margin-bottom: 25px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+}
+
+.dashboard-header h2 {
+    margin: 0 0 10px 0;
+    font-size: 24px;
+    font-weight: 700;
+    color: #60a5fa;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.dashboard-controls {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+}
+
+.btn-toggle-fundo {
+    padding: 8px 16px;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 6px;
+    color: #e2e8f0;
+    cursor: pointer;
+    font-size: 14px;
+    transition: all 0.3s ease;
+}
+
+.btn-toggle-fundo:hover {
+    background: rgba(255, 255, 255, 0.2);
+    border-color: #60a5fa;
+}
+
+.dashboard-subtitle {
+    display: flex;
+    gap: 15px;
+    color: #9ca3af;
+    font-size: 14px;
+}
+
+.dashboard-subtitle .separator {
+    color: #4b5563;
+}
+
+/* =================== GRID DE KPIs PRINCIPAIS =================== */
+.kpis-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 20px;
+    margin-bottom: 30px;
+}
+
+.kpi-card {
+    background: #1a1f2e;
+    border-radius: 12px;
+    padding: 20px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    transition: all 0.3s ease;
+}
+
+.kpi-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+}
+
+.kpi-icon {
+    font-size: 40px;
+    opacity: 0.8;
+}
+
+.kpi-info h3 {
+    margin: 0 0 5px 0;
+    font-size: 14px;
+    color: #9ca3af;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.kpi-value {
+    font-size: 28px;
+    font-weight: 700;
+    color: #60a5fa;
+    margin: 0;
+}
+
+.kpi-percentage {
+    font-size: 18px;
+    font-weight: 600;
+    color: #22c55e;
+}
+
+.kpi-detail {
+    display: flex;
+    gap: 15px;
+    font-size: 12px;
+    color: #9ca3af;
+    margin-top: 5px;
+}
+
+/* Cores específicas para cada tipo de KPI */
+.kpi-ocupacao .kpi-icon { color: #60a5fa; }
+.kpi-vagos .kpi-icon { color: #22c55e; }
+.kpi-isolamento .kpi-icon { color: #f97316; }
+.kpi-alta .kpi-icon { color: #8b5cf6; }
+
+/* =================== KPIs SECUNDÁRIOS =================== */
+.kpis-secondary {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 20px;
+    margin-bottom: 30px;
+}
+
+.kpi-group {
+    background: #1a1f2e;
+    border-radius: 12px;
+    padding: 20px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.kpi-group h4 {
+    margin: 0 0 15px 0;
+    font-size: 16px;
+    color: #60a5fa;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.kpi-items {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.kpi-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.kpi-item:last-child {
+    border-bottom: none;
+}
+
+.kpi-label {
+    color: #9ca3af;
+    font-size: 14px;
+}
+
+.kpi-item .kpi-value {
+    font-weight: 600;
+    color: #e2e8f0;
+    font-size: 14px;
+}
+
+/* =================== CONTAINER DOS GRÁFICOS =================== */
+.charts-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+    gap: 25px;
+}
+
+.chart-wrapper {
+    background: #1a1f2e;
+    border-radius: 12px;
+    padding: 20px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+}
+
+.chart-wrapper.chart-wide {
+    grid-column: 1 / -1;
+}
+
+.chart-wrapper h3 {
+    margin: 0 0 15px 0;
+    font-size: 16px;
+    color: #60a5fa;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* =================== CONTAINER DOS GRÁFICOS COM ALTURA FIXA =================== */
+.chart-container {
+    position: relative;
+    height: 350px;
+    margin-bottom: 15px;
+}
+
+.chart-container canvas {
+    max-height: 350px !important;
+}
+
+/* =================== TOGGLE DOS GRÁFICOS =================== */
+.chart-toggle {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 15px;
+    justify-content: center;
+}
+
+.toggle-btn {
+    padding: 8px 16px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 6px;
+    color: #9ca3af;
+    cursor: pointer;
+    font-size: 13px;
+    transition: all 0.3s ease;
+}
+
+.toggle-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.2);
+    color: #e2e8f0;
+}
+
+.toggle-btn.active {
+    background: #60a5fa;
+    border-color: #60a5fa;
+    color: white;
+}
+
+/* =================== LEGENDAS HTML CUSTOMIZADAS =================== */
+.chart-legend {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 10px;
+    padding: 15px;
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 8px;
+}
+
+.legend-items {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    justify-content: center;
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 13px;
+}
+
+.legend-item:hover {
+    background: rgba(255, 255, 255, 0.1);
+    transform: translateY(-2px);
+}
+
+.legend-item.disabled {
+    opacity: 0.4;
+    text-decoration: line-through;
+}
+
+.legend-color {
+    width: 16px;
+    height: 16px;
+    border-radius: 4px;
+    flex-shrink: 0;
+}
+
+.legend-label {
+    color: #e2e8f0;
+    font-weight: 500;
+}
+
+.legend-value {
+    color: #9ca3af;
+    font-size: 12px;
+}
+
+/* =================== FOOTER DO DASHBOARD =================== */
+.dashboard-footer {
+    text-align: center;
+    padding: 30px;
+    color: #6b7280;
+    font-size: 13px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    margin-top: 40px;
+}
+
+.dashboard-footer p {
+    margin: 5px 0;
+}
+
+/* =================== MODO CLARO (FUNDO BRANCO) =================== */
+body.fundo-branco {
+    background: #f8fafc;
+}
+
+body.fundo-branco .dashboard-container {
+    background: #f8fafc;
+    color: #1e293b;
+}
+
+body.fundo-branco .dashboard-header,
+body.fundo-branco .kpi-card,
+body.fundo-branco .kpi-group,
+body.fundo-branco .chart-wrapper {
+    background: white;
+    border-color: #e5e7eb;
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+}
+
+body.fundo-branco .dashboard-header h2,
+body.fundo-branco .kpi-value {
+    color: #3b82f6;
+}
+
+body.fundo-branco .kpi-info h3,
+body.fundo-branco .kpi-label,
+body.fundo-branco .dashboard-subtitle {
+    color: #6b7280;
+}
+
+body.fundo-branco .legend-label,
+body.fundo-branco .kpi-item .kpi-value {
+    color: #1e293b;
+}
+
+body.fundo-branco .toggle-btn,
+body.fundo-branco .legend-item {
+    background: #f3f4f6;
+    border-color: #e5e7eb;
+    color: #4b5563;
+}
+
+body.fundo-branco .toggle-btn:hover,
+body.fundo-branco .legend-item:hover {
+    background: #e5e7eb;
+}
+
+body.fundo-branco .toggle-btn.active {
+    background: #3b82f6;
+    color: white;
+}
+
+body.fundo-branco .chart-legend {
+    background: #f9fafb;
+}
+
+/* =================== RESPONSIVIDADE =================== */
+@media (max-width: 1200px) {
+    .charts-container {
+        grid-template-columns: 1fr;
+    }
+    
+    .kpis-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 768px) {
+    .dashboard-container {
+        padding: 15px;
+    }
+    
+    .kpis-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .kpis-secondary {
+        grid-template-columns: 1fr;
+    }
+    
+    .chart-container {
+        height: 250px;
+    }
+    
+    .chart-container canvas {
+        max-height: 250px !important;
+    }
+    
+    .legend-items {
+        font-size: 11px;
+    }
+    
+    .legend-item {
+        padding: 4px 8px;
+    }
+    
+    .dashboard-controls {
+        position: static;
+        margin-top: 15px;
+    }
+}
+
+/* =================== ANIMAÇÕES =================== */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.kpi-card,
+.chart-wrapper {
+    animation: fadeIn 0.5s ease-out;
+}
+
+/* =================== UTILIDADES =================== */
+.error-message {
+    background: #ef4444;
+    color: white;
+    padding: 20px;
+    border-radius: 8px;
+    text-align: center;
+    margin: 20px 0;
+}
+
+/* =================== SCROLLBAR PERSONALIZADA =================== */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: #1a1f2e;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #60a5fa;
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #3b82f6;
+}
