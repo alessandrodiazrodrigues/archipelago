@@ -487,7 +487,7 @@
                     }
                 }
             },
-            plugins: [ChartDataLabels]
+            plugins: typeof window.ChartDataLabels !== 'undefined' ? [window.ChartDataLabels] : []
         });
     }
 
@@ -570,7 +570,7 @@
                     }
                 }
             },
-            plugins: [ChartDataLabels]
+            plugins: typeof window.ChartDataLabels !== 'undefined' ? [window.ChartDataLabels] : []
         });
     }
 
@@ -653,7 +653,7 @@
                     }
                 }
             },
-            plugins: [ChartDataLabels]
+            plugins: typeof window.ChartDataLabels !== 'undefined' ? [window.ChartDataLabels] : []
         });
     }
 
@@ -710,7 +710,7 @@
                     }
                 }
             },
-            plugins: [ChartDataLabels]
+            plugins: typeof window.ChartDataLabels !== 'undefined' ? [window.ChartDataLabels] : []
         });
     }
 
@@ -788,7 +788,7 @@
                     }
                 }
             },
-            plugins: [ChartDataLabels]
+            plugins: typeof window.ChartDataLabels !== 'undefined' ? [window.ChartDataLabels] : []
         });
     }
 
