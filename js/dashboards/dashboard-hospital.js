@@ -18,7 +18,7 @@
  * @param {string} hospitalId - ID do hospital ('H1', 'H2', 'H3', 'H4', 'H5')
  * @param {object} dados - Objeto com dados de todos os hospitais
  */
-window.renderizarDashboardHospital = function(hospitalId, dados) {
+window.renderDashboardHospitalar = function(hospitalId, dados) {
     console.log('[DASH HOSP] Renderizando dashboard para:', hospitalId);
     
     // Validacoes
