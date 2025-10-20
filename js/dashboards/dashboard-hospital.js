@@ -1,40 +1,141 @@
 /**
- * ARCHIPELAGO DASHBOARD - DASHBOARD HOSPITALAR V3.3.2 FINAL
+ * DASHBOARD HOSPITALAR V3.3.2 - FINAL CORRIGIDO
+ * 
+ * Data: 20/Outubro/2025
+ * Cliente: Guilherme Santoro
+ * Desenvolvedor: Alessandro Rodrigues
  * 
  * CORREÇÕES APLICADAS:
- * - Animações desativadas (sem loop infinito)
- * - Barras SEMPRE VERTICAIS
- * - KPIs funcionando
- * - Top 10 Concessões, Top 15 Linhas
- * - Gauge com percentual dentro
- * - Números visíveis nas pizzas
+ * ✅ Gauge meia-rosca com PERCENTUAL DENTRO
+ * ✅ KPIs carregam dados REAIS (não hardcoded)
+ * ✅ Barras SEMPRE VERTICAIS (Concessões e Linhas)
+ * ✅ Números SEMPRE VISÍVEIS nos pizzas
+ * ✅ Todos os 5 hospitais carregam
  */
 
 (function() {
     'use strict';
-
+    
     console.log('[DASHBOARD HOSPITALAR V3.3.2 FINAL] Inicializando...');
-
-    // ===== FUNÇÃO PRINCIPAL =====
+    
+    // ==================== CORES E TEMAS ====================
+    
+    let temaAtual = 'escuro';
+    
+    const CORES_TEMA = {
+        escuro: {
+            fundo: '#1a1a2e',
+            texto: '#ffffff',
+            textoSecundario: '#b0b0b0',
+            card: '#16213e',
+            borda: '#0f3460',
+            graficoBg: 'rgba(255, 255, 255, 0.05)'
+        },
+        claro: {
+            fundo: '#f5f5f5',
+            texto: '#333333',
+            textoSecundario: '#666666',
+            card: '#ffffff',
+            borda: '#e0e0e0',
+            graficoBg: 'rgba(0, 0, 0, 0.02)'
+        }
+    };
+    
+    function getCorTema(propriedade) {
+        return CORES_TEMA[temaAtual][propriedade];
+    }
+    
+    // ==================== BOTÃO TEMA ====================
+    
+    function criarBotaoTema() {
+        // Remove botão existente se houver
+        const btnExistente = document.getElementById('btn-tema-dashboard');
+        if (btnExistente) {
+            btnExistente.remove();
+        }
+        
+        const btn = document.createElement('button');
+        btn.id = 'btn-tema-dashboard';
+        btn.className = 'btn-tema-dashboard';
+        btn.textContent = temaAtual === 'escuro' ? '☀️ Tema Claro' : '🌙 Tema Escuro';
+        btn.style.cssText = `
+            padding: 8px 16px;
+            border: 2px solid ${getCorTema('borda')};
+            background: ${getCorTema('card')};
+            color: ${getCorTema('texto')};
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            margin-left: 10px;
+        `;
+        
+        btn.addEventListener('click', alternarTema);
+        
+        // Tenta inserir ao lado do botão Atualizar
+        const header = document.querySelector('.main-header') || document.querySelector('header');
+        const btnAtualizar = document.querySelector('[onclick*="loadHospitalData"]');
+        
+        if (btnAtualizar && btnAtualizar.parentNode) {
+            btnAtualizar.parentNode.insertBefore(btn, btnAtualizar.nextSibling);
+        } else if (header) {
+            header.appendChild(btn);
+        } else {
+            // Fallback: posição fixa
+            btn.style.position = 'fixed';
+            btn.style.top = '20px';
+            btn.style.right = '20px';
+            btn.style.zIndex = '9999';
+            document.body.appendChild(btn);
+        }
+    }
+    
+    function alternarTema() {
+        temaAtual = temaAtual === 'escuro' ? 'claro' : 'escuro';
+        
+        // Atualizar botão
+        const btn = document.getElementById('btn-tema-dashboard');
+        if (btn) {
+            btn.textContent = temaAtual === 'escuro' ? '☀️ Tema Claro' : '🌙 Tema Escuro';
+            btn.style.border = `2px solid ${getCorTema('borda')}`;
+            btn.style.background = getCorTema('card');
+            btn.style.color = getCorTema('texto');
+        }
+        
+        // Re-renderizar dashboard
+        const hospitalSelecionado = document.getElementById('hospital-select')?.value || 'todos';
+        window.renderizarDashboardHospital(hospitalSelecionado);
+    }
+    
+    // ==================== RENDERIZAÇÃO PRINCIPAL ====================
+    
     window.renderizarDashboardHospital = function(hospitalId = 'todos') {
         console.log('[DASHBOARD HOSPITALAR] Renderizando hospital:', hospitalId);
-
+        
         const container = document.getElementById('dashHospitalarContent');
         if (!container) {
-            console.error('[DASHBOARD HOSPITALAR] Container não encontrado!');
+            console.error('[DASHBOARD HOSPITALAR] Container não encontrado');
             return;
         }
-
+        
+        // Criar botão tema (se não existir)
+        criarBotaoTema();
+        
+        // Buscar dados
         const dados = window.hospitalData;
         if (!dados) {
-            container.innerHTML = '<div class="loading">Carregando dados...</div>';
+            container.innerHTML = `
+                <div style="padding: 40px; text-align: center; color: ${getCorTema('textoSecundario')};">
+                    <p style="font-size: 18px;">Carregando dados...</p>
+                </div>
+            `;
             return;
         }
-
-        // Renderizar dropdown + botão tema
+        
+        // Renderizar dropdown + conteúdo
         let html = renderDropdown(hospitalId);
-
-        // Renderizar hospitais
+        
         if (hospitalId === 'todos') {
             html += renderTodosHospitais(dados);
         } else {
@@ -43,771 +144,856 @@
                 html += renderHospitalHTML(hospitalId, hospital);
             }
         }
-
+        
         container.innerHTML = html;
-
-        // Renderizar gráficos após DOM estar pronto
+        
+        // Renderizar gráficos após DOM atualizar
         setTimeout(() => {
             if (hospitalId === 'todos') {
-                ['H1', 'H2', 'H3', 'H4', 'H5'].forEach(id => {
-                    const hospital = dados[id];
-                    if (hospital) {
-                        renderGraficos(id, hospital.leitos);
-                    }
-                });
+                renderGraficosHospitais(dados);
             } else {
                 const hospital = dados[hospitalId];
                 if (hospital) {
-                    renderGraficos(hospitalId, hospital.leitos);
+                    renderGraficosHospital(hospitalId, hospital);
                 }
             }
         }, 100);
     };
-
-    // Aliases para compatibilidade
-    window.renderizarDashboard = window.renderizarDashboardHospital;
-    window.renderDashboardHospitalar = window.renderizarDashboardHospital;
-
-    // ===== DROPDOWN =====
-    function renderDropdown(hospitalId) {
+    
+    // ==================== DROPDOWN ====================
+    
+    function renderDropdown(hospitalSelecionado) {
+        const hospitais = window.HOSPITAIS || {
+            H1: { nome: 'Neomater' },
+            H2: { nome: 'Cruz Azul' },
+            H3: { nome: 'Santa Marcelina' },
+            H4: { nome: 'Santa Clara' },
+            H5: { nome: 'Hospital Adventista' }
+        };
+        
+        let options = '<option value="todos">Todos os Hospitais</option>';
+        Object.keys(hospitais).forEach(id => {
+            const selected = id === hospitalSelecionado ? 'selected' : '';
+            options += `<option value="${id}" ${selected}>${hospitais[id].nome}</option>`;
+        });
+        
         return `
-            <div class="dashboard-controls" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding: 15px; background: var(--card-bg); border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
-                <div style="display: flex; align-items: center; gap: 10px;">
-                    <label for="selectHospital" style="font-weight: 600; color: var(--text-primary);">
-                        Selecione o Hospital:
-                    </label>
-                    <select id="selectHospital" 
-                            onchange="window.renderizarDashboardHospital(this.value)"
-                            style="padding: 8px 12px; border: 1px solid var(--border-color); border-radius: 6px; font-size: 14px; background: var(--input-bg); color: var(--text-primary); cursor: pointer;">
-                        <option value="todos" ${hospitalId === 'todos' ? 'selected' : ''}>Todos os Hospitais</option>
-                        <option value="H1" ${hospitalId === 'H1' ? 'selected' : ''}>H1 - Neomater</option>
-                        <option value="H2" ${hospitalId === 'H2' ? 'selected' : ''}>H2 - Cruz Azul</option>
-                        <option value="H3" ${hospitalId === 'H3' ? 'selected' : ''}>H3 - Santa Marcelina</option>
-                        <option value="H4" ${hospitalId === 'H4' ? 'selected' : ''}>H4 - Santa Clara</option>
-                        <option value="H5" ${hospitalId === 'H5' ? 'selected' : ''}>H5 - Hospital Adventista</option>
-                    </select>
-                </div>
-                <button onclick="toggleDashboardTheme()" 
-                        style="padding: 8px 16px; background: var(--primary-color); color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 500; transition: opacity 0.2s;"
-                        onmouseover="this.style.opacity='0.9'" 
-                        onmouseout="this.style.opacity='1'">
-                    ☀️ Tema Claro
-                </button>
+            <div style="margin-bottom: 30px; padding: 20px; background: ${getCorTema('card')}; border-radius: 12px; border: 2px solid ${getCorTema('borda')};">
+                <label for="hospital-select" style="display: block; margin-bottom: 10px; font-size: 16px; font-weight: 600; color: ${getCorTema('texto')};">
+                    Selecione o Hospital:
+                </label>
+                <select 
+                    id="hospital-select" 
+                    onchange="window.renderizarDashboardHospital(this.value)"
+                    style="width: 100%; max-width: 400px; padding: 12px; font-size: 16px; border: 2px solid ${getCorTema('borda')}; border-radius: 8px; background: ${getCorTema('fundo')}; color: ${getCorTema('texto')}; cursor: pointer;"
+                >
+                    ${options}
+                </select>
             </div>
         `;
     }
-
-    // ===== RENDERIZAR TODOS OS HOSPITAIS =====
+    
+    // ==================== RENDER TODOS OS HOSPITAIS ====================
+    
     function renderTodosHospitais(dados) {
+        console.log('[DASHBOARD HOSPITALAR] Renderizando todos os hospitais');
+        
+        const hospitais = ['H1', 'H2', 'H3', 'H4', 'H5'];
         let html = '';
-        ['H1', 'H2', 'H3', 'H4', 'H5'].forEach(id => {
-            const hospital = dados[id];
-            if (hospital) {
-                html += renderHospitalHTML(id, hospital);
+        
+        hospitais.forEach((hospitalId, index) => {
+            try {
+                const hospital = dados[hospitalId];
+                if (!hospital) {
+                    console.warn(`[DASHBOARD] Hospital ${hospitalId} não encontrado`);
+                    return;
+                }
+                
+                console.log(`[DASHBOARD] Processando ${hospitalId}:`, hospital);
+                
+                html += `
+                    <div class="hospital-section" id="hospital-${hospitalId}">
+                        ${renderHospitalHTML(hospitalId, hospital)}
+                    </div>
+                    ${index < hospitais.length - 1 ? '<hr style="border: 1px solid ' + getCorTema('borda') + '; margin: 40px 0;">' : ''}
+                `;
+            } catch (error) {
+                console.error(`[DASHBOARD] Erro ao processar ${hospitalId}:`, error);
             }
         });
+        
         return html;
     }
-
-    // ===== RENDERIZAR UM HOSPITAL =====
+    
+    function renderGraficosHospitais(dados) {
+        const hospitais = ['H1', 'H2', 'H3', 'H4', 'H5'];
+        
+        hospitais.forEach(hospitalId => {
+            try {
+                const hospital = dados[hospitalId];
+                if (hospital) {
+                    console.log(`[DASHBOARD] Renderizando gráficos de ${hospitalId}`);
+                    renderGraficosHospital(hospitalId, hospital);
+                }
+            } catch (error) {
+                console.error(`[DASHBOARD] Erro ao renderizar gráficos de ${hospitalId}:`, error);
+            }
+        });
+    }
+    
+    // ==================== RENDER HOSPITAL ====================
+    
     function renderHospitalHTML(hospitalId, hospital) {
+        const nomeHospital = hospital.nome || window.HOSPITAIS?.[hospitalId]?.nome || hospitalId;
         const leitos = hospital.leitos || [];
+        const dataAtual = new Date().toLocaleDateString('pt-BR');
+        
+        // CALCULAR KPIS REAIS
         const kpis = calcularKPIs(leitos);
-        const nomeHospital = hospital.nome || hospitalId;
-
+        
         return `
-            <div class="hospital-card" style="margin-bottom: 30px; padding: 20px; background: var(--card-bg); border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
-                <h2 style="color: var(--primary-color); margin-bottom: 20px; font-size: 24px; border-bottom: 2px solid var(--primary-color); padding-bottom: 10px;">
-                    🏥 ${nomeHospital}
+            <div style="background: ${getCorTema('fundo')}; padding: 30px; border-radius: 12px; margin-bottom: 30px;">
+                <!-- TÍTULO -->
+                <h2 style="color: ${getCorTema('texto')}; margin: 0 0 30px 0; font-size: 28px; font-weight: 700; text-align: center;">
+                    ${nomeHospital}
                 </h2>
-
-                ${renderKPIsLinha1(kpis)}
-                ${renderKPIsLinha2(kpis)}
-                ${renderGraficosPlaceholders(hospitalId)}
+                
+                <!-- KPIS LINHA 1 -->
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 20px; margin-bottom: 20px;">
+                    <!-- GAUGE OCUPAÇÃO -->
+                    <div style="background: ${getCorTema('card')}; border: 2px solid ${getCorTema('borda')}; border-radius: 12px; padding: 20px; text-align: center;">
+                        <div style="position: relative; height: 120px; margin-bottom: 10px;">
+                            <canvas id="gauge-${hospitalId}" style="width: 100%; height: 100%;"></canvas>
+                        </div>
+                        <div style="font-size: 12px; font-weight: 600; color: ${getCorTema('textoSecundario')}; text-transform: uppercase; letter-spacing: 1px;">
+                            OCUPAÇÃO
+                        </div>
+                    </div>
+                    
+                    <!-- TOTAL -->
+                    <div style="background: ${getCorTema('card')}; border: 2px solid ${getCorTema('borda')}; border-radius: 12px; padding: 20px; text-align: center;">
+                        <div style="font-size: 36px; font-weight: 700; color: ${getCorTema('texto')}; margin-bottom: 8px;">
+                            ${kpis.total}
+                        </div>
+                        <div style="font-size: 12px; font-weight: 600; color: ${getCorTema('textoSecundario')}; text-transform: uppercase; letter-spacing: 1px;">
+                            TOTAL
+                        </div>
+                    </div>
+                    
+                    <!-- OCUPADOS -->
+                    <div style="background: ${getCorTema('card')}; border: 2px solid ${getCorTema('borda')}; border-radius: 12px; padding: 20px; text-align: center;">
+                        <div style="font-size: 36px; font-weight: 700; color: #f59e0b; margin-bottom: 8px;">
+                            ${kpis.ocupados}
+                        </div>
+                        <div style="font-size: 12px; font-weight: 600; color: ${getCorTema('textoSecundario')}; text-transform: uppercase; letter-spacing: 1px;">
+                            OCUPADOS
+                        </div>
+                    </div>
+                    
+                    <!-- VAGOS -->
+                    <div style="background: ${getCorTema('card')}; border: 2px solid ${getCorTema('borda')}; border-radius: 12px; padding: 20px; text-align: center;">
+                        <div style="font-size: 36px; font-weight: 700; color: #10b981; margin-bottom: 8px;">
+                            ${kpis.vagos}
+                        </div>
+                        <div style="font-size: 12px; font-weight: 600; color: ${getCorTema('textoSecundario')}; text-transform: uppercase; letter-spacing: 1px;">
+                            VAGOS
+                        </div>
+                    </div>
+                    
+                    <!-- EM ALTA -->
+                    <div style="background: ${getCorTema('card')}; border: 2px solid ${getCorTema('borda')}; border-radius: 12px; padding: 20px; text-align: center;">
+                        <div style="font-size: 36px; font-weight: 700; color: #3b82f6; margin-bottom: 8px;">
+                            ${kpis.emAlta}
+                        </div>
+                        <div style="font-size: 12px; font-weight: 600; color: ${getCorTema('textoSecundario')}; text-transform: uppercase; letter-spacing: 1px;">
+                            EM ALTA
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- KPIS LINHA 2 -->
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px; margin-bottom: 30px;">
+                    <!-- APARTAMENTOS OCUPADOS -->
+                    <div style="background: ${getCorTema('card')}; border: 2px solid ${getCorTema('borda')}; border-radius: 10px; padding: 15px; text-align: center;">
+                        <div style="font-size: 28px; font-weight: 700; color: ${getCorTema('texto')}; margin-bottom: 5px;">
+                            ${kpis.aptosOcupados}
+                        </div>
+                        <div style="font-size: 11px; font-weight: 600; color: ${getCorTema('textoSecundario')}; text-transform: uppercase;">
+                            APTOS OCUPADOS
+                        </div>
+                    </div>
+                    
+                    <!-- ENFERMARIAS OCUPADAS -->
+                    <div style="background: ${getCorTema('card')}; border: 2px solid ${getCorTema('borda')}; border-radius: 10px; padding: 15px; text-align: center;">
+                        <div style="font-size: 28px; font-weight: 700; color: ${getCorTema('texto')}; margin-bottom: 5px;">
+                            ${kpis.enfsOcupadas}
+                        </div>
+                        <div style="font-size: 11px; font-weight: 600; color: ${getCorTema('textoSecundario')}; text-transform: uppercase;">
+                            ENFS OCUPADAS
+                        </div>
+                    </div>
+                    
+                    <!-- ENFERMARIAS DISPONÍVEIS -->
+                    <div style="background: ${getCorTema('card')}; border: 2px solid ${getCorTema('borda')}; border-radius: 10px; padding: 15px; text-align: center;">
+                        <div style="font-size: 28px; font-weight: 700; color: ${getCorTema('texto')}; margin-bottom: 5px;">
+                            ${kpis.enfsDisponiveis}
+                        </div>
+                        <div style="font-size: 11px; font-weight: 600; color: ${getCorTema('textoSecundario')}; text-transform: uppercase;">
+                            ENFS DISPONÍVEIS
+                        </div>
+                    </div>
+                    
+                    <!-- ISOLAMENTOS -->
+                    <div style="background: ${getCorTema('card')}; border: 2px solid ${getCorTema('borda')}; border-radius: 10px; padding: 15px; text-align: center;">
+                        <div style="font-size: 20px; font-weight: 700; color: ${getCorTema('texto')}; margin-bottom: 5px;">
+                            ${kpis.isolamentoResp} Resp | ${kpis.isolamentoContato} Cont
+                        </div>
+                        <div style="font-size: 11px; font-weight: 600; color: ${getCorTema('textoSecundario')}; text-transform: uppercase;">
+                            ISOLAMENTOS
+                        </div>
+                    </div>
+                    
+                    <!-- COM DIRETIVAS -->
+                    <div style="background: ${getCorTema('card')}; border: 2px solid ${getCorTema('borda')}; border-radius: 10px; padding: 15px; text-align: center;">
+                        <div style="font-size: 28px; font-weight: 700; color: ${getCorTema('texto')}; margin-bottom: 5px;">
+                            ${kpis.comDiretivas}
+                        </div>
+                        <div style="font-size: 11px; font-weight: 600; color: ${getCorTema('textoSecundario')}; text-transform: uppercase;">
+                            COM DIRETIVAS
+                        </div>
+                    </div>
+                    
+                    <!-- IDADE MÉDIA -->
+                    <div style="background: ${getCorTema('card')}; border: 2px solid ${getCorTema('borda')}; border-radius: 10px; padding: 15px; text-align: center;">
+                        <div style="font-size: 28px; font-weight: 700; color: ${getCorTema('texto')}; margin-bottom: 5px;">
+                            ${kpis.idadeMedia}
+                        </div>
+                        <div style="font-size: 11px; font-weight: 600; color: ${getCorTema('textoSecundario')}; text-transform: uppercase;">
+                            IDADE MÉDIA (ANOS)
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- GRÁFICOS -->
+                <div style="display: grid; grid-template-columns: 1fr; gap: 30px;">
+                    <!-- GRÁFICO 1: ANÁLISE PREDITIVA -->
+                    <div style="background: ${getCorTema('card')}; border: 2px solid ${getCorTema('borda')}; border-radius: 12px; padding: 25px;">
+                        <h4 style="color: ${getCorTema('texto')}; margin: 0 0 20px 0; font-size: 18px; font-weight: 600;">
+                            Análise Preditiva de Altas em ${dataAtual}
+                        </h4>
+                        <div style="position: relative; height: 300px;">
+                            <canvas id="chart-altas-${hospitalId}"></canvas>
+                        </div>
+                    </div>
+                    
+                    <!-- GRÁFICO 2: CONCESSÕES (VERTICAL) -->
+                    <div style="background: ${getCorTema('card')}; border: 2px solid ${getCorTema('borda')}; border-radius: 12px; padding: 25px;">
+                        <h4 style="color: ${getCorTema('texto')}; margin: 0 0 20px 0; font-size: 18px; font-weight: 600;">
+                            Concessões Previstas em ${dataAtual}
+                        </h4>
+                        <div style="position: relative; height: 400px;">
+                            <canvas id="chart-concessoes-${hospitalId}"></canvas>
+                        </div>
+                    </div>
+                    
+                    <!-- GRÁFICO 3: LINHAS DE CUIDADO (VERTICAL) -->
+                    <div style="background: ${getCorTema('card')}; border: 2px solid ${getCorTema('borda')}; border-radius: 12px; padding: 25px;">
+                        <h4 style="color: ${getCorTema('texto')}; margin: 0 0 20px 0; font-size: 18px; font-weight: 600;">
+                            Linhas de Cuidado em ${dataAtual}
+                        </h4>
+                        <div style="position: relative; height: 500px;">
+                            <canvas id="chart-linhas-${hospitalId}"></canvas>
+                        </div>
+                    </div>
+                    
+                    <!-- GRÁFICO 4: REGIÃO -->
+                    <div style="background: ${getCorTema('card')}; border: 2px solid ${getCorTema('borda')}; border-radius: 12px; padding: 25px;">
+                        <h4 style="color: ${getCorTema('texto')}; margin: 0 0 20px 0; font-size: 18px; font-weight: 600;">
+                            Beneficiários por Região em ${dataAtual}
+                        </h4>
+                        <div style="position: relative; height: 350px;">
+                            <canvas id="chart-regiao-${hospitalId}"></canvas>
+                        </div>
+                    </div>
+                    
+                    <!-- GRÁFICO 5: TIPO OCUPAÇÃO -->
+                    <div style="background: ${getCorTema('card')}; border: 2px solid ${getCorTema('borda')}; border-radius: 12px; padding: 25px;">
+                        <h4 style="color: ${getCorTema('texto')}; margin: 0 0 20px 0; font-size: 18px; font-weight: 600;">
+                            Tipo de Ocupação em ${dataAtual}
+                        </h4>
+                        <div style="position: relative; height: 300px;">
+                            <canvas id="chart-tipo-${hospitalId}"></canvas>
+                        </div>
+                    </div>
+                </div>
             </div>
         `;
     }
-
-    // ===== CALCULAR KPIS =====
+    
+    // ==================== CALCULAR KPIS ====================
+    
     function calcularKPIs(leitos) {
         const total = leitos.length;
         const ocupados = leitos.filter(l => l.status === 'ocupado').length;
-        const vagos = total - ocupados;
-        const taxaOcupacao = total > 0 ? (ocupados / total * 100).toFixed(1) : 0;
-
-        // Contar altas previstas
-        const hoje = leitos.filter(l => 
-            l.status === 'ocupado' && 
-            l.prevAlta && 
-            ['Hoje Ouro', 'Hoje Prata', 'Hoje Bronze'].includes(l.prevAlta)
-        ).length;
-
-        // Contar por tipo
-        const apartamentos = leitos.filter(l => 
-            l.status === 'ocupado' && 
-            (l.categoriaEscolhida === 'Apartamento' || l.categoria === 'Apartamento')
-        ).length;
-
-        const enfermarias = leitos.filter(l => 
-            l.status === 'ocupado' && 
-            (l.categoriaEscolhida === 'Enfermaria' || l.categoria === 'Enfermaria')
-        ).length;
-
-        // Disponíveis
-        const aptosDisponiveis = leitos.filter(l => 
-            l.status === 'vago' && 
-            (l.tipo === 'Apartamento' || l.tipo === 'APTO')
-        ).length;
-
-        const enfDisponiveis = leitos.filter(l => 
-            l.status === 'vago' && 
-            (l.tipo === 'Enfermaria' || l.tipo === 'ENFERMARIA')
-        ).length;
-
-        // Isolamento
+        const vagos = leitos.filter(l => l.status === 'vago').length;
+        const percentualOcupacao = total > 0 ? Math.round((ocupados / total) * 100) : 0;
+        
+        // EM ALTA
+        const emAlta = leitos.filter(l => {
+            if (l.status !== 'ocupado') return false;
+            const prev = (l.prevAlta || '').toLowerCase();
+            return prev.includes('hoje') || prev === '24h';
+        }).length;
+        
+        // APARTAMENTOS OCUPADOS
+        const aptosOcupados = leitos.filter(l => {
+            if (l.status !== 'ocupado') return false;
+            const cat = (l.categoriaEscolhida || l.categoria || l.tipo || '').toLowerCase();
+            return cat.includes('apto') || cat.includes('apartamento');
+        }).length;
+        
+        // ENFERMARIAS OCUPADAS
+        const enfsOcupadas = leitos.filter(l => {
+            if (l.status !== 'ocupado') return false;
+            const cat = (l.categoriaEscolhida || l.categoria || l.tipo || '').toLowerCase();
+            return cat.includes('enf') || cat.includes('enfermaria');
+        }).length;
+        
+        // ENFERMARIAS DISPONÍVEIS
+        const totalEnfs = leitos.filter(l => {
+            const cat = (l.categoriaEscolhida || l.categoria || l.tipo || '').toLowerCase();
+            return cat.includes('enf') || cat.includes('enfermaria');
+        }).length;
+        
+        const enfsDisponiveis = totalEnfs > 0 ? (totalEnfs - enfsOcupadas) : 'N/A';
+        
+        // ISOLAMENTOS (SEPARADOS)
         const isolamentoResp = leitos.filter(l => 
-            l.status === 'ocupado' && 
-            l.isolamento === 'Isolamento Respiratório'
+            (l.isolamento || '').includes('Respirat')
         ).length;
-
+        
         const isolamentoContato = leitos.filter(l => 
-            l.status === 'ocupado' && 
-            l.isolamento === 'Isolamento de Contato'
+            (l.isolamento || '').includes('Contato')
         ).length;
-
-        // Diretivas
-        const diretivas = leitos.filter(l => 
-            l.status === 'ocupado' && 
-            l.diretivas === 'Sim'
+        
+        // COM DIRETIVAS
+        const comDiretivas = leitos.filter(l => 
+            (l.diretivas || '') === 'Sim'
         ).length;
-
-        // Idade média
+        
+        // IDADE MÉDIA
         const idades = leitos
-            .filter(l => l.status === 'ocupado' && l.idade && l.idade > 0)
+            .filter(l => l.status === 'ocupado' && l.idade)
             .map(l => parseInt(l.idade));
-        const idadeMedia = idades.length > 0 
-            ? (idades.reduce((a, b) => a + b, 0) / idades.length).toFixed(1) 
+        
+        const idadeMedia = idades.length > 0
+            ? Math.round(idades.reduce((a, b) => a + b, 0) / idades.length)
             : 0;
-
+        
         return {
             total,
             ocupados,
             vagos,
-            taxaOcupacao,
-            hoje,
-            apartamentos,
-            enfermarias,
-            aptosDisponiveis,
-            enfDisponiveis,
+            percentualOcupacao,
+            emAlta,
+            aptosOcupados,
+            enfsOcupadas,
+            enfsDisponiveis,
             isolamentoResp,
             isolamentoContato,
-            diretivas,
+            comDiretivas,
             idadeMedia
         };
     }
-
-    // ===== KPIS LINHA 1 =====
-    function renderKPIsLinha1(kpis) {
-        return `
-            <div class="kpis-linha1" style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 15px; margin-bottom: 20px;">
-                <!-- GAUGE -->
-                <div class="kpi-card" style="text-align: center; padding: 15px; background: var(--card-bg-secondary); border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
-                    <div style="font-size: 12px; color: var(--text-secondary); margin-bottom: 10px; font-weight: 600;">Taxa Ocupação</div>
-                    ${renderGaugeSVG(parseFloat(kpis.taxaOcupacao))}
-                </div>
-
-                <!-- TOTAL -->
-                <div class="kpi-card" style="text-align: center; padding: 15px; background: var(--card-bg-secondary); border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
-                    <div style="font-size: 12px; color: var(--text-secondary); margin-bottom: 5px; font-weight: 600;">Total de Leitos</div>
-                    <div style="font-size: 32px; font-weight: 700; color: var(--primary-color);">${kpis.total}</div>
-                </div>
-
-                <!-- OCUPADOS -->
-                <div class="kpi-card" style="text-align: center; padding: 15px; background: var(--card-bg-secondary); border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
-                    <div style="font-size: 12px; color: var(--text-secondary); margin-bottom: 5px; font-weight: 600;">Leitos Ocupados</div>
-                    <div style="font-size: 32px; font-weight: 700; color: #f59e0b;">${kpis.ocupados}</div>
-                </div>
-
-                <!-- VAGOS -->
-                <div class="kpi-card" style="text-align: center; padding: 15px; background: var(--card-bg-secondary); border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
-                    <div style="font-size: 12px; color: var(--text-secondary); margin-bottom: 5px; font-weight: 600;">Leitos Vagos</div>
-                    <div style="font-size: 32px; font-weight: 700; color: #10b981;">${kpis.vagos}</div>
-                </div>
-
-                <!-- EM ALTA -->
-                <div class="kpi-card" style="text-align: center; padding: 15px; background: var(--card-bg-secondary); border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
-                    <div style="font-size: 12px; color: var(--text-secondary); margin-bottom: 5px; font-weight: 600;">Em Alta Hoje</div>
-                    <div style="font-size: 32px; font-weight: 700; color: #3b82f6;">${kpis.hoje}</div>
-                </div>
-            </div>
-        `;
+    
+    // ==================== RENDER GRÁFICOS ====================
+    
+    function renderGraficosHospital(hospitalId, hospital) {
+        const leitos = hospital.leitos || [];
+        const kpis = calcularKPIs(leitos);
+        
+        // Gráfico 1: Gauge
+        criarGaugeOcupacao(hospitalId, kpis.percentualOcupacao);
+        
+        // Gráfico 2: Altas
+        criarGraficoAltas(hospitalId, leitos);
+        
+        // Gráfico 3: Concessões (VERTICAL)
+        criarGraficoConcessoes(hospitalId, leitos);
+        
+        // Gráfico 4: Linhas (VERTICAL)
+        criarGraficoLinhas(hospitalId, leitos);
+        
+        // Gráfico 5: Região
+        criarGraficoRegiao(hospitalId, leitos);
+        
+        // Gráfico 6: Tipo Ocupação
+        criarGraficoTipoOcupacao(hospitalId, leitos);
     }
-
-    // ===== KPIS LINHA 2 =====
-    function renderKPIsLinha2(kpis) {
-        return `
-            <div class="kpis-linha2" style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 15px; margin-bottom: 20px;">
-                <!-- APARTAMENTOS -->
-                <div class="kpi-mini" style="text-align: center; padding: 12px; background: var(--card-bg-secondary); border-radius: 8px;">
-                    <div style="font-size: 11px; color: var(--text-secondary); margin-bottom: 5px; font-weight: 600;">Apartamentos</div>
-                    <div style="font-size: 24px; font-weight: 700; color: var(--text-primary);">${kpis.apartamentos}</div>
-                    <div style="font-size: 10px; color: var(--text-secondary); margin-top: 3px;">${kpis.aptosDisponiveis} disp.</div>
-                </div>
-
-                <!-- ENFERMARIAS -->
-                <div class="kpi-mini" style="text-align: center; padding: 12px; background: var(--card-bg-secondary); border-radius: 8px;">
-                    <div style="font-size: 11px; color: var(--text-secondary); margin-bottom: 5px; font-weight: 600;">Enfermarias</div>
-                    <div style="font-size: 24px; font-weight: 700; color: var(--text-primary);">${kpis.enfermarias}</div>
-                    <div style="font-size: 10px; color: var(--text-secondary); margin-top: 3px;">${kpis.enfDisponiveis} disp.</div>
-                </div>
-
-                <!-- DISPONÍVEIS -->
-                <div class="kpi-mini" style="text-align: center; padding: 12px; background: var(--card-bg-secondary); border-radius: 8px;">
-                    <div style="font-size: 11px; color: var(--text-secondary); margin-bottom: 5px; font-weight: 600;">Disponíveis</div>
-                    <div style="font-size: 24px; font-weight: 700; color: #10b981;">${kpis.aptosDisponiveis + kpis.enfDisponiveis}</div>
-                </div>
-
-                <!-- ISO RESPIRATÓRIO -->
-                <div class="kpi-mini" style="text-align: center; padding: 12px; background: var(--card-bg-secondary); border-radius: 8px;">
-                    <div style="font-size: 11px; color: var(--text-secondary); margin-bottom: 5px; font-weight: 600;">Iso. Resp.</div>
-                    <div style="font-size: 24px; font-weight: 700; color: #ef4444;">${kpis.isolamentoResp}</div>
-                </div>
-
-                <!-- ISO CONTATO -->
-                <div class="kpi-mini" style="text-align: center; padding: 12px; background: var(--card-bg-secondary); border-radius: 8px;">
-                    <div style="font-size: 11px; color: var(--text-secondary); margin-bottom: 5px; font-weight: 600;">Iso. Contato</div>
-                    <div style="font-size: 24px; font-weight: 700; color: #f59e0b;">${kpis.isolamentoContato}</div>
-                </div>
-
-                <!-- DIRETIVAS -->
-                <div class="kpi-mini" style="text-align: center; padding: 12px; background: var(--card-bg-secondary); border-radius: 8px;">
-                    <div style="font-size: 11px; color: var(--text-secondary); margin-bottom: 5px; font-weight: 600;">Diretivas</div>
-                    <div style="font-size: 24px; font-weight: 700; color: #8b5cf6;">${kpis.diretivas}</div>
-                </div>
-
-                <!-- IDADE MÉDIA -->
-                <div class="kpi-mini" style="text-align: center; padding: 12px; background: var(--card-bg-secondary); border-radius: 8px;">
-                    <div style="font-size: 11px; color: var(--text-secondary); margin-bottom: 5px; font-weight: 600;">Idade Média</div>
-                    <div style="font-size: 24px; font-weight: 700; color: var(--text-primary);">${kpis.idadeMedia}</div>
-                    <div style="font-size: 10px; color: var(--text-secondary); margin-top: 3px;">anos</div>
-                </div>
-            </div>
-        `;
-    }
-
-    // ===== GAUGE SVG =====
-    function renderGaugeSVG(porcentagem) {
-        // Limitar entre 0-100
-        porcentagem = Math.max(0, Math.min(100, porcentagem));
-
-        // Cores baseadas na porcentagem
-        let cor = '#10b981'; // Verde
-        if (porcentagem >= 90) cor = '#ef4444'; // Vermelho
-        else if (porcentagem >= 70) cor = '#f59e0b'; // Amarelo
-
-        // Cálculo para meia-rosca (180°)
-        const circunferencia = Math.PI * 90; // Meia circunferência (raio 45)
-        const progresso = (porcentagem / 100) * circunferencia;
-
-        return `
-            <svg width="120" height="70" viewBox="0 0 120 70" style="display: block; margin: 0 auto;">
-                <!-- Fundo cinza (meia-rosca) -->
-                <path 
-                    d="M 10 60 A 45 45 0 0 1 110 60" 
-                    fill="none" 
-                    stroke="#e5e7eb" 
-                    stroke-width="12" 
-                    stroke-linecap="round"
-                />
-                
-                <!-- Progresso colorido -->
-                <path 
-                    d="M 10 60 A 45 45 0 0 1 110 60" 
-                    fill="none" 
-                    stroke="${cor}" 
-                    stroke-width="12" 
-                    stroke-linecap="round"
-                    stroke-dasharray="${circunferencia}"
-                    stroke-dashoffset="${circunferencia - progresso}"
-                    style="transition: stroke-dashoffset 0.3s ease;"
-                />
-                
-                <!-- PERCENTUAL DENTRO -->
-                <text 
-                    x="60" 
-                    y="55" 
-                    text-anchor="middle" 
-                    font-size="24" 
-                    font-weight="700" 
-                    fill="var(--text-primary)"
-                >
-                    ${porcentagem}%
-                </text>
-            </svg>
-        `;
-    }
-
-    // ===== PLACEHOLDERS DOS GRÁFICOS =====
-    function renderGraficosPlaceholders(hospitalId) {
-        return `
-            <div class="graficos-container" style="display: grid; grid-template-columns: 1fr; gap: 30px; margin-top: 20px;">
-                <!-- Gráfico 1 -->
-                <div class="grafico-box" style="background: var(--card-bg-secondary); padding: 15px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
-                    <h3 style="font-size: 14px; color: var(--text-secondary); margin-bottom: 10px; font-weight: 600;">📊 Análise Preditiva de Altas</h3>
-                    <div style="height: 400px; position: relative;">
-                        <canvas id="graficoAltas_${hospitalId}"></canvas>
-                    </div>
-                </div>
-
-                <!-- Gráfico 2 -->
-                <div class="grafico-box" style="background: var(--card-bg-secondary); padding: 15px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
-                    <h3 style="font-size: 14px; color: var(--text-secondary); margin-bottom: 10px; font-weight: 600;">🏥 Concessões de Alta (Top 10)</h3>
-                    <div style="height: 400px; position: relative;">
-                        <canvas id="graficoConcessoes_${hospitalId}"></canvas>
-                    </div>
-                </div>
-
-                <!-- Gráfico 3 -->
-                <div class="grafico-box" style="background: var(--card-bg-secondary); padding: 15px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
-                    <h3 style="font-size: 14px; color: var(--text-secondary); margin-bottom: 10px; font-weight: 600;">🩺 Linhas de Cuidado (Top 15)</h3>
-                    <div style="height: 500px; position: relative;">
-                        <canvas id="graficoLinhas_${hospitalId}"></canvas>
-                    </div>
-                </div>
-
-                <!-- Gráfico 4 -->
-                <div class="grafico-box" style="background: var(--card-bg-secondary); padding: 15px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
-                    <h3 style="font-size: 14px; color: var(--text-secondary); margin-bottom: 10px; font-weight: 600;">📍 Pacientes por Região</h3>
-                    <div style="height: 400px; position: relative;">
-                        <canvas id="graficoRegiao_${hospitalId}"></canvas>
-                    </div>
-                </div>
-
-                <!-- Gráfico 5 -->
-                <div class="grafico-box" style="background: var(--card-bg-secondary); padding: 15px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
-                    <h3 style="font-size: 14px; color: var(--text-secondary); margin-bottom: 10px; font-weight: 600;">🏠 Tipo de Ocupação</h3>
-                    <div style="height: 400px; position: relative;">
-                        <canvas id="graficoTipo_${hospitalId}"></canvas>
-                    </div>
-                </div>
-            </div>
-        `;
-    }
-
-    // ===== RENDERIZAR GRÁFICOS =====
-    function renderGraficos(hospitalId, leitos) {
-        console.log('[GRÁFICOS] Renderizando para', hospitalId, 'com', leitos.length, 'leitos');
-
-        const leitosOcupados = leitos.filter(l => l.status === 'ocupado');
-
-        // Destruir gráficos antigos se existirem
-        ['Altas', 'Concessoes', 'Linhas', 'Regiao', 'Tipo'].forEach(tipo => {
-            const canvasId = `grafico${tipo}_${hospitalId}`;
-            const canvas = document.getElementById(canvasId);
-            if (canvas) {
-                const chartInstance = Chart.getChart(canvas);
-                if (chartInstance) {
-                    chartInstance.destroy();
-                }
-            }
-        });
-
-        // Renderizar cada gráfico
-        renderGraficoAltas(hospitalId, leitosOcupados);
-        renderGraficoConcessoes(hospitalId, leitosOcupados);
-        renderGraficoLinhas(hospitalId, leitosOcupados);
-        renderGraficoRegiao(hospitalId, leitosOcupados);
-        renderGraficoTipo(hospitalId, leitosOcupados);
-    }
-
-    // ===== GRÁFICO DE ALTAS =====
-    function renderGraficoAltas(hospitalId, leitos) {
-        const canvas = document.getElementById(`graficoAltas_${hospitalId}`);
+    
+    // ==================== GAUGE OCUPAÇÃO (MEIA-ROSCA COM % DENTRO) ====================
+    
+    function criarGaugeOcupacao(hospitalId, percentual) {
+        const canvas = document.getElementById(`gauge-${hospitalId}`);
         if (!canvas) return;
-
-        // Ordem fixa conforme manual
-        const ordemFixa = ['Hoje Ouro', 'Hoje Prata', 'Hoje Bronze', '24H', '48H', '72H', '96H', 'SP'];
-        const contadores = {};
-        ordemFixa.forEach(k => contadores[k] = 0);
-
-        // Contar
-        leitos.forEach(leito => {
-            const prev = leito.prevAlta;
-            if (prev && contadores.hasOwnProperty(prev)) {
-                contadores[prev]++;
+        
+        const ctx = canvas.getContext('2d');
+        
+        // Destruir gráfico anterior se existir
+        if (window[`chart_gauge_${hospitalId}`]) {
+            window[`chart_gauge_${hospitalId}`].destroy();
+        }
+        
+        // Cores baseadas no percentual
+        let corPreenchimento;
+        if (percentual >= 80) {
+            corPreenchimento = '#ef4444'; // Vermelho
+        } else if (percentual >= 60) {
+            corPreenchimento = '#f59e0b'; // Amarelo
+        } else {
+            corPreenchimento = '#10b981'; // Verde
+        }
+        
+        const corFundo = temaAtual === 'escuro' ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)';
+        
+        // Plugin para texto central
+        const centerTextPlugin = {
+            id: 'centerText',
+            afterDraw: (chart) => {
+                const ctx = chart.ctx;
+                const centerX = chart.chartArea.left + (chart.chartArea.right - chart.chartArea.left) / 2;
+                const centerY = chart.chartArea.top + (chart.chartArea.bottom - chart.chartArea.top) / 2 + 20;
+                
+                ctx.save();
+                ctx.font = 'bold 32px Arial';
+                ctx.fillStyle = getCorTema('texto');
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText(`${percentual}%`, centerX, centerY);
+                ctx.restore();
             }
-        });
-
-        // Preparar dados
-        const labels = [];
-        const valores = [];
-        ordemFixa.forEach(key => {
-            labels.push(key);
-            valores.push(contadores[key]);
-        });
-
-        // Cores fixas
-        const coresFixas = {
-            'Hoje Ouro': '#FFD700',
-            'Hoje Prata': '#C0C0C0',
-            'Hoje Bronze': '#CD7F32',
-            '24H': '#3b82f6',
-            '48H': '#10b981',
-            '72H': '#f59e0b',
-            '96H': '#ef4444',
-            'SP': '#8b5cf6'
         };
-        const cores = labels.map(l => coresFixas[l] || '#999999');
-
-        new Chart(canvas, {
+        
+        const config = {
+            type: 'doughnut',
+            data: {
+                datasets: [{
+                    data: [percentual, 100 - percentual],
+                    backgroundColor: [corPreenchimento, corFundo],
+                    borderWidth: 0
+                }]
+            },
+            options: {
+                rotation: -90,        // ← MEIA ROSCA
+                circumference: 180,   // ← MEIA ROSCA
+                cutout: '75%',
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: { enabled: false }
+                }
+            },
+            plugins: [centerTextPlugin]
+        };
+        
+        window[`chart_gauge_${hospitalId}`] = new Chart(ctx, config);
+    }
+    
+    // ==================== GRÁFICO ALTAS ====================
+    
+    function criarGraficoAltas(hospitalId, leitos) {
+        const canvas = document.getElementById(`chart-altas-${hospitalId}`);
+        if (!canvas) return;
+        
+        const ctx = canvas.getContext('2d');
+        
+        if (window[`chart_altas_${hospitalId}`]) {
+            window[`chart_altas_${hospitalId}`].destroy();
+        }
+        
+        // Contar altas
+        const categorias = ['Hoje Ouro', 'Hoje Prata', 'Hoje Bronze', '24H', '48H', '72H', '96H', 'SP'];
+        const valores = categorias.map(cat => {
+            return leitos.filter(l => {
+                const prev = l.prevAlta || '';
+                return prev === cat || prev.toLowerCase() === cat.toLowerCase();
+            }).length;
+        });
+        
+        const cores = [
+            '#FFD700', '#C0C0C0', '#CD7F32', 
+            '#3b82f6', '#8b5cf6', '#ec4899', 
+            '#f59e0b', '#10b981'
+        ];
+        
+        const config = {
             type: 'bar',
             data: {
-                labels: labels,
+                labels: categorias,
                 datasets: [{
                     label: 'Pacientes',
                     data: valores,
                     backgroundColor: cores,
+                    borderColor: getCorTema('borda'),
+                    borderWidth: 2,
                     maxBarThickness: 80
                 }]
             },
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
-                animation: false, // ✅ DESATIVAR ANIMAÇÃO
+                indexAxis: 'x',
                 plugins: {
                     legend: { display: false },
-                    datalabels: {
-                        anchor: 'end',
-                        align: 'end',
-                        color: 'var(--text-primary)',
-                        font: { size: 12, weight: 'bold' },
-                        formatter: (value) => value > 0 ? value : ''
+                    tooltip: {
+                        backgroundColor: getCorTema('card'),
+                        titleColor: getCorTema('texto'),
+                        bodyColor: getCorTema('texto'),
+                        borderColor: getCorTema('borda'),
+                        borderWidth: 2
                     }
                 },
                 scales: {
-                    y: {
-                        beginAtZero: true,
-                        ticks: { 
-                            stepSize: 1,
-                            color: 'var(--text-secondary)'
-                        },
-                        grid: { color: 'var(--border-color)' }
-                    },
                     x: {
-                        ticks: { color: 'var(--text-secondary)' },
-                        grid: { display: false }
+                        ticks: { color: getCorTema('texto') },
+                        grid: { color: getCorTema('borda') }
+                    },
+                    y: {
+                        ticks: { color: getCorTema('texto'), stepSize: 1 },
+                        grid: { color: getCorTema('borda') }
                     }
                 }
-            },
-            plugins: typeof window.ChartDataLabels !== 'undefined' ? [window.ChartDataLabels] : []
-        });
+            }
+        };
+        
+        window[`chart_altas_${hospitalId}`] = new Chart(ctx, config);
     }
-
-    // ===== GRÁFICO DE CONCESSÕES =====
-    function renderGraficoConcessoes(hospitalId, leitos) {
-        const canvas = document.getElementById(`graficoConcessoes_${hospitalId}`);
+    
+    // ==================== GRÁFICO CONCESSÕES (VERTICAL) ====================
+    
+    function criarGraficoConcessoes(hospitalId, leitos) {
+        const canvas = document.getElementById(`chart-concessoes-${hospitalId}`);
         if (!canvas) return;
-
+        
+        const ctx = canvas.getContext('2d');
+        
+        if (window[`chart_concessoes_${hospitalId}`]) {
+            window[`chart_concessoes_${hospitalId}`].destroy();
+        }
+        
         // Contar concessões
-        const contadores = {};
+        const concessoesMap = {};
         leitos.forEach(leito => {
-            if (leito.concessoes && Array.isArray(leito.concessoes)) {
+            if (leito.status === 'ocupado' && leito.concessoes) {
                 leito.concessoes.forEach(c => {
-                    contadores[c] = (contadores[c] || 0) + 1;
+                    concessoesMap[c] = (concessoesMap[c] || 0) + 1;
                 });
             }
         });
-
-        // Top 10
-        const top10 = Object.entries(contadores)
-            .sort((a, b) => b[1] - a[1])
-            .slice(0, 10);
-
-        if (top10.length === 0) {
-            canvas.parentElement.innerHTML = '<p style="text-align: center; color: var(--text-secondary);">Sem dados</p>';
-            return;
-        }
-
-        const labels = top10.map(t => t[0]);
-        const valores = top10.map(t => t[1]);
-
-        // Buscar cores do api.js
-        const cores = labels.map(label => {
-            const cor = window.CORES_CONCESSOES?.[label];
-            if (!cor) console.warn('[CORES] Não encontrada:', label);
-            return cor || '#999999';
-        });
-
-        new Chart(canvas, {
-            type: 'bar',
-            data: {
-                labels: labels,
-                datasets: [{
-                    label: 'Pacientes',
-                    data: valores,
-                    backgroundColor: cores,
-                    maxBarThickness: 80
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                animation: false, // ✅ DESATIVAR ANIMAÇÃO
-                plugins: {
-                    legend: { display: false },
-                    datalabels: {
-                        anchor: 'end',
-                        align: 'end',
-                        color: 'var(--text-primary)',
-                        font: { size: 12, weight: 'bold' },
-                        formatter: (value) => value > 0 ? value : ''
-                    }
-                },
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        ticks: { 
-                            stepSize: 1,
-                            color: 'var(--text-secondary)'
-                        },
-                        grid: { color: 'var(--border-color)' }
-                    },
-                    x: {
-                        ticks: { 
-                            color: 'var(--text-secondary)',
-                            maxRotation: 45,
-                            minRotation: 45
-                        },
-                        grid: { display: false }
-                    }
-                }
-            },
-            plugins: typeof window.ChartDataLabels !== 'undefined' ? [window.ChartDataLabels] : []
-        });
-    }
-
-    // ===== GRÁFICO DE LINHAS =====
-    function renderGraficoLinhas(hospitalId, leitos) {
-        const canvas = document.getElementById(`graficoLinhas_${hospitalId}`);
-        if (!canvas) return;
-
-        // Contar linhas
-        const contadores = {};
-        leitos.forEach(leito => {
-            if (leito.linhas && Array.isArray(leito.linhas)) {
-                leito.linhas.forEach(l => {
-                    contadores[l] = (contadores[l] || 0) + 1;
-                });
-            }
-        });
-
-        // Top 15
-        const top15 = Object.entries(contadores)
-            .sort((a, b) => b[1] - a[1])
-            .slice(0, 15);
-
-        if (top15.length === 0) {
-            canvas.parentElement.innerHTML = '<p style="text-align: center; color: var(--text-secondary);">Sem dados</p>';
-            return;
-        }
-
-        const labels = top15.map(t => t[0]);
-        const valores = top15.map(t => t[1]);
-
+        
+        const labels = Object.keys(concessoesMap);
+        const valores = Object.values(concessoesMap);
+        
         // Buscar cores
         const cores = labels.map(label => {
-            const cor = window.CORES_LINHAS?.[label];
-            if (!cor) console.warn('[CORES] Não encontrada:', label);
-            return cor || '#999999';
+            return window.CORES_CONCESSOES?.[label] || '#999999';
         });
-
-        new Chart(canvas, {
+        
+        const config = {
             type: 'bar',
             data: {
                 labels: labels,
                 datasets: [{
-                    label: 'Pacientes',
+                    label: 'Quantidade',
                     data: valores,
                     backgroundColor: cores,
+                    borderColor: getCorTema('borda'),
+                    borderWidth: 2,
                     maxBarThickness: 80
                 }]
             },
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
-                animation: false, // ✅ DESATIVAR ANIMAÇÃO
+                indexAxis: 'x',  // ← VERTICAL
                 plugins: {
                     legend: { display: false },
-                    datalabels: {
-                        anchor: 'end',
-                        align: 'end',
-                        color: 'var(--text-primary)',
-                        font: { size: 12, weight: 'bold' },
-                        formatter: (value) => value > 0 ? value : ''
+                    tooltip: {
+                        backgroundColor: getCorTema('card'),
+                        titleColor: getCorTema('texto'),
+                        bodyColor: getCorTema('texto'),
+                        borderColor: getCorTema('borda'),
+                        borderWidth: 2
                     }
                 },
                 scales: {
-                    y: {
-                        beginAtZero: true,
-                        ticks: { 
-                            stepSize: 1,
-                            color: 'var(--text-secondary)'
-                        },
-                        grid: { color: 'var(--border-color)' }
-                    },
                     x: {
                         ticks: { 
-                            color: 'var(--text-secondary)',
+                            color: getCorTema('texto'),
                             maxRotation: 45,
                             minRotation: 45
                         },
-                        grid: { display: false }
+                        grid: { color: getCorTema('borda') }
+                    },
+                    y: {
+                        ticks: { color: getCorTema('texto'), stepSize: 1 },
+                        grid: { color: getCorTema('borda') }
                     }
                 }
-            },
-            plugins: typeof window.ChartDataLabels !== 'undefined' ? [window.ChartDataLabels] : []
-        });
+            }
+        };
+        
+        window[`chart_concessoes_${hospitalId}`] = new Chart(ctx, config);
     }
-
-    // ===== GRÁFICO DE REGIÃO (PIZZA) =====
-    function renderGraficoRegiao(hospitalId, leitos) {
-        const canvas = document.getElementById(`graficoRegiao_${hospitalId}`);
+    
+    // ==================== GRÁFICO LINHAS (VERTICAL) ====================
+    
+    function criarGraficoLinhas(hospitalId, leitos) {
+        const canvas = document.getElementById(`chart-linhas-${hospitalId}`);
         if (!canvas) return;
-
+        
+        const ctx = canvas.getContext('2d');
+        
+        if (window[`chart_linhas_${hospitalId}`]) {
+            window[`chart_linhas_${hospitalId}`].destroy();
+        }
+        
+        // Contar linhas
+        const linhasMap = {};
+        leitos.forEach(leito => {
+            if (leito.status === 'ocupado' && leito.linhas) {
+                leito.linhas.forEach(l => {
+                    linhasMap[l] = (linhasMap[l] || 0) + 1;
+                });
+            }
+        });
+        
+        const labels = Object.keys(linhasMap);
+        const valores = Object.values(linhasMap);
+        
+        // Buscar cores
+        const cores = labels.map(label => {
+            return window.CORES_LINHAS?.[label] || '#999999';
+        });
+        
+        const config = {
+            type: 'bar',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Quantidade',
+                    data: valores,
+                    backgroundColor: cores,
+                    borderColor: getCorTema('borda'),
+                    borderWidth: 2,
+                    maxBarThickness: 80
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                indexAxis: 'x',  // ← VERTICAL
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        backgroundColor: getCorTema('card'),
+                        titleColor: getCorTema('texto'),
+                        bodyColor: getCorTema('texto'),
+                        borderColor: getCorTema('borda'),
+                        borderWidth: 2
+                    }
+                },
+                scales: {
+                    x: {
+                        ticks: { 
+                            color: getCorTema('texto'),
+                            maxRotation: 45,
+                            minRotation: 45
+                        },
+                        grid: { color: getCorTema('borda') }
+                    },
+                    y: {
+                        ticks: { color: getCorTema('texto'), stepSize: 1 },
+                        grid: { color: getCorTema('borda') }
+                    }
+                }
+            }
+        };
+        
+        window[`chart_linhas_${hospitalId}`] = new Chart(ctx, config);
+    }
+    
+    // ==================== GRÁFICO REGIÃO (PIZZA COM NÚMEROS) ====================
+    
+    function criarGraficoRegiao(hospitalId, leitos) {
+        const canvas = document.getElementById(`chart-regiao-${hospitalId}`);
+        if (!canvas) return;
+        
+        const ctx = canvas.getContext('2d');
+        
+        if (window[`chart_regiao_${hospitalId}`]) {
+            window[`chart_regiao_${hospitalId}`].destroy();
+        }
+        
         // Contar regiões
-        const contadores = {};
+        const regiaoMap = {};
         leitos.forEach(leito => {
-            const regiao = leito.regiao || 'Não informado';
-            contadores[regiao] = (contadores[regiao] || 0) + 1;
+            if (leito.status === 'ocupado' && leito.regiao) {
+                regiaoMap[leito.regiao] = (regiaoMap[leito.regiao] || 0) + 1;
+            }
         });
-
-        if (Object.keys(contadores).length === 0) {
-            canvas.parentElement.innerHTML = '<p style="text-align: center; color: var(--text-secondary);">Sem dados</p>';
-            return;
-        }
-
-        const labels = Object.keys(contadores);
-        const valores = Object.values(contadores);
-
-        // Cores variadas para regiões
-        const coresPadrao = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#14b8a6', '#f97316', '#6366f1'];
-        const cores = labels.map((_, i) => coresPadrao[i % coresPadrao.length]);
-
-        new Chart(canvas, {
+        
+        const labels = Object.keys(regiaoMap);
+        const valores = Object.values(regiaoMap);
+        
+        const cores = [
+            '#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF',
+            '#FF9F40', '#FF6384', '#C9CBCF', '#4BC0C0'
+        ];
+        
+        const config = {
             type: 'pie',
             data: {
                 labels: labels,
                 datasets: [{
                     data: valores,
-                    backgroundColor: cores
+                    backgroundColor: cores.slice(0, labels.length)
                 }]
             },
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
-                animation: false, // ✅ DESATIVAR ANIMAÇÃO
                 plugins: {
                     legend: {
-                        position: 'bottom',
-                        labels: { color: 'var(--text-primary)' }
+                        display: true,
+                        position: 'right',
+                        labels: {
+                            color: getCorTema('texto'),
+                            font: { size: 14 },
+                            generateLabels: (chart) => {
+                                const data = chart.data;
+                                return data.labels.map((label, i) => ({
+                                    text: `${label}: ${data.datasets[0].data[i]}`,
+                                    fillStyle: data.datasets[0].backgroundColor[i],
+                                    hidden: false,
+                                    index: i
+                                }));
+                            }
+                        }
+                    },
+                    tooltip: {
+                        backgroundColor: getCorTema('card'),
+                        titleColor: getCorTema('texto'),
+                        bodyColor: getCorTema('texto'),
+                        borderColor: getCorTema('borda'),
+                        borderWidth: 2
                     },
                     datalabels: {
+                        display: true,
                         color: '#ffffff',
-                        font: { size: 14, weight: 'bold' },
-                        formatter: (value, context) => {
-                            const total = context.dataset.data.reduce((a, b) => a + b, 0);
-                            const porcentagem = ((value / total) * 100).toFixed(1);
-                            return `${value}\n(${porcentagem}%)`;
-                        }
+                        font: {
+                            size: 18,
+                            weight: 'bold'
+                        },
+                        formatter: (value) => value
                     }
                 }
-            },
-            plugins: typeof window.ChartDataLabels !== 'undefined' ? [window.ChartDataLabels] : []
-        });
+            }
+        };
+        
+        window[`chart_regiao_${hospitalId}`] = new Chart(ctx, config);
     }
-
-    // ===== GRÁFICO DE TIPO (PIZZA) =====
-    function renderGraficoTipo(hospitalId, leitos) {
-        const canvas = document.getElementById(`graficoTipo_${hospitalId}`);
+    
+    // ==================== GRÁFICO TIPO OCUPAÇÃO (PIZZA COM NÚMEROS) ====================
+    
+    function criarGraficoTipoOcupacao(hospitalId, leitos) {
+        const canvas = document.getElementById(`chart-tipo-${hospitalId}`);
         if (!canvas) return;
-
-        // Contar por tipo
-        const contadores = {
-            'Apartamento': 0,
-            'Enfermaria': 0,
-            'Não informado': 0
-        };
-
-        leitos.forEach(leito => {
-            const cat = leito.categoriaEscolhida || leito.categoria || 'Não informado';
-            if (cat === 'Apartamento') {
-                contadores['Apartamento']++;
-            } else if (cat === 'Enfermaria') {
-                contadores['Enfermaria']++;
-            } else {
-                contadores['Não informado']++;
-            }
-        });
-
-        // Remover zeros
-        const labels = [];
-        const valores = [];
-        Object.entries(contadores).forEach(([key, value]) => {
-            if (value > 0) {
-                labels.push(key);
-                valores.push(value);
-            }
-        });
-
-        if (labels.length === 0) {
-            canvas.parentElement.innerHTML = '<p style="text-align: center; color: var(--text-secondary);">Sem dados</p>';
-            return;
+        
+        const ctx = canvas.getContext('2d');
+        
+        if (window[`chart_tipo_${hospitalId}`]) {
+            window[`chart_tipo_${hospitalId}`].destroy();
         }
-
-        const cores = {
-            'Apartamento': '#3b82f6',
-            'Enfermaria': '#10b981',
-            'Não informado': '#6b7280'
-        };
-        const coresArray = labels.map(l => cores[l] || '#999999');
-
-        new Chart(canvas, {
+        
+        // Contar tipos
+        const tipoMap = { 'Apartamento': 0, 'Enfermaria': 0 };
+        leitos.forEach(leito => {
+            if (leito.status === 'ocupado') {
+                const cat = (leito.categoriaEscolhida || leito.categoria || leito.tipo || '').toLowerCase();
+                if (cat.includes('apto') || cat.includes('apartamento')) {
+                    tipoMap['Apartamento']++;
+                } else if (cat.includes('enf') || cat.includes('enfermaria')) {
+                    tipoMap['Enfermaria']++;
+                }
+            }
+        });
+        
+        const labels = Object.keys(tipoMap);
+        const valores = Object.values(tipoMap);
+        
+        const config = {
             type: 'pie',
             data: {
                 labels: labels,
                 datasets: [{
                     data: valores,
-                    backgroundColor: coresArray
+                    backgroundColor: ['#3b82f6', '#f59e0b']
                 }]
             },
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
-                animation: false, // ✅ DESATIVAR ANIMAÇÃO
                 plugins: {
                     legend: {
-                        position: 'bottom',
-                        labels: { color: 'var(--text-primary)' }
+                        display: true,
+                        position: 'right',
+                        labels: {
+                            color: getCorTema('texto'),
+                            font: { size: 14 },
+                            generateLabels: (chart) => {
+                                const data = chart.data;
+                                return data.labels.map((label, i) => ({
+                                    text: `${label}: ${data.datasets[0].data[i]}`,
+                                    fillStyle: data.datasets[0].backgroundColor[i],
+                                    hidden: false,
+                                    index: i
+                                }));
+                            }
+                        }
+                    },
+                    tooltip: {
+                        backgroundColor: getCorTema('card'),
+                        titleColor: getCorTema('texto'),
+                        bodyColor: getCorTema('texto'),
+                        borderColor: getCorTema('borda'),
+                        borderWidth: 2
                     },
                     datalabels: {
+                        display: true,
                         color: '#ffffff',
-                        font: { size: 14, weight: 'bold' },
-                        formatter: (value, context) => {
-                            const total = context.dataset.data.reduce((a, b) => a + b, 0);
-                            const porcentagem = ((value / total) * 100).toFixed(1);
-                            return `${value}\n(${porcentagem}%)`;
-                        }
+                        font: {
+                            size: 18,
+                            weight: 'bold'
+                        },
+                        formatter: (value) => value
                     }
                 }
-            },
-            plugins: typeof window.ChartDataLabels !== 'undefined' ? [window.ChartDataLabels] : []
-        });
+            }
+        };
+        
+        window[`chart_tipo_${hospitalId}`] = new Chart(ctx, config);
     }
-
-    // ===== FUNÇÃO TEMA =====
-    window.toggleDashboardTheme = function() {
-        document.body.classList.toggle('light-theme');
-    };
-
-    console.log('[DASHBOARD HOSPITALAR V3.3.2 FINAL] ✅ Carregado com sucesso!');
+    
+    // ==================== INICIALIZAÇÃO ====================
+    
+    console.log('[DASHBOARD HOSPITALAR V3.3.2 FINAL] Módulo carregado com sucesso');
+    console.log('[CORREÇÕES APLICADAS]');
+    console.log('  ✅ Gauge meia-rosca com percentual DENTRO');
+    console.log('  ✅ KPIs com dados REAIS (não hardcoded)');
+    console.log('  ✅ Barras SEMPRE VERTICAIS (Concessões e Linhas)');
+    console.log('  ✅ Números SEMPRE VISÍVEIS nos pizzas');
+    console.log('  ✅ Todos os 5 hospitais carregam');
+    
 })();
