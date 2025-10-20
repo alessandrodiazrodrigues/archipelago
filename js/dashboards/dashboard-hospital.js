@@ -1,901 +1,701 @@
-/**
- * ╔═══════════════════════════════════════════════════════════════════════════╗
- * ║               DASHBOARD HOSPITALAR V3.3.2 - ARCHIPELAGO                   ║
- * ╠═══════════════════════════════════════════════════════════════════════════╣
- * ║ Cliente: Guilherme Santoro                                                ║
- * ║ Desenvolvedor: Alessandro Rodrigues                                       ║
- * ║ Data: 20/Outubro/2025                                                     ║
- * ║ Status: ✅ CORRIGIDO - Fundo dark, layout 1/linha, barras individuais    ║
- * ╚═══════════════════════════════════════════════════════════════════════════╝
- * 
- * CORREÇÕES APLICADAS:
- * ✅ Fundo dark (#1a202c) aplicado automaticamente
- * ✅ Gráficos 1 por linha (grid-template-columns: 1fr)
- * ✅ Concessões: 1 barra POR concessão (total de todos os prazos)
- * ✅ Linhas: 1 barra POR linha de cuidado (total de todos os prazos)
- * ✅ Logs de debug detalhados
+/*!
+ * Dashboard Hospitalar V3.3.2 — Archipelago MVP
+ * Requisitos:
+ * - Sem mock (usa apenas window.hospitalData carregado pela API)
+ * - Função pública: window.renderDashboardHospitalar(hospitalId = 'todos')
+ * - Neomater primeiro; gauge meia-rosca como 1º KPI
+ * - Barras verticais (Altas, Concessões, Linhas); Pizzas (Região, Tipo)
+ * - Legenda HTML externa, 1 item/linha, clicável
  */
 
-(function() {
-    'use strict';
+(function(){
+  'use strict';
 
-    // ═══════════════════════════════════════════════════════════════════════
-    // CONFIGURAÇÕES E CONSTANTES
-    // ═══════════════════════════════════════════════════════════════════════
+  // ============================
+  //  CORES OFICIAIS (constantes)
+  // ============================
+  window.CORES_CONCESSOES = {
+    'Transição Domiciliar': '#007A53',
+    'Aplicação domiciliar de medicamentos': '#582C83',
+    'Aspiração': '#2E1A47',
+    'Banho': '#8FD3F4',
+    'Curativo': '#00BFB3',
+    'Curativo PICC': '#E03C31',
+    'Fisioterapia Domiciliar': '#009639',
+    'Fonoaudiologia Domiciliar': '#FF671F',
+    'Oxigenoterapia': '#64A70B',
+    'Remoção': '#FFB81C',
+    'Solicitação domiciliar de exames': '#546E7A',
+  };
 
-    const ORDEM_HOSPITAIS = ['H1', 'H2', 'H3', 'H4', 'H5'];
+  window.CORES_LINHAS = {
+    'Assiste': '#ED0A72',
+    'APS SP': '#007A33',
+    'Cuidados Paliativos': '#00B5A2',
+    'ICO (Insuficiência Coronariana)': '#A6192E',
+    'Nexus SP Cardiologia': '#C8102E',
+    'Nexus SP Gastroentereologia': '#455A64',
+    'Nexus SP Geriatria': '#E35205',
+    'Nexus SP Pneumologia': '#4A148C',
+    'Nexus SP Psiquiatria': '#3E2723',
+    'Nexus SP Reumatologia': '#E91E63',
+    'Nexus SP Saúde do Fígado': '#556F44',
+    'Generalista': '#FFC72C',
+    'Bucomaxilofacial': '#D81B60',
+    'Cardiologia': '#5A0020',
+    'Cirurgia Cardíaca': '#9CCC65',
+    'Cirurgia de Cabeça e Pescoço': '#7CB342',
+    'Cirurgia do Aparelho Digestivo': '#00263A',
+    'Cirurgia Geral': '#00AEEF',
+    'Cirurgia Oncológica': '#0072CE',
+    'Cirurgia Plástica': '#8E24AA',
+    'Cirurgia Torácica': '#BA68C8',
+    'Cirurgia Vascular': '#AED581',
+    'Clínica Médica': '#F4E285',
+    'Coloproctologia': '#C2185B',
+    'Dermatologia': '#9C27B0',
+    'Endocrinologia': '#37474F',
+    'Fisiatria': '#E8927C',
+    'Gastroenterologia': '#003C57',
+    'Geriatria': '#FF6F1D',
+    'Ginecologia e Obstetrícia': '#582D40',
+    'Hematologia': '#1E88E5',
+    'Infectologia': '#4A7C59',
+    'Mastologia': '#5C5EBE',
+    'Nefrologia': '#7B1FA2',
+    'Neurocirurgia': '#1565C0',
+    'Neurologia': '#64B5F6',
+    'Oftalmologia': '#6D4C41',
+    'Oncologia Clínica': '#6A1B9A',
+    'Ortopedia': '#42A5F5',
+    'Otorrinolaringologia': '#AD1457',
+    'Pediatria': '#5A646B',
+    'Pneumologia': '#1976D2',
+    'Psiquiatria': '#4E342E',
+    'Reumatologia': '#880E4F',
+    'Urologia': '#2D5016',
+  };
 
-    const NOMES_HOSPITAIS = {
-        H1: 'Neomater',
-        H2: 'Cruz Azul',
-        H3: 'Santa Marcelina',
-        H4: 'Santa Clara',
-        H5: 'Hospital Adventista'
+  // Helpers de cor
+  function corConcessao(nome){ return window.CORES_CONCESSOES?.[nome] || '#999999'; }
+  function corLinha(nome){ return window.CORES_LINHAS?.[nome] || '#999999'; }
+
+  // ============================
+  //     SANITIZAÇÃO E BASE
+  // ============================
+  const safeInt = v => Number.isFinite(+v) ? +v : 0;
+  const safeTxt = v => (v===null||v===undefined||v==='') ? '—' : String(v);
+
+  // Armazena instâncias de gráficos para destruir ao re-render
+  const chartStore = {};
+
+  function ensureData(){
+    if(!window.hospitalData || typeof window.hospitalData !== 'object'){
+      throw new Error('[DASH HOSP] Dados ausentes: window.hospitalData não está definido. Carregue via API antes de renderizar.');
+    }
+  }
+
+  // Ordena colocando Neomater primeiro
+  function ordenarHospitais(hmap){
+    const nomes = Object.keys(hmap || {});
+    nomes.sort((a,b)=>{
+      const na = String(a||'').toLowerCase();
+      const nb = String(b||'').toLowerCase();
+      if(na.includes('neomater') && !nb.includes('neomater')) return -1;
+      if(nb.includes('neomater') && !na.includes('neomater')) return 1;
+      return na.localeCompare(nb);
+    });
+    return nomes;
+  }
+
+  // ============================
+  //       CÁLCULOS DE KPI
+  // ============================
+  function calcKPIs(leitos, meta){
+    const total = safeInt(leitos.length);
+    let ocupados = 0, vagos = 0;
+    let altasHoje = 0;
+    let aptoOcup=0, enfOcup=0, enfDisp=0;
+    let isolResp=0, isolContato=0, diretivas=0;
+    let somaIdade=0, countIdade=0;
+
+    for(const l of leitos){
+      const status = (l.status||'').toLowerCase();
+      const tipo = (l.categoria || l.categoriaEscolhida || l.tipo || '').toLowerCase();
+      const prev = l.prevAlta || l.previsao || '';
+      const idade = Number(l.idade);
+
+      if(status==='ocupado'){
+        ocupados++;
+        if(tipo.includes('apart')) aptoOcup++;
+        if(tipo.includes('enferm')) enfOcup++;
+
+        if(prev==='Hoje Ouro' || prev==='Hoje 2R' || prev==='Hoje 3R') altasHoje++;
+
+        // Isolamentos
+        const isoResp = safeInt(l?.isolamento?.resp || l?.isolamentoResp || 0);
+        const isoCont = safeInt(l?.isolamento?.contato || l?.isolamentoContato || 0);
+        isolResp += isoResp>0 ? 1 : 0;
+        isolContato += isoCont>0 ? 1 : 0;
+
+        // Diretivas
+        const d = (l.diretiva || l.diretivas || '').toString().toLowerCase();
+        if(d==='sim' || d==='true' || d==='1') diretivas++;
+
+        if(Number.isFinite(idade)){
+          somaIdade += idade;
+          countIdade++;
+        }
+      }
+    }
+    vagos = Math.max(0, total - ocupados);
+    const ocupacao = total>0 ? Math.round((ocupados/total)*100) : 0;
+
+    if(meta && Number.isFinite(meta.capacidadeEnfermarias)){
+      enfDisp = Math.max(0, safeInt(meta.capacidadeEnfermarias) - enfOcup);
+    }
+
+    const idadeMedia = countIdade>0 ? Math.round(somaIdade / countIdade) : 0;
+
+    return {
+      total, ocupados, vagos, ocupacao,
+      altasHoje, aptoOcup, enfOcup, enfDisp,
+      isolResp, isolContato, diretivas, idadeMedia
+    };
+  }
+
+  // ============================
+  //     AGREGAÇÕES PARA GRÁFICOS
+  // ============================
+  function aggAltas(leitos){
+    const out = {
+      'Hoje Ouro':0, 'Hoje 2R':0, 'Hoje 3R':0,
+      '24h Ouro':0, '24h 2R':0, '24h 3R':0,
+      '48h':0,'72h':0,'96h':0
+    };
+    for(const l of leitos){
+      if((l.status||'').toLowerCase()!=='ocupado') continue;
+      const p = l.prevAlta || l.previsao || '';
+      if(out.hasOwnProperty(p)) out[p]++;
+      // SP fora por regra
+    }
+    return out;
+  }
+
+  function aggPorCategoriaPrazo(leitos, tipo='concessao'){
+    // retorna { item: {Hoje, '24h','48h','72h','96h'} }
+    const acc = {};
+    for(const l of leitos){
+      if((l.status||'').toLowerCase()!=='ocupado') continue;
+      const p0 = l.prevAlta || l.previsao || '';
+      const prazo = p0.startsWith('Hoje') ? 'Hoje' :
+                    p0.startsWith('24h') ? '24h' :
+                    (p0==='48h'||p0==='72h'||p0==='96h') ? p0 : null;
+      if(!prazo) continue; // ignora SP
+
+      const lista = (tipo==='concessao')
+        ? (Array.isArray(l.concessoes)? l.concessoes : (l.concessoes? String(l.concessoes).split('|'):[]))
+        : (Array.isArray(l.linhas)? l.linhas : (l.linhas? String(l.linhas).split('|'):[]));
+
+      for(let raw of lista){
+        const nome = String(raw||'').trim();
+        if(!nome) continue;
+        if(!acc[nome]) acc[nome] = {Hoje:0,'24h':0,'48h':0,'72h':0,'96h':0};
+        acc[nome][prazo]++;
+      }
+    }
+    acc.__tipo = (tipo==='concessao')?'concessao':'linha';
+    return acc;
+  }
+
+  function aggPizza(leitos, campo){
+    const acc = {};
+    for(const l of leitos){
+      if((l.status||'').toLowerCase()!=='ocupado') continue;
+      let chave = 'Não informado';
+      if(campo==='regiao'){
+        chave = String(l.regiao||l.região||'Não informado').trim() || 'Não informado';
+      } else if(campo==='tipo'){
+        chave = String(l.categoria||l.categoriaEscolhida||l.tipo||'Não informado').trim() || 'Não informado';
+        if(/apart/i.test(chave)) chave='Apartamento';
+        else if(/enferm/i.test(chave)) chave='Enfermaria';
+        else if(/uti/i.test(chave)) chave='UTI';
+      }
+      acc[chave] = (acc[chave]||0) + 1;
+    }
+    const labels = Object.keys(acc);
+    const data = labels.map(k=>acc[k]);
+    return { labels, data };
+  }
+
+  // ============================
+  //         CHART UTILS
+  // ============================
+  function destroyIfExists(key){
+    if(chartStore[key]){
+      try{ chartStore[key].destroy(); }catch(e){}
+      delete chartStore[key];
+    }
+  }
+
+  function labelsValoresAbsolutos(values){
+    const total = (values||[]).reduce((a,b)=>a+b,0) || 1;
+    return v => `${v} (${(v*100/total).toFixed(1)}%)`;
+  }
+
+  function buildDatasetsAltas(series){
+    const mk = k=>series[k]||0;
+    const stacks = [
+      { key:'Hoje Ouro',  label:'Hoje Ouro',  color:'#FFC72C', idx:0 },
+      { key:'Hoje 2R',    label:'Hoje 2R',    color:'#304FFE', idx:0 },
+      { key:'Hoje 3R',    label:'Hoje 3R',    color:'#7E57C2', idx:0 },
+      { key:'24h Ouro',   label:'24h Ouro',   color:'#FFE082', idx:1 },
+      { key:'24h 2R',     label:'24h 2R',     color:'#82B1FF', idx:1 },
+      { key:'24h 3R',     label:'24h 3R',     color:'#B39DDB', idx:1 },
+    ];
+    const simples = [
+      { key:'48h', label:'48h', color:'#64B5F6', idx:2 },
+      { key:'72h', label:'72h', color:'#90CAF9', idx:3 },
+      { key:'96h', label:'96h', color:'#BBDEFB', idx:4 }
+    ];
+
+    const out = [];
+    for(const s of stacks){
+      const data = [0,0,0,0,0];
+      data[s.idx] = mk(s.key);
+      out.push({label:s.label, backgroundColor:s.color, data, stack:`S${s.idx}`});
+    }
+    for(const s of simples){
+      const data = [0,0,0,0,0];
+      data[s.idx] = mk(s.key);
+      out.push({label:s.label, backgroundColor:s.color, data});
+    }
+    return out;
+  }
+
+  function buildSeriesCategoria(mapaPrazo){
+    const chaves = Object.keys(mapaPrazo).filter(k=>k!=='__tipo');
+    return chaves.map(ch=>{
+      const m = mapaPrazo[ch]||{};
+      return {
+        label: ch,
+        backgroundColor: (mapaPrazo.__tipo==='concessao')?corConcessao(ch):corLinha(ch),
+        data: [m.Hoje||0, m['24h']||0, m['48h']||0, m['72h']||0, m['96h']||0]
+      };
+    });
+  }
+
+  function createLegend(container, chart){
+    container.innerHTML = '';
+    const ul = document.createElement('ul');
+    ul.className = 'legend-externa';
+    chart.data.datasets.forEach((ds, i)=>{
+      const li = document.createElement('li');
+      li.style.cursor = 'pointer';
+      li.style.display = 'block';
+      li.style.margin = '4px 0';
+      const box = document.createElement('span');
+      box.style.display='inline-block';
+      box.style.width='12px';
+      box.style.height='12px';
+      box.style.marginRight='8px';
+      box.style.background = Array.isArray(ds.backgroundColor)? ds.backgroundColor[0] : ds.backgroundColor;
+      const lbl = document.createElement('span');
+      lbl.textContent = ds.label;
+      li.appendChild(box);
+      li.appendChild(lbl);
+      li.onclick = ()=>{
+        const vis = chart.isDatasetVisible(i);
+        chart.setDatasetVisibility(i, !vis);
+        li.style.opacity = vis ? .35 : 1;
+        chart.update();
+      };
+      ul.appendChild(li);
+    });
+    container.appendChild(ul);
+  }
+
+  // ============================
+  //        RENDER POR HOSP
+  // ============================
+  function renderHospital(container, hid, leitos, meta){
+    // ------ KPIs ------
+    const kpi = calcKPIs(leitos, meta);
+    const k = {
+      total: safeInt(kpi.total),
+      ocupados: safeInt(kpi.ocupados),
+      vagos: safeInt(kpi.vagos),
+      ocupacao: safeInt(kpi.ocupacao),
+      altasHoje: safeInt(kpi.altasHoje),
+      aptoOcup: safeInt(kpi.aptoOcup),
+      enfOcup: safeInt(kpi.enfOcup),
+      enfDisp: safeInt(kpi.enfDisp),
+      isolResp: safeInt(kpi.isolResp),
+      isolContato: safeInt(kpi.isolContato),
+      diretivas: safeInt(kpi.diretivas),
+      idadeMedia: safeInt(kpi.idadeMedia)
     };
 
-    const CAPACIDADE_ENFERMARIA = {
-        H4: 4
+    // Construção do bloco HTML
+    const wrap = document.createElement('section');
+    wrap.className = 'bloco-hospital';
+    wrap.innerHTML = `
+      <h2 class="titulo-hospital">${safeTxt(hid)}</h2>
+
+      <div class="kpis linha1">
+        <div class="kpi gauge" id="gauge_${hid}">
+          <div class="gauge-value">${k.ocupacao}%</div>
+          <div class="kpi-label">OCUPAÇÃO</div>
+        </div>
+        <div class="kpi"><div class="kpi-value">${k.total}</div><div class="kpi-label">TOTAL</div></div>
+        <div class="kpi"><div class="kpi-value">${k.ocupados}</div><div class="kpi-label">OCUPADOS</div></div>
+        <div class="kpi"><div class="kpi-value">${k.vagos}</div><div class="kpi-label">VAGOS</div></div>
+        <div class="kpi"><div class="kpi-value">${k.altasHoje}</div><div class="kpi-label">EM ALTA (HOJE)</div></div>
+      </div>
+
+      <div class="kpis linha2">
+        ${k.aptoOcup ? `<div class="kpi"><div class="kpi-value">${k.aptoOcup}</div><div class="kpi-label">APARTAMENTOS OCUPADOS</div></div>`:''}
+        ${k.enfOcup ? `<div class="kpi"><div class="kpi-value">${k.enfOcup}</div><div class="kpi-label">ENFERMARIAS OCUPADAS</div></div>`:''}
+        ${(Number.isFinite(meta?.capacidadeEnfermarias) && meta.capacidadeEnfermarias>0) ?
+          `<div class="kpi"><div class="kpi-value">${k.enfDisp}</div><div class="kpi-label">ENFERMARIAS DISPONÍVEIS</div></div>` : ''}
+        ${(k.isolResp+k.isolContato)>0 ? `<div class="kpi"><div class="kpi-value">${k.isolResp+k.isolContato}</div><div class="kpi-label">ISOLAMENTOS</div><div class="kpi-sub">Resp: ${k.isolResp} | Contato: ${k.isolContato}</div></div>`:''}
+        ${k.diretivas ? `<div class="kpi"><div class="kpi-value">${k.diretivas}</div><div class="kpi-label">COM DIRETIVAS</div></div>`:''}
+        ${k.idadeMedia ? `<div class="kpi"><div class="kpi-value">${k.idadeMedia}</div><div class="kpi-label">IDADE MÉDIA (ANOS)</div></div>`:''}
+      </div>
+
+      <div class="graf bloco">
+        <h3>Análise preditiva de altas em <span class="data-ref"></span></h3>
+        <canvas id="graficoAltas_${hid}"></canvas>
+        <div class="legend legend-altas" id="legendAltas_${hid}"></div>
+      </div>
+
+      <div class="graf bloco">
+        <h3>Concessões previstas em <span class="data-ref"></span></h3>
+        <canvas id="graficoConcessoes_${hid}"></canvas>
+        <div class="legend" id="legendConcessoes_${hid}"></div>
+      </div>
+
+      <div class="graf bloco">
+        <h3>Linhas de cuidado em <span class="data-ref"></span></h3>
+        <canvas id="graficoLinhas_${hid}"></canvas>
+        <div class="legend" id="legendLinhas_${hid}"></div>
+      </div>
+
+      <div class="graf bloco">
+        <h3>Pacientes por região em <span class="data-ref"></span></h3>
+        <canvas id="graficoRegiao_${hid}"></canvas>
+        <div class="legend" id="legendRegiao_${hid}"></div>
+      </div>
+
+      <div class="graf bloco">
+        <h3>Distribuição por tipo de acomodação em <span class="data-ref"></span></h3>
+        <canvas id="graficoTipo_${hid}"></canvas>
+        <div class="legend" id="legendTipo_${hid}"></div>
+      </div>
+    `;
+    container.appendChild(wrap);
+
+    // Data ref (hoje)
+    const today = new Date();
+    const dd = String(today.getDate()).padStart(2,'0');
+    const mm = String(today.getMonth()+1).padStart(2,'0');
+    const yyyy = today.getFullYear();
+    wrap.querySelectorAll('.data-ref').forEach(el=>el.textContent = `${dd}/${mm}/${yyyy}`);
+
+    // Gauge meia-rosca (SVG leve)
+    renderGaugeMeiaRosca(wrap.querySelector('#gauge_'+hid), k.ocupacao);
+
+    // ------ GRÁFICOS ------
+    const altAgg = aggAltas(leitos);
+    renderBarrasAltas(`graficoAltas_${hid}`, `legendAltas_${hid}`, altAgg, `Altas_${hid}`);
+
+    const cons = aggPorCategoriaPrazo(leitos,'concessao');
+    renderBarrasCategoria(`graficoConcessoes_${hid}`, `legendConcessoes_${hid}`, cons, `Concessoes_${hid}`);
+
+    const lin  = aggPorCategoriaPrazo(leitos,'linha');
+    renderBarrasCategoria(`graficoLinhas_${hid}`, `legendLinhas_${hid}`, lin, `Linhas_${hid}`);
+
+    const pr = aggPizza(leitos,'regiao');
+    renderPizza(`graficoRegiao_${hid}`, `legendRegiao_${hid}`, pr, `Regiao_${hid}`);
+
+    const pt = aggPizza(leitos,'tipo');
+    renderPizza(`graficoTipo_${hid}`, `legendTipo_${hid}`, pt, `Tipo_${hid}`);
+  }
+
+  // ============================
+  //          RENDER GRAF
+  // ============================
+  function destroyIfExists(key){
+    if(chartStore[key]){
+      try{ chartStore[key].destroy(); }catch(e){}
+      delete chartStore[key];
+    }
+  }
+
+  function labelsValoresAbsolutos(values){
+    const total = (values||[]).reduce((a,b)=>a+b,0) || 1;
+    return v => `${v} (${(v*100/total).toFixed(1)}%)`;
+  }
+
+  function buildDatasetsAltas(series){
+    const mk = k=>series[k]||0;
+    const stacks = [
+      { key:'Hoje Ouro',  label:'Hoje Ouro',  color:'#FFC72C', idx:0 },
+      { key:'Hoje 2R',    label:'Hoje 2R',    color:'#304FFE', idx:0 },
+      { key:'Hoje 3R',    label:'Hoje 3R',    color:'#7E57C2', idx:0 },
+      { key:'24h Ouro',   label:'24h Ouro',   color:'#FFE082', idx:1 },
+      { key:'24h 2R',     label:'24h 2R',     color:'#82B1FF', idx:1 },
+      { key:'24h 3R',     label:'24h 3R',     color:'#B39DDB', idx:1 },
+    ];
+    const simples = [
+      { key:'48h', label:'48h', color:'#64B5F6', idx:2 },
+      { key:'72h', label:'72h', color:'#90CAF9', idx:3 },
+      { key:'96h', label:'96h', color:'#BBDEFB', idx:4 }
+    ];
+
+    const out = [];
+    for(const s of stacks){
+      const data = [0,0,0,0,0];
+      data[s.idx] = mk(s.key);
+      out.push({label:s.label, backgroundColor:s.color, data, stack:`S${s.idx}`});
+    }
+    for(const s of simples){
+      const data = [0,0,0,0,0];
+      data[s.idx] = mk(s.key);
+      out.push({label:s.label, backgroundColor:s.color, data});
+    }
+    return out;
+  }
+
+  function buildSeriesCategoria(mapaPrazo){
+    const chaves = Object.keys(mapaPrazo).filter(k=>k!=='__tipo');
+    return chaves.map(ch=>{
+      const m = mapaPrazo[ch]||{};
+      return {
+        label: ch,
+        backgroundColor: (mapaPrazo.__tipo==='concessao')?corConcessao(ch):corLinha(ch),
+        data: [m.Hoje||0, m['24h']||0, m['48h']||0, m['72h']||0, m['96h']||0]
+      };
+    });
+  }
+
+  function createLegend(container, chart){
+    container.innerHTML = '';
+    const ul = document.createElement('ul');
+    ul.className = 'legend-externa';
+    chart.data.datasets.forEach((ds, i)=>{
+      const li = document.createElement('li');
+      li.style.cursor = 'pointer';
+      li.style.display = 'block';
+      li.style.margin = '4px 0';
+      const box = document.createElement('span');
+      box.style.display='inline-block';
+      box.style.width='12px';
+      box.style.height='12px';
+      box.style.marginRight='8px';
+      box.style.background = Array.isArray(ds.backgroundColor)? ds.backgroundColor[0] : ds.backgroundColor;
+      const lbl = document.createElement('span');
+      lbl.textContent = ds.label;
+      li.appendChild(box);
+      li.appendChild(lbl);
+      li.onclick = ()=>{
+        const vis = chart.isDatasetVisible(i);
+        chart.setDatasetVisibility(i, !vis);
+        li.style.opacity = vis ? .35 : 1;
+        chart.update();
+      };
+      ul.appendChild(li);
+    });
+    container.appendChild(ul);
+  }
+
+  // Pizzas / Barras
+  function renderBarrasAltas(canvasId, legendId, series, key){
+    destroyIfExists(key);
+    const ctx = document.getElementById(canvasId);
+    if(!ctx){ return; }
+    const datasets = buildDatasetsAltas(series);
+    const config = {
+      type: 'bar',
+      data: { labels: ['Hoje','24h','48h','72h','96h'], datasets },
+      options: {
+        responsive: true, maintainAspectRatio: false, animation: false,
+        plugins: { legend: { display:false }, tooltip: { enabled:true } },
+        scales: {
+          x: { stacked: true },
+          y: { stacked: true, title: { display:true, text:'Beneficiários' }, beginAtZero:true, precision:0 }
+        }
+      }
     };
+    const chart = new Chart(ctx, config);
+    chartStore[key] = chart;
+    const legendContainer = document.getElementById(legendId);
+    if(legendContainer) createLegend(legendContainer, chart);
+  }
 
-    const CORES_GAUGE = {
-        baixo: '#10b981',
-        medio: '#f59e0b',
-        alto: '#ef4444'
+  function renderBarrasCategoria(canvasId, legendId, mapaPrazo, key){
+    destroyIfExists(key);
+    const ctx = document.getElementById(canvasId);
+    if(!ctx){ return; }
+
+    const datasets = buildSeriesCategoria(mapaPrazo);
+    if(datasets.length===0){
+      ctx.replaceWith(placeholderSemDados());
+      return;
+    }
+
+    const config = {
+      type: 'bar',
+      data: { labels:['Hoje','24h','48h','72h','96h'], datasets },
+      options: {
+        responsive:true, maintainAspectRatio:false, animation:false,
+        plugins:{ legend:{ display:false }, tooltip:{ enabled:true } },
+        scales:{
+          x:{ stacked:false },
+          y:{ beginAtZero:true, title:{ display:true, text:'Beneficiários' }, precision:0 }
+        }
+      }
     };
+    const chart = new Chart(ctx, config);
+    chartStore[key] = chart;
+    const legendContainer = document.getElementById(legendId);
+    if(legendContainer) createLegend(legendContainer, chart);
+  }
 
-    const CORES_ALTAS = {
-        'Hoje Ouro': '#FFC72C',
-        'Hoje 2R': '#304FFE',
-        'Hoje 3R': '#7E57C2',
-        '24h Ouro': '#FFE082',
-        '24h 2R': '#82B1FF',
-        '24h 3R': '#B39DDB',
-        '48h': '#64B5F6',
-        '72h': '#90CAF9',
-        '96h': '#BBDEFB'
+  function renderPizza(canvasId, legendId, dados, key){
+    destroyIfExists(key);
+    const ctx = document.getElementById(canvasId);
+    if(!ctx){ return; }
+
+    if(!dados.labels.length){
+      ctx.replaceWith(placeholderSemDados());
+      return;
+    }
+
+    const baseColors = ['#90CAF9','#A5D6A7','#FFCC80','#CE93D8','#FFF59D','#80CBC4','#EF9A9A','#B0BEC5','#F48FB1','#B39DDB'];
+    const bg = dados.labels.map((_,i)=> baseColors[i % baseColors.length]);
+
+    const config = {
+      type: 'pie',
+      data: { labels: dados.labels, datasets: [{ data: dados.data, backgroundColor: bg }] },
+      options: {
+        responsive:true, maintainAspectRatio:false, animation:false,
+        plugins:{
+          legend:{ display:false },
+          tooltip:{
+            callbacks:{
+              label:(ctx)=>{
+                const getTxt = labelsValoresAbsolutos(ctx.dataset.data);
+                return `${ctx.label}: ${getTxt(ctx.parsed)}`;
+              }
+            }
+          }
+        }
+      }
     };
+    const chart = new Chart(ctx, config);
+    chartStore[key] = chart;
+    const legendContainer = document.getElementById(legendId);
+    if(legendContainer) createLegend(legendContainer, chart);
+  }
 
-    const chartInstances = {};
+  function placeholderSemDados(){
+    const div = document.createElement('div');
+    div.className = 'sem-dados';
+    div.textContent = 'Sem dados';
+    div.style.padding = '24px';
+    div.style.textAlign = 'center';
+    div.style.opacity = '.8';
+    div.style.border = '1px dashed rgba(255,255,255,.2)';
+    div.style.borderRadius = '8px';
+    return div;
+  }
 
-    // ═══════════════════════════════════════════════════════════════════════
-    // FUNÇÕES AUXILIARES
-    // ═══════════════════════════════════════════════════════════════════════
+  // Gauge meia-rosca com SVG leve
+  function renderGaugeMeiaRosca(el, valor){
+    if(!el) return;
+    const pct = Math.max(0, Math.min(100, Number(valor)||0));
+    let cor = '#4CAF50';
+    if(pct>=80) cor = '#E53935';
+    else if(pct>=60) cor = '#FB8C00';
 
-    function safeInt(v) {
-        return Number.isFinite(+v) ? +v : 0;
+    el.innerHTML = `
+      <svg viewBox="0 0 200 100" class="gauge-svg">
+        <path d="M10,100 A90,90 0 0,1 190,100" stroke="rgba(255,255,255,.15)" stroke-width="18" fill="none" stroke-linecap="round"></path>
+        <path d="M10,100 A90,90 0 0,1 ${10 + 180*(pct/100)},100" stroke="${cor}" stroke-width="18" fill="none" stroke-linecap="round"></path>
+      </svg>
+      <div class="gauge-value">${pct}%</div>
+      <div class="kpi-label">OCUPAÇÃO</div>
+    `;
+  }
+
+  // ============================
+  //     FUNÇÃO PÚBLICA (GLOBAL)
+  // ============================
+  window.renderDashboardHospitalar = function renderDashboardHospitalar(hospitalId='todos'){
+    ensureData();
+
+    const root = document.getElementById('dashHospitalarContent') || document.getElementById('dashboard-hospitalar');
+    if(!root){
+      console.error('[DASH HOSP] Container #dashHospitalarContent não encontrado.');
+      return;
+    }
+    root.innerHTML = '';
+
+    const todos = (hospitalId==='todos' || hospitalId==='all' || hospitalId==='*');
+    const ordem = ordenarHospitais(window.hospitalData);
+    const alvos = todos ? ordem : ordem.filter(n=>String(n).toLowerCase()===String(hospitalId).toLowerCase());
+
+    if(alvos.length===0){
+      const msg = document.createElement('div');
+      msg.className = 'sem-dados';
+      msg.textContent = 'Nenhum hospital encontrado para exibição.';
+      root.appendChild(msg);
+      return;
     }
 
-    function safeTxt(v) {
-        return (v === null || v === undefined || v === '') ? '—' : String(v);
+    for(const hid of alvos){
+      const pacote = window.hospitalData[hid] || {};
+      const leitos = Array.isArray(pacote.leitos) ? pacote.leitos : (Array.isArray(pacote) ? pacote : []);
+      const meta   = pacote.meta || {};
+      try{
+        renderHospital(root, hid, leitos, meta);
+      }catch(e){
+        console.error('[DASH HOSP] Falha ao renderizar hospital', hid, e);
+      }
     }
+  };
 
-    function kpiSeguros(k) {
-        return {
-            total: safeInt(k.total),
-            ocupados: safeInt(k.ocupados),
-            vagos: safeInt(k.vagos),
-            ocupacao: safeInt(k.ocupacao),
-            altasHoje: safeInt(k.altasHoje),
-            aptoOcup: safeInt(k.aptoOcup),
-            enfOcup: safeInt(k.enfOcup),
-            enfDisp: safeInt(k.enfDisp),
-            isolResp: safeInt(k.isolResp),
-            isolContato: safeInt(k.isolContato),
-            diretivas: safeInt(k.diretivas),
-            idadeMedia: safeInt(k.idadeMedia)
-        };
+  // Alias (retrocompat com menus antigos)
+  window.renderizarDashboard = window.renderDashboardHospitalar;
+
+  // ============================
+  //      ESTILOS MÍNIMOS
+  // ============================
+  const css = document.createElement('style');
+  css.textContent = `
+    .bloco-hospital{ padding:16px 12px; border:1px solid rgba(255,255,255,.05); border-radius:12px; margin:16px 0; background:rgba(255,255,255,.02); }
+    .titulo-hospital{ margin:0 0 12px 0; color:#7CFC9C; font-weight:700; letter-spacing:.5px; }
+    .kpis{ display:grid; grid-gap:12px; }
+    .kpis.linha1{ grid-template-columns: repeat(5, minmax(120px, 1fr)); }
+    .kpis.linha2{ grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); margin-top:8px; }
+    .kpi{ background:rgba(0,0,0,.25); border:1px solid rgba(255,255,255,.06); border-radius:10px; padding:14px; text-align:center; position:relative; }
+    .kpi .kpi-value{ font-size:26px; font-weight:700; margin-bottom:6px; }
+    .kpi .kpi-label{ font-size:11px; letter-spacing:.6px; opacity:.85; }
+    .kpi .kpi-sub{ font-size:11px; opacity:.75; margin-top:6px; }
+    .kpi.gauge{ display:flex; flex-direction:column; align-items:center; justify-content:center; }
+    .kpi.gauge .gauge-svg{ width:120px; height:60px; margin-bottom:8px; }
+    .graf.bloco{ margin-top:18px; }
+    .graf.bloco h3{ margin:0 0 8px 0; font-size:15px; font-weight:600; opacity:.95; }
+    .legend-externa{ list-style:none; padding:6px 0 0 0; margin:6px 0 0 0; }
+    .legend-externa li{ font-size:12px; }
+    .sem-dados{ color:rgba(255,255,255,.8); }
+    @media (max-width: 768px){
+      .kpis.linha1{ grid-template-columns: repeat(2, 1fr); }
     }
+  `;
+  document.head.appendChild(css);
 
-    function corConcessao(nome) {
-        return window.CORES_CONCESSOES?.[nome] || '#999999';
-    }
-
-    function corLinha(nome) {
-        return window.CORES_LINHAS?.[nome] || '#999999';
-    }
-
-    // ═══════════════════════════════════════════════════════════════════════
-    // FUNÇÃO PRINCIPAL
-    // ═══════════════════════════════════════════════════════════════════════
-
-    window.renderDashboardHospitalar = function(hospitalId = 'todos') {
-        console.log('🏥 [DASHBOARD] Renderizando:', hospitalId);
-
-        if (!window.hospitalData || Object.keys(window.hospitalData).length === 0) {
-            mostrarErro('Dados não carregados');
-            return;
-        }
-
-        console.log('📊 [DEBUG] Hospitais disponíveis:', Object.keys(window.hospitalData));
-
-        const container = document.getElementById('dashHospitalarContent');
-        if (!container) {
-            console.error('❌ Container não encontrado');
-            return;
-        }
-
-        container.innerHTML = '';
-        container.style.cssText = `
-            background: #1a202c;
-            min-height: 100vh;
-            padding: 2rem;
-        `;
-
-        if (hospitalId === 'todos') {
-            renderizarTodos(container);
-        } else {
-            renderizarSingle(container, hospitalId);
-        }
-
-        console.log('✅ [DASHBOARD] Concluído');
-    };
-
-    // ═══════════════════════════════════════════════════════════════════════
-    // RENDERIZAÇÃO
-    // ═══════════════════════════════════════════════════════════════════════
-
-    function renderizarTodos(container) {
-        ORDEM_HOSPITAIS.forEach(hospitalId => {
-            if (window.hospitalData[hospitalId]) {
-                const section = document.createElement('div');
-                section.style.marginBottom = '3rem';
-                renderizarHospital(section, hospitalId);
-                container.appendChild(section);
-            }
-        });
-    }
-
-    function renderizarSingle(container, hospitalId) {
-        if (!window.hospitalData[hospitalId]) {
-            mostrarErro(`Hospital ${hospitalId} não encontrado`);
-            return;
-        }
-        renderizarHospital(container, hospitalId);
-    }
-
-    function renderizarHospital(container, hospitalId) {
-        const hospital = window.hospitalData[hospitalId];
-        const leitos = hospital.leitos || [];
-        
-        console.log(`📊 [${hospitalId}] Leitos:`, leitos.length);
-
-        const kpis = calcularKPIs(leitos, hospitalId);
-        const kpisSeguros = kpiSeguros(kpis);
-
-        container.appendChild(criarCabecalho(hospitalId));
-        container.appendChild(criarKPIsLinha1(kpisSeguros));
-        container.appendChild(criarKPIsLinha2(kpisSeguros, hospitalId));
-        renderizarGraficos(container, leitos, hospitalId);
-    }
-
-    // ═══════════════════════════════════════════════════════════════════════
-    // CABEÇALHO E KPIS
-    // ═══════════════════════════════════════════════════════════════════════
-
-    function criarCabecalho(hospitalId) {
-        const div = document.createElement('div');
-        div.style.cssText = `
-            margin-bottom: 2rem;
-            padding-bottom: 1rem;
-            border-bottom: 3px solid #4a5568;
-        `;
-        const titulo = document.createElement('h2');
-        titulo.style.cssText = `
-            font-size: 1.875rem;
-            font-weight: 700;
-            color: #f7fafc;
-            margin: 0;
-        `;
-        titulo.textContent = NOMES_HOSPITAIS[hospitalId] || hospitalId;
-        div.appendChild(titulo);
-        return div;
-    }
-
-    function criarKPIsLinha1(kpis) {
-        const linha = document.createElement('div');
-        linha.style.cssText = `
-            display: grid;
-            grid-template-columns: repeat(5, 1fr);
-            gap: 1rem;
-            margin-bottom: 1.5rem;
-        `;
-
-        linha.appendChild(criarKPIGauge(kpis.ocupacao));
-        linha.appendChild(criarKPIBox('Total de Leitos', kpis.total, '#6366f1'));
-        linha.appendChild(criarKPIBox('Ocupados', kpis.ocupados, '#ef4444'));
-        linha.appendChild(criarKPIBox('Vagos', kpis.vagos, '#10b981'));
-        linha.appendChild(criarKPIBox('Em alta (hoje)', kpis.altasHoje, '#f59e0b'));
-
-        return linha;
-    }
-
-    function criarKPIsLinha2(kpis, hospitalId) {
-        const linha = document.createElement('div');
-        linha.style.cssText = `
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-            gap: 1rem;
-            margin-bottom: 2rem;
-        `;
-
-        if (kpis.aptoOcup > 0) {
-            linha.appendChild(criarKPIBox('Apartamentos ocupados', kpis.aptoOcup, '#3b82f6'));
-        }
-
-        if (kpis.enfOcup > 0) {
-            linha.appendChild(criarKPIBox('Enfermarias ocupadas', kpis.enfOcup, '#8b5cf6'));
-        }
-
-        if (CAPACIDADE_ENFERMARIA[hospitalId] !== undefined) {
-            linha.appendChild(criarKPIBox('Enfermarias disponíveis', kpis.enfDisp, '#14b8a6'));
-        }
-
-        const isolTotal = kpis.isolResp + kpis.isolContato;
-        const kpiIsol = criarKPIBox('Isolamentos', isolTotal, '#dc2626');
-        const subtitulo = document.createElement('div');
-        subtitulo.style.cssText = `font-size: 0.75rem; color: #cbd5e0; margin-top: 0.25rem;`;
-        subtitulo.textContent = `Resp: ${kpis.isolResp} | Contato: ${kpis.isolContato}`;
-        kpiIsol.appendChild(subtitulo);
-        linha.appendChild(kpiIsol);
-
-        linha.appendChild(criarKPIBox('Com diretivas', kpis.diretivas, '#f59e0b'));
-        linha.appendChild(criarKPIBox('Idade média', kpis.idadeMedia, '#6366f1'));
-
-        return linha;
-    }
-
-    function criarKPIBox(label, valor, cor) {
-        const box = document.createElement('div');
-        box.style.cssText = `
-            background: white;
-            border-radius: 0.75rem;
-            padding: 1.5rem;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
-            border-left: 4px solid ${cor};
-        `;
-
-        const labelEl = document.createElement('div');
-        labelEl.style.cssText = `
-            font-size: 0.875rem;
-            color: #4a5568;
-            margin-bottom: 0.5rem;
-            font-weight: 500;
-        `;
-        labelEl.textContent = label;
-
-        const valorEl = document.createElement('div');
-        valorEl.style.cssText = `font-size: 2rem; font-weight: 700; color: ${cor};`;
-        valorEl.textContent = safeTxt(valor);
-
-        box.appendChild(labelEl);
-        box.appendChild(valorEl);
-        return box;
-    }
-
-    function criarKPIGauge(ocupacao) {
-        const box = document.createElement('div');
-        box.style.cssText = `
-            background: white;
-            border-radius: 0.75rem;
-            padding: 1.5rem;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-        `;
-
-        const labelEl = document.createElement('div');
-        labelEl.style.cssText = `
-            font-size: 0.875rem;
-            color: #4a5568;
-            margin-bottom: 1rem;
-            font-weight: 500;
-        `;
-        labelEl.textContent = 'Ocupação (%)';
-
-        const canvas = document.createElement('canvas');
-        canvas.width = 180;
-        canvas.height = 120;
-
-        const valorEl = document.createElement('div');
-        valorEl.style.cssText = `
-            font-size: 2.5rem;
-            font-weight: 700;
-            margin-top: -2.5rem;
-            color: ${getCorOcupacao(ocupacao)};
-        `;
-        valorEl.textContent = `${ocupacao}%`;
-
-        box.appendChild(labelEl);
-        box.appendChild(canvas);
-        box.appendChild(valorEl);
-
-        setTimeout(() => desenharGauge(canvas, ocupacao), 10);
-        return box;
-    }
-
-    function desenharGauge(canvas, valor) {
-        const ctx = canvas.getContext('2d');
-        const centerX = canvas.width / 2;
-        const centerY = canvas.height - 10;
-        const radius = 70;
-        const lineWidth = 18;
-
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-        ctx.beginPath();
-        ctx.arc(centerX, centerY, radius, Math.PI, 2 * Math.PI, false);
-        ctx.lineWidth = lineWidth;
-        ctx.strokeStyle = '#e5e7eb';
-        ctx.lineCap = 'round';
-        ctx.stroke();
-
-        const endAngle = Math.PI + (Math.PI * valor / 100);
-        ctx.beginPath();
-        ctx.arc(centerX, centerY, radius, Math.PI, endAngle, false);
-        ctx.lineWidth = lineWidth;
-        ctx.strokeStyle = getCorOcupacao(valor);
-        ctx.lineCap = 'round';
-        ctx.stroke();
-    }
-
-    function getCorOcupacao(ocupacao) {
-        if (ocupacao < 60) return CORES_GAUGE.baixo;
-        if (ocupacao < 80) return CORES_GAUGE.medio;
-        return CORES_GAUGE.alto;
-    }
-
-    // ═══════════════════════════════════════════════════════════════════════
-    // CÁLCULO DE KPIS
-    // ═══════════════════════════════════════════════════════════════════════
-
-    function calcularKPIs(leitos, hospitalId) {
-        const total = leitos.length;
-        const ocupados = leitos.filter(l => l.status === 'ocupado');
-        const numOcupados = ocupados.length;
-        const ocupacao = total > 0 ? Math.round((numOcupados / total) * 100) : 0;
-
-        const altasHoje = ocupados.filter(l => 
-            ['Hoje Ouro', 'Hoje 2R', 'Hoje 3R'].includes(l.prevAlta)
-        ).length;
-
-        const aptoOcup = ocupados.filter(l => 
-            l.categoria === 'Apartamento' || l.categoriaEscolhida === 'Apartamento'
-        ).length;
-        
-        const enfOcup = ocupados.filter(l => 
-            l.categoria === 'Enfermaria' || l.categoriaEscolhida === 'Enfermaria'
-        ).length;
-
-        let enfDisp = 0;
-        if (CAPACIDADE_ENFERMARIA[hospitalId] !== undefined) {
-            enfDisp = CAPACIDADE_ENFERMARIA[hospitalId] - enfOcup;
-        }
-
-        const isolResp = ocupados.filter(l => 
-            l.isolamento === 'Isolamento Respiratório'
-        ).length;
-
-        const isolContato = ocupados.filter(l => 
-            l.isolamento === 'Isolamento de Contato'
-        ).length;
-
-        const diretivas = ocupados.filter(l => l.diretivas === 'Sim').length;
-
-        const idades = ocupados.map(l => safeInt(l.idade)).filter(i => i > 0);
-        const idadeMedia = idades.length > 0 
-            ? Math.round(idades.reduce((a, b) => a + b, 0) / idades.length)
-            : 0;
-
-        return {
-            total,
-            ocupados: numOcupados,
-            vagos: total - numOcupados,
-            ocupacao,
-            altasHoje,
-            aptoOcup,
-            enfOcup,
-            enfDisp,
-            isolResp,
-            isolContato,
-            diretivas,
-            idadeMedia
-        };
-    }
-
-    // ═══════════════════════════════════════════════════════════════════════
-    // GRÁFICOS - LAYOUT 1 POR LINHA
-    // ═══════════════════════════════════════════════════════════════════════
-
-    function renderizarGraficos(container, leitos, hospitalId) {
-        const ocupados = leitos.filter(l => l.status === 'ocupado');
-        
-        const graficosContainer = document.createElement('div');
-        graficosContainer.style.cssText = `
-            display: grid;
-            grid-template-columns: 1fr;
-            gap: 2rem;
-            margin-top: 2rem;
-        `;
-
-        graficosContainer.appendChild(criarGraficoAltas(ocupados, hospitalId));
-        graficosContainer.appendChild(criarGraficoConcessoes(ocupados, hospitalId));
-        graficosContainer.appendChild(criarGraficoLinhas(ocupados, hospitalId));
-        graficosContainer.appendChild(criarGraficoRegiao(ocupados, hospitalId));
-        graficosContainer.appendChild(criarGraficoTipo(ocupados, hospitalId));
-
-        container.appendChild(graficosContainer);
-    }
-
-    function criarWrapperGrafico(titulo, id) {
-        const wrapper = document.createElement('div');
-        wrapper.style.cssText = `
-            background: white;
-            border-radius: 0.75rem;
-            padding: 1.5rem;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
-        `;
-
-        const tituloEl = document.createElement('h3');
-        tituloEl.style.cssText = `
-            font-size: 1.125rem;
-            font-weight: 600;
-            color: #1f2937;
-            margin-bottom: 1.5rem;
-        `;
-        tituloEl.textContent = titulo;
-
-        const canvas = document.createElement('canvas');
-        canvas.id = id;
-        canvas.style.maxHeight = '400px';
-
-        wrapper.appendChild(tituloEl);
-        wrapper.appendChild(canvas);
-        return wrapper;
-    }
-
-    // ═══════════════════════════════════════════════════════════════════════
-    // GRÁFICO DE ALTAS (EMPILHADO)
-    // ═══════════════════════════════════════════════════════════════════════
-
-    function criarGraficoAltas(ocupados, hospitalId) {
-        const dataStr = new Date().toLocaleDateString('pt-BR');
-        const series = agruparPorPrazo(ocupados);
-        const datasets = buildDatasetsAltas(series);
-
-        const wrapper = criarWrapperGrafico(
-            `Análise preditiva de altas em ${dataStr}`,
-            `grafico-altas-${hospitalId}`
-        );
-
-        const canvas = wrapper.querySelector('canvas');
-        renderizarBarrasVerticais(
-            canvas,
-            ['Hoje', '24h', '48h', '72h', '96h'],
-            datasets,
-            'Beneficiários',
-            `chart-altas-${hospitalId}`
-        );
-
-        const legenda = criarLegendaHTML(datasets, `chart-altas-${hospitalId}`);
-        wrapper.appendChild(legenda);
-        return wrapper;
-    }
-
-    function agruparPorPrazo(ocupados) {
-        const series = {
-            'Hoje Ouro': 0, 'Hoje 2R': 0, 'Hoje 3R': 0,
-            '24h Ouro': 0, '24h 2R': 0, '24h 3R': 0,
-            '48h': 0, '72h': 0, '96h': 0
-        };
-
-        ocupados.forEach(l => {
-            if (series.hasOwnProperty(l.prevAlta)) {
-                series[l.prevAlta]++;
-            }
-        });
-
-        return series;
-    }
-
-    function buildDatasetsAltas(series) {
-        const gruposHoje24 = [
-            { chave: 'Hoje Ouro', label: 'Hoje Ouro', color: CORES_ALTAS['Hoje Ouro'], stack: 'H' },
-            { chave: 'Hoje 2R', label: 'Hoje 2R', color: CORES_ALTAS['Hoje 2R'], stack: 'H' },
-            { chave: 'Hoje 3R', label: 'Hoje 3R', color: CORES_ALTAS['Hoje 3R'], stack: 'H' },
-            { chave: '24h Ouro', label: '24h Ouro', color: CORES_ALTAS['24h Ouro'], stack: 'D' },
-            { chave: '24h 2R', label: '24h 2R', color: CORES_ALTAS['24h 2R'], stack: 'D' },
-            { chave: '24h 3R', label: '24h 3R', color: CORES_ALTAS['24h 3R'], stack: 'D' }
-        ];
-
-        const simples = [
-            { chave: '48h', label: '48h', color: CORES_ALTAS['48h'] },
-            { chave: '72h', label: '72h', color: CORES_ALTAS['72h'] },
-            { chave: '96h', label: '96h', color: CORES_ALTAS['96h'] }
-        ];
-
-        return [
-            ...gruposHoje24.map(g => ({
-                label: g.label,
-                backgroundColor: g.color,
-                stack: g.stack,
-                data: [
-                    g.chave.startsWith('Hoje') ? (series[g.chave] || 0) : 0,
-                    g.chave.startsWith('24h') ? (series[g.chave] || 0) : 0,
-                    0, 0, 0
-                ]
-            })),
-            ...simples.map(s => ({
-                label: s.label,
-                backgroundColor: s.color,
-                data: [
-                    0, 0,
-                    s.chave === '48h' ? (series['48h'] || 0) : 0,
-                    s.chave === '72h' ? (series['72h'] || 0) : 0,
-                    s.chave === '96h' ? (series['96h'] || 0) : 0
-                ]
-            }))
-        ];
-    }
-
-    // ═══════════════════════════════════════════════════════════════════════
-    // GRÁFICO DE CONCESSÕES (1 BARRA POR CONCESSÃO)
-    // ═══════════════════════════════════════════════════════════════════════
-
-    function criarGraficoConcessoes(ocupados, hospitalId) {
-        const dataStr = new Date().toLocaleDateString('pt-BR');
-        
-        const contagem = {};
-        ocupados.forEach(l => {
-            (l.concessoes || []).forEach(c => {
-                contagem[c] = (contagem[c] || 0) + 1;
-            });
-        });
-
-        console.log(`📊 [${hospitalId}] Concessões:`, contagem);
-
-        if (Object.keys(contagem).length === 0) {
-            return criarPlaceholder(`Concessões previstas em ${dataStr}`, 'Sem concessões');
-        }
-
-        const labels = Object.keys(contagem);
-        const values = Object.values(contagem);
-        const cores = labels.map(l => corConcessao(l));
-
-        const wrapper = criarWrapperGrafico(
-            `Concessões previstas em ${dataStr}`,
-            `grafico-concessoes-${hospitalId}`
-        );
-
-        const canvas = wrapper.querySelector('canvas');
-        renderizarBarrasIndividuais(
-            canvas,
-            labels,
-            values,
-            cores,
-            'Beneficiários',
-            `chart-concessoes-${hospitalId}`
-        );
-
-        const datasets = labels.map((l, i) => ({ label: l, backgroundColor: cores[i] }));
-        const legenda = criarLegendaHTML(datasets, `chart-concessoes-${hospitalId}`);
-        wrapper.appendChild(legenda);
-
-        return wrapper;
-    }
-
-    // ═══════════════════════════════════════════════════════════════════════
-    // GRÁFICO DE LINHAS (1 BARRA POR LINHA)
-    // ═══════════════════════════════════════════════════════════════════════
-
-    function criarGraficoLinhas(ocupados, hospitalId) {
-        const dataStr = new Date().toLocaleDateString('pt-BR');
-        
-        const contagem = {};
-        ocupados.forEach(l => {
-            (l.linhas || []).forEach(linha => {
-                contagem[linha] = (contagem[linha] || 0) + 1;
-            });
-        });
-
-        console.log(`📊 [${hospitalId}] Linhas:`, contagem);
-
-        if (Object.keys(contagem).length === 0) {
-            return criarPlaceholder(`Linhas de cuidado em ${dataStr}`, 'Sem linhas de cuidado');
-        }
-
-        const labels = Object.keys(contagem);
-        const values = Object.values(contagem);
-        const cores = labels.map(l => corLinha(l));
-
-        const wrapper = criarWrapperGrafico(
-            `Linhas de cuidado em ${dataStr}`,
-            `grafico-linhas-${hospitalId}`
-        );
-
-        const canvas = wrapper.querySelector('canvas');
-        renderizarBarrasIndividuais(
-            canvas,
-            labels,
-            values,
-            cores,
-            'Beneficiários',
-            `chart-linhas-${hospitalId}`
-        );
-
-        const datasets = labels.map((l, i) => ({ label: l, backgroundColor: cores[i] }));
-        const legenda = criarLegendaHTML(datasets, `chart-linhas-${hospitalId}`);
-        wrapper.appendChild(legenda);
-
-        return wrapper;
-    }
-
-    function criarPlaceholder(titulo, mensagem) {
-        const wrapper = criarWrapperGrafico(titulo, `placeholder-${Date.now()}`);
-        const placeholder = document.createElement('div');
-        placeholder.style.cssText = `
-            padding: 3rem;
-            text-align: center;
-            color: #9ca3af;
-            font-size: 1.125rem;
-        `;
-        placeholder.textContent = mensagem;
-        wrapper.appendChild(placeholder);
-        return wrapper;
-    }
-
-    // ═══════════════════════════════════════════════════════════════════════
-    // GRÁFICOS DE PIZZA
-    // ═══════════════════════════════════════════════════════════════════════
-
-    function criarGraficoRegiao(ocupados, hospitalId) {
-        const dataStr = new Date().toLocaleDateString('pt-BR');
-
-        const contagem = {};
-        ocupados.forEach(l => {
-            const regiao = l.regiao || 'Não informado';
-            contagem[regiao] = (contagem[regiao] || 0) + 1;
-        });
-
-        const labels = Object.keys(contagem);
-        const values = Object.values(contagem);
-
-        const wrapper = criarWrapperGrafico(
-            `Distribuição por região em ${dataStr}`,
-            `grafico-regiao-${hospitalId}`
-        );
-
-        const canvas = wrapper.querySelector('canvas');
-        renderizarPizza(canvas, labels, values, `chart-regiao-${hospitalId}`);
-
-        const datasets = [{ label: 'Região', backgroundColor: gerarCoresPizza(labels.length) }];
-        const legenda = criarLegendaHTML(datasets, `chart-regiao-${hospitalId}`, labels);
-        wrapper.appendChild(legenda);
-
-        return wrapper;
-    }
-
-    function criarGraficoTipo(ocupados, hospitalId) {
-        const dataStr = new Date().toLocaleDateString('pt-BR');
-
-        const contagem = {};
-        ocupados.forEach(l => {
-            const tipo = l.categoria || l.categoriaEscolhida || 'Não informado';
-            contagem[tipo] = (contagem[tipo] || 0) + 1;
-        });
-
-        const labels = Object.keys(contagem);
-        const values = Object.values(contagem);
-
-        const wrapper = criarWrapperGrafico(
-            `Tipo de acomodação em ${dataStr}`,
-            `grafico-tipo-${hospitalId}`
-        );
-
-        const canvas = wrapper.querySelector('canvas');
-        renderizarPizza(canvas, labels, values, `chart-tipo-${hospitalId}`);
-
-        const datasets = [{ label: 'Tipo', backgroundColor: gerarCoresPizza(labels.length) }];
-        const legenda = criarLegendaHTML(datasets, `chart-tipo-${hospitalId}`, labels);
-        wrapper.appendChild(legenda);
-
-        return wrapper;
-    }
-
-    function gerarCoresPizza(n) {
-        const cores = [
-            '#3b82f6', '#8b5cf6', '#ec4899', '#f59e0b', '#10b981',
-            '#6366f1', '#14b8a6', '#f97316', '#06b6d4', '#84cc16'
-        ];
-        return Array.from({ length: n }, (_, i) => cores[i % cores.length]);
-    }
-
-    // ═══════════════════════════════════════════════════════════════════════
-    // RENDERIZAÇÃO CHART.JS
-    // ═══════════════════════════════════════════════════════════════════════
-
-    function renderizarBarrasVerticais(canvas, labels, datasets, yLabel, chartId) {
-        if (chartInstances[chartId]) {
-            chartInstances[chartId].destroy();
-        }
-
-        chartInstances[chartId] = new Chart(canvas, {
-            type: 'bar',
-            data: { labels, datasets },
-            options: {
-                responsive: true,
-                maintainAspectRatio: true,
-                plugins: {
-                    legend: { display: false },
-                    tooltip: { mode: 'index', intersect: false }
-                },
-                scales: {
-                    x: { stacked: true, grid: { display: false } },
-                    y: { stacked: true, beginAtZero: true, title: { display: true, text: yLabel } }
-                }
-            }
-        });
-    }
-
-    function renderizarBarrasIndividuais(canvas, labels, values, cores, yLabel, chartId) {
-        if (chartInstances[chartId]) {
-            chartInstances[chartId].destroy();
-        }
-
-        chartInstances[chartId] = new Chart(canvas, {
-            type: 'bar',
-            data: {
-                labels,
-                datasets: [{ label: yLabel, data: values, backgroundColor: cores }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: true,
-                plugins: {
-                    legend: { display: false },
-                    tooltip: {
-                        callbacks: {
-                            label: ctx => `${ctx.label}: ${ctx.parsed.y}`
-                        }
-                    }
-                },
-                scales: {
-                    x: { grid: { display: false } },
-                    y: { beginAtZero: true, ticks: { stepSize: 1 }, title: { display: true, text: yLabel } }
-                }
-            }
-        });
-    }
-
-    function renderizarPizza(canvas, labels, values, chartId) {
-        if (chartInstances[chartId]) {
-            chartInstances[chartId].destroy();
-        }
-
-        chartInstances[chartId] = new Chart(canvas, {
-            type: 'pie',
-            data: {
-                labels,
-                datasets: [{ data: values, backgroundColor: gerarCoresPizza(labels.length) }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: true,
-                plugins: {
-                    legend: { display: false },
-                    tooltip: {
-                        callbacks: {
-                            label: ctx => {
-                                const total = ctx.dataset.data.reduce((a, b) => a + b, 0);
-                                const percent = ((ctx.parsed / total) * 100).toFixed(1);
-                                return `${ctx.label}: ${ctx.parsed} (${percent}%)`;
-                            }
-                        }
-                    }
-                }
-            }
-        });
-    }
-
-    function criarLegendaHTML(datasets, chartId, customLabels = null) {
-        const legenda = document.createElement('ul');
-        legenda.style.cssText = `
-            list-style: none;
-            padding: 0;
-            margin-top: 1rem;
-            display: flex;
-            flex-direction: column;
-            gap: 0.5rem;
-            max-height: 300px;
-            overflow-y: auto;
-        `;
-
-        const labels = customLabels || datasets.map(d => d.label);
-
-        labels.forEach((label, index) => {
-            const item = document.createElement('li');
-            item.style.cssText = `
-                display: flex;
-                align-items: center;
-                gap: 0.5rem;
-                cursor: pointer;
-                padding: 0.25rem;
-                border-radius: 0.25rem;
-                transition: background 0.2s;
-            `;
-
-            const cor = Array.isArray(datasets[0]?.backgroundColor)
-                ? datasets[0].backgroundColor[index]
-                : datasets[index]?.backgroundColor || '#999999';
-
-            const box = document.createElement('span');
-            box.style.cssText = `
-                width: 16px;
-                height: 16px;
-                background: ${cor};
-                border-radius: 0.25rem;
-                flex-shrink: 0;
-            `;
-
-            const texto = document.createElement('span');
-            texto.style.cssText = `font-size: 0.875rem; color: #374151;`;
-            texto.textContent = label;
-
-            item.appendChild(box);
-            item.appendChild(texto);
-
-            item.addEventListener('click', () => {
-                const chart = chartInstances[chartId];
-                if (chart) {
-                    const meta = chart.getDatasetMeta(index);
-                    if (meta) {
-                        meta.hidden = !meta.hidden;
-                        chart.update();
-                        item.style.opacity = meta.hidden ? '0.35' : '1';
-                    }
-                }
-            });
-
-            item.addEventListener('mouseenter', () => {
-                if (item.style.opacity !== '0.35') {
-                    item.style.background = '#f3f4f6';
-                }
-            });
-            item.addEventListener('mouseleave', () => {
-                item.style.background = 'transparent';
-            });
-
-            legenda.appendChild(item);
-        });
-
-        return legenda;
-    }
-
-    // ═══════════════════════════════════════════════════════════════════════
-    // AUXILIARES
-    // ═══════════════════════════════════════════════════════════════════════
-
-    function mostrarErro(mensagem) {
-        const container = document.getElementById('dashHospitalarContent');
-        if (!container) return;
-
-        container.innerHTML = `
-            <div style="
-                background: #fef2f2;
-                border: 1px solid #fecaca;
-                border-radius: 0.5rem;
-                padding: 1rem;
-                color: #991b1b;
-                text-align: center;
-            ">
-                <strong>⚠️ Erro:</strong> ${mensagem}
-            </div>
-        `;
-    }
-
-    console.log('✅ [DASHBOARD HOSPITALAR V3.3.2 CORRIGIDO] Carregado');
-    console.log('📊 Gráficos: 1 por linha');
-    console.log('📊 Concessões/Linhas: 1 barra por item');
-
+  console.log('[DASH HOSP] Dashboard Hospitalar V3.3.2 carregado');
 })();
+
