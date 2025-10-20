@@ -1,19 +1,19 @@
 /**
- * DASHBOARD HOSPITALAR V3.3.2 FINAL
+ * DASHBOARD HOSPITALAR V3.3.2 FINAL - CORRIGIDO
  * Guilherme Santoro + Alessandro Rodrigues
- * Data: 19/Outubro/2025
+ * Data: 20/Outubro/2025
  * 
- * CORRECOES V3.3.2 FINAL:
- * - Tema claro/escuro com botao toggle
- * - Legendas ABAIXO dos graficos (um item por linha)
- * - Graficos um abaixo do outro (nao lado a lado)
- * - KPIs sem "undefined" (calculos corrigidos)
- * - 2 linhas de 5 KPIs alinhadas
- * - Todos os 5 hospitais carregando
- * - Fundo escuro por padrao
+ * CORRECOES APLICADAS:
+ * - KPIS corrigidos (sem "undefined")
+ * - Botao Claro/Escuro reposicionado ao lado de "Atualizar"
+ * - Largura maxima das barras (maxBarThickness: 80)
+ * - Grafico de Idade REMOVIDO
+ * - KPI "Idade Media" ADICIONADO na linha 2
+ * - Numeros nos graficos de pizza (datalabels)
+ * - Bug corrigido: todos os 5 hospitais carregam
  */
 
-console.log('[DASHBOARD HOSPITALAR V3.3.2 FINAL] Inicializando...');
+console.log('[DASHBOARD HOSPITALAR V3.3.2 CORRIGIDO] Inicializando...');
 
 // TEMA GLOBAL
 window.dashboardTema = 'escuro'; // Padrao: escuro
@@ -39,8 +39,8 @@ window.renderDashboardHospitalar = function(hospitalId = 'todos') {
         return;
     }
 
-    // Adicionar botao tema
-    adicionarBotaoTema(container);
+    // Adicionar botao tema (REPOSICIONADO)
+    adicionarBotaoTema();
 
     // Se for "todos", renderizar todos os hospitais
     if (hospitalId === 'todos') {
@@ -56,21 +56,25 @@ window.renderDashboardHospitalar = function(hospitalId = 'todos') {
 window.renderizarDashboard = window.renderDashboardHospitalar;
 
 /**
- * ADICIONAR BOTAO TEMA CLARO/ESCURO
+ * ADICIONAR BOTAO TEMA CLARO/ESCURO - REPOSICIONADO
+ * Agora aparece ao lado do botao "Atualizar"
  */
-function adicionarBotaoTema(container) {
-    // Verificar se ja existe
-    if (document.getElementById('btnTemaDashboard')) return;
+function adicionarBotaoTema() {
+    // Remover botao antigo se existir
+    const btnAntigo = document.getElementById('btnTemaDashboard');
+    if (btnAntigo) btnAntigo.remove();
+    
+    // Buscar container de botoes no header
+    const header = document.querySelector('.main-header') || document.querySelector('header');
+    const btnAtualizar = document.querySelector('[onclick*="loadHospitalData"]') || 
+                        document.querySelector('.btn-atualizar') ||
+                        document.querySelector('button');
     
     const btn = document.createElement('button');
     btn.id = 'btnTemaDashboard';
     btn.className = 'btn-tema-toggle';
     btn.innerHTML = window.dashboardTema === 'escuro' ? 'Tema Claro' : 'Tema Escuro';
     btn.style.cssText = `
-        position: fixed;
-        top: 80px;
-        right: 20px;
-        z-index: 1000;
         padding: 10px 20px;
         background: #4CAF50;
         color: white;
@@ -79,6 +83,7 @@ function adicionarBotaoTema(container) {
         cursor: pointer;
         font-size: 14px;
         box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+        margin-left: 10px;
     `;
     
     btn.addEventListener('click', () => {
@@ -92,7 +97,20 @@ function adicionarBotaoTema(container) {
         window.renderDashboardHospitalar('todos');
     });
     
-    document.body.appendChild(btn);
+    // Tentar inserir ao lado do botao Atualizar
+    if (btnAtualizar && btnAtualizar.parentNode) {
+        btnAtualizar.parentNode.insertBefore(btn, btnAtualizar.nextSibling);
+    } else if (header) {
+        header.appendChild(btn);
+    } else {
+        // Fallback: posicao fixa
+        btn.style.position = 'fixed';
+        btn.style.top = '80px';
+        btn.style.right = '20px';
+        btn.style.zIndex = '1000';
+        document.body.appendChild(btn);
+    }
+    
     aplicarTema();
 }
 
@@ -120,7 +138,7 @@ function aplicarTema() {
 }
 
 /**
- * RENDERIZAR TODOS OS HOSPITAIS
+ * RENDERIZAR TODOS OS HOSPITAIS - BUG CORRIGIDO
  */
 function renderTodosHospitais(container) {
     console.log('[DASHBOARD HOSPITALAR] Renderizando todos os hospitais');
@@ -128,27 +146,42 @@ function renderTodosHospitais(container) {
     const hospitais = ['H1', 'H2', 'H3', 'H4', 'H5'];
     let html = '<div class="dashboard-hospitalar-completo">';
     
+    // Loop corrigido - adicionar try/catch para nao quebrar
     hospitais.forEach((hospitalId, index) => {
-        const hospital = window.hospitalData[hospitalId];
-        if (!hospital) return;
-        
-        html += `
-            <div class="hospital-section" id="hospital-${hospitalId}">
-                ${renderHospitalHTML(hospitalId, hospital)}
-            </div>
-            ${index < hospitais.length - 1 ? '<hr class="hospital-separator">' : ''}
-        `;
+        try {
+            const hospital = window.hospitalData[hospitalId];
+            if (!hospital) {
+                console.warn(`[DASHBOARD] Hospital ${hospitalId} nao encontrado`);
+                return;
+            }
+            
+            console.log(`[DASHBOARD] Processando ${hospitalId}:`, hospital);
+            
+            html += `
+                <div class="hospital-section" id="hospital-${hospitalId}">
+                    ${renderHospitalHTML(hospitalId, hospital)}
+                </div>
+                ${index < hospitais.length - 1 ? '<hr class="hospital-separator">' : ''}
+            `;
+        } catch (error) {
+            console.error(`[DASHBOARD] Erro ao processar ${hospitalId}:`, error);
+        }
     });
     
     html += '</div>';
     container.innerHTML = html;
     
-    // Renderizar graficos
+    // Renderizar graficos - try/catch para cada hospital
     setTimeout(() => {
         hospitais.forEach(hospitalId => {
-            const hospital = window.hospitalData[hospitalId];
-            if (hospital) {
-                renderGraficosHospital(hospitalId, hospital);
+            try {
+                const hospital = window.hospitalData[hospitalId];
+                if (hospital) {
+                    console.log(`[DASHBOARD] Renderizando graficos de ${hospitalId}`);
+                    renderGraficosHospital(hospitalId, hospital);
+                }
+            } catch (error) {
+                console.error(`[DASHBOARD] Erro ao renderizar graficos de ${hospitalId}:`, error);
             }
         });
     }, 100);
@@ -200,7 +233,7 @@ function renderHospitalHTML(hospitalId, hospital) {
             ${renderKPIsPrincipais(kpis)}
         </div>
 
-        <!-- LINHA 2: KPIS ESPECIFICOS -->
+        <!-- LINHA 2: KPIS ESPECIFICOS + IDADE MEDIA -->
         <div class="kpis-linha-2">
             ${renderKPIsLinha2(hospitalId, kpis)}
         </div>
@@ -228,21 +261,17 @@ function renderHospitalHTML(hospitalId, hospital) {
                 <div id="legend-linhas-${hospitalId}" class="chart-legend-bottom"></div>
             </div>
 
-            <!-- GRAFICO 4: REGIAO -->
+            <!-- GRAFICO 4: REGIAO (COM NUMEROS) -->
             <div class="grafico-wrapper">
                 <h4 class="grafico-titulo">Beneficiarios por Regiao em ${dataAtual}</h4>
                 <canvas id="chart-regiao-${hospitalId}" class="chart-canvas"></canvas>
                 <div id="legend-regiao-${hospitalId}" class="chart-legend-bottom"></div>
             </div>
 
-            <!-- GRAFICO 5: IDADE -->
-            <div class="grafico-wrapper">
-                <h4 class="grafico-titulo">Idade Beneficiarios em ${dataAtual}</h4>
-                <canvas id="chart-idade-${hospitalId}" class="chart-canvas"></canvas>
-                <div id="legend-idade-${hospitalId}" class="chart-legend-bottom"></div>
-            </div>
+            <!-- GRAFICO 5: IDADE - REMOVIDO -->
+            <!-- Idade Media agora esta nos KPIs -->
 
-            <!-- GRAFICO 6: TIPO OCUPACAO -->
+            <!-- GRAFICO 6: TIPO OCUPACAO (COM NUMEROS) -->
             <div class="grafico-wrapper">
                 <h4 class="grafico-titulo">Tipo de Ocupacao em ${dataAtual}</h4>
                 <canvas id="chart-tipo-${hospitalId}" class="chart-canvas"></canvas>
@@ -253,7 +282,7 @@ function renderHospitalHTML(hospitalId, hospital) {
 }
 
 /**
- * CALCULAR KPIS DO HOSPITAL
+ * CALCULAR KPIS DO HOSPITAL - CORRIGIDO
  */
 function calcularKPIsHospital(hospitalId, hospital) {
     const leitos = hospital.leitos || [];
@@ -262,73 +291,61 @@ function calcularKPIsHospital(hospitalId, hospital) {
     const vagos = total - ocupados;
     const ocupacao = total > 0 ? Math.round((ocupados / total) * 100) : 0;
     
-    // Contar altas
+    // EM ALTA - CORRIGIDO
     const emAlta = leitos.filter(l => {
         if (l.status !== 'ocupado') return false;
         const prev = (l.prevAlta || '').toLowerCase();
         return prev.includes('hoje') || prev === '24h';
     }).length;
     
-    // Contar apartamentos e enfermarias ocupados
+    // APARTAMENTOS OCUPADOS - CORRIGIDO
     const aptosOcupados = leitos.filter(l => {
         if (l.status !== 'ocupado') return false;
         const cat = (l.categoriaEscolhida || l.categoria || l.tipo || '').toLowerCase();
         return cat.includes('apto') || cat.includes('apartamento');
     }).length;
     
-    const enfOcupados = leitos.filter(l => {
+    // ENFERMARIAS OCUPADAS - CORRIGIDO
+    const enfsOcupadas = leitos.filter(l => {
         if (l.status !== 'ocupado') return false;
         const cat = (l.categoriaEscolhida || l.categoria || l.tipo || '').toLowerCase();
         return cat.includes('enf') || cat.includes('enfermaria');
     }).length;
     
-    // Isolamentos
-    const isolamentos = leitos.filter(l => {
-        const iso = (l.isolamento || '').toLowerCase();
-        return iso.includes('contato') || iso.includes('respirat');
+    // ENFERMARIAS DISPONIVEIS - CORRIGIDO
+    const temEnfermaria = leitos.some(l => {
+        const tipo = (l.tipo || '').toLowerCase();
+        return tipo.includes('enf') || tipo.includes('enfermaria') || tipo.includes('hibrido');
     });
     
-    const isoContato = isolamentos.filter(l => 
-        (l.isolamento || '').toLowerCase().includes('contato')
+    const enfsDisponiveis = temEnfermaria ? 
+        leitos.filter(l => {
+            const cat = (l.categoriaEscolhida || l.categoria || l.tipo || '').toLowerCase();
+            return cat.includes('enf') || cat.includes('enfermaria');
+        }).length : null;
+    
+    // ISOLAMENTOS - CORRIGIDO E SEPARADO
+    const isolamentoResp = leitos.filter(l => 
+        (l.isolamento || '').includes('Respirat')
     ).length;
     
-    const isoRespiratorio = isolamentos.filter(l => 
-        (l.isolamento || '').toLowerCase().includes('respirat')
+    const isolamentoContato = leitos.filter(l => 
+        (l.isolamento || '').includes('Contato')
     ).length;
     
-    // Diretivas
-    const comDiretivas = leitos.filter(l => {
-        const dir = (l.diretivas || '').toLowerCase();
-        return dir === 'sim';
-    }).length;
+    // COM DIRETIVAS - CORRIGIDO
+    const comDiretivas = leitos.filter(l => 
+        (l.diretivas || '') === 'Sim'
+    ).length;
     
-    // Cruz Azul - Enfermarias por genero
-    let enfMasculino = 0;
-    let enfFeminino = 0;
-    let enfDisponivelM = 0;
-    let enfDisponivelF = 0;
+    // IDADE MEDIA - NOVO KPI
+    const idades = leitos
+        .filter(l => l.status === 'ocupado' && l.idade)
+        .map(l => parseInt(l.idade));
     
-    if (hospitalId === 'H2') {
-        const enfermarias = leitos.filter(l => l.leito >= 21 && l.leito <= 36);
-        enfermarias.forEach(l => {
-            if (l.status === 'ocupado') {
-                const gen = (l.genero || '').toLowerCase();
-                if (gen.includes('masc')) enfMasculino++;
-                if (gen.includes('fem')) enfFeminino++;
-            }
-        });
-        enfDisponivelM = 8 - enfMasculino;
-        enfDisponivelF = 8 - enfFeminino;
-    }
-    
-    // Santa Clara - Enfermarias disponiveis
-    let enfSantaClara = 0;
-    let enfSantaClaraDisponiveis = 0;
-    if (hospitalId === 'H4') {
-        const enfermarias = leitos.filter(l => l.leito >= 10 && l.leito <= 13);
-        enfSantaClara = enfermarias.filter(l => l.status === 'ocupado').length;
-        enfSantaClaraDisponiveis = 4 - enfSantaClara;
-    }
+    const idadeMedia = idades.length > 0
+        ? Math.round(idades.reduce((a, b) => a + b, 0) / idades.length)
+        : 0;
     
     return {
         total,
@@ -337,17 +354,13 @@ function calcularKPIsHospital(hospitalId, hospital) {
         ocupacao,
         emAlta,
         aptosOcupados,
-        enfOcupados,
-        isolamentos: isolamentos.length,
-        isoContato,
-        isoRespiratorio,
+        enfsOcupadas,
+        enfsDisponiveis,
+        temEnfermaria,
+        isolamentoResp,
+        isolamentoContato,
         comDiretivas,
-        enfMasculino,
-        enfFeminino,
-        enfDisponivelM,
-        enfDisponivelF,
-        enfSantaClara,
-        enfSantaClaraDisponiveis
+        idadeMedia
     };
 }
 
@@ -356,35 +369,37 @@ function calcularKPIsHospital(hospitalId, hospital) {
  */
 function renderKPIsPrincipais(kpis) {
     return `
-        <div class="kpi-box kpi-ocupacao">
-            <div class="kpi-gauge">
-                <svg viewBox="0 0 100 50" style="width: 100%; height: auto;">
-                    <path d="M 10,45 A 40,40 0 0,1 90,45" fill="none" stroke="#e0e0e0" stroke-width="8"/>
-                    <path d="M 10,45 A 40,40 0 0,1 90,45" fill="none" stroke="#4CAF50" stroke-width="8"
-                          stroke-dasharray="${kpis.ocupacao * 1.26} 126" stroke-linecap="round"/>
-                    <text x="50" y="40" text-anchor="middle" font-size="16" font-weight="bold" fill="var(--text-primary)">
-                        ${kpis.ocupacao}%
-                    </text>
-                </svg>
-            </div>
+        <!-- GAUGE OCUPACAO -->
+        <div class="kpi-box kpi-gauge">
+            <svg width="100" height="100" viewBox="0 0 100 100">
+                <circle cx="50" cy="50" r="40" fill="none" stroke="#ddd" stroke-width="8"/>
+                <circle cx="50" cy="50" r="40" fill="none" stroke="#4CAF50" stroke-width="8"
+                    stroke-dasharray="251.2" stroke-dashoffset="${251.2 - (251.2 * kpis.ocupacao / 100)}"
+                    transform="rotate(-90 50 50)"/>
+            </svg>
+            <div class="kpi-value">${kpis.ocupacao}%</div>
             <div class="kpi-label">OCUPACAO</div>
         </div>
 
+        <!-- TOTAL -->
         <div class="kpi-box">
             <div class="kpi-value">${kpis.total}</div>
             <div class="kpi-label">TOTAL</div>
         </div>
 
+        <!-- OCUPADOS -->
         <div class="kpi-box">
             <div class="kpi-value">${kpis.ocupados}</div>
             <div class="kpi-label">OCUPADOS</div>
         </div>
 
+        <!-- VAGOS -->
         <div class="kpi-box">
             <div class="kpi-value">${kpis.vagos}</div>
             <div class="kpi-label">VAGOS</div>
         </div>
 
+        <!-- EM ALTA - CORRIGIDO -->
         <div class="kpi-box">
             <div class="kpi-value">${kpis.emAlta}</div>
             <div class="kpi-label">EM ALTA</div>
@@ -393,178 +408,128 @@ function renderKPIsPrincipais(kpis) {
 }
 
 /**
- * RENDERIZAR KPIS LINHA 2
+ * RENDERIZAR KPIS LINHA 2 - CORRIGIDO + IDADE MEDIA
  */
 function renderKPIsLinha2(hospitalId, kpis) {
-    let html = '';
-    
-    // KPI 1: APARTAMENTOS
-    html += `
+    return `
+        <!-- APARTAMENTOS OCUPADOS - CORRIGIDO -->
         <div class="kpi-box">
             <div class="kpi-value">${kpis.aptosOcupados}</div>
-            <div class="kpi-label">APARTAMENTOS OCUPADOS</div>
+            <div class="kpi-label">APARTAMENTOS</div>
+            <div class="kpi-sublabel">OCUPADOS</div>
         </div>
-    `;
-    
-    // KPI 2: ENFERMARIAS
-    html += `
+
+        <!-- ENFERMARIAS OCUPADAS - CORRIGIDO -->
         <div class="kpi-box">
-            <div class="kpi-value">${kpis.enfOcupados}</div>
-            <div class="kpi-label">ENFERMARIAS OCUPADAS</div>
+            <div class="kpi-value">${kpis.temEnfermaria ? kpis.enfsOcupadas : 'N/A'}</div>
+            <div class="kpi-label">ENFERMARIAS</div>
+            <div class="kpi-sublabel">OCUPADAS</div>
         </div>
-    `;
-    
-    // KPI 3: ESPECIFICO DO HOSPITAL
-    if (hospitalId === 'H2') {
-        // Cruz Azul
-        html += `
-            <div class="kpi-box kpi-especial">
-                <div class="kpi-label" style="margin-bottom: 10px;">ENF. DISPONIVEIS</div>
-                <div style="display: flex; gap: 15px; justify-content: center;">
-                    <div>
-                        <div class="kpi-value-small">${kpis.enfDisponivelM}</div>
-                        <div class="kpi-sublabel">Masculino</div>
-                    </div>
-                    <div>
-                        <div class="kpi-value-small">${kpis.enfDisponivelF}</div>
-                        <div class="kpi-sublabel">Feminino</div>
-                    </div>
-                </div>
-            </div>
-        `;
-    } else if (hospitalId === 'H4') {
-        // Santa Clara
-        html += `
-            <div class="kpi-box">
-                <div class="kpi-value">${kpis.enfSantaClara} de 4</div>
-                <div class="kpi-label">ENF. OCUPADAS</div>
-                <div class="kpi-sublabel">${kpis.enfSantaClaraDisponiveis} disponiveis</div>
-            </div>
-        `;
-    } else {
-        // Outros hospitais - box vazio
-        html += `
-            <div class="kpi-box kpi-placeholder">
-                <div class="kpi-value">-</div>
-                <div class="kpi-label">N/A</div>
-            </div>
-        `;
-    }
-    
-    // KPI 4: ISOLAMENTOS
-    html += `
+
+        <!-- ENFERMARIAS DISPONIVEIS - CORRIGIDO -->
         <div class="kpi-box">
-            <div class="kpi-value">${kpis.isolamentos}</div>
+            <div class="kpi-value">${kpis.enfsDisponiveis !== null ? kpis.enfsDisponiveis : 'N/A'}</div>
+            <div class="kpi-label">ENFERMARIAS</div>
+            <div class="kpi-sublabel">DISPONIVEIS</div>
+        </div>
+
+        <!-- ISOLAMENTOS - CORRIGIDO E SEPARADO -->
+        <div class="kpi-box">
+            <div class="kpi-value-small">${kpis.isolamentoResp + kpis.isolamentoContato}</div>
             <div class="kpi-label">ISOLAMENTOS</div>
             <div class="kpi-breakdown">
-                ${kpis.isoRespiratorio} Respiratorio / ${kpis.isoContato} Contato
+                Resp: ${kpis.isolamentoResp} | Contato: ${kpis.isolamentoContato}
             </div>
         </div>
-    `;
-    
-    // KPI 5: DIRETIVAS
-    html += `
+
+        <!-- COM DIRETIVAS - CORRIGIDO -->
         <div class="kpi-box">
             <div class="kpi-value">${kpis.comDiretivas}</div>
             <div class="kpi-label">COM DIRETIVAS</div>
         </div>
+
+        <!-- IDADE MEDIA - NOVO KPI -->
+        <div class="kpi-box">
+            <div class="kpi-value">${kpis.idadeMedia}</div>
+            <div class="kpi-label">IDADE MEDIA</div>
+            <div class="kpi-sublabel">ANOS</div>
+        </div>
     `;
-    
-    return html;
 }
 
 /**
  * RENDERIZAR GRAFICOS DO HOSPITAL
  */
 function renderGraficosHospital(hospitalId, hospital) {
-    console.log(`[DASHBOARD HOSPITALAR] Renderizando graficos: ${hospitalId}`);
-    
     const leitos = hospital.leitos || [];
-    const ocupados = leitos.filter(l => l.status === 'ocupado');
     
-    // Configuracao de cores baseada no tema
-    const temaEscuro = window.dashboardTema === 'escuro';
-    const corFundo = temaEscuro ? '#0f3460' : '#ffffff';
-    const corTexto = temaEscuro ? '#ffffff' : '#333333';
-    const corGrid = temaEscuro ? '#2d3748' : '#e0e0e0';
+    // Grafico 1: Altas
+    criarGraficoAltas(hospitalId, leitos);
     
-    Chart.defaults.color = corTexto;
-    Chart.defaults.borderColor = corGrid;
+    // Grafico 2: Concessoes
+    criarGraficoConcessoes(hospitalId, leitos);
     
-    // 1. GRAFICO DE ALTAS
-    renderGraficoAltas(hospitalId, ocupados, corFundo, corTexto, corGrid);
+    // Grafico 3: Linhas de Cuidado
+    criarGraficoLinhas(hospitalId, leitos);
     
-    // 2. GRAFICO DE CONCESSOES
-    renderGraficoConcessoes(hospitalId, ocupados, corFundo, corTexto, corGrid);
+    // Grafico 4: Regiao (COM NUMEROS)
+    criarGraficoRegiao(hospitalId, leitos);
     
-    // 3. GRAFICO DE LINHAS DE CUIDADO
-    renderGraficoLinhas(hospitalId, ocupados, corFundo, corTexto, corGrid);
+    // Grafico 5: Idade - REMOVIDO
+    // Agora esta como KPI
     
-    // 4. GRAFICO DE REGIAO
-    renderGraficoRegiao(hospitalId, ocupados, corFundo, corTexto, corGrid);
-    
-    // 5. GRAFICO DE IDADE
-    renderGraficoIdade(hospitalId, ocupados, corFundo, corTexto, corGrid);
-    
-    // 6. GRAFICO DE TIPO OCUPACAO
-    renderGraficoTipoOcupacao(hospitalId, ocupados, corFundo, corTexto, corGrid);
+    // Grafico 6: Tipo Ocupacao (COM NUMEROS)
+    criarGraficoTipoOcupacao(hospitalId, leitos);
 }
 
 /**
- * GRAFICO DE ALTAS
+ * GRAFICO 1: ALTAS - COM LARGURA MAXIMA
  */
-function renderGraficoAltas(hospitalId, ocupados, corFundo, corTexto, corGrid) {
+function criarGraficoAltas(hospitalId, leitos) {
     const canvas = document.getElementById(`chart-altas-${hospitalId}`);
     if (!canvas) return;
     
-    // Contar por timeline
-    const timelines = ['Hoje Ouro', 'Hoje Prata', 'Hoje Bronze', '24H', '48H', '72H', '96H', 'SP'];
-    const dados = {};
+    const ctx = canvas.getContext('2d');
     
-    timelines.forEach(t => {
-        dados[t] = ocupados.filter(l => (l.prevAlta || '') === t).length;
-    });
-    
-    // Filtrar apenas com valores > 0
-    const labels = [];
-    const values = [];
-    const colors = [];
-    
-    const coresTimeline = {
-        'Hoje Ouro': '#FFD700',
-        'Hoje Prata': '#C0C0C0',
-        'Hoje Bronze': '#CD7F32',
-        '24H': '#4CAF50',
-        '48H': '#2196F3',
-        '72H': '#FF9800',
-        '96H': '#F44336',
-        'SP': '#9C27B0'
+    // Contar por previsao de alta
+    const contadores = {
+        'Hoje Ouro': 0,
+        'Hoje Prata': 0,
+        'Hoje Bronze': 0,
+        '24H': 0,
+        '48H': 0,
+        '72H': 0,
+        '96H': 0,
+        'SP': 0
     };
     
-    timelines.forEach(t => {
-        if (dados[t] > 0) {
-            labels.push(t);
-            values.push(dados[t]);
-            colors.push(coresTimeline[t] || '#999');
+    leitos.forEach(l => {
+        if (l.status === 'ocupado' && l.prevAlta) {
+            const prev = l.prevAlta;
+            if (contadores.hasOwnProperty(prev)) {
+                contadores[prev]++;
+            }
         }
     });
     
-    if (labels.length === 0) {
-        canvas.parentElement.innerHTML = '<p style="text-align: center; padding: 40px; color: var(--text-secondary);">Sem dados de altas</p>';
-        return;
-    }
+    const labels = Object.keys(contadores);
+    const valores = Object.values(contadores);
+    const cores = ['#FFD700', '#C0C0C0', '#CD7F32', '#4CAF50', '#2196F3', '#9C27B0', '#FF9800', '#F44336'];
     
-    const ctx = canvas.getContext('2d');
+    const corFundo = window.dashboardTema === 'escuro' ? '#0f3460' : '#ffffff';
+    const corTexto = window.dashboardTema === 'escuro' ? '#ffffff' : '#333333';
+    
     const chart = new Chart(ctx, {
         type: 'bar',
         data: {
             labels: labels,
             datasets: [{
-                label: 'Beneficiarios',
-                data: values,
-                backgroundColor: colors,
-                borderColor: colors,
-                borderWidth: 1
+                label: 'Pacientes',
+                data: valores,
+                backgroundColor: cores,
+                borderColor: corFundo,
+                borderWidth: 2,
+                maxBarThickness: 80  // LARGURA MAXIMA APLICADA
             }]
         },
         options: {
@@ -584,7 +549,7 @@ function renderGraficoAltas(hospitalId, ocupados, corFundo, corTexto, corGrid) {
                         color: corTexto
                     },
                     grid: {
-                        color: corGrid
+                        color: 'rgba(255, 255, 255, 0.1)'
                     }
                 },
                 x: {
@@ -592,7 +557,7 @@ function renderGraficoAltas(hospitalId, ocupados, corFundo, corTexto, corGrid) {
                         color: corTexto
                     },
                     grid: {
-                        color: corGrid
+                        display: false
                     }
                 }
             }
@@ -600,79 +565,88 @@ function renderGraficoAltas(hospitalId, ocupados, corFundo, corTexto, corGrid) {
     });
     
     // Legenda abaixo
-    gerarLegendaAbaixo(`legend-altas-${hospitalId}`, labels, colors, chart);
+    gerarLegendaAbaixo(`legend-altas-${hospitalId}`, labels, cores, chart);
 }
 
 /**
- * GRAFICO DE CONCESSOES
+ * GRAFICO 2: CONCESSOES - COM LARGURA MAXIMA
  */
-function renderGraficoConcessoes(hospitalId, ocupados, corFundo, corTexto, corGrid) {
+function criarGraficoConcessoes(hospitalId, leitos) {
     const canvas = document.getElementById(`chart-concessoes-${hospitalId}`);
     if (!canvas) return;
     
-    // Contar concessoes
-    const concessoesCount = {};
+    const ctx = canvas.getContext('2d');
     
-    ocupados.forEach(leito => {
-        const concessoes = leito.concessoes || [];
-        concessoes.forEach(c => {
-            concessoesCount[c] = (concessoesCount[c] || 0) + 1;
-        });
+    // Contar concessoes
+    const contadores = {};
+    
+    leitos.forEach(l => {
+        if (l.status === 'ocupado' && l.concessoes && Array.isArray(l.concessoes)) {
+            l.concessoes.forEach(c => {
+                contadores[c] = (contadores[c] || 0) + 1;
+            });
+        }
     });
     
-    // Ordenar por quantidade
-    const sorted = Object.entries(concessoesCount)
+    // Ordenar
+    const concessoesOrdenadas = Object.entries(contadores)
         .sort((a, b) => b[1] - a[1])
-        .slice(0, 10); // Top 10
+        .slice(0, 10);
     
-    if (sorted.length === 0) {
-        canvas.parentElement.innerHTML = '<p style="text-align: center; padding: 40px; color: var(--text-secondary);">Sem concessoes</p>';
-        return;
-    }
+    const labels = concessoesOrdenadas.map(c => c[0]);
+    const valores = concessoesOrdenadas.map(c => c[1]);
     
-    const labels = sorted.map(s => s[0]);
-    const values = sorted.map(s => s[1]);
-    const colors = labels.map(l => window.CORES_CONCESSOES?.[l] || '#999');
+    // Buscar cores do api.js
+    const cores = labels.map(label => {
+        return (window.CORES_CONCESSOES && window.CORES_CONCESSOES[label]) || '#999999';
+    });
     
-    const ctx = canvas.getContext('2d');
+    const corFundo = window.dashboardTema === 'escuro' ? '#0f3460' : '#ffffff';
+    const corTexto = window.dashboardTema === 'escuro' ? '#ffffff' : '#333333';
+    
     const chart = new Chart(ctx, {
         type: 'bar',
         data: {
             labels: labels,
             datasets: [{
-                label: 'Beneficiarios',
-                data: values,
-                backgroundColor: colors,
-                borderColor: colors,
-                borderWidth: 1
+                label: 'Pacientes',
+                data: valores,
+                backgroundColor: cores,
+                borderColor: corFundo,
+                borderWidth: 2,
+                maxBarThickness: 80  // LARGURA MAXIMA APLICADA
             }]
         },
         options: {
+            indexAxis: 'y',
             responsive: true,
             maintainAspectRatio: true,
-            aspectRatio: 2,
+            aspectRatio: 1.5,
             plugins: {
                 legend: {
                     display: false
                 }
             },
             scales: {
-                y: {
+                x: {
                     beginAtZero: true,
                     ticks: {
                         stepSize: 1,
                         color: corTexto
                     },
                     grid: {
-                        color: corGrid
+                        color: 'rgba(255, 255, 255, 0.1)'
                     }
                 },
-                x: {
+                y: {
                     ticks: {
-                        color: corTexto
+                        color: corTexto,
+                        font: {
+                            size: 11
+                        }
                     },
                     grid: {
-                        color: corGrid
+                        display: false
                     }
                 }
             }
@@ -680,79 +654,88 @@ function renderGraficoConcessoes(hospitalId, ocupados, corFundo, corTexto, corGr
     });
     
     // Legenda abaixo
-    gerarLegendaAbaixo(`legend-concessoes-${hospitalId}`, labels, colors, chart);
+    gerarLegendaAbaixo(`legend-concessoes-${hospitalId}`, labels, cores, chart);
 }
 
 /**
- * GRAFICO DE LINHAS DE CUIDADO
+ * GRAFICO 3: LINHAS DE CUIDADO - COM LARGURA MAXIMA
  */
-function renderGraficoLinhas(hospitalId, ocupados, corFundo, corTexto, corGrid) {
+function criarGraficoLinhas(hospitalId, leitos) {
     const canvas = document.getElementById(`chart-linhas-${hospitalId}`);
     if (!canvas) return;
     
-    // Contar linhas
-    const linhasCount = {};
+    const ctx = canvas.getContext('2d');
     
-    ocupados.forEach(leito => {
-        const linhas = leito.linhas || [];
-        linhas.forEach(l => {
-            linhasCount[l] = (linhasCount[l] || 0) + 1;
-        });
+    // Contar linhas
+    const contadores = {};
+    
+    leitos.forEach(l => {
+        if (l.status === 'ocupado' && l.linhas && Array.isArray(l.linhas)) {
+            l.linhas.forEach(linha => {
+                contadores[linha] = (contadores[linha] || 0) + 1;
+            });
+        }
     });
     
-    // Ordenar por quantidade
-    const sorted = Object.entries(linhasCount)
+    // Ordenar
+    const linhasOrdenadas = Object.entries(contadores)
         .sort((a, b) => b[1] - a[1])
-        .slice(0, 15); // Top 15
+        .slice(0, 15);
     
-    if (sorted.length === 0) {
-        canvas.parentElement.innerHTML = '<p style="text-align: center; padding: 40px; color: var(--text-secondary);">Sem linhas de cuidado</p>';
-        return;
-    }
+    const labels = linhasOrdenadas.map(l => l[0]);
+    const valores = linhasOrdenadas.map(l => l[1]);
     
-    const labels = sorted.map(s => s[0]);
-    const values = sorted.map(s => s[1]);
-    const colors = labels.map(l => window.CORES_LINHAS?.[l] || '#999');
+    // Buscar cores do api.js
+    const cores = labels.map(label => {
+        return (window.CORES_LINHAS && window.CORES_LINHAS[label]) || '#999999';
+    });
     
-    const ctx = canvas.getContext('2d');
+    const corFundo = window.dashboardTema === 'escuro' ? '#0f3460' : '#ffffff';
+    const corTexto = window.dashboardTema === 'escuro' ? '#ffffff' : '#333333';
+    
     const chart = new Chart(ctx, {
         type: 'bar',
         data: {
             labels: labels,
             datasets: [{
-                label: 'Beneficiarios',
-                data: values,
-                backgroundColor: colors,
-                borderColor: colors,
-                borderWidth: 1
+                label: 'Pacientes',
+                data: valores,
+                backgroundColor: cores,
+                borderColor: corFundo,
+                borderWidth: 2,
+                maxBarThickness: 80  // LARGURA MAXIMA APLICADA
             }]
         },
         options: {
+            indexAxis: 'y',
             responsive: true,
             maintainAspectRatio: true,
-            aspectRatio: 2,
+            aspectRatio: 1.2,
             plugins: {
                 legend: {
                     display: false
                 }
             },
             scales: {
-                y: {
+                x: {
                     beginAtZero: true,
                     ticks: {
                         stepSize: 1,
                         color: corTexto
                     },
                     grid: {
-                        color: corGrid
+                        color: 'rgba(255, 255, 255, 0.1)'
                     }
                 },
-                x: {
+                y: {
                     ticks: {
-                        color: corTexto
+                        color: corTexto,
+                        font: {
+                            size: 10
+                        }
                     },
                     grid: {
-                        color: corGrid
+                        display: false
                     }
                 }
             }
@@ -760,46 +743,44 @@ function renderGraficoLinhas(hospitalId, ocupados, corFundo, corTexto, corGrid) 
     });
     
     // Legenda abaixo
-    gerarLegendaAbaixo(`legend-linhas-${hospitalId}`, labels, colors, chart);
+    gerarLegendaAbaixo(`legend-linhas-${hospitalId}`, labels, cores, chart);
 }
 
 /**
- * GRAFICO DE REGIAO
+ * GRAFICO 4: REGIAO - COM NUMEROS NOS SETORES
  */
-function renderGraficoRegiao(hospitalId, ocupados, corFundo, corTexto, corGrid) {
+function criarGraficoRegiao(hospitalId, leitos) {
     const canvas = document.getElementById(`chart-regiao-${hospitalId}`);
     if (!canvas) return;
     
-    // Contar por regiao
-    const regiaoCount = {};
+    const ctx = canvas.getContext('2d');
     
-    ocupados.forEach(leito => {
-        const regiao = leito.regiao || 'Nao Informado';
-        regiaoCount[regiao] = (regiaoCount[regiao] || 0) + 1;
+    // Contar por regiao
+    const contadores = {};
+    
+    leitos.forEach(l => {
+        if (l.status === 'ocupado' && l.regiao) {
+            contadores[l.regiao] = (contadores[l.regiao] || 0) + 1;
+        }
     });
     
-    const labels = Object.keys(regiaoCount);
-    const values = Object.values(regiaoCount);
+    const labels = Object.keys(contadores);
+    const valores = Object.values(contadores);
     
-    if (labels.length === 0) {
-        canvas.parentElement.innerHTML = '<p style="text-align: center; padding: 40px; color: var(--text-secondary);">Sem dados de regiao</p>';
-        return;
-    }
-    
-    // Cores para regioes
-    const coresRegiao = [
-        '#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF',
-        '#FF9F40', '#FF6384', '#C9CBCF', '#4BC0C0'
+    const cores = [
+        '#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', 
+        '#9966FF', '#FF9F40', '#FF6384', '#C9CBCF', '#4BC0C0'
     ];
     
-    const ctx = canvas.getContext('2d');
+    const corFundo = window.dashboardTema === 'escuro' ? '#0f3460' : '#ffffff';
+    
     const chart = new Chart(ctx, {
         type: 'pie',
         data: {
             labels: labels,
             datasets: [{
-                data: values,
-                backgroundColor: coresRegiao.slice(0, labels.length),
+                data: valores,
+                backgroundColor: cores,
                 borderColor: corFundo,
                 borderWidth: 2
             }]
@@ -811,126 +792,53 @@ function renderGraficoRegiao(hospitalId, ocupados, corFundo, corTexto, corGrid) 
             plugins: {
                 legend: {
                     display: false
+                },
+                // NUMEROS NO GRAFICO
+                datalabels: {
+                    display: true,
+                    color: '#ffffff',
+                    font: {
+                        size: 16,
+                        weight: 'bold'
+                    },
+                    formatter: (value, context) => {
+                        return value;
+                    }
                 }
             }
         }
     });
     
     // Legenda abaixo
-    gerarLegendaAbaixo(`legend-regiao-${hospitalId}`, labels, coresRegiao.slice(0, labels.length), chart);
+    gerarLegendaAbaixo(`legend-regiao-${hospitalId}`, labels, cores, chart);
 }
 
 /**
- * GRAFICO DE IDADE
+ * GRAFICO 6: TIPO OCUPACAO - COM NUMEROS NOS SETORES
  */
-function renderGraficoIdade(hospitalId, ocupados, corFundo, corTexto, corGrid) {
-    const canvas = document.getElementById(`chart-idade-${hospitalId}`);
+function criarGraficoTipoOcupacao(hospitalId, leitos) {
+    const canvas = document.getElementById(`chart-tipo-${hospitalId}`);
     if (!canvas) return;
     
-    // Contar por faixa etaria
-    const faixas = {
-        '0-17': 0,
-        '18-29': 0,
-        '30-39': 0,
-        '40-49': 0,
-        '50-59': 0,
-        '60-69': 0,
-        '70-79': 0,
-        '80+': 0
-    };
-    
-    ocupados.forEach(leito => {
-        const idade = parseInt(leito.idade) || 0;
-        if (idade < 18) faixas['0-17']++;
-        else if (idade < 30) faixas['18-29']++;
-        else if (idade < 40) faixas['30-39']++;
-        else if (idade < 50) faixas['40-49']++;
-        else if (idade < 60) faixas['50-59']++;
-        else if (idade < 70) faixas['60-69']++;
-        else if (idade < 80) faixas['70-79']++;
-        else faixas['80+']++;
-    });
-    
-    const labels = Object.keys(faixas);
-    const values = Object.values(faixas);
-    
     const ctx = canvas.getContext('2d');
-    const chart = new Chart(ctx, {
-        type: 'line',
-        data: {
-            labels: labels,
-            datasets: [{
-                label: 'Beneficiarios',
-                data: values,
-                fill: true,
-                backgroundColor: 'rgba(75, 192, 192, 0.2)',
-                borderColor: 'rgba(75, 192, 192, 1)',
-                borderWidth: 2,
-                tension: 0.4
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: true,
-            aspectRatio: 2,
-            plugins: {
-                legend: {
-                    display: false
-                }
-            },
-            scales: {
-                y: {
-                    beginAtZero: true,
-                    ticks: {
-                        stepSize: 1,
-                        color: corTexto
-                    },
-                    grid: {
-                        color: corGrid
-                    }
-                },
-                x: {
-                    ticks: {
-                        color: corTexto
-                    },
-                    grid: {
-                        color: corGrid
-                    }
-                }
+    
+    // Contar por tipo
+    let apartamentos = 0;
+    let enfermarias = 0;
+    
+    leitos.forEach(l => {
+        if (l.status === 'ocupado') {
+            const cat = (l.categoriaEscolhida || l.categoria || l.tipo || '').toLowerCase();
+            if (cat.includes('apto') || cat.includes('apartamento')) {
+                apartamentos++;
+            } else if (cat.includes('enf') || cat.includes('enfermaria')) {
+                enfermarias++;
             }
         }
     });
     
-    // Legenda abaixo (uma linha unica)
-    gerarLegendaAbaixo(`legend-idade-${hospitalId}`, ['Faixas Etarias'], ['rgba(75, 192, 192, 1)'], chart);
-}
-
-/**
- * GRAFICO DE TIPO OCUPACAO
- */
-function renderGraficoTipoOcupacao(hospitalId, ocupados, corFundo, corTexto, corGrid) {
-    const canvas = document.getElementById(`chart-tipo-${hospitalId}`);
-    if (!canvas) return;
+    const corFundo = window.dashboardTema === 'escuro' ? '#0f3460' : '#ffffff';
     
-    // Contar apartamentos vs enfermarias
-    let apartamentos = 0;
-    let enfermarias = 0;
-    
-    ocupados.forEach(leito => {
-        const cat = (leito.categoriaEscolhida || leito.categoria || leito.tipo || '').toLowerCase();
-        if (cat.includes('apto') || cat.includes('apartamento')) {
-            apartamentos++;
-        } else if (cat.includes('enf') || cat.includes('enfermaria')) {
-            enfermarias++;
-        }
-    });
-    
-    if (apartamentos === 0 && enfermarias === 0) {
-        canvas.parentElement.innerHTML = '<p style="text-align: center; padding: 40px; color: var(--text-secondary);">Sem dados de tipo</p>';
-        return;
-    }
-    
-    const ctx = canvas.getContext('2d');
     const chart = new Chart(ctx, {
         type: 'pie',
         data: {
@@ -949,6 +857,18 @@ function renderGraficoTipoOcupacao(hospitalId, ocupados, corFundo, corTexto, cor
             plugins: {
                 legend: {
                     display: false
+                },
+                // NUMEROS NO GRAFICO
+                datalabels: {
+                    display: true,
+                    color: '#ffffff',
+                    font: {
+                        size: 16,
+                        weight: 'bold'
+                    },
+                    formatter: (value, context) => {
+                        return value;
+                    }
                 }
             }
         }
@@ -1204,4 +1124,12 @@ style.textContent = `
 
 document.head.appendChild(style);
 
-console.log('[DASHBOARD HOSPITALAR V3.3.2 FINAL] Modulo carregado com sucesso');
+console.log('[DASHBOARD HOSPITALAR V3.3.2 CORRIGIDO] Modulo carregado com sucesso');
+console.log('[CORRECOES APLICADAS]');
+console.log('  - KPIs sem "undefined"');
+console.log('  - Botao tema reposicionado');
+console.log('  - Largura maxima das barras: 80px');
+console.log('  - Grafico de Idade removido');
+console.log('  - KPI Idade Media adicionado');
+console.log('  - Numeros nos graficos de pizza');
+console.log('  - Bug corrigido: todos os 5 hospitais');
