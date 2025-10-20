@@ -350,33 +350,45 @@
     // ===== PLACEHOLDERS DOS GRÁFICOS =====
     function renderGraficosPlaceholders(hospitalId) {
         return `
-            <div class="graficos-container" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; margin-top: 20px;">
-                <!-- Linha 1 -->
+            <div class="graficos-container" style="display: grid; grid-template-columns: 1fr; gap: 30px; margin-top: 20px;">
+                <!-- Gráfico 1 -->
                 <div class="grafico-box" style="background: var(--card-bg-secondary); padding: 15px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
                     <h3 style="font-size: 14px; color: var(--text-secondary); margin-bottom: 10px; font-weight: 600;">📊 Análise Preditiva de Altas</h3>
-                    <canvas id="graficoAltas_${hospitalId}" width="400" height="250"></canvas>
+                    <div style="height: 400px; position: relative;">
+                        <canvas id="graficoAltas_${hospitalId}"></canvas>
+                    </div>
                 </div>
 
+                <!-- Gráfico 2 -->
                 <div class="grafico-box" style="background: var(--card-bg-secondary); padding: 15px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
                     <h3 style="font-size: 14px; color: var(--text-secondary); margin-bottom: 10px; font-weight: 600;">🏥 Concessões de Alta (Top 10)</h3>
-                    <canvas id="graficoConcessoes_${hospitalId}" width="400" height="250"></canvas>
+                    <div style="height: 400px; position: relative;">
+                        <canvas id="graficoConcessoes_${hospitalId}"></canvas>
+                    </div>
                 </div>
 
-                <!-- Linha 2 -->
+                <!-- Gráfico 3 -->
                 <div class="grafico-box" style="background: var(--card-bg-secondary); padding: 15px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
                     <h3 style="font-size: 14px; color: var(--text-secondary); margin-bottom: 10px; font-weight: 600;">🩺 Linhas de Cuidado (Top 15)</h3>
-                    <canvas id="graficoLinhas_${hospitalId}" width="400" height="250"></canvas>
+                    <div style="height: 500px; position: relative;">
+                        <canvas id="graficoLinhas_${hospitalId}"></canvas>
+                    </div>
                 </div>
 
+                <!-- Gráfico 4 -->
                 <div class="grafico-box" style="background: var(--card-bg-secondary); padding: 15px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
                     <h3 style="font-size: 14px; color: var(--text-secondary); margin-bottom: 10px; font-weight: 600;">📍 Pacientes por Região</h3>
-                    <canvas id="graficoRegiao_${hospitalId}" width="400" height="250"></canvas>
+                    <div style="height: 400px; position: relative;">
+                        <canvas id="graficoRegiao_${hospitalId}"></canvas>
+                    </div>
                 </div>
 
-                <!-- Linha 3 (span 2) -->
-                <div class="grafico-box" style="background: var(--card-bg-secondary); padding: 15px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); grid-column: span 2;">
+                <!-- Gráfico 5 -->
+                <div class="grafico-box" style="background: var(--card-bg-secondary); padding: 15px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
                     <h3 style="font-size: 14px; color: var(--text-secondary); margin-bottom: 10px; font-weight: 600;">🏠 Tipo de Ocupação</h3>
-                    <canvas id="graficoTipo_${hospitalId}" width="800" height="250"></canvas>
+                    <div style="height: 400px; position: relative;">
+                        <canvas id="graficoTipo_${hospitalId}"></canvas>
+                    </div>
                 </div>
             </div>
         `;
