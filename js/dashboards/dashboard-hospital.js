@@ -2,11 +2,12 @@
 // Cliente: Guilherme Santoro
 // Desenvolvedor: Alessandro Rodrigues
 // Data: Outubro/2025
-// Versão: V3.3 FINAL - 5 HOSPITAIS
+// Versão: V3.3 FINAL - 5 HOSPITAIS - COM CRIAÇÃO DINÂMICA DE HTML
 // 
 // CHANGELOG V3.1 → V3.3:
 // ✅ Adicionado H5 (Hospital Adventista - 13 leitos)
 // ✅ Total: 79 leitos (H1:10, H2:36, H3:7, H4:13, H5:13)
+// ✅ CRIA TODA A ESTRUTURA HTML DINAMICAMENTE
 // ✅ Regras de gráficos conforme manual completo
 // ✅ Legendas HTML verticais com toggle
 // ✅ SP não entra nos gráficos
@@ -21,6 +22,15 @@
 
 // Estado global
 window.fundoBranco = false;
+
+// Configuração dos hospitais
+const HOSPITAIS_CONFIG = {
+    H1: { nome: 'Neomater', leitos: 10 },
+    H2: { nome: 'Cruz Azul', leitos: 36 },
+    H3: { nome: 'Santa Marcelina', leitos: 7 },
+    H4: { nome: 'Santa Clara', leitos: 13 },
+    H5: { nome: 'Hospital Adventista', leitos: 13 }
+};
 
 // =================== CORES PANTONE V3.3 ===================
 // Cores para Análise Preditiva de Altas
@@ -54,6 +64,93 @@ function isMobile() {
     return window.innerWidth <= 768;
 }
 
+// =================== CRIAR ESTRUTURA HTML DO HOSPITAL ===================
+function criarHTMLHospital(hospitalId) {
+    const config = HOSPITAIS_CONFIG[hospitalId];
+    if (!config) {
+        console.error(`❌ [HTML] Hospital ${hospitalId} não encontrado na configuração`);
+        return null;
+    }
+    
+    console.log(`🏗️ [HTML] Criando estrutura para ${hospitalId} - ${config.nome}`);
+    
+    const section = document.createElement('section');
+    section.id = `hospital-${hospitalId}`;
+    section.className = 'hospital-section';
+    section.style.cssText = 'margin-bottom: 60px; padding: 20px; background: rgba(255,255,255,0.02); border-radius: 12px;';
+    
+    section.innerHTML = `
+        <h2 style="color: #60a5fa; margin-bottom: 30px; font-size: 28px; font-weight: 700;">
+            ${hospitalId} - ${config.nome}
+        </h2>
+        
+        <!-- KPIs Grid -->
+        <div class="kpis-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin-bottom: 40px;">
+            
+            <!-- Donut Ocupação -->
+            <div class="kpi-card" style="background: rgba(255,255,255,0.05); padding: 24px; border-radius: 12px; text-align: center;">
+                <h3 style="color: #9ca3af; font-size: 14px; font-weight: 600; text-transform: uppercase; margin-bottom: 16px;">Ocupação</h3>
+                <div class="donut-container" style="position: relative; margin: 0 auto; width: 160px; height: 160px;">
+                    <canvas id="donutOcupacao${hospitalId}" width="160" height="160"></canvas>
+                    <p id="donutText${hospitalId}" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 24px; font-weight: 700; color: #60a5fa; margin: 0;">
+                        0/${config.leitos}
+                    </p>
+                </div>
+            </div>
+            
+            <!-- Total -->
+            <div class="kpi-card" style="background: rgba(255,255,255,0.05); padding: 24px; border-radius: 12px; text-align: center;">
+                <h3 style="color: #9ca3af; font-size: 14px; font-weight: 600; text-transform: uppercase; margin-bottom: 16px;">Total de Leitos</h3>
+                <p id="kpiTotal${hospitalId}" style="font-size: 48px; font-weight: 700; color: #60a5fa; margin: 0;">
+                    ${config.leitos}
+                </p>
+            </div>
+            
+            <!-- Disponíveis -->
+            <div class="kpi-card" style="background: rgba(255,255,255,0.05); padding: 24px; border-radius: 12px; text-align: center;">
+                <h3 style="color: #9ca3af; font-size: 14px; font-weight: 600; text-transform: uppercase; margin-bottom: 16px;">Disponíveis</h3>
+                <p id="kpiDisponiveis${hospitalId}" style="font-size: 48px; font-weight: 700; color: #10b981; margin: 0;">
+                    0
+                </p>
+            </div>
+            
+            <!-- Alta Hoje -->
+            <div class="kpi-card" style="background: rgba(255,255,255,0.05); padding: 24px; border-radius: 12px; text-align: center;">
+                <h3 style="color: #9ca3af; font-size: 14px; font-weight: 600; text-transform: uppercase; margin-bottom: 16px;">Com Alta Hoje</h3>
+                <p id="kpiAltaHoje${hospitalId}" style="font-size: 48px; font-weight: 700; color: #f59e0b; margin: 0;">
+                    0
+                </p>
+            </div>
+        </div>
+        
+        <!-- Gráfico Altas -->
+        <div class="chart-container" style="background: rgba(255,255,255,0.05); padding: 24px; border-radius: 12px; margin-bottom: 30px;">
+            <h3 class="chart-title" style="color: #e2e8f0; font-size: 18px; font-weight: 600; margin-bottom: 20px;">
+                Análise Preditiva de Altas
+            </h3>
+            <canvas id="chartAltas${hospitalId}" style="max-height: 400px;"></canvas>
+        </div>
+        
+        <!-- Gráfico Concessões -->
+        <div class="chart-container" style="background: rgba(255,255,255,0.05); padding: 24px; border-radius: 12px; margin-bottom: 30px;">
+            <h3 class="chart-title" style="color: #e2e8f0; font-size: 18px; font-weight: 600; margin-bottom: 20px;">
+                Concessões Previstas
+            </h3>
+            <canvas id="chartConcessoes${hospitalId}" style="max-height: 400px;"></canvas>
+        </div>
+        
+        <!-- Gráfico Linhas -->
+        <div class="chart-container" style="background: rgba(255,255,255,0.05); padding: 24px; border-radius: 12px; margin-bottom: 30px;">
+            <h3 class="chart-title" style="color: #e2e8f0; font-size: 18px; font-weight: 600; margin-bottom: 20px;">
+                Linhas de Cuidado Previstas
+            </h3>
+            <canvas id="chartLinhas${hospitalId}" style="max-height: 400px;"></canvas>
+        </div>
+    `;
+    
+    return section;
+}
+
 // =================== CRIAR LEGENDAS HTML CUSTOMIZADAS ===================
 window.createCustomLegendOutside = function(chartId, datasets) {
     const canvas = document.getElementById(chartId);
@@ -78,139 +175,160 @@ window.createCustomLegendOutside = function(chartId, datasets) {
     // Criar nova legenda
     legendDiv = document.createElement('div');
     legendDiv.className = 'custom-legend';
+    legendDiv.style.cssText = `
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+        padding: 16px;
+        background: rgba(255,255,255,0.03);
+        border-radius: 8px;
+        margin-top: 16px;
+    `;
     
     // Criar items da legenda (VERTICAL - um por linha)
     datasets.forEach((dataset, index) => {
         const item = document.createElement('div');
         item.className = 'legend-item';
         item.dataset.index = index;
+        item.style.cssText = `
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+            transition: opacity 0.3s;
+            padding: 4px 8px;
+            border-radius: 4px;
+        `;
         
         // Quadrado de cor
         const colorBox = document.createElement('span');
         colorBox.className = 'legend-color';
-        colorBox.style.backgroundColor = dataset.backgroundColor || dataset.borderColor || '#999';
+        colorBox.style.cssText = `
+            width: 20px;
+            height: 20px;
+            border-radius: 4px;
+            background-color: ${dataset.backgroundColor || dataset.borderColor || '#999'};
+            flex-shrink: 0;
+        `;
         
         // Label
         const label = document.createElement('span');
         label.className = 'legend-label';
+        label.style.cssText = `
+            font-size: 14px;
+            color: #e2e8f0;
+            user-select: none;
+        `;
         label.textContent = dataset.label || `Dataset ${index + 1}`;
         
         item.appendChild(colorBox);
         item.appendChild(label);
         
-        // Click handler para toggle
-        item.addEventListener('click', () => {
+        // Toggle ao clicar
+        item.addEventListener('click', function() {
             const chart = Chart.getChart(chartId);
-            if (!chart) return;
+            if (!chart) {
+                console.warn(`⚠️ [LEGENDA] Gráfico ${chartId} não encontrado`);
+                return;
+            }
             
-            const meta = chart.getDatasetMeta(index);
-            meta.hidden = !meta.hidden;
+            const datasetIndex = parseInt(this.dataset.index);
+            const meta = chart.getDatasetMeta(datasetIndex);
             
-            // Toggle classe visual
-            item.classList.toggle('inactive');
+            // Toggle visibilidade
+            meta.hidden = meta.hidden === null ? !chart.data.datasets[datasetIndex].hidden : !meta.hidden;
             
-            chart.update();
+            // Atualizar estilo do item
+            if (meta.hidden) {
+                this.style.opacity = '0.3';
+            } else {
+                this.style.opacity = '1';
+            }
+            
+            // Atualizar gráfico
+            chart.update('active');
         });
         
         legendDiv.appendChild(item);
     });
     
-    // Adicionar legenda abaixo do canvas
+    // Inserir legenda após o canvas
     chartContainer.appendChild(legendDiv);
     
     console.log(`✅ [LEGENDA] Legenda criada para ${chartId} com ${datasets.length} itens`);
 };
 
-// =================== EXTRAIR PERÍODO DE PREVISÃO DE ALTA ===================
-function extrairPeriodo(prevAlta) {
-    if (!prevAlta) return null;
-    
-    // Normalizar string
-    const str = prevAlta.toLowerCase().trim();
-    
-    // Hoje
-    if (str.startsWith('hoje')) return 'Hoje';
-    
-    // 24h, 48h, 72h, 96h
-    if (str.includes('24')) return '24h';
-    if (str.includes('48')) return '48h';
-    if (str.includes('72')) return '72h';
-    if (str.includes('96')) return '96h';
-    
-    // SP
-    if (str === 'sp') return 'SP';
-    
-    return null;
-}
-
-// =================== EXTRAIR SUBCATEGORIA (OURO, 2R, 3R) ===================
-function extrairSubcategoria(prevAlta) {
-    if (!prevAlta) return null;
-    
-    const str = prevAlta.toLowerCase().trim();
-    
-    if (str.includes('ouro')) return 'Ouro';
-    if (str.includes('2r')) return '2R';
-    if (str.includes('3r')) return '3R';
-    
-    return null;
-}
-
 // =================== PROCESSAR DADOS DE ALTAS ===================
 function processarAltas(leitos) {
-    const altas = {
-        'Hoje Ouro': 0,
-        'Hoje 2R': 0,
-        'Hoje 3R': 0,
-        '24h Ouro': 0,
-        '24h 2R': 0,
-        '24h 3R': 0,
-        '48h': 0,
-        '72h': 0,
-        '96h': 0
-        // SP é excluído propositalmente!
+    const contadores = {
+        'Hoje': { Ouro: 0, '2R': 0, '3R': 0 },
+        '24H': { Ouro: 0, '2R': 0, '3R': 0 },
+        '48H': { total: 0 },
+        '72H': { total: 0 },
+        '96H': { total: 0 }
     };
     
     leitos.forEach(leito => {
-        if (!leito.prevAlta || leito.prevAlta === 'SP') return;
+        const prevAlta = leito.prevAlta || '';
         
-        const periodo = extrairPeriodo(leito.prevAlta);
-        const subcat = extrairSubcategoria(leito.prevAlta);
+        // Ignorar "SP" (Sem Previsão)
+        if (prevAlta === 'SP') return;
         
-        // Hoje e 24h com subcategoria
-        if ((periodo === 'Hoje' || periodo === '24h') && subcat) {
-            const chave = `${periodo} ${subcat}`;
-            if (altas[chave] !== undefined) {
-                altas[chave]++;
-            }
+        // HOJE
+        if (prevAlta.includes('Hoje')) {
+            if (prevAlta.includes('Ouro')) contadores['Hoje'].Ouro++;
+            else if (prevAlta.includes('Prata') || prevAlta.includes('2R')) contadores['Hoje']['2R']++;
+            else if (prevAlta.includes('Bronze') || prevAlta.includes('3R')) contadores['Hoje']['3R']++;
         }
-        // 48h, 72h, 96h sem subcategoria
-        else if (['48h', '72h', '96h'].includes(periodo)) {
-            altas[periodo]++;
+        // 24H
+        else if (prevAlta === '24H') {
+            contadores['24H']['2R']++; // 24H é sempre 2R
+        }
+        // 48H, 72H, 96H
+        else if (prevAlta === '48H') {
+            contadores['48H'].total++;
+        }
+        else if (prevAlta === '72H') {
+            contadores['72H'].total++;
+        }
+        else if (prevAlta === '96H') {
+            contadores['96H'].total++;
         }
     });
     
-    return altas;
+    return contadores;
 }
 
-// =================== PROCESSAR CONCESSÕES POR PERÍODO ===================
+// =================== PROCESSAR CONCESSÕES ===================
 function processarConcessoes(leitos) {
     const concessoesPorPeriodo = {
         'Hoje': {},
-        '24h': {},
-        '48h': {},
-        '72h': {},
-        '96h': {}
+        '24H': {},
+        '48H': {},
+        '72H': {},
+        '96H': {}
     };
     
     leitos.forEach(leito => {
-        if (!leito.prevAlta || leito.prevAlta === 'SP') return;
-        if (!leito.concessoes || !Array.isArray(leito.concessoes)) return;
+        const prevAlta = leito.prevAlta || '';
+        const concessoes = leito.concessoes || [];
         
-        const periodo = extrairPeriodo(leito.prevAlta);
-        if (!periodo || periodo === 'SP') return;
+        // Ignorar "SP"
+        if (prevAlta === 'SP') return;
         
-        leito.concessoes.forEach(concessao => {
+        // Determinar período
+        let periodo = null;
+        if (prevAlta.includes('Hoje')) periodo = 'Hoje';
+        else if (prevAlta === '24H') periodo = '24H';
+        else if (prevAlta === '48H') periodo = '48H';
+        else if (prevAlta === '72H') periodo = '72H';
+        else if (prevAlta === '96H') periodo = '96H';
+        
+        if (!periodo) return;
+        
+        // Contar cada concessão
+        concessoes.forEach(concessao => {
             if (!concessoesPorPeriodo[periodo][concessao]) {
                 concessoesPorPeriodo[periodo][concessao] = 0;
             }
@@ -221,24 +339,35 @@ function processarConcessoes(leitos) {
     return concessoesPorPeriodo;
 }
 
-// =================== PROCESSAR LINHAS DE CUIDADO POR PERÍODO ===================
+// =================== PROCESSAR LINHAS DE CUIDADO ===================
 function processarLinhas(leitos) {
     const linhasPorPeriodo = {
         'Hoje': {},
-        '24h': {},
-        '48h': {},
-        '72h': {},
-        '96h': {}
+        '24H': {},
+        '48H': {},
+        '72H': {},
+        '96H': {}
     };
     
     leitos.forEach(leito => {
-        if (!leito.prevAlta || leito.prevAlta === 'SP') return;
-        if (!leito.linhas || !Array.isArray(leito.linhas)) return;
+        const prevAlta = leito.prevAlta || '';
+        const linhas = leito.linhas || [];
         
-        const periodo = extrairPeriodo(leito.prevAlta);
-        if (!periodo || periodo === 'SP') return;
+        // Ignorar "SP"
+        if (prevAlta === 'SP') return;
         
-        leito.linhas.forEach(linha => {
+        // Determinar período
+        let periodo = null;
+        if (prevAlta.includes('Hoje')) periodo = 'Hoje';
+        else if (prevAlta === '24H') periodo = '24H';
+        else if (prevAlta === '48H') periodo = '48H';
+        else if (prevAlta === '72H') periodo = '72H';
+        else if (prevAlta === '96H') periodo = '96H';
+        
+        if (!periodo) return;
+        
+        // Contar cada linha
+        linhas.forEach(linha => {
             if (!linhasPorPeriodo[periodo][linha]) {
                 linhasPorPeriodo[periodo][linha] = 0;
             }
@@ -249,224 +378,230 @@ function processarLinhas(leitos) {
     return linhasPorPeriodo;
 }
 
-// =================== CRIAR GRÁFICO DE ANÁLISE PREDITIVA DE ALTAS ===================
+// =================== CRIAR GRÁFICO DE ALTAS ===================
 function criarGraficoAltas(hospitalId, altas) {
-    const chartId = `chartAltas${hospitalId}`;
-    const canvas = document.getElementById(chartId);
+    const canvasId = `chartAltas${hospitalId}`;
+    const canvas = document.getElementById(canvasId);
     
     if (!canvas) {
-        console.warn(`⚠️ [GRÁFICO ALTAS] Canvas ${chartId} não encontrado`);
+        console.warn(`⚠️ [GRÁFICO ALTAS] Canvas ${canvasId} não encontrado`);
         return;
     }
     
-    // Destruir gráfico existente
-    const existingChart = Chart.getChart(chartId);
-    if (existingChart) {
-        existingChart.destroy();
+    // Destruir gráfico anterior se existir
+    const chartExistente = Chart.getChart(canvasId);
+    if (chartExistente) {
+        chartExistente.destroy();
     }
     
-    // Preparar datasets empilhados para Hoje e 24h
-    const datasetsEmpilhados = [
+    // Labels do eixo X
+    const labels = ['Hoje', '24H', '48H', '72H', '96H'];
+    
+    // Datasets empilhados para Hoje e 24H
+    const datasets = [
         {
             label: 'Ouro',
-            data: [altas['Hoje Ouro'], altas['24h Ouro'], 0, 0, 0],
+            data: [altas['Hoje'].Ouro, 0, 0, 0, 0],
             backgroundColor: CORES_TIMELINE['Ouro'],
             stack: 'stack0'
         },
         {
             label: '2R',
-            data: [altas['Hoje 2R'], altas['24h 2R'], 0, 0, 0],
+            data: [altas['Hoje']['2R'], altas['24H']['2R'], 0, 0, 0],
             backgroundColor: CORES_TIMELINE['2R'],
             stack: 'stack0'
         },
         {
             label: '3R',
-            data: [altas['Hoje 3R'], altas['24h 3R'], 0, 0, 0],
+            data: [altas['Hoje']['3R'], 0, 0, 0, 0],
             backgroundColor: CORES_TIMELINE['3R'],
             stack: 'stack0'
-        }
-    ];
-    
-    // Datasets não empilhados para 48h, 72h, 96h
-    const datasetsSimples = [
+        },
         {
-            label: '48h',
-            data: [0, 0, altas['48h'], 0, 0],
+            label: '48H',
+            data: [0, 0, altas['48H'].total, 0, 0],
             backgroundColor: CORES_TIMELINE['Padrão']
         },
         {
-            label: '72h',
-            data: [0, 0, 0, altas['72h'], 0],
+            label: '72H',
+            data: [0, 0, 0, altas['72H'].total, 0],
             backgroundColor: CORES_TIMELINE['Padrão']
         },
         {
-            label: '96h',
-            data: [0, 0, 0, 0, altas['96h']],
+            label: '96H',
+            data: [0, 0, 0, 0, altas['96H'].total],
             backgroundColor: CORES_TIMELINE['Padrão']
         }
     ];
     
-    const allDatasets = [...datasetsEmpilhados, ...datasetsSimples];
+    // Calcular máximo para eixo Y (+1)
+    const todosValores = [
+        altas['Hoje'].Ouro + altas['Hoje']['2R'] + altas['Hoje']['3R'],
+        altas['24H']['2R'],
+        altas['48H'].total,
+        altas['72H'].total,
+        altas['96H'].total
+    ];
+    const maxValor = Math.max(...todosValores, 1);
+    const maxEixoY = maxValor + 1;
     
-    // Calcular máximo para eixo Y (sempre +1)
-    const allValues = Object.values(altas);
-    const maxValue = Math.max(...allValues, 0);
-    const yMax = maxValue + 1;
-    
-    // Altura do gráfico (responsivo)
-    const mobile = isMobile();
-    canvas.style.height = mobile ? '200px' : '300px';
-    
-    const ctx = canvas.getContext('2d');
-    new Chart(ctx, {
+    // Criar gráfico
+    new Chart(canvas, {
         type: 'bar',
         data: {
-            labels: ['Hoje', '24h', '48h', '72h', '96h'],
-            datasets: allDatasets
+            labels: labels,
+            datasets: datasets
         },
         options: {
             responsive: true,
-            maintainAspectRatio: false,
+            maintainAspectRatio: true,
+            aspectRatio: isMobile() ? 1 : 2,
             plugins: {
                 legend: {
-                    display: false // Legenda HTML externa
+                    display: false // Usar legenda HTML
                 },
                 tooltip: {
-                    callbacks: {
-                        title: (items) => items[0].label,
-                        label: (item) => `${item.dataset.label}: ${item.raw}`
-                    }
+                    backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                    titleColor: '#fff',
+                    bodyColor: '#fff',
+                    padding: 12,
+                    cornerRadius: 8
                 }
             },
             scales: {
                 x: {
+                    stacked: true,
                     ticks: {
-                        color: '#ffffff',
-                        font: { size: mobile ? 10 : 12 }
+                        color: '#fff',
+                        font: { size: 12, weight: '600' }
                     },
-                    grid: { display: false }
+                    grid: {
+                        color: 'rgba(255, 255, 255, 0.1)'
+                    }
                 },
                 y: {
+                    stacked: true,
                     beginAtZero: true,
-                    max: yMax,
+                    max: maxEixoY,
                     ticks: {
                         stepSize: 1,
-                        color: '#ffffff',
-                        font: { size: mobile ? 10 : 12 },
-                        callback: (value) => value
+                        color: '#fff',
+                        font: { size: 12, weight: '600' },
+                        callback: function(value) {
+                            return Number.isInteger(value) ? value : null;
+                        }
+                    },
+                    grid: {
+                        color: 'rgba(255, 255, 255, 0.1)'
                     },
                     title: {
                         display: true,
                         text: 'Beneficiários',
-                        color: '#ffffff',
-                        font: { size: mobile ? 12 : 14 }
-                    },
-                    grid: {
-                        color: 'rgba(255, 255, 255, 0.1)'
+                        color: '#fff',
+                        font: { size: 14, weight: '700' }
                     }
                 }
             }
         }
     });
     
-    // Criar legenda HTML (apenas para Ouro, 2R, 3R)
-    window.createCustomLegendOutside(chartId, datasetsEmpilhados);
+    // Criar legenda HTML
+    window.createCustomLegendOutside(canvasId, datasets.slice(0, 3)); // Apenas Ouro, 2R, 3R
     
-    console.log(`✅ [GRÁFICO ALTAS] Criado para ${hospitalId} com yMax=${yMax}`);
+    console.log(`✅ [GRÁFICO ALTAS] ${canvasId} criado`);
 }
 
 // =================== CRIAR GRÁFICO DE CONCESSÕES ===================
 function criarGraficoConcessoes(hospitalId, concessoesPorPeriodo) {
-    const chartId = `chartConcessoes${hospitalId}`;
-    const canvas = document.getElementById(chartId);
+    const canvasId = `chartConcessoes${hospitalId}`;
+    const canvas = document.getElementById(canvasId);
     
     if (!canvas) {
-        console.warn(`⚠️ [GRÁFICO CONCESSÕES] Canvas ${chartId} não encontrado`);
+        console.warn(`⚠️ [GRÁFICO CONCESSÕES] Canvas ${canvasId} não encontrado`);
         return;
     }
     
-    // Destruir gráfico existente
-    const existingChart = Chart.getChart(chartId);
-    if (existingChart) {
-        existingChart.destroy();
+    // Destruir gráfico anterior
+    const chartExistente = Chart.getChart(canvasId);
+    if (chartExistente) {
+        chartExistente.destroy();
     }
     
+    // Labels do eixo X
+    const labels = ['Hoje', '24H', '48H', '72H', '96H'];
+    
     // Coletar todas as concessões únicas
-    const todasConcessoes = new Set();
+    const concessoesSet = new Set();
     Object.values(concessoesPorPeriodo).forEach(periodo => {
-        Object.keys(periodo).forEach(concessao => todasConcessoes.add(concessao));
+        Object.keys(periodo).forEach(concessao => concessoesSet.add(concessao));
     });
     
-    // Criar um dataset por concessão
-    const datasets = Array.from(todasConcessoes).map(concessao => {
+    // Criar datasets (uma barra por concessão)
+    const datasets = Array.from(concessoesSet).map(concessao => {
         return {
             label: concessao,
-            data: [
-                concessoesPorPeriodo['Hoje'][concessao] || 0,
-                concessoesPorPeriodo['24h'][concessao] || 0,
-                concessoesPorPeriodo['48h'][concessao] || 0,
-                concessoesPorPeriodo['72h'][concessao] || 0,
-                concessoesPorPeriodo['96h'][concessao] || 0
-            ],
+            data: labels.map(periodo => concessoesPorPeriodo[periodo][concessao] || 0),
             backgroundColor: getCorConcessao(concessao)
         };
     });
     
-    // Calcular máximo para eixo Y (sempre +1)
-    const allValues = datasets.flatMap(d => d.data);
-    const maxValue = Math.max(...allValues, 0);
-    const yMax = maxValue + 1;
+    // Calcular máximo (+1)
+    const todosValores = datasets.flatMap(ds => ds.data);
+    const maxValor = Math.max(...todosValores, 1);
+    const maxEixoY = maxValor + 1;
     
-    // Altura do gráfico (responsivo)
-    const mobile = isMobile();
-    canvas.style.height = mobile ? '200px' : '300px';
-    
-    const ctx = canvas.getContext('2d');
-    new Chart(ctx, {
+    // Criar gráfico
+    new Chart(canvas, {
         type: 'bar',
         data: {
-            labels: ['Hoje', '24h', '48h', '72h', '96h'],
+            labels: labels,
             datasets: datasets
         },
         options: {
             responsive: true,
-            maintainAspectRatio: false,
+            maintainAspectRatio: true,
+            aspectRatio: isMobile() ? 1 : 2,
             plugins: {
                 legend: {
-                    display: false // Legenda HTML externa
+                    display: false
                 },
                 tooltip: {
-                    callbacks: {
-                        title: (items) => items[0].label,
-                        label: (item) => `${item.dataset.label}: ${item.raw}`
-                    }
+                    backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                    titleColor: '#fff',
+                    bodyColor: '#fff',
+                    padding: 12,
+                    cornerRadius: 8
                 }
             },
             scales: {
                 x: {
                     ticks: {
-                        color: '#ffffff',
-                        font: { size: mobile ? 10 : 12 }
+                        color: '#fff',
+                        font: { size: 12, weight: '600' }
                     },
-                    grid: { display: false }
+                    grid: {
+                        color: 'rgba(255, 255, 255, 0.1)'
+                    }
                 },
                 y: {
                     beginAtZero: true,
-                    max: yMax,
+                    max: maxEixoY,
                     ticks: {
                         stepSize: 1,
-                        color: '#ffffff',
-                        font: { size: mobile ? 10 : 12 },
-                        callback: (value) => value
+                        color: '#fff',
+                        font: { size: 12, weight: '600' },
+                        callback: function(value) {
+                            return Number.isInteger(value) ? value : null;
+                        }
+                    },
+                    grid: {
+                        color: 'rgba(255, 255, 255, 0.1)'
                     },
                     title: {
                         display: true,
                         text: 'Beneficiários',
-                        color: '#ffffff',
-                        font: { size: mobile ? 12 : 14 }
-                    },
-                    grid: {
-                        color: 'rgba(255, 255, 255, 0.1)'
+                        color: '#fff',
+                        font: { size: 14, weight: '700' }
                     }
                 }
             }
@@ -474,103 +609,102 @@ function criarGraficoConcessoes(hospitalId, concessoesPorPeriodo) {
     });
     
     // Criar legenda HTML
-    window.createCustomLegendOutside(chartId, datasets);
+    window.createCustomLegendOutside(canvasId, datasets);
     
-    console.log(`✅ [GRÁFICO CONCESSÕES] Criado para ${hospitalId} com ${datasets.length} concessões, yMax=${yMax}`);
+    console.log(`✅ [GRÁFICO CONCESSÕES] ${canvasId} criado com ${datasets.length} concessões`);
 }
 
 // =================== CRIAR GRÁFICO DE LINHAS DE CUIDADO ===================
 function criarGraficoLinhas(hospitalId, linhasPorPeriodo) {
-    const chartId = `chartLinhas${hospitalId}`;
-    const canvas = document.getElementById(chartId);
+    const canvasId = `chartLinhas${hospitalId}`;
+    const canvas = document.getElementById(canvasId);
     
     if (!canvas) {
-        console.warn(`⚠️ [GRÁFICO LINHAS] Canvas ${chartId} não encontrado`);
+        console.warn(`⚠️ [GRÁFICO LINHAS] Canvas ${canvasId} não encontrado`);
         return;
     }
     
-    // Destruir gráfico existente
-    const existingChart = Chart.getChart(chartId);
-    if (existingChart) {
-        existingChart.destroy();
+    // Destruir gráfico anterior
+    const chartExistente = Chart.getChart(canvasId);
+    if (chartExistente) {
+        chartExistente.destroy();
     }
     
+    // Labels do eixo X
+    const labels = ['Hoje', '24H', '48H', '72H', '96H'];
+    
     // Coletar todas as linhas únicas
-    const todasLinhas = new Set();
+    const linhasSet = new Set();
     Object.values(linhasPorPeriodo).forEach(periodo => {
-        Object.keys(periodo).forEach(linha => todasLinhas.add(linha));
+        Object.keys(periodo).forEach(linha => linhasSet.add(linha));
     });
     
-    // Criar um dataset por linha
-    const datasets = Array.from(todasLinhas).map(linha => {
+    // Criar datasets (uma barra por linha)
+    const datasets = Array.from(linhasSet).map(linha => {
         return {
             label: linha,
-            data: [
-                linhasPorPeriodo['Hoje'][linha] || 0,
-                linhasPorPeriodo['24h'][linha] || 0,
-                linhasPorPeriodo['48h'][linha] || 0,
-                linhasPorPeriodo['72h'][linha] || 0,
-                linhasPorPeriodo['96h'][linha] || 0
-            ],
+            data: labels.map(periodo => linhasPorPeriodo[periodo][linha] || 0),
             backgroundColor: getCorLinha(linha)
         };
     });
     
-    // Calcular máximo para eixo Y (sempre +1)
-    const allValues = datasets.flatMap(d => d.data);
-    const maxValue = Math.max(...allValues, 0);
-    const yMax = maxValue + 1;
+    // Calcular máximo (+1)
+    const todosValores = datasets.flatMap(ds => ds.data);
+    const maxValor = Math.max(...todosValores, 1);
+    const maxEixoY = maxValor + 1;
     
-    // Altura do gráfico (responsivo)
-    const mobile = isMobile();
-    canvas.style.height = mobile ? '200px' : '300px';
-    
-    const ctx = canvas.getContext('2d');
-    new Chart(ctx, {
+    // Criar gráfico
+    new Chart(canvas, {
         type: 'bar',
         data: {
-            labels: ['Hoje', '24h', '48h', '72h', '96h'],
+            labels: labels,
             datasets: datasets
         },
         options: {
             responsive: true,
-            maintainAspectRatio: false,
+            maintainAspectRatio: true,
+            aspectRatio: isMobile() ? 1 : 2,
             plugins: {
                 legend: {
-                    display: false // Legenda HTML externa
+                    display: false
                 },
                 tooltip: {
-                    callbacks: {
-                        title: (items) => items[0].label,
-                        label: (item) => `${item.dataset.label}: ${item.raw}`
-                    }
+                    backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                    titleColor: '#fff',
+                    bodyColor: '#fff',
+                    padding: 12,
+                    cornerRadius: 8
                 }
             },
             scales: {
                 x: {
                     ticks: {
-                        color: '#ffffff',
-                        font: { size: mobile ? 10 : 12 }
+                        color: '#fff',
+                        font: { size: 12, weight: '600' }
                     },
-                    grid: { display: false }
+                    grid: {
+                        color: 'rgba(255, 255, 255, 0.1)'
+                    }
                 },
                 y: {
                     beginAtZero: true,
-                    max: yMax,
+                    max: maxEixoY,
                     ticks: {
                         stepSize: 1,
-                        color: '#ffffff',
-                        font: { size: mobile ? 10 : 12 },
-                        callback: (value) => value
+                        color: '#fff',
+                        font: { size: 12, weight: '600' },
+                        callback: function(value) {
+                            return Number.isInteger(value) ? value : null;
+                        }
+                    },
+                    grid: {
+                        color: 'rgba(255, 255, 255, 0.1)'
                     },
                     title: {
                         display: true,
                         text: 'Beneficiários',
-                        color: '#ffffff',
-                        font: { size: mobile ? 12 : 14 }
-                    },
-                    grid: {
-                        color: 'rgba(255, 255, 255, 0.1)'
+                        color: '#fff',
+                        font: { size: 14, weight: '700' }
                     }
                 }
             }
@@ -578,123 +712,86 @@ function criarGraficoLinhas(hospitalId, linhasPorPeriodo) {
     });
     
     // Criar legenda HTML
-    window.createCustomLegendOutside(chartId, datasets);
+    window.createCustomLegendOutside(canvasId, datasets);
     
-    console.log(`✅ [GRÁFICO LINHAS] Criado para ${hospitalId} com ${datasets.length} linhas, yMax=${yMax}`);
+    console.log(`✅ [GRÁFICO LINHAS] ${canvasId} criado com ${datasets.length} linhas`);
 }
 
-// =================== CRIAR DONUT CHART DE OCUPAÇÃO ===================
+// =================== RENDERIZAR KPIS ===================
+function renderizarKPIs(hospitalId, hospital) {
+    const config = HOSPITAIS_CONFIG[hospitalId];
+    const leitos = hospital.leitos || [];
+    const leitosOcupados = leitos.filter(l => l.status === 'ocupado');
+    const leitosDisponiveis = leitos.filter(l => l.status === 'vago');
+    const leitosAltaHoje = leitosOcupados.filter(l => (l.prevAlta || '').includes('Hoje'));
+    
+    // Atualizar textos dos KPIs
+    const donutText = document.getElementById(`donutText${hospitalId}`);
+    const kpiTotal = document.getElementById(`kpiTotal${hospitalId}`);
+    const kpiDisponiveis = document.getElementById(`kpiDisponiveis${hospitalId}`);
+    const kpiAltaHoje = document.getElementById(`kpiAltaHoje${hospitalId}`);
+    
+    if (donutText) donutText.textContent = `${leitosOcupados.length}/${config.leitos}`;
+    if (kpiTotal) kpiTotal.textContent = config.leitos;
+    if (kpiDisponiveis) kpiDisponiveis.textContent = leitosDisponiveis.length;
+    if (kpiAltaHoje) kpiAltaHoje.textContent = leitosAltaHoje.length;
+    
+    // Criar donut de ocupação
+    criarDonutOcupacao(hospitalId, leitosOcupados.length, config.leitos);
+    
+    console.log(`✅ [KPIs] ${hospitalId}: Total=${config.leitos}, Ocupados=${leitosOcupados.length}, Disponíveis=${leitosDisponiveis.length}, Alta Hoje=${leitosAltaHoje.length}`);
+}
+
+// =================== CRIAR DONUT DE OCUPAÇÃO ===================
 function criarDonutOcupacao(hospitalId, ocupados, total) {
-    const chartId = `donutOcupacao${hospitalId}`;
-    const canvas = document.getElementById(chartId);
+    const canvasId = `donutOcupacao${hospitalId}`;
+    const canvas = document.getElementById(canvasId);
     
     if (!canvas) {
-        console.warn(`⚠️ [DONUT OCUPAÇÃO] Canvas ${chartId} não encontrado`);
+        console.warn(`⚠️ [DONUT OCUPAÇÃO] Canvas ${canvasId} não encontrado`);
         return;
     }
     
-    // Destruir gráfico existente
-    const existingChart = Chart.getChart(chartId);
-    if (existingChart) {
-        existingChart.destroy();
+    // Destruir gráfico anterior
+    const chartExistente = Chart.getChart(canvasId);
+    if (chartExistente) {
+        chartExistente.destroy();
     }
     
-    const vagos = total - ocupados;
+    const disponiveis = total - ocupados;
     const percentual = total > 0 ? Math.round((ocupados / total) * 100) : 0;
     
-    // Altura do donut (responsivo)
-    const mobile = isMobile();
-    canvas.style.height = mobile ? '120px' : '150px';
-    
-    const ctx = canvas.getContext('2d');
-    new Chart(ctx, {
+    new Chart(canvas, {
         type: 'doughnut',
         data: {
-            labels: ['Ocupados', 'Vagos'],
+            labels: ['Ocupados', 'Disponíveis'],
             datasets: [{
-                data: [ocupados, vagos],
-                backgroundColor: ['#10b981', '#e5e7eb'],
+                data: [ocupados, disponiveis],
+                backgroundColor: ['#f59e0b', '#10b981'],
                 borderWidth: 0
             }]
         },
         options: {
             responsive: true,
-            maintainAspectRatio: false,
+            maintainAspectRatio: true,
             cutout: '70%',
             plugins: {
                 legend: {
                     display: false
                 },
                 tooltip: {
+                    backgroundColor: 'rgba(0, 0, 0, 0.8)',
                     callbacks: {
-                        label: (item) => `${item.label}: ${item.raw}`
+                        label: function(context) {
+                            return `${context.label}: ${context.parsed} leitos (${percentual}%)`;
+                        }
                     }
                 }
             }
-        },
-        plugins: [{
-            id: 'centerText',
-            beforeDraw: (chart) => {
-                const { ctx, chartArea } = chart;
-                if (!chartArea) return;
-                
-                ctx.save();
-                const centerX = (chartArea.left + chartArea.right) / 2;
-                const centerY = (chartArea.top + chartArea.bottom) / 2;
-                
-                ctx.textAlign = 'center';
-                ctx.textBaseline = 'middle';
-                ctx.fillStyle = window.fundoBranco ? '#1f2937' : '#ffffff';
-                ctx.font = mobile ? 'bold 20px Inter' : 'bold 24px Inter';
-                ctx.fillText(`${percentual}%`, centerX, centerY);
-                ctx.restore();
-            }
-        }]
+        }
     });
     
-    console.log(`✅ [DONUT OCUPAÇÃO] Criado para ${hospitalId}: ${ocupados}/${total} (${percentual}%)`);
-}
-
-// =================== RENDERIZAR KPIs ===================
-function renderizarKPIs(hospitalId, hospital) {
-    const leitos = hospital.leitos || [];
-    const totalLeitos = leitos.length;
-    const ocupados = leitos.filter(l => l.status === 'ocupado').length;
-    const disponiveis = totalLeitos - ocupados;
-    const comAltaHoje = leitos.filter(l => {
-        if (!l.prevAlta) return false;
-        const periodo = extrairPeriodo(l.prevAlta);
-        return periodo === 'Hoje';
-    }).length;
-    
-    // Criar donut de ocupação
-    criarDonutOcupacao(hospitalId, ocupados, totalLeitos);
-    
-    // Atualizar texto do donut
-    const donutText = document.getElementById(`donutText${hospitalId}`);
-    if (donutText) {
-        donutText.textContent = `${ocupados}/${totalLeitos} leitos`;
-    }
-    
-    // Atualizar KPI total
-    const kpiTotal = document.getElementById(`kpiTotal${hospitalId}`);
-    if (kpiTotal) {
-        kpiTotal.textContent = totalLeitos;
-    }
-    
-    // Atualizar KPI disponíveis
-    const kpiDisponiveis = document.getElementById(`kpiDisponiveis${hospitalId}`);
-    if (kpiDisponiveis) {
-        kpiDisponiveis.textContent = disponiveis;
-    }
-    
-    // Atualizar KPI alta hoje
-    const kpiAltaHoje = document.getElementById(`kpiAltaHoje${hospitalId}`);
-    if (kpiAltaHoje) {
-        kpiAltaHoje.textContent = comAltaHoje;
-    }
-    
-    console.log(`✅ [KPIs] ${hospitalId}: Total=${totalLeitos}, Ocupados=${ocupados}, Disponíveis=${disponiveis}, Alta Hoje=${comAltaHoje}`);
+    console.log(`✅ [DONUT] ${canvasId} criado: ${ocupados}/${total} (${percentual}%)`);
 }
 
 // =================== RENDERIZAR HOSPITAL ===================
@@ -742,7 +839,18 @@ window.renderDashboardHospitalar = function(hospitalId = 'todos') {
         return;
     }
     
-    // Obter data atual para títulos
+    // Obter container principal
+    const container = document.getElementById('dashHospitalarContent');
+    if (!container) {
+        console.error('❌ [DASHBOARD] Container dashHospitalarContent não encontrado!');
+        return;
+    }
+    
+    // Limpar container
+    container.innerHTML = '';
+    console.log('🧹 [DASHBOARD] Container limpo');
+    
+    // Obter data atual
     const hoje = new Date();
     const dataAtual = hoje.toLocaleDateString('pt-BR', { 
         day: '2-digit', 
@@ -750,34 +858,39 @@ window.renderDashboardHospitalar = function(hospitalId = 'todos') {
         year: 'numeric' 
     });
     
-    // Atualizar títulos dos gráficos com data
-    document.querySelectorAll('.chart-title[data-type="altas"]').forEach(el => {
-        el.textContent = `Análise Preditiva de Altas em ${dataAtual}`;
-    });
-    
-    document.querySelectorAll('.chart-title[data-type="concessoes"]').forEach(el => {
-        el.textContent = `Concessões Previstas em ${dataAtual}`;
-    });
-    
-    document.querySelectorAll('.chart-title[data-type="linhas"]').forEach(el => {
-        el.textContent = `Linhas de Cuidado Previstas em ${dataAtual}`;
-    });
-    
-    // Renderizar hospitais
+    // Determinar quais hospitais renderizar
     const hospitaisIds = ['H1', 'H2', 'H3', 'H4', 'H5'];
+    let hospitaisParaRenderizar = [];
     
     if (hospitalId === 'todos') {
         console.log('📋 [DASHBOARD] Renderizando TODOS os hospitais (5)');
-        hospitaisIds.forEach(id => renderizarHospital(id));
+        hospitaisParaRenderizar = hospitaisIds;
     } else if (hospitaisIds.includes(hospitalId)) {
         console.log(`📋 [DASHBOARD] Renderizando hospital específico: ${hospitalId}`);
-        renderizarHospital(hospitalId);
+        hospitaisParaRenderizar = [hospitalId];
     } else {
         console.error(`❌ [DASHBOARD] Hospital inválido: "${hospitalId}"`);
         console.error(`❌ [DASHBOARD] Hospitais válidos: ${hospitaisIds.join(', ')}, 'todos'`);
+        return;
     }
     
-    console.log('✅ [DASHBOARD HOSPITALAR] Renderização concluída');
+    // Criar estrutura HTML para cada hospital
+    hospitaisParaRenderizar.forEach(id => {
+        const section = criarHTMLHospital(id);
+        if (section) {
+            container.appendChild(section);
+            console.log(`✅ [HTML] Estrutura de ${id} adicionada ao DOM`);
+        }
+    });
+    
+    // Aguardar DOM atualizar, depois renderizar dados
+    setTimeout(() => {
+        hospitaisParaRenderizar.forEach(id => {
+            renderizarHospital(id);
+        });
+        
+        console.log('✅ [DASHBOARD HOSPITALAR] Renderização concluída');
+    }, 100);
 };
 
 // Criar alias para compatibilidade
@@ -788,3 +901,4 @@ console.log('✅ [DASHBOARD HOSPITALAR V3.3] Módulo carregado');
 console.log('📊 [DASHBOARD] Função disponível: window.renderDashboardHospitalar(hospitalId)');
 console.log('🏥 [DASHBOARD] Hospitais suportados: H1, H2, H3, H4, H5, "todos"');
 console.log('🎨 [DASHBOARD] 56 cores Pantone carregadas (11 concessões + 45 linhas)');
+console.log('🏗️ [DASHBOARD] Estrutura HTML criada dinamicamente');
