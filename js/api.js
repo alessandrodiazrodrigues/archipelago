@@ -389,14 +389,7 @@ function jsonpRequest(url, params = {}) {
     return new Promise((resolve, reject) => {
         const callbackName = 'jsonp_callback_' + Date.now() + '_' + Math.floor(Math.random() * 1000);
         
-        const urlObj = new URL(url);
-        Object.keys(params).forEach(key => {
-            if (params[key] !== null && params[key] !== undefined) {
-                urlObj.searchParams.append(key, String(params[key]));
-            }
-        });
-        urlObj.searchParams.append('callback', callbackName);
-        
+        // ✅ REGISTRAR CALLBACK ANTES DE TUDO
         window[callbackName] = function(data) {
             delete window[callbackName];
             if (script && script.parentNode) {
@@ -404,6 +397,14 @@ function jsonpRequest(url, params = {}) {
             }
             resolve(data);
         };
+        
+        const urlObj = new URL(url);
+        Object.keys(params).forEach(key => {
+            if (params[key] !== null && params[key] !== undefined) {
+                urlObj.searchParams.append(key, String(params[key]));
+            }
+        });
+        urlObj.searchParams.append('callback', callbackName);
         
         const script = document.createElement('script');
         script.src = urlObj.toString();
@@ -415,7 +416,8 @@ function jsonpRequest(url, params = {}) {
             reject(new Error('JSONP request failed'));
         };
         
-        setTimeout(() => {
+        // ✅ TIMEOUT AUMENTADO + DELAY
+        const timeoutId = setTimeout(() => {
             if (window[callbackName]) {
                 delete window[callbackName];
                 if (script && script.parentNode) {
@@ -423,9 +425,12 @@ function jsonpRequest(url, params = {}) {
                 }
                 reject(new Error('JSONP request timeout'));
             }
-        }, window.API_TIMEOUT);
+        }, 20000); // ✅ 20 segundos timeout
         
-        document.head.appendChild(script);
+        // ✅ ADICIONAR SCRIPT APÓS CALLBACK ESTAR REGISTRADO
+        setTimeout(() => {
+            document.head.appendChild(script);
+        }, 100); // ✅ 100ms delay para garantir callback registrado
     });
 }
 
@@ -446,7 +451,7 @@ async function apiRequest(action, params = {}, method = 'GET') {
                 });
                 
                 const controller = new AbortController();
-                const timeoutId = setTimeout(() => controller.abort(), 8000);
+                const timeoutId = setTimeout(() => controller.abort(), 15000); // ✅ 15s timeout
                 
                 const response = await fetch(url.toString(), {
                     method: 'GET',
