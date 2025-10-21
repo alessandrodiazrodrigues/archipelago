@@ -111,7 +111,7 @@ window.COLUNAS = {
 window.TIMELINE_OPCOES = [
     "Hoje Ouro", "Hoje 2R", "Hoje 3R",
     "24h Ouro", "24h 2R", "24h 3R", 
-    "48h", "72h", "96h", "SP"
+    "48h", "48H", "72h", "72H", "96h", "96H", "SP"
 ];
 
 // =================== ISOLAMENTO (3 OPÇÕES - COLUNA AR) ===================
