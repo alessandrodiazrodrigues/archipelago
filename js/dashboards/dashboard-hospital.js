@@ -13,70 +13,30 @@ window.graficosState = {
 // Estado global para fundo branco
 window.fundoBranco = false;
 
-// Paleta de cores Pantone para Concessões - EXATA SEM FALLBACK
-const CORES_CONCESSOES = {
-    'Transição Domiciliar': '#007A53',
-    'Aplicação domiciliar de medicamentos': '#582C83',
-    'Fisioterapia': '#009639',
-    'Fonoaudiologia': '#FF671F',
-    'Aspiração': '#2E1A47',
-    'Banho': '#8FD3F4',
-    'Curativos': '#00BFB3',
-    'Oxigenoterapia': '#64A70B',
-    'Recarga de O₂': '#00AEEF',
-    'Recarga de O2': '#00AEEF', // Alias sem subscript
-    'Orientação Nutricional – com dispositivo': '#FFC72C',
-    'Orientação Nutricional - com dispositivo': '#FFC72C', // Alias com hífen
-    'Orientação Nutricional – sem dispositivo': '#F4E285',
-    'Orientação Nutricional - sem dispositivo': '#F4E285', // Alias com hífen
-    'Clister': '#E8927C',
-    'PICC': '#E03C31'
-};
+// =================== CORES PANTONE V3.3 - USA api.js (window.CORES_*) ===================
+// ✅ CORREÇÃO APLICADA: Este dashboard agora usa as cores definidas no api.js
+// As cores são acessadas via window.CORES_CONCESSOES e window.CORES_LINHAS
+// Isso garante consistência 100% com os nomes que vêm da planilha
+//
+// IMPORTANTE: As paletas locais antigas foram REMOVIDAS!
+// Agora tudo vem do api.js para evitar nomes inconsistentes
 
-// Paleta de cores Pantone para Linhas de Cuidado - EXATA SEM FALLBACK
-const CORES_LINHAS = {
-    'Assiste': '#ED0A72',
-    'APS': '#007A33',
-    'Cuidados Paliativos': '#00B5A2',
-    'ICO': '#A6192E',
-    'ICO (Insuficiência Coronariana)': '#A6192E', // Alias com descrição
-    'Oncologia': '#6A1B9A',
-    'Pediatria': '#5A646B',
-    'Programa Autoimune – Gastroenterologia': '#5C5EBE',
-    'Programa Autoimune - Gastroenterologia': '#5C5EBE', // Alias com hífen
-    'Programa Autoimune – Neuro-desmielinizante': '#00AEEF',
-    'Programa Autoimune - Neuro-desmielinizante': '#00AEEF', // Alias
-    'Programa Autoimune – Neuro-muscular': '#00263A',
-    'Programa Autoimune - Neuro-muscular': '#00263A', // Alias
-    'Programa Autoimune – Reumatologia': '#582D40',
-    'Programa Autoimune - Reumatologia': '#582D40', // Alias
-    'Vida Mais Leve Care': '#FFB81C',
-    'Crônicos – Cardiologia': '#C8102E',
-    'Crônicos - Cardiologia': '#C8102E', // Alias
-    'Crônicos – Endocrinologia': '#582C83',
-    'Crônicos - Endocrinologia': '#582C83', // Alias
-    'Crônicos – Geriatria': '#FF6F1D',
-    'Crônicos - Geriatria': '#FF6F1D', // Alias
-    'Crônicos – Melhor Cuidado': '#556F44',
-    'Crônicos - Melhor Cuidado': '#556F44', // Alias
-    'Crônicos – Neurologia': '#0072CE',
-    'Crônicos - Neurologia': '#0072CE', // Alias
-    'Crônicos – Pneumologia': '#E35205',
-    'Crônicos - Pneumologia': '#E35205', // Alias
-    'Crônicos – Pós-bariátrica': '#003C57',
-    'Crônicos - Pós-bariátrica': '#003C57', // Alias
-    'Crônicos – Reumatologia': '#5A0020',
-    'Crônicos - Reumatologia': '#5A0020' // Alias
-};
-
-// Função RIGOROSA para obter cores Pantone EXATAS
+// Função para obter cores Pantone EXATAS do api.js
 function getCorExata(itemName, tipo = 'concessao') {
     if (!itemName || typeof itemName !== 'string') {
         console.warn(`⚠️ [CORES] Item inválido: "${itemName}"`);
         return '#6b7280'; // Único fallback permitido
     }
     
-    const paleta = tipo === 'concessao' ? CORES_CONCESSOES : CORES_LINHAS;
+    // ✅ CORREÇÃO: Agora usa window.CORES do api.js!
+    const paleta = tipo === 'concessao' ? 
+        window.CORES_CONCESSOES :  // Do api.js
+        window.CORES_LINHAS;       // Do api.js
+    
+    if (!paleta) {
+        console.error(`❌ [CORES] Paleta não carregada! Verifique se api.js está carregado antes.`);
+        return '#6b7280';
+    }
     
     // 1. Busca exata primeiro
     let cor = paleta[itemName];
@@ -85,13 +45,11 @@ function getCorExata(itemName, tipo = 'concessao') {
         return cor;
     }
     
-    // 2. Normalizar para busca flexível
+    // 2. Normalizar para busca flexível (apenas caso não encontre exato)
     const nomeNormalizado = itemName
         .trim()
         .replace(/\s+/g, ' ')
-        .replace(/[–—]/g, '-')
-        .replace(/O₂/g, 'O2')
-        .replace(/²/g, '2');
+        .replace(/[–—]/g, '-');
     
     cor = paleta[nomeNormalizado];
     if (cor) {
@@ -99,21 +57,9 @@ function getCorExata(itemName, tipo = 'concessao') {
         return cor;
     }
     
-    // 3. Busca por correspondência parcial rigorosa
-    for (const [chave, valor] of Object.entries(paleta)) {
-        const chaveNormalizada = chave.toLowerCase().replace(/[–—]/g, '-');
-        const itemNormalizado = nomeNormalizado.toLowerCase();
-        
-        if (chaveNormalizada.includes(itemNormalizado) || 
-            itemNormalizado.includes(chaveNormalizada)) {
-            console.log(`✅ [CORES] Encontrado parcial: "${itemName}" → "${chave}" → ${valor}`);
-            return valor;
-        }
-    }
-    
-    // 4. Log de erro para debug
+    // 3. Log de erro para debug
     console.error(`❌ [CORES] COR NÃO ENCONTRADA: "${itemName}" (normalizado: "${nomeNormalizado}")`);
-    console.error(`❌ [CORES] Disponíveis na paleta:`, Object.keys(paleta));
+    console.error(`❌ [CORES] Disponíveis na paleta (tipo: ${tipo}):`, Object.keys(paleta));
     
     return '#6b7280'; // Fallback final cinza
 }
