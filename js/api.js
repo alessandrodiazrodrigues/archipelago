@@ -1,9 +1,9 @@
-// =================== API V3.3.2 CORRIGIDA - ESTRUTURA COMPLETA 74 COLUNAS - COM DIRETIVAS ===================
+// =================== API V3.3 - ESTRUTURA COMPLETA 74 COLUNAS - COM DIRETIVAS ===================
 // Cliente: Guilherme Santoro
 // Desenvolvedor: Alessandro Rodrigues
 // Data: Outubro/2025
-// Versão: V3.3.2 CORRIGIDA - Compatibilidade de cores para dashboard
-// =================== CHANGELOG V3.2 → V3.3 → V3.3.2 ===================
+// Versão: V3.3 (COMPLETO - Listas + Cores + Diretivas)
+// =================== CHANGELOG V3.2 → V3.3 ===================
 // ✅ Listas de concessões corrigidas (11 itens validados)
 // ✅ Listas de linhas corrigidas (45 itens validados)
 // ✅ Cores Pantone completas (56 cores)
@@ -11,7 +11,6 @@
 // ✅ Total de colunas: 73 → 74 (A-BV)
 // ✅ Estrutura validada com planilha real
 // ✅ TODAS as funções do V3.2 mantidas + correções
-// ✅ V3.3.2: Adicionado alias 'Colorproctologia' para compatibilidade com dashboard
 // ==================================================================================
 
 // *** URL DA API V3.3 ***
@@ -261,7 +260,6 @@ window.CORES_LINHAS = {
     'Cirurgia Vascular': '#AED581',
     'Clínica Médica': '#F4E285',
     'Coloproctologia': '#C2185B',
-    'Colorproctologia': '#C2185B', // Alias para compatibilidade com dashboard
     'Dermatologia': '#9C27B0',
     'Endocrinologia': '#37474F',
     'Fisiatria': '#E8927C',
@@ -574,6 +572,7 @@ window.loadHospitalData = async function() {
             if (hospital && hospital.leitos) {
                 hospital.leitos = hospital.leitos.map(leito => {
                     if (leito.status === 'Em uso') leito.status = 'ocupado';
+                    if (leito.status === 'Ocupado') leito.status = 'ocupado'; // ✅ NORMALIZAR MAIÚSCULO
                     if (leito.status === 'Vago') leito.status = 'vago';
                     
                     if (leito.prevAlta) {
