@@ -822,9 +822,9 @@ function renderAltasHospital(hospitalId) {
                 else if (prevAlta === '24h Ouro') { index = 1; tipo = 'Ouro'; }
                 else if (prevAlta === '24h 2R') { index = 1; tipo = '2R'; }
                 else if (prevAlta === '24h 3R') { index = 1; tipo = '3R'; }
-                else if (prevAlta === '48h') { index = 2; tipo = '48H'; }
-                else if (prevAlta === '72h') { index = 3; tipo = '72H'; }
-                else if (prevAlta === '96h') { index = 4; tipo = '96H'; }
+                else if (prevAlta === '48h' || prevAlta === '48H') { index = 2; tipo = '48H'; }
+                else if (prevAlta === '72h' || prevAlta === '72H') { index = 3; tipo = '72H'; }
+                else if (prevAlta === '96h' || prevAlta === '96H') { index = 4; tipo = '96H'; }
                 
                 if (index >= 0 && tipo && dados[tipo]) {
                     dados[tipo][index]++;
@@ -951,9 +951,9 @@ function renderConcessoesHospital(hospitalId, type = 'bar') {
                 let timelineIndex = -1;
                 if (prevAlta.includes('Hoje')) timelineIndex = 0;
                 else if (prevAlta.includes('24h')) timelineIndex = 1;
-                else if (prevAlta === '48h') timelineIndex = 2;
-                else if (prevAlta === '72h') timelineIndex = 3;
-                else if (prevAlta === '96h') timelineIndex = 4;
+                else if (prevAlta === '48h' || prevAlta === '48H') timelineIndex = 2;
+                else if (prevAlta === '72h' || prevAlta === '72H') timelineIndex = 3;
+                else if (prevAlta === '96h' || prevAlta === '96H') timelineIndex = 4;
                 
                 if (timelineIndex >= 0) {
                     concessoesList.forEach(concessao => {
@@ -1217,9 +1217,9 @@ function renderLinhasHospital(hospitalId, type = 'bar') {
                 let timelineIndex = -1;
                 if (prevAlta.includes('Hoje')) timelineIndex = 0;
                 else if (prevAlta.includes('24h')) timelineIndex = 1;
-                else if (prevAlta === '48h') timelineIndex = 2;
-                else if (prevAlta === '72h') timelineIndex = 3;
-                else if (prevAlta === '96h') timelineIndex = 4;
+                else if (prevAlta === '48h' || prevAlta === '48H') timelineIndex = 2;
+                else if (prevAlta === '72h' || prevAlta === '72H') timelineIndex = 3;
+                else if (prevAlta === '96h' || prevAlta === '96H') timelineIndex = 4;
                 
                 if (timelineIndex >= 0) {
                     linhasList.forEach(linha => {
