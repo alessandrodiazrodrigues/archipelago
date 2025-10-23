@@ -766,7 +766,19 @@
         // =================== PROCESSAR DADOS DA PLANILHA ===================
         
         function processarDadosHospital(hospitalId) {
-            const leitos = window.hospitalData[hospitalId] || [];
+            const hospitalObj = window.hospitalData[hospitalId] || {};
+            
+            // Debug: verificar estrutura dos dados
+            console.log(`Processando ${hospitalId}:`, hospitalObj);
+            
+            // Garantir que leitos é um array
+            let leitos = hospitalObj.leitos || hospitalObj || [];
+            if (!Array.isArray(leitos)) {
+                console.warn(`${hospitalId}: leitos não é array, convertendo...`);
+                leitos = [];
+            }
+            
+            console.log(`${hospitalId}: ${leitos.length} leitos encontrados`);
             
             // Calcular ocupados
             const ocupados = leitos.filter(l => l.status === 'ocupado');
