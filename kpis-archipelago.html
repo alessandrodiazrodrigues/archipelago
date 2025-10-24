@@ -998,6 +998,18 @@
             const vagosEnfMasc = vagos.filter(l => 
                 l.tipo === 'Enfermaria Masculina'
             ).length;
+
+            // ✅ HOSPITAIS HÍBRIDOS: Disponíveis podem ser QUALQUER tipo
+            let vagosAptoFinal = vagosApto;
+            let vagosEnfFemFinal = vagosEnfFem;
+            let vagosEnfMascFinal = vagosEnfMasc;
+            
+            if (hospitalId === 'H1' || hospitalId === 'H3' || hospitalId === 'H5') {
+                // Para híbridos: TODOS os vagos podem ser usados como qualquer tipo
+                vagosAptoFinal = vagos.length;
+                vagosEnfFemFinal = vagos.length;
+                vagosEnfMascFinal = vagos.length;
+            }
             
             // TPH médio
             const tphValues = ocupados
@@ -1076,9 +1088,9 @@
                 },
                 disponiveis: {
                     total: vagos.length,
-                    apartamento: vagosApto,
-                    enf_feminina: vagosEnfFem,
-                    enf_masculina: vagosEnfMasc,
+                    apartamento: vagosAptoFinal,
+                    enf_feminina: vagosEnfFemFinal,
+                    enf_masculina: vagosEnfMascFinal,
                     modalidade: modalidadeDisponiveis
                 },
                 tph: {
@@ -1405,7 +1417,6 @@
 
                         <!-- BOX 2: Previsão de Alta -->
                         <div class="kpi-box box-previsao">
-                                    <div class="kpi-subtitle">Total de Leitos com alta na data de hoje</div>
                             <div class="kpi-title">Leitos em Previsão de Alta</div>
                             
                             <div class="kpi-content">
