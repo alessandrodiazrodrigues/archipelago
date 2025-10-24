@@ -283,10 +283,10 @@
 
         .v5-number-inside {
             position: absolute;
-            top: 60%;
+            top: 65%;
             left: 50%;
             transform: translate(-50%, -50%);
-            font-size: 42px;
+            font-size: 39px;
             font-weight: 700;
             color: #ffffff;
             line-height: 1;
@@ -322,8 +322,8 @@
         .gauge-largo-container {
             position: relative;
             width: 100%;
-            max-width: 450px;
-            height: 220px;
+            max-width: 400px;
+            height: 200px;
             margin: 0 auto;
         }
 
@@ -337,11 +337,11 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            padding-top: 40px;
+            padding-top: 35px;
         }
 
         .gauge-largo-percentage {
-            font-size: 64px;
+            font-size: 54px;
             font-weight: 700;
             color: #ffffff;
             line-height: 1;
@@ -353,15 +353,15 @@
             text-transform: uppercase;
             letter-spacing: 0.5px;
             font-weight: 600;
-            margin-top: 8px;
+            margin-top: 6px;
         }
 
         .gauge-largo-number {
-            font-size: 56px;
+            font-size: 48px;
             font-weight: 700;
             color: #ffffff;
             line-height: 1;
-            margin-top: 8px;
+            margin-top: 6px;
         }
 
         .gauge-largo-subtitle {
@@ -609,13 +609,13 @@
             </div>
             <div class="action-buttons">
                 <button class="btn btn-reload" onclick="recarregarDados()">
-                    🔄 Atualizar
+                    Atualizar
                 </button>
                 <button class="btn btn-print" onclick="window.print()">
-                    🖨️ Imprimir
+                    Imprimir
                 </button>
                 <button class="btn btn-whatsapp" onclick="copiarParaWhatsApp()">
-                    📱 Copiar para WhatsApp
+                    Copiar para WhatsApp
                 </button>
             </div>
         </div>
@@ -833,11 +833,16 @@
                 : 0;
             
             const leitosMais5Diarias = ocupados.filter(l => {
-                if (!l.adm_at) return false;
-                const admData = new Date(l.adm_at);
+                if (!l.admAt) return false;
+                const admData = new Date(l.admAt);
                 const hoje = new Date();
                 const dias = Math.floor((hoje - admData) / (1000 * 60 * 60 * 24));
                 return dias > 5;
+            }).map(l => {
+                const admData = new Date(l.admAt);
+                const hoje = new Date();
+                const dias = Math.floor((hoje - admData) / (1000 * 60 * 60 * 24));
+                return { ...l, dias };
             });
             
             // PPS
@@ -863,27 +868,27 @@
             
             // Modalidade contratual (simplificado - todos como flexíveis por enquanto)
             const modalidadeOcupados = {
-                flexiveis: ocupados.length,
-                exclusivo_apto: 0,
-                exclusivo_enf_sem_restricao: 0,
-                exclusivo_enf_fem: 0,
-                exclusivo_enf_masc: 0
+                flexiveis: ocupados.filter(l => !l.categoria_escolhida || l.categoria_escolhida === '').length,
+                exclusivo_apto: ocupados.filter(l => l.categoria_escolhida === 'Apartamento').length,
+                exclusivo_enf_sem_restricao: ocupados.filter(l => l.categoria_escolhida === 'Enfermaria sem Restrição').length,
+                exclusivo_enf_fem: ocupados.filter(l => l.categoria_escolhida === 'Enfermaria Feminina').length,
+                exclusivo_enf_masc: ocupados.filter(l => l.categoria_escolhida === 'Enfermaria Masculina').length
             };
             
             const modalidadePrevisao = {
-                flexiveis: previsaoAlta.length,
-                exclusivo_apto: 0,
-                exclusivo_enf_sem_restricao: 0,
-                exclusivo_enf_fem: 0,
-                exclusivo_enf_masc: 0
+                flexiveis: previsaoAlta.filter(l => !l.categoria_escolhida || l.categoria_escolhida === '').length,
+                exclusivo_apto: previsaoAlta.filter(l => l.categoria_escolhida === 'Apartamento').length,
+                exclusivo_enf_sem_restricao: previsaoAlta.filter(l => l.categoria_escolhida === 'Enfermaria sem Restrição').length,
+                exclusivo_enf_fem: previsaoAlta.filter(l => l.categoria_escolhida === 'Enfermaria Feminina').length,
+                exclusivo_enf_masc: previsaoAlta.filter(l => l.categoria_escolhida === 'Enfermaria Masculina').length
             };
             
             const modalidadeDisponiveis = {
-                flexiveis: vagos.length,
-                exclusivo_apto: 0,
-                exclusivo_enf_sem_restricao: 0,
-                exclusivo_enf_fem: 0,
-                exclusivo_enf_masc: 0
+                flexiveis: vagos.filter(l => !l.categoria_escolhida || l.categoria_escolhida === '').length,
+                exclusivo_apto: vagos.filter(l => l.categoria_escolhida === 'Apartamento').length,
+                exclusivo_enf_sem_restricao: vagos.filter(l => l.categoria_escolhida === 'Enfermaria sem Restrição').length,
+                exclusivo_enf_fem: vagos.filter(l => l.categoria_escolhida === 'Enfermaria Feminina').length,
+                exclusivo_enf_masc: vagos.filter(l => l.categoria_escolhida === 'Enfermaria Masculina').length
             };
             
             return {
@@ -1453,7 +1458,7 @@
                     <p style="color: #ef4444;">❌ Erro ao carregar dados</p>
                     <p style="color: #9ca3af; font-size: 14px; margin-top: 10px;">${error.message}</p>
                     <button class="btn btn-reload" onclick="carregarDados()" style="margin-top: 20px;">
-                        🔄 Tentar Novamente
+                        Tentar Novamente
                     </button>
                 `;
             }
@@ -1499,6 +1504,12 @@
                 texto += `• TPH: ${h.tph.medio} dias\n`;
                 texto += `• PPS Médio: ${h.pps.medio}\n`;
                 texto += `• SPICT: ${h.spict.elegiveis} | Diretivas: ${h.spict.diretivas}\n`;
+                texto += `\n_Modalidades Disponíveis:_\n`;
+                texto += `  Flexíveis: ${h.disponiveis.modalidade.flexiveis}\n`;
+                texto += `  Exclus. Apto: ${h.disponiveis.modalidade.exclusivo_apto}\n`;
+                texto += `  Exclus. Enf s/ Restr: ${h.disponiveis.modalidade.exclusivo_enf_sem_restricao}\n`;
+                texto += `  Exclus. Enf Fem: ${h.disponiveis.modalidade.exclusivo_enf_fem}\n`;
+                texto += `  Exclus. Enf Masc: ${h.disponiveis.modalidade.exclusivo_enf_masc}\n`;
                 if (index < hospitais.length - 1) texto += `\n`;
             });
             
