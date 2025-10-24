@@ -860,40 +860,32 @@
                     
                     // ENFERMARIAs → Sistema de Leito Irmão
                     if (tipo === 'ENFERMARIA' || tipo === 'Enfermaria') {
-                        const idLeito = leitoVago.identificacaoLeito;
+                        const numeroLeito = leitoVago.leito;
                         
-                        if (!idLeito || !idLeito.includes('.')) {
-                            // Sem identificação de irmão → Sem restrição
+                        if (!numeroLeito || typeof numeroLeito !== 'number') {
+                            // Sem número de leito → Sem restrição
                             modalidade.exclusivo_enf_sem_restricao++;
                             return;
                         }
                         
-                        // Identificar leito irmão
-                        const [numero, parte] = idLeito.split('.');
-                        const parteIrmao = parte === '1' ? '2' : '1';
-                        const idIrmao = `${numero}.${parteIrmao}`;
+                        // ✅ LÓGICA CORRIGIDA: Leitos irmãos são números consecutivos
+                        // Ímpares (21, 23, 25...) → irmão é +1
+                        // Pares (22, 24, 26...) → irmão é -1
+                        const numeroIrmao = (numeroLeito % 2 === 0) 
+                            ? numeroLeito - 1  // Par → irmão é o anterior
+                            : numeroLeito + 1; // Ímpar → irmão é o próximo
                         
-                        // Buscar irmão
-                        const irmao = leitos.find(l => l.identificacaoLeito === idIrmao);
-                        
-                        // DEBUG DETALHADO
-                        console.log('[H2 LEITO IRMÃO]', {
-                            leitoVago: idLeito,
-                            procurandoIrmao: idIrmao,
-                            irmaoEncontrado: irmao ? 'SIM' : 'NÃO',
-                            irmaoStatus: irmao?.status,
-                            irmaoGenero: irmao?.genero,
-                            irmaoVago: irmao ? isVago(irmao) : 'N/A'
-                        });
+                        // Buscar irmão pelo campo 'leito'
+                        const irmao = leitos.find(l => l.leito === numeroIrmao);
                         
                         if (!irmao || isVago(irmao)) {
-                            // Irmão vago → Sem restrição
+                            // Ambos vagos OU irmão não encontrado → Sem restrição
                             modalidade.exclusivo_enf_sem_restricao++;
                         } else if (irmao.isolamento && irmao.isolamento !== 'Não Isolamento') {
                             // Irmão com isolamento → BLOQUEADO (não conta)
                             // Não incrementa nada
                         } else {
-                            // Irmão ocupado → Verificar gênero
+                            // Irmão ocupado → Verificar gênero do paciente no irmão
                             if (irmao.genero === 'Feminino') {
                                 modalidade.exclusivo_enf_fem++;
                             } else if (irmao.genero === 'Masculino') {
