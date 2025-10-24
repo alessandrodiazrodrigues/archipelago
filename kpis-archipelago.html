@@ -876,6 +876,16 @@
                         // Buscar irmão
                         const irmao = leitos.find(l => l.identificacaoLeito === idIrmao);
                         
+                        // DEBUG DETALHADO
+                        console.log('[H2 LEITO IRMÃO]', {
+                            leitoVago: idLeito,
+                            procurandoIrmao: idIrmao,
+                            irmaoEncontrado: irmao ? 'SIM' : 'NÃO',
+                            irmaoStatus: irmao?.status,
+                            irmaoGenero: irmao?.genero,
+                            irmaoVago: irmao ? isVago(irmao) : 'N/A'
+                        });
+                        
                         if (!irmao || isVago(irmao)) {
                             // Irmão vago → Sem restrição
                             modalidade.exclusivo_enf_sem_restricao++;
@@ -1059,6 +1069,16 @@
                         // Buscar irmão
                         const irmao = leitos.find(l => l.identificacaoLeito === idIrmao);
                         
+                        // DEBUG DETALHADO
+                        console.log('[H2 LEITO IRMÃO]', {
+                            leitoVago: idLeito,
+                            procurandoIrmao: idIrmao,
+                            irmaoEncontrado: irmao ? 'SIM' : 'NÃO',
+                            irmaoStatus: irmao?.status,
+                            irmaoGenero: irmao?.genero,
+                            irmaoVago: irmao ? isVago(irmao) : 'N/A'
+                        });
+                        
                         if (!irmao || isVago(irmao)) {
                             vagosEnfSemRestricao++;
                         } else if (irmao.isolamento && irmao.isolamento !== 'Não Isolamento') {
@@ -1074,6 +1094,15 @@
                             }
                         }
                     }
+                });
+                
+                // DEBUG H2
+                console.log('[H2 VAGOS DEBUG]', {
+                    vagosApto,
+                    vagosEnfFem,
+                    vagosEnfMasc,
+                    vagosEnfSemRestricao,
+                    totalVagos: vagos.length
                 });
             } else {
                 // Outros hospitais
@@ -1182,6 +1211,16 @@
                     enf_masculina: vagosEnfMascFinal,
                     modalidade: modalidadeDisponiveis
                 },
+                // DEBUG
+                ...(hospitalId === 'H2' && console.log('[H2 RETURN DEBUG]', {
+                    hospitalId,
+                    vagosAptoFinal,
+                    vagosEnfFemFinal,
+                    vagosEnfMascFinal,
+                    disponiveis_apartamento: vagosAptoFinal,
+                    disponiveis_enf_feminina: vagosEnfFemFinal,
+                    disponiveis_enf_masculina: vagosEnfMascFinal
+                }) ? {} : {}),
                 tph: {
                     medio: tphMedio,
                     lista: leitosMais5Diarias
