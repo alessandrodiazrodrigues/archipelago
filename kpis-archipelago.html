@@ -637,6 +637,21 @@
     </div>
 
     <script>
+        // =================== FUNÇÕES AUXILIARES DE STATUS ===================
+        
+        // ✅ CORREÇÃO: Verificar se leito está ocupado (case-insensitive + "Em uso")
+        function isOcupado(leito) {
+            if (!leito || !leito.status) return false;
+            const status = leito.status.toLowerCase();
+            return status === 'ocupado' || status === 'em uso';
+        }
+        
+        // ✅ CORREÇÃO: Verificar se leito está vago (case-insensitive)
+        function isVago(leito) {
+            if (!leito || !leito.status) return false;
+            return leito.status.toLowerCase() === 'vago';
+        }
+        
         // =================== FUNÇÕES AUXILIARES ===================
         
         function formatarData() {
@@ -803,7 +818,7 @@
                 exclusivo_enf_masc: 0
             };
 
-            const vagos = leitos.filter(l => l.status === 'vago');
+            const vagos = leitos.filter(l => isVago(l));
 
             // ====== REGRA 1: H1, H3, H5 (HÍBRIDOS PUROS) ======
             if (hospitalId === 'H1' || hospitalId === 'H3' || hospitalId === 'H5') {
@@ -813,7 +828,7 @@
 
             // ====== REGRA 2: H4 - SANTA CLARA (HÍBRIDO COM LIMITES) ======
             if (hospitalId === 'H4') {
-                const ocupados = leitos.filter(l => l.status === 'ocupado');
+                const ocupados = leitos.filter(l => isOcupado(l));
                 
                 const aptosOcupados = ocupados.filter(l => 
                     l.categoriaEscolhida === 'Apartamento'
@@ -861,7 +876,7 @@
                         // Buscar irmão
                         const irmao = leitos.find(l => l.identificacaoLeito === idIrmao);
                         
-                        if (!irmao || irmao.status === 'vago') {
+                        if (!irmao || isVago(irmao)) {
                             // Irmão vago → Sem restrição
                             modalidade.exclusivo_enf_sem_restricao++;
                         } else if (irmao.isolamento && irmao.isolamento !== 'Não Isolamento') {
@@ -942,7 +957,7 @@
             console.log(`${hospitalId}: ${leitos.length} leitos encontrados`);
             
             // Calcular ocupados
-            const ocupados = leitos.filter(l => l.status === 'ocupado');
+            const ocupados = leitos.filter(l => isOcupado(l));
             
             const ocupadosApto = ocupados.filter(l => 
                 l.tipo === 'Apartamento' || l.tipo === 'APTO' || l.tipo === 'Híbrido'
@@ -967,7 +982,7 @@
             ).length;
             
             // Calcular disponíveis
-            const vagos = leitos.filter(l => l.status === 'vago');
+            const vagos = leitos.filter(l => isVago(l));
             const vagosApto = vagos.filter(l => 
                 l.tipo === 'Apartamento' || l.tipo === 'APTO' || l.tipo === 'Híbrido'
             ).length;
