@@ -223,6 +223,7 @@
             text-transform: uppercase;
             letter-spacing: 0.5px;
             margin-bottom: 20px;
+            text-align: center; /* ✅ CENTRALIZADO */
         }
 
         /* =================== GAUGE MEIA-ROSCA (NORMAL) =================== */
@@ -281,8 +282,9 @@
         .gauge-largo-container {
             position: relative;
             width: 500px; /* ✅ AUMENTADO (era 450px) */
-            height: 250px; /* ✅ AUMENTADO (era 220px) */
+            height: 280px; /* ✅ AUMENTADO para não cortar (era 250px) */
             margin: 0 auto;
+            padding-top: 20px; /* ✅ PADDING para não cortar o topo */
         }
 
         .gauge-largo-info {
@@ -311,7 +313,7 @@
         }
 
         .gauge-largo-percentage {
-            font-size: 20px; /* ✅ PERCENTUAL EM BADGE - MENOR */
+            font-size: 60px; /* ✅ AUMENTADO 25% (era 48px) */
             font-weight: 700;
             color: #22c55e;
             padding: 6px 16px;
@@ -482,6 +484,47 @@
             color: #9ca3af;
             margin-top: 8px;
         }
+
+        /* =================== TPH MINI GAUGE =================== */
+        .tph-mini-gauge {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .tph-gauge-bar {
+            display: flex;
+            align-items: center;
+            gap: 2px;
+            height: 20px;
+        }
+
+        .tph-gauge-block {
+            width: 8px;
+            height: 20px;
+            border-radius: 2px;
+            transition: all 0.3s ease;
+        }
+
+        .tph-gauge-block.filled {
+            background: currentColor;
+        }
+
+        .tph-gauge-block.empty {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .tph-gauge-label {
+            font-size: 13px;
+            font-weight: 600;
+            color: #9ca3af;
+        }
+
+        .tph-gauge-bar.green { color: #22c55e; }
+        .tph-gauge-bar.yellow { color: #f59e0b; }
+        .tph-gauge-bar.red { color: #ef4444; }
 
         /* =================== TABELAS =================== */
         .hospitais-table {
@@ -654,22 +697,50 @@
 
         // =================== RENDER GAUGE LARGO (EXECUTIVO - MAIOR) ===================
         
+        function renderMiniGaugeTPH(dias) {
+            const maxDias = 30;
+            const porcentagem = (dias / maxDias) * 100;
+            
+            // Determinar cor baseado na porcentagem
+            let corClass = 'green';
+            if (porcentagem >= 67) corClass = 'red';
+            else if (porcentagem >= 47) corClass = 'yellow';
+            
+            // Criar 20 blocos
+            const totalBlocos = 20;
+            const blocosCheios = Math.round((dias / maxDias) * totalBlocos);
+            
+            let blocos = '';
+            for (let i = 0; i < totalBlocos; i++) {
+                blocos += `<div class="tph-gauge-block ${i < blocosCheios ? 'filled' : 'empty'}"></div>`;
+            }
+            
+            return `
+                <div class="tph-mini-gauge">
+                    <div class="tph-gauge-bar ${corClass}">
+                        ${blocos}
+                    </div>
+                    <span class="tph-gauge-label">${dias}/${maxDias}</span>
+                </div>
+            `;
+        }
+        
         function renderGaugeLargo(porcentagem, numeroTotal) {
             const offset = calcularGaugeLargoOffset(porcentagem);
             
             return `
-                <div style="display: flex; justify-content: center; margin: 40px 0 30px 0;">
+                <div style="display: flex; justify-content: center; margin: 20px 0 30px 0;">
                     <div class="gauge-largo-container">
                         <!-- SVG Gauge Largo -->
-                        <svg viewBox="0 0 500 250" style="width: 100%; height: 100%;">
+                        <svg viewBox="0 0 500 280" style="width: 100%; height: 100%;">
                             <!-- Fundo cinza -->
-                            <path d="M 50 200 A 200 200 0 0 1 450 200" 
+                            <path d="M 50 220 A 200 200 0 0 1 450 220" 
                                   fill="none" 
                                   stroke="rgba(255,255,255,0.1)" 
                                   stroke-width="30" 
                                   stroke-linecap="round"/>
                             <!-- Progresso verde -->
-                            <path d="M 50 200 A 200 200 0 0 1 450 200" 
+                            <path d="M 50 220 A 200 200 0 0 1 450 220" 
                                   fill="none" 
                                   stroke="#22c55e" 
                                   stroke-width="30" 
@@ -723,6 +794,100 @@
 
         // =================== NOVA FUNÇÃO: CALCULAR MODALIDADES POR HOSPITAL ===================
         
+        function calcularModalidadesVagos(leitos, hospitalId) {
+            const modalidade = {
+                flexiveis: 0,
+                exclusivo_apto: 0,
+                exclusivo_enf_sem_restricao: 0,
+                exclusivo_enf_fem: 0,
+                exclusivo_enf_masc: 0
+            };
+
+            const vagos = leitos.filter(l => l.status === 'vago');
+
+            // ====== REGRA 1: H1, H3, H5 (HÍBRIDOS PUROS) ======
+            if (hospitalId === 'H1' || hospitalId === 'H3' || hospitalId === 'H5') {
+                modalidade.flexiveis = vagos.length;
+                return modalidade;
+            }
+
+            // ====== REGRA 2: H4 - SANTA CLARA (HÍBRIDO COM LIMITES) ======
+            if (hospitalId === 'H4') {
+                const ocupados = leitos.filter(l => l.status === 'ocupado');
+                
+                const aptosOcupados = ocupados.filter(l => 
+                    l.categoriaEscolhida === 'Apartamento'
+                ).length;
+                
+                const enfOcupadas = ocupados.filter(l => 
+                    l.categoriaEscolhida === 'Enfermaria'
+                ).length;
+                
+                modalidade.flexiveis = 0;
+                modalidade.exclusivo_apto = 9 - aptosOcupados;
+                modalidade.exclusivo_enf_sem_restricao = 4 - enfOcupadas;
+                modalidade.exclusivo_enf_fem = 0;
+                modalidade.exclusivo_enf_masc = 0;
+                
+                return modalidade;
+            }
+
+            // ====== REGRA 3: H2 - CRUZ AZUL (TIPOS FIXOS + LEITO IRMÃO) ======
+            if (hospitalId === 'H2') {
+                vagos.forEach(leitoVago => {
+                    const tipo = leitoVago.tipo || '';
+                    
+                    // APTOs vagos → Exclusivamente Apartamentos
+                    if (tipo === 'APTO' || tipo === 'Apartamento') {
+                        modalidade.exclusivo_apto++;
+                        return;
+                    }
+                    
+                    // ENFERMARIAs → Sistema de Leito Irmão
+                    if (tipo === 'ENFERMARIA' || tipo === 'Enfermaria') {
+                        const idLeito = leitoVago.identificacaoLeito;
+                        
+                        if (!idLeito || !idLeito.includes('.')) {
+                            // Sem identificação de irmão → Sem restrição
+                            modalidade.exclusivo_enf_sem_restricao++;
+                            return;
+                        }
+                        
+                        // Identificar leito irmão
+                        const [numero, parte] = idLeito.split('.');
+                        const parteIrmao = parte === '1' ? '2' : '1';
+                        const idIrmao = `${numero}.${parteIrmao}`;
+                        
+                        // Buscar irmão
+                        const irmao = leitos.find(l => l.identificacaoLeito === idIrmao);
+                        
+                        if (!irmao || irmao.status === 'vago') {
+                            // Irmão vago → Sem restrição
+                            modalidade.exclusivo_enf_sem_restricao++;
+                        } else if (irmao.isolamento && irmao.isolamento !== 'Não Isolamento') {
+                            // Irmão com isolamento → BLOQUEADO (não conta)
+                            // Não incrementa nada
+                        } else {
+                            // Irmão ocupado → Verificar gênero
+                            if (irmao.genero === 'Feminino') {
+                                modalidade.exclusivo_enf_fem++;
+                            } else if (irmao.genero === 'Masculino') {
+                                modalidade.exclusivo_enf_masc++;
+                            } else {
+                                // Sem gênero definido → Sem restrição
+                                modalidade.exclusivo_enf_sem_restricao++;
+                            }
+                        }
+                    }
+                });
+                
+                return modalidade;
+            }
+
+            // Fallback (não deveria chegar aqui)
+            return modalidade;
+        }
+
         function calcularModalidadePorTipo(leitos, hospitalId) {
             const modalidade = {
                 flexiveis: 0,
@@ -732,56 +897,28 @@
                 exclusivo_enf_masc: 0
             };
 
+            // Para OCUPADOS e EM PREVISÃO: classificar por categoria escolhida
             leitos.forEach(leito => {
-                // Se tem categoriaEscolhida definida, usar ela
-                if (leito.categoriaEscolhida && leito.categoriaEscolhida.trim() !== '') {
-                    if (leito.categoriaEscolhida === 'Apartamento') {
-                        modalidade.exclusivo_apto++;
-                    } else if (leito.categoriaEscolhida === 'Enfermaria sem Restrição') {
-                        modalidade.exclusivo_enf_sem_restricao++;
-                    } else if (leito.categoriaEscolhida === 'Enfermaria Feminina') {
-                        modalidade.exclusivo_enf_fem++;
-                    } else if (leito.categoriaEscolhida === 'Enfermaria Masculina') {
-                        modalidade.exclusivo_enf_masc++;
-                    } else {
-                        modalidade.flexiveis++;
-                    }
-                    return;
-                }
-
-                // LÓGICA POR HOSPITAL
-                const tipo = leito.tipo || '';
+                const catEscolhida = leito.categoriaEscolhida || leito.categoria || '';
+                const genero = leito.genero || '';
                 
-                // H2 - CRUZ AZUL
-                if (hospitalId === 'H2') {
-                    if (tipo === 'APTO' || tipo === 'Apartamento') {
-                        modalidade.exclusivo_apto++;
-                    } else if (tipo === 'ENFERMARIA' || tipo === 'Enfermaria Feminina' || tipo === 'Enfermaria Masculina') {
-                        if (tipo === 'Enfermaria Feminina' || leito.genero === 'F') {
+                if (catEscolhida === 'Apartamento') {
+                    modalidade.exclusivo_apto++;
+                } else if (catEscolhida === 'Enfermaria') {
+                    // Enfermarias sempre sem restrição quando ocupadas (exceto H2)
+                    if (hospitalId === 'H2') {
+                        if (genero === 'Feminino') {
                             modalidade.exclusivo_enf_fem++;
-                        } else if (tipo === 'Enfermaria Masculina' || leito.genero === 'M') {
+                        } else if (genero === 'Masculino') {
                             modalidade.exclusivo_enf_masc++;
                         } else {
                             modalidade.exclusivo_enf_sem_restricao++;
                         }
                     } else {
-                        modalidade.flexiveis++;
-                    }
-                }
-                
-                // H4 - SANTA CLARA  
-                else if (hospitalId === 'H4') {
-                    if (tipo === 'APTO' || tipo === 'Apartamento') {
-                        modalidade.exclusivo_apto++;
-                    } else if (tipo === 'ENFERMARIA' || tipo === 'Enfermaria Feminina' || tipo === 'Enfermaria Masculina') {
                         modalidade.exclusivo_enf_sem_restricao++;
-                    } else {
-                        modalidade.flexiveis++;
                     }
-                }
-                
-                // H1, H3, H5 - HÍBRIDOS (todos flexíveis)
-                else {
+                } else {
+                    // Híbrido ou indefinido
                     modalidade.flexiveis++;
                 }
             });
@@ -892,7 +1029,7 @@
             // USAR NOVA FUNÇÃO DE CÁLCULO DE MODALIDADES
             const modalidadeOcupados = calcularModalidadePorTipo(ocupados, hospitalId);
             const modalidadePrevisao = calcularModalidadePorTipo(previsaoAlta, hospitalId);
-            const modalidadeDisponiveis = calcularModalidadePorTipo(vagos, hospitalId);
+            const modalidadeDisponiveis = calcularModalidadesVagos(leitos, hospitalId); // ✅ NOVA FUNÇÃO PARA VAGOS!
             
             return {
                 nome: hospitalId === 'H1' ? 'ADVENTISTA' :
@@ -1042,6 +1179,7 @@
                                 ${renderGaugeV5((totalPrevisao / totalLeitos * 100), '#f97316', totalPrevisao)}
                                 
                                 <div class="kpi-items-lista">
+                                    <div class="kpi-subtitle">Total de Leitos com alta na data de hoje</div>
                                     <div class="item-lista">
                                         <span class="label">Apartamento</span>
                                         <span class="valor">${previsaoApto}</span>
@@ -1100,6 +1238,7 @@
                             <div class="kpi-tph-container">
                                 <div class="kpi-tph-numero">${tphMedioGeral}</div>
                                 <div class="kpi-tph-label">dias</div>
+                                ${renderMiniGaugeTPH(parseFloat(tphMedioGeral))}
                             </div>
                             
                             <div class="kpi-detalhes">
@@ -1309,6 +1448,7 @@
                             <div class="kpi-tph-container">
                                 <div class="kpi-tph-numero">${dados.tph.medio}</div>
                                 <div class="kpi-tph-label">dias</div>
+                                ${renderMiniGaugeTPH(parseFloat(dados.tph.medio))}
                             </div>
                             
                             <div class="kpi-detalhes">
