@@ -258,26 +258,27 @@
             /* Header mais compacto */
             .page-header {
                 background: white !important;
-                border-left: none !important;
-                padding: 10px 0 !important;
-                margin-bottom: 10px !important;
+                border: none !important;
+                padding: 5px 0 !important;
+                margin-bottom: 8px !important;
                 border-radius: 0 !important;
                 page-break-after: avoid;
             }
 
             .page-header h1 {
                 color: black !important;
-                font-size: 18px !important;
+                font-size: 16px !important;
                 margin: 0 !important;
+                font-weight: 700 !important;
             }
 
             .page-header-left {
-                gap: 10px !important;
+                gap: 8px !important;
             }
 
             .timestamp {
                 color: #666 !important;
-                font-size: 10px !important;
+                font-size: 9px !important;
             }
 
             /* DASHBOARD EXECUTIVO: 1 página */
@@ -285,9 +286,9 @@
                 page-break-after: always !important;
                 page-break-inside: avoid;
                 background: white !important;
-                border: 1px solid #ddd !important;
-                border-left: 3px solid #8b5cf6 !important;
-                padding: 15px !important;
+                border: 1px solid #ccc !important;
+                border-left: 2px solid #666 !important;
+                padding: 12px !important;
                 margin-bottom: 0 !important;
             }
 
@@ -297,9 +298,9 @@
                 page-break-after: always !important;
                 page-break-inside: avoid;
                 background: white !important;
-                border: 1px solid #ddd !important;
-                border-left: 3px solid #60a5fa !important;
-                padding: 15px !important;
+                border: 1px solid #ccc !important;
+                border-left: 2px solid #666 !important;
+                padding: 12px !important;
                 margin-bottom: 0 !important;
             }
 
@@ -310,136 +311,212 @@
 
             /* Header das seções */
             .dashboard-header-section {
-                margin-bottom: 15px !important;
-                padding-bottom: 10px !important;
-                border-bottom: 1px solid #ddd !important;
+                margin-bottom: 10px !important;
+                padding-bottom: 6px !important;
+                border-bottom: 1px solid #ccc !important;
             }
 
             .dashboard-header-section h2 {
                 color: black !important;
-                font-size: 16px !important;
+                font-size: 14px !important;
                 margin: 0 !important;
+                font-weight: 700 !important;
             }
 
             .badge {
-                font-size: 9px !important;
-                padding: 3px 8px !important;
-                background: #f0f0f0 !important;
+                font-size: 8px !important;
+                padding: 2px 6px !important;
+                background: #f5f5f5 !important;
                 color: #666 !important;
-                border: 1px solid #ddd !important;
+                border: 1px solid #ccc !important;
             }
 
-            /* KPI Grid mais compacto */
+            /* KPI Grid - 3 colunas balanceadas */
             .kpis-grid {
-                gap: 10px !important;
+                gap: 8px !important;
                 grid-template-columns: repeat(3, 1fr) !important;
             }
 
-            /* KPI Boxes */
+            /* KPI Boxes - tamanho fixo e balanceado */
             .kpi-box {
                 background: white !important;
-                border: 1px solid #ddd !important;
-                padding: 12px !important;
-                min-height: auto !important;
+                border: 1px solid #ccc !important;
+                padding: 10px !important;
+                min-height: 160px !important;
+                max-height: 160px !important;
                 page-break-inside: avoid;
+                display: flex;
+                flex-direction: column;
+                justify-content: space-between;
             }
 
             .kpi-title {
                 color: black !important;
-                font-size: 11px !important;
-                margin-bottom: 8px !important;
+                font-size: 10px !important;
+                margin-bottom: 6px !important;
                 font-weight: 700 !important;
+                text-transform: uppercase;
+                border-bottom: 1px solid #eee;
+                padding-bottom: 4px;
             }
 
-            /* Valores dos KPIs */
+            /* Valores dos KPIs - proporcionais */
+            .kpi-valor-unico {
+                text-align: center;
+                padding: 8px 0;
+            }
+
             .kpi-valor-unico .valor {
-                font-size: 28px !important;
+                font-size: 32px !important;
                 color: black !important;
+                font-weight: 700;
+                line-height: 1;
             }
 
             .kpi-valor-unico .label {
-                font-size: 10px !important;
+                font-size: 9px !important;
                 color: #666 !important;
+                margin-top: 4px;
             }
 
             .kpi-valores-duplos-divididos {
+                display: flex;
                 gap: 8px !important;
+                align-items: center;
+                padding: 8px 0;
+            }
+
+            .kpi-valor-metade {
+                flex: 1;
+                text-align: center;
             }
 
             .kpi-valor-metade .valor {
-                font-size: 22px !important;
+                font-size: 24px !important;
                 color: black !important;
+                font-weight: 700;
+                line-height: 1;
             }
 
             .kpi-valor-metade .label {
-                font-size: 9px !important;
+                font-size: 8px !important;
                 color: #666 !important;
+                margin-top: 3px;
             }
 
             .divisor-vertical {
+                width: 1px;
+                height: 40px;
                 background: #ddd !important;
             }
 
-            /* Capacidade e Modalidade */
+            /* Gauge - tamanho reduzido */
+            .gauge-container {
+                margin: 6px auto !important;
+                text-align: center;
+            }
+
+            .gauge-container svg {
+                width: 100px !important;
+                height: 60px !important;
+                filter: grayscale(80%) !important;
+            }
+
+            /* Capacidade e Modalidade - mais compactas */
+            .kpi-capacidade,
+            .kpi-modalidade {
+                flex: 1;
+                overflow: hidden;
+            }
+
             .kpi-capacidade-item,
             .kpi-modalidade-item {
-                font-size: 10px !important;
-                padding: 6px 8px !important;
+                font-size: 8px !important;
+                padding: 4px 6px !important;
+                display: flex;
+                justify-content: space-between;
+                border-bottom: 1px solid #f5f5f5;
+            }
+
+            .kpi-capacidade-item:last-child,
+            .kpi-modalidade-item:last-child {
+                border-bottom: none;
             }
 
             .kpi-capacidade-item .tipo,
             .kpi-modalidade-item .tipo {
                 color: #666 !important;
+                font-size: 8px;
             }
 
             .kpi-capacidade-item .valor,
             .kpi-modalidade-item .valor {
                 color: black !important;
                 font-weight: 700 !important;
+                font-size: 8px;
             }
 
-            /* Detalhes (tabelas) */
+            /* Detalhes (tabelas) - compactas */
             .kpi-detalhes {
-                margin-top: 8px !important;
-                padding-top: 8px !important;
+                margin-top: 6px !important;
+                padding-top: 6px !important;
                 border-top: 1px solid #eee !important;
+                flex: 1;
+                overflow: hidden;
             }
 
             .detalhe-titulo {
-                font-size: 9px !important;
+                font-size: 8px !important;
                 color: #666 !important;
-                margin-bottom: 6px !important;
+                margin-bottom: 4px !important;
+                font-weight: 600;
             }
 
             .hospitais-table {
-                font-size: 9px !important;
+                font-size: 7px !important;
+                width: 100%;
+                border-collapse: collapse;
             }
 
             .hospitais-table th {
                 background: #f5f5f5 !important;
                 color: black !important;
-                padding: 4px !important;
+                padding: 3px !important;
                 font-weight: 700 !important;
+                border: 1px solid #ddd !important;
+                font-size: 7px;
             }
 
             .hospitais-table td {
-                padding: 4px !important;
-                border-bottom: 1px solid #eee !important;
+                padding: 3px !important;
+                border: 1px solid #eee !important;
                 color: black !important;
+                font-size: 7px;
             }
 
             .sem-dados {
-                font-size: 9px !important;
+                font-size: 8px !important;
                 color: #999 !important;
+                text-align: center;
+                padding: 6px;
             }
 
-            /* Gauge */
-            .gauge-container {
-                margin: 8px auto !important;
+            /* Box de Taxa de Ocupação - especial */
+            .box-taxa-ocupacao {
+                grid-column: 1 / 2;
             }
 
-            .gauge-container svg {
-                filter: grayscale(100%) !important;
+            /* Box TPH, PPS, SPICT - altura consistente */
+            .box-tph,
+            .box-pps,
+            .box-spict {
+                border-left: 2px solid #ddd !important;
+            }
+
+            /* Tabelas dentro dos boxes - scrollable */
+            .kpi-detalhes {
+                max-height: 80px;
+                overflow: hidden;
             }
 
             /* Remover loading */
@@ -454,21 +531,33 @@
 
             /* Ajustar margens da página */
             @page {
-                margin: 1.5cm;
+                margin: 1cm;
                 size: A4 portrait;
             }
 
-            /* Otimizar espaços */
-            .page-header {
-                margin-bottom: 5px !important;
+            /* Título do Box de Leitos Disponíveis */
+            .box-disponiveis .kpi-title {
+                font-size: 9px !important;
             }
 
-            /* Box especiais */
-            .box-taxa-ocupacao,
-            .box-tph,
-            .box-pps,
-            .box-spict {
-                border-left: 3px solid #ddd !important;
+            /* Subtítulo capacidade */
+            .kpi-capacidade h4,
+            .kpi-modalidade h4 {
+                font-size: 8px !important;
+                color: #666 !important;
+                margin: 0 0 4px 0 !important;
+                font-weight: 600 !important;
+            }
+
+            /* Lista de Hospitais na tabela */
+            .hospitais-table tbody tr:nth-child(even) {
+                background: #fafafa !important;
+            }
+
+            /* Otimizar impressão colorida */
+            * {
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
             }
         }
 
