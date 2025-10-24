@@ -42,6 +42,25 @@
             gap: 20px;
         }
 
+        .page-header-left {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .hamburger {
+            font-size: 28px;
+            cursor: pointer;
+            padding: 8px 12px;
+            border-radius: 8px;
+            transition: background 0.3s;
+            color: #60a5fa;
+        }
+
+        .hamburger:hover {
+            background: rgba(96, 165, 250, 0.2);
+        }
+
         .page-header h1 {
             color: #60a5fa;
             font-size: 32px;
@@ -53,6 +72,7 @@
         .page-header .timestamp {
             color: #9ca3af;
             font-size: 14px;
+            white-space: nowrap;
         }
 
         /* =================== BOTÕES DE AÇÃO =================== */
@@ -115,6 +135,98 @@
         @keyframes spin {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
+        }
+
+        /* =================== MENU LATERAL =================== */
+        .side-menu {
+            position: fixed;
+            left: -280px;
+            top: 0;
+            width: 280px;
+            height: 100vh;
+            background: #1e293b;
+            box-shadow: 2px 0 8px rgba(0, 0, 0, 0.2);
+            transition: left 0.3s ease;
+            z-index: 2000;
+            overflow-y: auto;
+        }
+        
+        .side-menu.open {
+            left: 0;
+        }
+        
+        .menu-header {
+            padding: 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .menu-header h2 {
+            margin: 0;
+            color: #60a5fa;
+            font-size: 20px;
+        }
+        
+        .menu-close {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 28px;
+            cursor: pointer;
+            padding: 0;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 6px;
+            transition: background 0.3s;
+        }
+        
+        .menu-close:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+        
+        .menu-items {
+            padding: 20px 0;
+        }
+        
+        .side-menu-item {
+            display: block;
+            padding: 12px 20px;
+            color: #e2e8f0;
+            text-decoration: none;
+            transition: all 0.3s;
+            border-left: 3px solid transparent;
+        }
+        
+        .side-menu-item:hover {
+            background: rgba(255, 255, 255, 0.05);
+            border-left-color: #60a5fa;
+        }
+        
+        .side-menu-item.active {
+            background: rgba(96, 165, 250, 0.1);
+            border-left-color: #60a5fa;
+            color: #60a5fa;
+            font-weight: 600;
+        }
+
+        .menu-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1500;
+        }
+        
+        .menu-overlay.active {
+            display: block;
         }
 
         /* =================== DASHBOARD SECTION =================== */
@@ -601,22 +713,51 @@
 </head>
 <body>
     <div class="page-container">
+        <!-- MENU LATERAL -->
+        <aside id="sideMenu" class="side-menu">
+            <div class="menu-header">
+                <h2>Menu</h2>
+                <button class="menu-close" onclick="toggleMenu()">×</button>
+            </div>
+            
+            <nav class="menu-items">
+                <a href="index.html" class="side-menu-item">
+                    Leitos
+                </a>
+                <a href="index.html#dash1" class="side-menu-item">
+                    Dashboard Hospitalar
+                </a>
+                <a href="index.html#dash2" class="side-menu-item">
+                    Dashboard Executivo
+                </a>
+                <a href="#" class="side-menu-item active" onclick="closeMenu(); return false;">
+                    KPIs
+                </a>
+            </nav>
+        </aside>
+
+        <!-- OVERLAY DO MENU -->
+        <div class="menu-overlay" id="menuOverlay" onclick="toggleMenu()"></div>
+
         <!-- HEADER -->
         <div class="page-header">
-            <div>
+            <div class="page-header-left">
+                <span class="hamburger" onclick="toggleMenu()">☰</span>
                 <h1>KPIs Archipelago</h1>
-                <div class="timestamp" id="timestamp">Carregando...</div>
             </div>
-            <div class="action-buttons">
-                <button class="btn btn-print" onclick="window.print()">
-                    Imprimir
-                </button>
-                <button class="btn btn-whatsapp" onclick="copiarParaWhatsApp()">
-                    Copiar para WhatsApp
-                </button>
-                <button class="btn btn-reload" onclick="recarregarDados()">
-                    Atualizar
-                </button>
+            <div style="display: flex; align-items: center; gap: 20px;">
+                <div class="timestamp" id="timestamp">Carregando...</div>
+                <div class="action-buttons">
+                    <button class="btn btn-print" onclick="window.print()">
+                        Imprimir
+                    </button>
+                    <button class="btn btn-whatsapp" onclick="copiarParaWhatsApp()">
+                        Copiar para WhatsApp
+                    </button>
+                    <button class="btn btn-reload" onclick="recarregarDados()">
+                        Atualizar
+                    </button>
+                </div>
             </div>
         </div>
 
@@ -1796,6 +1937,24 @@
                 console.error('Erro ao copiar:', err);
                 alert('Erro ao copiar. Tente novamente.');
             });
+        }
+
+        // =================== FUNÇÕES DO MENU ===================
+        
+        function toggleMenu() {
+            const menu = document.getElementById('sideMenu');
+            const overlay = document.getElementById('menuOverlay');
+            
+            menu.classList.toggle('open');
+            overlay.classList.toggle('active');
+        }
+        
+        function closeMenu() {
+            const menu = document.getElementById('sideMenu');
+            const overlay = document.getElementById('menuOverlay');
+            
+            menu.classList.remove('open');
+            overlay.classList.remove('active');
         }
 
         // =================== INICIALIZAÇÃO ===================
