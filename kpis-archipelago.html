@@ -965,27 +965,62 @@
             // Calcular ocupados
             const ocupados = leitos.filter(l => isOcupado(l));
             
-            const ocupadosApto = ocupados.filter(l => 
-                l.tipo === 'Apartamento' || l.tipo === 'APTO' || l.tipo === 'Híbrido'
-            ).length;
-            const ocupadosEnfFem = ocupados.filter(l => 
-                l.tipo === 'Enfermaria Feminina'
-            ).length;
-            const ocupadosEnfMasc = ocupados.filter(l => 
-                l.tipo === 'Enfermaria Masculina'
-            ).length;
+            // ✅ Para hospitais HÍBRIDOS: usar categoria_escolhida
+            let ocupadosApto, ocupadosEnfFem, ocupadosEnfMasc;
+            
+            if (hospitalId === 'H1' || hospitalId === 'H3' || hospitalId === 'H5') {
+                // Híbridos: baseado em categoria_escolhida + gênero
+                ocupadosApto = ocupados.filter(l => 
+                    l.categoriaEscolhida === 'Apartamento'
+                ).length;
+                ocupadosEnfFem = ocupados.filter(l => 
+                    l.categoriaEscolhida === 'Enfermaria' && l.genero === 'Feminino'
+                ).length;
+                ocupadosEnfMasc = ocupados.filter(l => 
+                    l.categoriaEscolhida === 'Enfermaria' && l.genero === 'Masculino'
+                ).length;
+            } else {
+                // Outros hospitais: baseado em tipo
+                ocupadosApto = ocupados.filter(l => 
+                    l.tipo === 'Apartamento' || l.tipo === 'APTO' || l.tipo === 'Híbrido'
+                ).length;
+                ocupadosEnfFem = ocupados.filter(l => 
+                    l.tipo === 'Enfermaria Feminina'
+                ).length;
+                ocupadosEnfMasc = ocupados.filter(l => 
+                    l.tipo === 'Enfermaria Masculina'
+                ).length;
+            }
             
             // Calcular previsão de alta
             const previsaoAlta = leitos.filter(l => l.prevAlta && l.prevAlta.trim() !== '');
-            const previsaoApto = previsaoAlta.filter(l => 
-                l.tipo === 'Apartamento' || l.tipo === 'APTO' || l.tipo === 'Híbrido'
-            ).length;
-            const previsaoEnfFem = previsaoAlta.filter(l => 
-                l.tipo === 'Enfermaria Feminina'
-            ).length;
-            const previsaoEnfMasc = previsaoAlta.filter(l => 
-                l.tipo === 'Enfermaria Masculina'
-            ).length;
+            
+            // ✅ Para hospitais HÍBRIDOS: usar categoria_escolhida
+            let previsaoApto, previsaoEnfFem, previsaoEnfMasc;
+            
+            if (hospitalId === 'H1' || hospitalId === 'H3' || hospitalId === 'H5') {
+                // Híbridos: baseado em categoria_escolhida + gênero
+                previsaoApto = previsaoAlta.filter(l => 
+                    l.categoriaEscolhida === 'Apartamento'
+                ).length;
+                previsaoEnfFem = previsaoAlta.filter(l => 
+                    l.categoriaEscolhida === 'Enfermaria' && l.genero === 'Feminino'
+                ).length;
+                previsaoEnfMasc = previsaoAlta.filter(l => 
+                    l.categoriaEscolhida === 'Enfermaria' && l.genero === 'Masculino'
+                ).length;
+            } else {
+                // Outros hospitais: baseado em tipo
+                previsaoApto = previsaoAlta.filter(l => 
+                    l.tipo === 'Apartamento' || l.tipo === 'APTO' || l.tipo === 'Híbrido'
+                ).length;
+                previsaoEnfFem = previsaoAlta.filter(l => 
+                    l.tipo === 'Enfermaria Feminina'
+                ).length;
+                previsaoEnfMasc = previsaoAlta.filter(l => 
+                    l.tipo === 'Enfermaria Masculina'
+                ).length;
+            }
             
             // Calcular disponíveis
             const vagos = leitos.filter(l => isVago(l));
