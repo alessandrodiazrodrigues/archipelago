@@ -239,6 +239,7 @@
             text-transform: uppercase;
             letter-spacing: 0.5px;
             margin-bottom: 20px;
+            text-align: center;
         }
 
         /* =================== KPI CONTENT =================== */
@@ -282,10 +283,10 @@
 
         .v5-number-inside {
             position: absolute;
-            top: 50%;
+            top: 60%;
             left: 50%;
             transform: translate(-50%, -50%);
-            font-size: 48px;
+            font-size: 42px;
             font-weight: 700;
             color: #ffffff;
             line-height: 1;
@@ -603,7 +604,7 @@
         <!-- HEADER -->
         <div class="page-header">
             <div>
-                <h1>🏥 KPIs ARCHIPELAGO</h1>
+                <h1>KPIs ARCHIPELAGO</h1>
                 <p class="timestamp" id="timestamp">Carregando...</p>
             </div>
             <div class="action-buttons">
@@ -782,27 +783,46 @@
             
             // Calcular ocupados
             const ocupados = leitos.filter(l => l.status === 'ocupado');
-            const ocupadosApto = ocupados.filter(l => l.tipo === 'Apartamento').length;
-            const ocupadosEnfFem = ocupados.filter(l => l.tipo === 'Enfermaria Feminina').length;
-            const ocupadosEnfMasc = ocupados.filter(l => l.tipo === 'Enfermaria Masculina').length;
+            // Calcular ocupados por tipo (considerando diferentes nomenclaturas)
+            const ocupadosApto = ocupados.filter(l => 
+                l.tipo === 'Apartamento' || l.tipo === 'APTO' || l.tipo === 'Híbrido'
+            ).length;
+            const ocupadosEnfFem = ocupados.filter(l => 
+                l.tipo === 'Enfermaria Feminina' || l.tipo === 'ENFERMARIA'
+            ).length;
+            const ocupadosEnfMasc = ocupados.filter(l => 
+                l.tipo === 'Enfermaria Masculina' || l.tipo === 'ENFERMARIA'
+            ).length;
             
             // Calcular previsão de alta
-            const previsaoAlta = leitos.filter(l => l.prev_alta && l.prev_alta.trim() !== '');
-            const previsaoApto = previsaoAlta.filter(l => l.tipo === 'Apartamento').length;
-            const previsaoEnfFem = previsaoAlta.filter(l => l.tipo === 'Enfermaria Feminina').length;
-            const previsaoEnfMasc = previsaoAlta.filter(l => l.tipo === 'Enfermaria Masculina').length;
+            const previsaoAlta = leitos.filter(l => l.prevAlta && l.prevAlta.trim() !== '');
+            const previsaoApto = previsaoAlta.filter(l => 
+                l.tipo === 'Apartamento' || l.tipo === 'APTO' || l.tipo === 'Híbrido'
+            ).length;
+            const previsaoEnfFem = previsaoAlta.filter(l => 
+                l.tipo === 'Enfermaria Feminina' || l.tipo === 'ENFERMARIA'
+            ).length;
+            const previsaoEnfMasc = previsaoAlta.filter(l => 
+                l.tipo === 'Enfermaria Masculina' || l.tipo === 'ENFERMARIA'
+            ).length;
             
             // Calcular disponíveis
             const vagos = leitos.filter(l => l.status === 'vago');
-            const vagosApto = vagos.filter(l => l.tipo === 'Apartamento').length;
-            const vagosEnfFem = vagos.filter(l => l.tipo === 'Enfermaria Feminina').length;
-            const vagosEnfMasc = vagos.filter(l => l.tipo === 'Enfermaria Masculina').length;
+            const vagosApto = vagos.filter(l => 
+                l.tipo === 'Apartamento' || l.tipo === 'APTO' || l.tipo === 'Híbrido'
+            ).length;
+            const vagosEnfFem = vagos.filter(l => 
+                l.tipo === 'Enfermaria Feminina' || l.tipo === 'ENFERMARIA'
+            ).length;
+            const vagosEnfMasc = vagos.filter(l => 
+                l.tipo === 'Enfermaria Masculina' || l.tipo === 'ENFERMARIA'
+            ).length;
             
             // TPH médio
             const tphValues = ocupados
                 .map(l => {
-                    if (!l.adm_at) return 0;
-                    const admData = new Date(l.adm_at);
+                    if (!l.admAt) return 0;
+                    const admData = new Date(l.admAt);
                     const hoje = new Date();
                     const dias = Math.floor((hoje - admData) / (1000 * 60 * 60 * 24));
                     return dias > 0 ? dias : 0;
@@ -830,9 +850,11 @@
             const ppsMenor40 = ocupados.filter(l => parseInt(l.pps) < 40);
             
             // SPICT
-            const spictElegiveis = ocupados.filter(l => l.spict === 'ELEGÍVEL');
+            const spictElegiveis = ocupados.filter(l => 
+                l.spict && l.spict.toLowerCase() === 'elegivel'
+            );
             const diretivasPendentes = ocupados.filter(l => 
-                l.spict === 'ELEGÍVEL' && (!l.diretivas || l.diretivas.trim() === '')
+                l.spict && l.spict.toLowerCase() === 'elegivel' && (!l.diretivas || l.diretivas.trim() === '' || l.diretivas === 'Não')
             );
             
             // Calcular taxa de ocupação
@@ -960,7 +982,7 @@
             return `
                 <div class="dashboard-section executivo">
                     <div class="dashboard-header-section">
-                        <h2>📊 DASHBOARD EXECUTIVO - REDE EXTERNA</h2>
+                        <h2>DASHBOARD EXECUTIVO - REDE EXTERNA</h2>
                         <span class="badge executivo">Consolidado</span>
                     </div>
                     
@@ -1000,9 +1022,9 @@
                         <div class="kpi-box box-previsao">
                             <div class="kpi-title">Leitos em Previsão de Alta</div>
                             
-                            <div class="kpi-content-centered-large" style="min-height: 120px; margin-top: 25px;">
-                                <div class="kpi-value-principal">${totalPrevisao}</div>
-                                <div class="kpi-items-lateral-centered">
+                            <div class="kpi-content-centered-large" style="min-height: 180px; margin-top: 25px;">
+                                ${renderGaugeLargo((totalPrevisao / totalLeitos * 100), totalPrevisao)}
+                                <div class="kpi-items-lateral-centered" style="margin-top: 20px;">
                                     <div class="item-lateral">
                                         <span class="label">Apartamento</span>
                                         <span class="valor">${previsaoApto}</span>
@@ -1033,9 +1055,9 @@
                                 </div>
                             </div>
                             
-                            <div class="kpi-content-centered-large" style="min-height: 120px;">
-                                <div class="kpi-value-principal">${totalDisponiveis}</div>
-                                <div class="kpi-items-lateral-centered">
+                            <div class="kpi-content-centered-large" style="min-height: 180px;">
+                                ${renderGaugeLargo((totalDisponiveis / totalLeitos * 100), totalDisponiveis)}
+                                <div class="kpi-items-lateral-centered" style="margin-top: 20px;">
                                     <div class="item-lateral">
                                         <span class="label">Apartamento</span>
                                         <span class="valor">até ${disponiveisApto}</span>
@@ -1091,7 +1113,7 @@
 
                         <!-- BOX 5: PPS -->
                         <div class="kpi-box box-pps">
-                            <div class="kpi-title">PPS Médio | PPS < 40%</div>
+                            <div class="kpi-title">PPS</div>
                             
                             <div class="kpi-valores-duplos-divididos">
                                 <div class="kpi-valor-metade">
@@ -1129,7 +1151,7 @@
 
                         <!-- BOX 6: SPICT -->
                         <div class="kpi-box box-spict">
-                            <div class="kpi-title">SPICT-BR Elegíveis | Diretivas Pendentes</div>
+                            <div class="kpi-title">SPICT-BR | Diretivas</div>
                             
                             <div class="kpi-valores-duplos-divididos">
                                 <div class="kpi-valor-metade">
@@ -1182,7 +1204,7 @@
             return `
                 <div class="dashboard-section hospitalar">
                     <div class="dashboard-header-section">
-                        <h2>🏥 ${dados.nome}</h2>
+                        <h2>${dados.nome}</h2>
                         <span class="badge hospital">${hospitalId}</span>
                     </div>
                     
@@ -1315,7 +1337,7 @@
 
                         <!-- BOX 5: PPS -->
                         <div class="kpi-box box-pps">
-                            <div class="kpi-title">PPS Médio | PPS < 40%</div>
+                            <div class="kpi-title">PPS</div>
                             
                             <div class="kpi-valores-duplos-divididos">
                                 <div class="kpi-valor-metade">
@@ -1354,7 +1376,7 @@
 
                         <!-- BOX 6: SPICT -->
                         <div class="kpi-box box-spict">
-                            <div class="kpi-title">SPICT-BR Elegíveis | Diretivas Pendentes</div>
+                            <div class="kpi-title">SPICT-BR | Diretivas</div>
                             
                             <div class="kpi-valores-duplos-divididos">
                                 <div class="kpi-valor-metade">
