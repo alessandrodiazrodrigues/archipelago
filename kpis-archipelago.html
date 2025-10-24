@@ -981,15 +981,15 @@
                     l.categoriaEscolhida === 'Enfermaria' && l.genero === 'Masculino'
                 ).length;
             } else {
-                // Outros hospitais: baseado em tipo
+                // H2 - CRUZ AZUL: baseado em tipo + gênero do paciente
                 ocupadosApto = ocupados.filter(l => 
-                    l.tipo === 'Apartamento' || l.tipo === 'APTO' || l.tipo === 'Híbrido'
+                    l.tipo === 'Apartamento' || l.tipo === 'APTO'
                 ).length;
                 ocupadosEnfFem = ocupados.filter(l => 
-                    l.tipo === 'Enfermaria Feminina'
+                    (l.tipo === 'ENFERMARIA' || l.tipo === 'Enfermaria') && l.genero === 'Feminino'
                 ).length;
                 ocupadosEnfMasc = ocupados.filter(l => 
-                    l.tipo === 'Enfermaria Masculina'
+                    (l.tipo === 'ENFERMARIA' || l.tipo === 'Enfermaria') && l.genero === 'Masculino'
                 ).length;
             }
             
@@ -1011,29 +1011,82 @@
                     l.categoriaEscolhida === 'Enfermaria' && l.genero === 'Masculino'
                 ).length;
             } else {
-                // Outros hospitais: baseado em tipo
+                // H2 - CRUZ AZUL: baseado em tipo + gênero do paciente
                 previsaoApto = previsaoAlta.filter(l => 
-                    l.tipo === 'Apartamento' || l.tipo === 'APTO' || l.tipo === 'Híbrido'
+                    l.tipo === 'Apartamento' || l.tipo === 'APTO'
                 ).length;
                 previsaoEnfFem = previsaoAlta.filter(l => 
-                    l.tipo === 'Enfermaria Feminina'
+                    (l.tipo === 'ENFERMARIA' || l.tipo === 'Enfermaria') && l.genero === 'Feminino'
                 ).length;
                 previsaoEnfMasc = previsaoAlta.filter(l => 
-                    l.tipo === 'Enfermaria Masculina'
+                    (l.tipo === 'ENFERMARIA' || l.tipo === 'Enfermaria') && l.genero === 'Masculino'
                 ).length;
             }
             
             // Calcular disponíveis
             const vagos = leitos.filter(l => isVago(l));
-            const vagosApto = vagos.filter(l => 
-                l.tipo === 'Apartamento' || l.tipo === 'APTO' || l.tipo === 'Híbrido'
-            ).length;
-            const vagosEnfFem = vagos.filter(l => 
-                l.tipo === 'Enfermaria Feminina'
-            ).length;
-            const vagosEnfMasc = vagos.filter(l => 
-                l.tipo === 'Enfermaria Masculina'
-            ).length;
+            
+            // ✅ H2 tem lógica diferente para vagos
+            let vagosApto, vagosEnfFem, vagosEnfMasc;
+            
+            if (hospitalId === 'H2') {
+                // H2: Dividir enfermarias por gênero baseado no leito irmão ocupado
+                vagosApto = vagos.filter(l => 
+                    l.tipo === 'Apartamento' || l.tipo === 'APTO'
+                ).length;
+                
+                // Contar enfermarias por gênero do irmão ocupado
+                vagosEnfFem = 0;
+                vagosEnfMasc = 0;
+                let vagosEnfSemRestricao = 0;
+                
+                vagos.forEach(leitoVago => {
+                    const tipo = leitoVago.tipo || '';
+                    
+                    if (tipo === 'ENFERMARIA' || tipo === 'Enfermaria') {
+                        const idLeito = leitoVago.identificacaoLeito;
+                        
+                        if (!idLeito || !idLeito.includes('.')) {
+                            vagosEnfSemRestricao++;
+                            return;
+                        }
+                        
+                        // Identificar leito irmão
+                        const [numero, parte] = idLeito.split('.');
+                        const parteIrmao = parte === '1' ? '2' : '1';
+                        const idIrmao = `${numero}.${parteIrmao}`;
+                        
+                        // Buscar irmão
+                        const irmao = leitos.find(l => l.identificacaoLeito === idIrmao);
+                        
+                        if (!irmao || isVago(irmao)) {
+                            vagosEnfSemRestricao++;
+                        } else if (irmao.isolamento && irmao.isolamento !== 'Não Isolamento') {
+                            // Irmão com isolamento → BLOQUEADO (não conta)
+                        } else {
+                            // Irmão ocupado → Dividir por gênero
+                            if (irmao.genero === 'Feminino') {
+                                vagosEnfFem++;
+                            } else if (irmao.genero === 'Masculino') {
+                                vagosEnfMasc++;
+                            } else {
+                                vagosEnfSemRestricao++;
+                            }
+                        }
+                    }
+                });
+            } else {
+                // Outros hospitais
+                vagosApto = vagos.filter(l => 
+                    l.tipo === 'Apartamento' || l.tipo === 'APTO' || l.tipo === 'Híbrido'
+                ).length;
+                vagosEnfFem = vagos.filter(l => 
+                    l.tipo === 'Enfermaria Feminina'
+                ).length;
+                vagosEnfMasc = vagos.filter(l => 
+                    l.tipo === 'Enfermaria Masculina'
+                ).length;
+            }
 
             // ✅ HOSPITAIS HÍBRIDOS: Disponíveis podem ser QUALQUER tipo
             let vagosAptoFinal = vagosApto;
