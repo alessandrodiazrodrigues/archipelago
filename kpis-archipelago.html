@@ -912,7 +912,8 @@
                 exclusivo_enf_masc: 0
             };
 
-            // ✅ HOSPITAIS HÍBRIDOS (H1, H3, H5): TUDO EM FLEXÍVEIS
+            // ✅ HOSPITAIS HÍBRIDOS PUROS (H1, H3, H5): TUDO EM FLEXÍVEIS
+            // H4 é híbrido mas com limitações, então não entra aqui
             if (hospitalId === 'H1' || hospitalId === 'H3' || hospitalId === 'H5') {
                 modalidade.flexiveis = leitos.length;
                 return modalidade;
@@ -968,7 +969,7 @@
             // ✅ Para hospitais HÍBRIDOS: usar categoria_escolhida
             let ocupadosApto, ocupadosEnfFem, ocupadosEnfMasc;
             
-            if (hospitalId === 'H1' || hospitalId === 'H3' || hospitalId === 'H5') {
+            if (hospitalId === 'H1' || hospitalId === 'H3' || hospitalId === 'H4' || hospitalId === 'H5') {
                 // Híbridos: baseado em categoria_escolhida + gênero
                 ocupadosApto = ocupados.filter(l => 
                     l.categoriaEscolhida === 'Apartamento'
@@ -998,7 +999,7 @@
             // ✅ Para hospitais HÍBRIDOS: usar categoria_escolhida
             let previsaoApto, previsaoEnfFem, previsaoEnfMasc;
             
-            if (hospitalId === 'H1' || hospitalId === 'H3' || hospitalId === 'H5') {
+            if (hospitalId === 'H1' || hospitalId === 'H3' || hospitalId === 'H4' || hospitalId === 'H5') {
                 // Híbridos: baseado em categoria_escolhida + gênero
                 previsaoApto = previsaoAlta.filter(l => 
                     l.categoriaEscolhida === 'Apartamento'
