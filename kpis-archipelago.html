@@ -283,19 +283,19 @@
 
         .v5-number-inside {
             position: absolute;
-            top: 65%;
+            top: 70%;
             left: 50%;
             transform: translate(-50%, -50%);
-            font-size: 39px;
+            font-size: 32px;
             font-weight: 700;
             color: #ffffff;
             line-height: 1;
         }
 
         .v5-badge-below {
-            padding: 4px 12px;
+            padding: 3px 10px;
             border-radius: 12px;
-            font-size: 13px;
+            font-size: 11px;
             font-weight: 600;
             color: white;
         }
@@ -322,8 +322,8 @@
         .gauge-largo-container {
             position: relative;
             width: 100%;
-            max-width: 400px;
-            height: 200px;
+            max-width: 320px;
+            height: 160px;
             margin: 0 auto;
         }
 
@@ -337,11 +337,11 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            padding-top: 35px;
+            padding-top: 25px;
         }
 
         .gauge-largo-percentage {
-            font-size: 54px;
+            font-size: 42px;
             font-weight: 700;
             color: #ffffff;
             line-height: 1;
@@ -357,7 +357,7 @@
         }
 
         .gauge-largo-number {
-            font-size: 48px;
+            font-size: 36px;
             font-weight: 700;
             color: #ffffff;
             line-height: 1;
@@ -443,17 +443,20 @@
             justify-content: space-between;
             align-items: center;
             padding: 4px 0;
+            gap: 15px;
         }
 
         .item-lateral .label {
             font-size: 13px;
             color: #d1d5db;
+            white-space: nowrap;
         }
 
         .item-lateral .valor {
             font-size: 14px;
             font-weight: 600;
             color: #ffffff;
+            white-space: nowrap;
         }
 
         /* =================== KPI DETALHES =================== */
@@ -868,27 +871,27 @@
             
             // Modalidade contratual (simplificado - todos como flexíveis por enquanto)
             const modalidadeOcupados = {
-                flexiveis: ocupados.filter(l => !l.categoria_escolhida || l.categoria_escolhida === '').length,
-                exclusivo_apto: ocupados.filter(l => l.categoria_escolhida === 'Apartamento').length,
-                exclusivo_enf_sem_restricao: ocupados.filter(l => l.categoria_escolhida === 'Enfermaria sem Restrição').length,
-                exclusivo_enf_fem: ocupados.filter(l => l.categoria_escolhida === 'Enfermaria Feminina').length,
-                exclusivo_enf_masc: ocupados.filter(l => l.categoria_escolhida === 'Enfermaria Masculina').length
+                flexiveis: ocupados.filter(l => !l.categoriaEscolhida || l.categoriaEscolhida === '').length,
+                exclusivo_apto: ocupados.filter(l => l.categoriaEscolhida === 'Apartamento').length,
+                exclusivo_enf_sem_restricao: ocupados.filter(l => l.categoriaEscolhida === 'Enfermaria sem Restrição').length,
+                exclusivo_enf_fem: ocupados.filter(l => l.categoriaEscolhida === 'Enfermaria Feminina').length,
+                exclusivo_enf_masc: ocupados.filter(l => l.categoriaEscolhida === 'Enfermaria Masculina').length
             };
             
             const modalidadePrevisao = {
-                flexiveis: previsaoAlta.filter(l => !l.categoria_escolhida || l.categoria_escolhida === '').length,
-                exclusivo_apto: previsaoAlta.filter(l => l.categoria_escolhida === 'Apartamento').length,
-                exclusivo_enf_sem_restricao: previsaoAlta.filter(l => l.categoria_escolhida === 'Enfermaria sem Restrição').length,
-                exclusivo_enf_fem: previsaoAlta.filter(l => l.categoria_escolhida === 'Enfermaria Feminina').length,
-                exclusivo_enf_masc: previsaoAlta.filter(l => l.categoria_escolhida === 'Enfermaria Masculina').length
+                flexiveis: previsaoAlta.filter(l => !l.categoriaEscolhida || l.categoriaEscolhida === '').length,
+                exclusivo_apto: previsaoAlta.filter(l => l.categoriaEscolhida === 'Apartamento').length,
+                exclusivo_enf_sem_restricao: previsaoAlta.filter(l => l.categoriaEscolhida === 'Enfermaria sem Restrição').length,
+                exclusivo_enf_fem: previsaoAlta.filter(l => l.categoriaEscolhida === 'Enfermaria Feminina').length,
+                exclusivo_enf_masc: previsaoAlta.filter(l => l.categoriaEscolhida === 'Enfermaria Masculina').length
             };
             
             const modalidadeDisponiveis = {
-                flexiveis: vagos.filter(l => !l.categoria_escolhida || l.categoria_escolhida === '').length,
-                exclusivo_apto: vagos.filter(l => l.categoria_escolhida === 'Apartamento').length,
-                exclusivo_enf_sem_restricao: vagos.filter(l => l.categoria_escolhida === 'Enfermaria sem Restrição').length,
-                exclusivo_enf_fem: vagos.filter(l => l.categoria_escolhida === 'Enfermaria Feminina').length,
-                exclusivo_enf_masc: vagos.filter(l => l.categoria_escolhida === 'Enfermaria Masculina').length
+                flexiveis: vagos.filter(l => !l.categoriaEscolhida || l.categoriaEscolhida === '').length,
+                exclusivo_apto: vagos.filter(l => l.categoriaEscolhida === 'Apartamento').length,
+                exclusivo_enf_sem_restricao: vagos.filter(l => l.categoriaEscolhida === 'Enfermaria sem Restrição').length,
+                exclusivo_enf_fem: vagos.filter(l => l.categoriaEscolhida === 'Enfermaria Feminina').length,
+                exclusivo_enf_masc: vagos.filter(l => l.categoriaEscolhida === 'Enfermaria Masculina').length
             };
             
             return {
@@ -1027,9 +1030,9 @@
                         <div class="kpi-box box-previsao">
                             <div class="kpi-title">Leitos em Previsão de Alta</div>
                             
-                            <div class="kpi-content-centered-large" style="min-height: 180px; margin-top: 25px;">
+                            <div class="kpi-content-centered-large" style="min-height: 160px; margin-top: 20px;">
                                 ${renderGaugeLargo((totalPrevisao / totalLeitos * 100), totalPrevisao)}
-                                <div class="kpi-items-lateral-centered" style="margin-top: 20px;">
+                                <div class="kpi-items-lateral-centered" style="margin-top: 25px;">
                                     <div class="item-lateral">
                                         <span class="label">Apartamento</span>
                                         <span class="valor">${previsaoApto}</span>
@@ -1060,9 +1063,9 @@
                                 </div>
                             </div>
                             
-                            <div class="kpi-content-centered-large" style="min-height: 180px;">
+                            <div class="kpi-content-centered-large" style="min-height: 160px;">
                                 ${renderGaugeLargo((totalDisponiveis / totalLeitos * 100), totalDisponiveis)}
-                                <div class="kpi-items-lateral-centered" style="margin-top: 20px;">
+                                <div class="kpi-items-lateral-centered" style="margin-top: 25px;">
                                     <div class="item-lateral">
                                         <span class="label">Apartamento</span>
                                         <span class="valor">até ${disponiveisApto}</span>
