@@ -1047,11 +1047,11 @@
             const modalidadeDisponiveis = calcularModalidadesVagos(leitos, hospitalId); // ✅ NOVA FUNÇÃO PARA VAGOS!
             
             return {
-                nome: hospitalId === 'H1' ? 'ADVENTISTA' :
+                nome: hospitalId === 'H1' ? 'NEOMATER' :
                       hospitalId === 'H2' ? 'CRUZ AZUL' :
-                      hospitalId === 'H3' ? 'NEOMATER' :
+                      hospitalId === 'H3' ? 'STA MARCELINA' :
                       hospitalId === 'H4' ? 'SANTA CLARA' :
-                      'STA MARCELINA',
+                      'ADVENTISTA',
                 totalLeitos,
                 taxaOcupacao,
                 ocupados: {
