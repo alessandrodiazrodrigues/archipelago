@@ -203,72 +203,29 @@
 
         .kpi-box:hover {
             background: rgba(255, 255, 255, 0.05);
-            transform: translateY(-2px);
+            border-color: rgba(255, 255, 255, 0.2);
         }
 
-        /* Cores por tipo de box */
-        .kpi-box.box-ocupados {
-            border-top: 3px solid #22c55e;
-        }
+        /* Cores da borda superior */
+        .box-ocupados { border-top: 3px solid #22c55e; }
+        .box-previsao { border-top: 3px solid #f97316; }
+        .box-disponiveis { border-top: 3px solid #3b82f6; }
+        .box-tph { border-top: 3px solid #8b5cf6; }
+        .box-pps { border-top: 3px solid #ec4899; }
+        .box-spict { border-top: 3px solid #14b8a6; }
+        .box-ocupacao-geral { border-top: 3px solid #22c55e; }
 
-        .kpi-box.box-previsao {
-            border-top: 3px solid #f97316;
-        }
-
-        .kpi-box.box-disponiveis {
-            border-top: 3px solid #3b82f6;
-        }
-
-        .kpi-box.box-tph {
-            border-top: 3px solid #8b5cf6;
-        }
-
-        .kpi-box.box-pps {
-            border-top: 3px solid #ec4899;
-        }
-
-        .kpi-box.box-spict {
-            border-top: 3px solid #14b8a6;
-        }
-
-        /* =================== KPI TITLE =================== */
+        /* Título do Box */
         .kpi-title {
-            font-size: 14px;
+            font-size: 12px;
             font-weight: 600;
             color: #9ca3af;
             text-transform: uppercase;
             letter-spacing: 0.5px;
             margin-bottom: 20px;
-            text-align: center;
         }
 
-        /* =================== KPI CONTENT =================== */
-        .kpi-content {
-            display: flex;
-            gap: 20px;
-            margin-bottom: 20px;
-            flex: 1;
-        }
-
-        .kpi-content-centered {
-            display: flex;
-            gap: 20px;
-            margin-bottom: 20px;
-            align-items: center;
-            justify-content: center;
-            flex: 1;
-        }
-
-        .kpi-content-centered-large {
-            display: flex;
-            gap: 30px;
-            margin-bottom: 20px;
-            align-items: center;
-            justify-content: center;
-            flex: 1;
-        }
-
-        /* =================== GAUGE V5 (MEIA ROSCA) =================== */
+        /* =================== V5 GAUGE (MEIA ROSCA) =================== */
         .v5-gauge-container {
             display: flex;
             flex-direction: column;
@@ -283,159 +240,57 @@
 
         .v5-number-inside {
             position: absolute;
-            top: 70%;
+            top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            font-size: 32px;
+            font-size: 48px;
             font-weight: 700;
-            color: #ffffff;
+            color: white;
             line-height: 1;
+            margin-top: 8px;
         }
 
         .v5-badge-below {
-            padding: 3px 10px;
+            font-size: 14px;
+            font-weight: 700;
+            padding: 4px 12px;
             border-radius: 12px;
-            font-size: 11px;
-            font-weight: 600;
-            color: white;
+            border: 1px solid;
         }
 
         .v5-badge-below.green {
             background: rgba(34, 197, 94, 0.2);
             color: #22c55e;
-            border: 1px solid #22c55e;
+            border-color: #22c55e;
         }
 
         .v5-badge-below.orange {
             background: rgba(249, 115, 22, 0.2);
             color: #f97316;
-            border: 1px solid #f97316;
+            border-color: #f97316;
         }
 
         .v5-badge-below.blue {
             background: rgba(59, 130, 246, 0.2);
             color: #3b82f6;
-            border: 1px solid #3b82f6;
+            border-color: #3b82f6;
         }
 
-        /* =================== GAUGE LARGO (EXECUTIVO) =================== */
-        .gauge-largo-container {
-            position: relative;
-            width: 100%;
-            max-width: 320px;
-            height: 160px;
-            margin: 0 auto;
-        }
-
-        .gauge-largo-info {
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
+        /* =================== CONTEÚDO DO BOX =================== */
+        .kpi-content {
             display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            padding-top: 25px;
-        }
-
-        .gauge-largo-percentage {
-            font-size: 42px;
-            font-weight: 700;
-            color: #ffffff;
-            line-height: 1;
-        }
-
-        .gauge-largo-label {
-            font-size: 11px;
-            color: #9ca3af;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            font-weight: 600;
-            margin-top: 6px;
-        }
-
-        .gauge-largo-number {
-            font-size: 36px;
-            font-weight: 700;
-            color: #ffffff;
-            line-height: 1;
-            margin-top: 6px;
-        }
-
-        .gauge-largo-subtitle {
-            font-size: 11px;
-            color: #9ca3af;
-            font-weight: 500;
-            margin-top: 8px;
-            text-align: center;
-            line-height: 1.3;
-        }
-
-        /* =================== KPI VALUE =================== */
-        .kpi-value-principal {
-            font-size: 72px;
-            font-weight: 700;
-            color: #ffffff;
-            line-height: 1;
-            text-align: center;
-        }
-
-        .kpi-percent-only {
-            font-size: 72px;
-            font-weight: 700;
-            color: #ffffff;
-            text-align: center;
-            margin: 40px 0;
-        }
-
-        /* =================== KPI VALORES DUPLOS =================== */
-        .kpi-valores-duplos-divididos {
-            display: flex;
+            align-items: flex-start;
             gap: 20px;
-            margin: 30px 0;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .kpi-valor-metade {
-            text-align: center;
+            margin-bottom: 20px;
             flex: 1;
         }
 
-        .kpi-valor-metade .valor {
-            font-size: 64px;
-            font-weight: 700;
-            color: #ffffff;
-            line-height: 1;
-        }
-
-        .kpi-valor-metade .label {
-            font-size: 13px;
-            color: #9ca3af;
-            margin-top: 8px;
-        }
-
-        .divisor-vertical {
-            width: 1px;
-            height: 80px;
-            background: rgba(255, 255, 255, 0.2);
-        }
-
-        /* =================== KPI ITEMS LATERAL =================== */
+        /* Lista Lateral (3 itens) */
         .kpi-items-lateral {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
             flex: 1;
-        }
-
-        .kpi-items-lateral-centered {
             display: flex;
             flex-direction: column;
             gap: 8px;
-            justify-content: center;
         }
 
         .item-lateral {
@@ -443,39 +298,35 @@
             justify-content: space-between;
             align-items: center;
             padding: 4px 0;
-            gap: 15px;
         }
 
         .item-lateral .label {
-            font-size: 13px;
-            color: #d1d5db;
-            white-space: nowrap;
+            font-size: 14px;
+            color: #9ca3af;
         }
 
         .item-lateral .valor {
-            font-size: 14px;
+            font-size: 16px;
             font-weight: 600;
             color: #ffffff;
-            white-space: nowrap;
         }
 
-        /* =================== KPI DETALHES =================== */
+        /* =================== DETALHES (5 CATEGORIAS MODALIDADE) =================== */
         .kpi-detalhes {
             border-top: 1px solid rgba(255, 255, 255, 0.1);
-            padding-top: 20px;
-            margin-top: auto;
+            padding-top: 15px;
         }
 
         .detalhe-titulo {
-            font-size: 12px;
+            font-size: 11px;
             font-weight: 600;
-            color: #9ca3af;
+            color: #60a5fa;
             text-transform: uppercase;
             letter-spacing: 0.5px;
-            margin-bottom: 12px;
+            margin-bottom: 10px;
         }
 
-        /* =================== LISTA SIMPLES COMPACTA =================== */
+        /* Lista Compacta (50% espaçamento) */
         .lista-simples-compacta {
             display: flex;
             flex-direction: column;
@@ -487,16 +338,77 @@
             justify-content: space-between;
             align-items: center;
             padding: 3px 10px;
-            font-size: 12px;
+            border-radius: 6px;
+            background: rgba(255, 255, 255, 0.02);
+            transition: background 0.2s ease;
+        }
+
+        .lista-item-compacto:hover {
+            background: rgba(255, 255, 255, 0.05);
         }
 
         .lista-item-compacto .label {
-            color: #d1d5db;
+            font-size: 13px;
+            color: #9ca3af;
         }
 
         .lista-item-compacto .valor {
+            font-size: 13px;
             font-weight: 600;
             color: #ffffff;
+        }
+
+        /* =================== VALORES DUPLOS (PPS / SPICT) =================== */
+        .kpi-valores-duplos-divididos {
+            display: flex;
+            align-items: center;
+            gap: 25px;
+            margin-bottom: 20px;
+        }
+
+        .kpi-valor-metade {
+            flex: 1;
+            text-align: center;
+        }
+
+        .kpi-valor-metade .valor {
+            font-size: 72px;
+            font-weight: 700;
+            color: white;
+            line-height: 1;
+            margin-bottom: 8px;
+        }
+
+        .kpi-valor-metade .label {
+            font-size: 13px;
+            color: #9ca3af;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .divisor-vertical {
+            width: 1px;
+            height: 80px;
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        /* =================== TPH =================== */
+        .kpi-tph-container {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .kpi-tph-numero {
+            font-size: 80px;
+            font-weight: 700;
+            color: white;
+            line-height: 1;
+        }
+
+        .kpi-tph-label {
+            font-size: 16px;
+            color: #9ca3af;
+            margin-top: 8px;
         }
 
         /* =================== TABELAS =================== */
@@ -506,98 +418,115 @@
             font-size: 13px;
         }
 
+        .hospitais-table thead {
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
         .hospitais-table th {
-            background: rgba(96, 165, 250, 0.1);
-            color: #60a5fa;
-            padding: 10px 12px;
             text-align: left;
-            font-size: 12px;
+            padding: 8px;
+            color: #60a5fa;
             font-weight: 600;
             text-transform: uppercase;
+            font-size: 11px;
             letter-spacing: 0.5px;
-            border-bottom: 2px solid #60a5fa;
         }
 
         .hospitais-table td {
-            padding: 10px 12px;
+            padding: 8px;
+            color: #e5e7eb;
             border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-            color: #d1d5db;
         }
 
-        .hospitais-table tr:hover {
-            background: rgba(255, 255, 255, 0.02);
+        .hospitais-table tbody tr:last-child td {
+            border-bottom: none;
         }
 
-        .hospitais-table .hospital-name-nowrap {
-            white-space: nowrap;
-            color: #93c5fd;
-            font-weight: 600;
+        .hospitais-table tbody tr:hover {
+            background: rgba(255, 255, 255, 0.03);
         }
 
-        /* =================== SEM DADOS =================== */
         .sem-dados {
             text-align: center;
             padding: 20px;
             color: #6b7280;
-            font-size: 13px;
             font-style: italic;
+            font-size: 13px;
         }
 
-        /* =================== PRINT STYLES =================== */
-        @media print {
-            @page {
-                size: A4;
-                margin: 15mm;
-            }
+        /* =================== GAUGE LARGO (EXECUTIVO) =================== */
+        .gauge-largo-container {
+            position: relative;
+            width: 450px;
+            height: 220px;
+            margin: 0 auto;
+        }
 
+        .gauge-largo-info {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -40%);
+            text-align: center;
+            width: 100%;
+        }
+
+        .gauge-largo-percentage {
+            font-size: 60px;
+            font-weight: 700;
+            color: white;
+            line-height: 1;
+            margin-bottom: 8px;
+        }
+
+        .gauge-largo-label {
+            font-size: 11px;
+            color: #9ca3af;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 8px;
+        }
+
+        .gauge-largo-number {
+            font-size: 48px;
+            font-weight: 700;
+            color: white;
+            line-height: 1;
+            margin-bottom: 4px;
+        }
+
+        .gauge-largo-subtitle {
+            font-size: 11px;
+            color: #6b7280;
+            line-height: 1.4;
+        }
+
+        /* =================== BOX OCUPAÇÃO GERAL (EXECUTIVO) =================== */
+        .box-ocupacao-geral .kpi-content {
+            flex-direction: column;
+            align-items: center;
+        }
+
+        /* =================== PRINT =================== */
+        @media print {
             body {
                 background: white;
                 color: black;
                 padding: 0;
             }
 
-            .action-buttons,
-            .btn {
-                display: none !important;
+            .action-buttons {
+                display: none;
             }
 
             .dashboard-section {
                 page-break-inside: avoid;
                 border: 1px solid #ddd;
-                background: white;
-                margin-bottom: 20px;
             }
 
             .kpi-box {
                 border: 1px solid #ddd;
-                background: white;
                 page-break-inside: avoid;
-            }
-
-            .page-header {
-                background: white;
-                border: 1px solid #ddd;
-            }
-
-            .page-header h1,
-            .dashboard-header-section h2,
-            .kpi-title,
-            .kpi-value-principal,
-            .kpi-valor-metade .valor,
-            .gauge-largo-percentage,
-            .gauge-largo-number,
-            .v5-number-inside {
-                color: black !important;
-            }
-
-            .badge {
-                border: 1px solid #999;
-            }
-
-            * {
-                color-adjust: exact;
-                -webkit-print-color-adjust: exact;
-                print-color-adjust: exact;
             }
         }
     </style>
@@ -607,18 +536,18 @@
         <!-- HEADER -->
         <div class="page-header">
             <div>
-                <h1>KPIs ARCHIPELAGO</h1>
-                <p class="timestamp" id="timestamp">Carregando...</p>
+                <h1>🏥 KPIs Archipelago</h1>
+                <div class="timestamp" id="timestamp">Carregando...</div>
             </div>
             <div class="action-buttons">
-                <button class="btn btn-reload" onclick="recarregarDados()">
-                    Atualizar
-                </button>
                 <button class="btn btn-print" onclick="window.print()">
-                    Imprimir
+                    🖨️ Imprimir
                 </button>
                 <button class="btn btn-whatsapp" onclick="copiarParaWhatsApp()">
-                    Copiar para WhatsApp
+                    📱 Copiar para WhatsApp
+                </button>
+                <button class="btn btn-reload" onclick="recarregarDados()">
+                    🔄 Atualizar
                 </button>
             </div>
         </div>
@@ -631,22 +560,22 @@
 
         <!-- CONTENT -->
         <div id="content" style="display: none;">
-            <!-- KPI EXECUTIVO V2 -->
+            <!-- DASHBOARD EXECUTIVO -->
             <div id="kpi-executivo"></div>
 
-            <!-- KPIs HOSPITALARES (5) -->
+            <!-- DASHBOARDS HOSPITALARES -->
             <div id="kpis-hospitalares"></div>
         </div>
     </div>
 
     <script>
-        // =================== FUNÇÕES UTILITÁRIAS ===================
+        // =================== FUNÇÕES AUXILIARES ===================
         
         function formatarData() {
             const agora = new Date();
-            const opcoes = { 
-                year: 'numeric', 
-                month: 'long', 
+            const opcoes = {
+                year: 'numeric',
+                month: 'long',
                 day: 'numeric',
                 hour: '2-digit',
                 minute: '2-digit'
@@ -767,6 +696,92 @@
             `;
         }
 
+        // =================== ✅ NOVA FUNÇÃO: CALCULAR MODALIDADES POR HOSPITAL ===================
+        
+        /**
+         * Calcula modalidades baseado no tipo de leito e hospital
+         * 
+         * LÓGICA:
+         * - H2 (Cruz Azul): 
+         *   - APTO → Exclusivo Apartamento
+         *   - ENFERMARIA → Enf Fem/Masc (por gênero definido)
+         * 
+         * - H4 (Santa Clara):
+         *   - APTO (max 9) → Exclusivo Apartamento  
+         *   - ENFERMARIA (max 4) → Enf sem Restrição
+         * 
+         * - H1, H3, H5 (Híbridos):
+         *   - Híbrido → Flexíveis (pode ser apto OU enfermaria)
+         */
+        function calcularModalidadePorTipo(leitos, hospitalId) {
+            const modalidade = {
+                flexiveis: 0,
+                exclusivo_apto: 0,
+                exclusivo_enf_sem_restricao: 0,
+                exclusivo_enf_fem: 0,
+                exclusivo_enf_masc: 0
+            };
+
+            leitos.forEach(leito => {
+                // Se tem categoriaEscolhida definida, usar ela
+                if (leito.categoriaEscolhida && leito.categoriaEscolhida.trim() !== '') {
+                    if (leito.categoriaEscolhida === 'Apartamento') {
+                        modalidade.exclusivo_apto++;
+                    } else if (leito.categoriaEscolhida === 'Enfermaria sem Restrição') {
+                        modalidade.exclusivo_enf_sem_restricao++;
+                    } else if (leito.categoriaEscolhida === 'Enfermaria Feminina') {
+                        modalidade.exclusivo_enf_fem++;
+                    } else if (leito.categoriaEscolhida === 'Enfermaria Masculina') {
+                        modalidade.exclusivo_enf_masc++;
+                    } else {
+                        modalidade.flexiveis++;
+                    }
+                    return;
+                }
+
+                // ✅ LÓGICA POR HOSPITAL
+                const tipo = leito.tipo || '';
+                
+                // H2 - CRUZ AZUL
+                if (hospitalId === 'H2') {
+                    if (tipo === 'APTO' || tipo === 'Apartamento') {
+                        modalidade.exclusivo_apto++;
+                    } else if (tipo === 'ENFERMARIA' || tipo === 'Enfermaria Feminina' || tipo === 'Enfermaria Masculina') {
+                        // Verificar gênero se disponível
+                        // Se tiver informação de gênero do paciente ou tipo específico
+                        if (tipo === 'Enfermaria Feminina' || leito.genero === 'F') {
+                            modalidade.exclusivo_enf_fem++;
+                        } else if (tipo === 'Enfermaria Masculina' || leito.genero === 'M') {
+                            modalidade.exclusivo_enf_masc++;
+                        } else {
+                            // Se não tem gênero definido, contar como sem restrição
+                            modalidade.exclusivo_enf_sem_restricao++;
+                        }
+                    } else {
+                        modalidade.flexiveis++;
+                    }
+                }
+                
+                // H4 - SANTA CLARA  
+                else if (hospitalId === 'H4') {
+                    if (tipo === 'APTO' || tipo === 'Apartamento') {
+                        modalidade.exclusivo_apto++;
+                    } else if (tipo === 'ENFERMARIA' || tipo === 'Enfermaria Feminina' || tipo === 'Enfermaria Masculina') {
+                        modalidade.exclusivo_enf_sem_restricao++;
+                    } else {
+                        modalidade.flexiveis++;
+                    }
+                }
+                
+                // H1, H3, H5 - HÍBRIDOS (todos flexíveis)
+                else {
+                    modalidade.flexiveis++;
+                }
+            });
+
+            return modalidade;
+        }
+
         // =================== PROCESSAR DADOS DA PLANILHA ===================
         
         function processarDadosHospital(hospitalId) {
@@ -786,15 +801,16 @@
             
             // Calcular ocupados
             const ocupados = leitos.filter(l => l.status === 'ocupado');
+            
             // Calcular ocupados por tipo (considerando diferentes nomenclaturas)
             const ocupadosApto = ocupados.filter(l => 
                 l.tipo === 'Apartamento' || l.tipo === 'APTO' || l.tipo === 'Híbrido'
             ).length;
             const ocupadosEnfFem = ocupados.filter(l => 
-                l.tipo === 'Enfermaria Feminina' || l.tipo === 'ENFERMARIA'
+                l.tipo === 'Enfermaria Feminina'
             ).length;
             const ocupadosEnfMasc = ocupados.filter(l => 
-                l.tipo === 'Enfermaria Masculina' || l.tipo === 'ENFERMARIA'
+                l.tipo === 'Enfermaria Masculina'
             ).length;
             
             // Calcular previsão de alta
@@ -803,10 +819,10 @@
                 l.tipo === 'Apartamento' || l.tipo === 'APTO' || l.tipo === 'Híbrido'
             ).length;
             const previsaoEnfFem = previsaoAlta.filter(l => 
-                l.tipo === 'Enfermaria Feminina' || l.tipo === 'ENFERMARIA'
+                l.tipo === 'Enfermaria Feminina'
             ).length;
             const previsaoEnfMasc = previsaoAlta.filter(l => 
-                l.tipo === 'Enfermaria Masculina' || l.tipo === 'ENFERMARIA'
+                l.tipo === 'Enfermaria Masculina'
             ).length;
             
             // Calcular disponíveis
@@ -815,10 +831,10 @@
                 l.tipo === 'Apartamento' || l.tipo === 'APTO' || l.tipo === 'Híbrido'
             ).length;
             const vagosEnfFem = vagos.filter(l => 
-                l.tipo === 'Enfermaria Feminina' || l.tipo === 'ENFERMARIA'
+                l.tipo === 'Enfermaria Feminina'
             ).length;
             const vagosEnfMasc = vagos.filter(l => 
-                l.tipo === 'Enfermaria Masculina' || l.tipo === 'ENFERMARIA'
+                l.tipo === 'Enfermaria Masculina'
             ).length;
             
             // TPH médio
@@ -869,39 +885,19 @@
             const totalLeitos = leitos.length;
             const taxaOcupacao = totalLeitos > 0 ? (ocupados.length / totalLeitos * 100) : 0;
             
-            // Modalidade contratual (simplificado - todos como flexíveis por enquanto)
-            const modalidadeOcupados = {
-                flexiveis: ocupados.filter(l => !l.categoriaEscolhida || l.categoriaEscolhida === '').length,
-                exclusivo_apto: ocupados.filter(l => l.categoriaEscolhida === 'Apartamento').length,
-                exclusivo_enf_sem_restricao: ocupados.filter(l => l.categoriaEscolhida === 'Enfermaria sem Restrição').length,
-                exclusivo_enf_fem: ocupados.filter(l => l.categoriaEscolhida === 'Enfermaria Feminina').length,
-                exclusivo_enf_masc: ocupados.filter(l => l.categoriaEscolhida === 'Enfermaria Masculina').length
-            };
-            
-            const modalidadePrevisao = {
-                flexiveis: previsaoAlta.filter(l => !l.categoriaEscolhida || l.categoriaEscolhida === '').length,
-                exclusivo_apto: previsaoAlta.filter(l => l.categoriaEscolhida === 'Apartamento').length,
-                exclusivo_enf_sem_restricao: previsaoAlta.filter(l => l.categoriaEscolhida === 'Enfermaria sem Restrição').length,
-                exclusivo_enf_fem: previsaoAlta.filter(l => l.categoriaEscolhida === 'Enfermaria Feminina').length,
-                exclusivo_enf_masc: previsaoAlta.filter(l => l.categoriaEscolhida === 'Enfermaria Masculina').length
-            };
-            
-            const modalidadeDisponiveis = {
-                flexiveis: vagos.filter(l => !l.categoriaEscolhida || l.categoriaEscolhida === '').length,
-                exclusivo_apto: vagos.filter(l => l.categoriaEscolhida === 'Apartamento').length,
-                exclusivo_enf_sem_restricao: vagos.filter(l => l.categoriaEscolhida === 'Enfermaria sem Restrição').length,
-                exclusivo_enf_fem: vagos.filter(l => l.categoriaEscolhida === 'Enfermaria Feminina').length,
-                exclusivo_enf_masc: vagos.filter(l => l.categoriaEscolhida === 'Enfermaria Masculina').length
-            };
+            // ✅ USAR NOVA FUNÇÃO DE CÁLCULO DE MODALIDADES
+            const modalidadeOcupados = calcularModalidadePorTipo(ocupados, hospitalId);
+            const modalidadePrevisao = calcularModalidadePorTipo(previsaoAlta, hospitalId);
+            const modalidadeDisponiveis = calcularModalidadePorTipo(vagos, hospitalId);
             
             return {
                 nome: hospitalId === 'H1' ? 'ADVENTISTA' :
                       hospitalId === 'H2' ? 'CRUZ AZUL' :
                       hospitalId === 'H3' ? 'NEOMATER' :
-                      hospitalId === 'H4' ? 'S. CLARA' :
-                      'S. MARCELINA',
-                totalLeitos: totalLeitos,
-                taxaOcupacao: taxaOcupacao,
+                      hospitalId === 'H4' ? 'SANTA CLARA' :
+                      'STA MARCELINA',
+                totalLeitos,
+                taxaOcupacao,
                 ocupados: {
                     total: ocupados.length,
                     apartamento: ocupadosApto,
@@ -925,7 +921,7 @@
                 },
                 tph: {
                     medio: tphMedio,
-                    leitosMais5: leitosMais5Diarias
+                    lista: leitosMais5Diarias
                 },
                 pps: {
                     medio: ppsMedio,
@@ -939,7 +935,7 @@
             };
         }
 
-        // =================== RENDER KPI EXECUTIVO V2 ===================
+        // =================== RENDER DASHBOARD EXECUTIVO ===================
         
         function renderKPIExecutivo() {
             const hospitais = ['H1', 'H2', 'H3', 'H4', 'H5'].map(processarDadosHospital);
@@ -947,30 +943,20 @@
             // Consolidar dados
             const totalLeitos = hospitais.reduce((sum, h) => sum + h.totalLeitos, 0);
             const totalOcupados = hospitais.reduce((sum, h) => sum + h.ocupados.total, 0);
-            const taxaOcupacaoGeral = totalLeitos > 0 ? (totalOcupados / totalLeitos * 100) : 0;
-            
             const totalPrevisao = hospitais.reduce((sum, h) => sum + h.previsao.total, 0);
+            const totalDisponiveis = hospitais.reduce((sum, h) => sum + h.disponiveis.total, 0);
+            const taxaOcupacao = (totalOcupados / totalLeitos * 100);
+            
+            // Consolidar por tipo
             const previsaoApto = hospitais.reduce((sum, h) => sum + h.previsao.apartamento, 0);
             const previsaoEnfFem = hospitais.reduce((sum, h) => sum + h.previsao.enf_feminina, 0);
             const previsaoEnfMasc = hospitais.reduce((sum, h) => sum + h.previsao.enf_masculina, 0);
             
-            const totalDisponiveis = hospitais.reduce((sum, h) => sum + h.disponiveis.total, 0);
             const disponiveisApto = hospitais.reduce((sum, h) => sum + h.disponiveis.apartamento, 0);
             const disponiveisEnfFem = hospitais.reduce((sum, h) => sum + h.disponiveis.enf_feminina, 0);
             const disponiveisEnfMasc = hospitais.reduce((sum, h) => sum + h.disponiveis.enf_masculina, 0);
             
-            const tphMedio = (hospitais.reduce((sum, h) => sum + parseFloat(h.tph.medio), 0) / hospitais.length).toFixed(1);
-            
-            const ppsValues = hospitais.map(h => h.pps.medio).filter(v => v > 0);
-            const ppsMedio = ppsValues.length > 0 
-                ? Math.round(ppsValues.reduce((a, b) => a + b, 0) / ppsValues.length)
-                : 0;
-            const totalPpsMenor40 = hospitais.reduce((sum, h) => sum + h.pps.menor40.length, 0);
-            
-            const totalSpict = hospitais.reduce((sum, h) => sum + h.spict.elegiveis, 0);
-            const totalDiretivas = hospitais.reduce((sum, h) => sum + h.spict.diretivas, 0);
-            
-            // Modalidades consolidadas
+            // Consolidar modalidades
             const modalidadePrevisao = {
                 flexiveis: hospitais.reduce((sum, h) => sum + h.previsao.modalidade.flexiveis, 0),
                 exclusivo_apto: hospitais.reduce((sum, h) => sum + h.previsao.modalidade.exclusivo_apto, 0),
@@ -987,22 +973,43 @@
                 exclusivo_enf_masc: hospitais.reduce((sum, h) => sum + h.disponiveis.modalidade.exclusivo_enf_masc, 0)
             };
             
+            // TPH médio
+            const tphTodos = hospitais.map(h => parseFloat(h.tph.medio)).filter(v => v > 0);
+            const tphMedioGeral = tphTodos.length > 0 
+                ? (tphTodos.reduce((a, b) => a + b, 0) / tphTodos.length).toFixed(1)
+                : 0;
+            
+            // PPS médio
+            const ppsTodos = hospitais.map(h => h.pps.medio).filter(v => v > 0);
+            const ppsMedioGeral = ppsTodos.length > 0
+                ? Math.round(ppsTodos.reduce((a, b) => a + b, 0) / ppsTodos.length)
+                : 0;
+            const totalPPSMenor40 = hospitais.reduce((sum, h) => sum + h.pps.menor40.length, 0);
+            
+            // SPICT
+            const totalSpict = hospitais.reduce((sum, h) => sum + h.spict.elegiveis, 0);
+            const totalDiretivas = hospitais.reduce((sum, h) => sum + h.spict.diretivas, 0);
+            const listaDiretivasConsolidada = hospitais.flatMap(h => 
+                h.spict.listaDiretivas.map(l => ({ ...l, hospital: h.nome }))
+            );
+            
             return `
                 <div class="dashboard-section executivo">
                     <div class="dashboard-header-section">
-                        <h2>DASHBOARD EXECUTIVO - REDE EXTERNA</h2>
-                        <span class="badge executivo">Consolidado</span>
+                        <h2>📊 Dashboard Executivo</h2>
+                        <span class="badge executivo">Rede Externa</span>
                     </div>
                     
                     <div class="kpis-grid">
-                        <!-- BOX 1: OCUPAÇÃO GERAL COM GAUGE LARGO -->
-                        <div class="kpi-box box-ocupados" style="min-height: 660px;">
+                        <!-- BOX 1: Ocupação Geral -->
+                        <div class="kpi-box box-ocupacao-geral">
                             <div class="kpi-title">Ocupação Geral - Rede Externa</div>
                             
-                            ${renderGaugeLargo(taxaOcupacaoGeral, totalOcupados)}
+                            <div class="kpi-content">
+                                ${renderGaugeLargo(taxaOcupacao, totalOcupados)}
+                            </div>
                             
-                            <!-- Tabela -->
-                            <div class="kpi-detalhes" style="padding-top: 0; border-top: none; margin-top: 0;">
+                            <div class="kpi-detalhes">
                                 <table class="hospitais-table">
                                     <thead>
                                         <tr>
@@ -1015,7 +1022,7 @@
                                     <tbody>
                                         ${hospitais.map(h => `
                                             <tr>
-                                                <td class="hospital-name-nowrap"><strong>${h.nome}</strong></td>
+                                                <td><strong>${h.nome}</strong></td>
                                                 <td>${h.totalLeitos}</td>
                                                 <td>${h.ocupados.total}</td>
                                                 <td>${h.taxaOcupacao.toFixed(1)}%</td>
@@ -1026,13 +1033,14 @@
                             </div>
                         </div>
 
-                        <!-- BOX 2: PREVISÃO DE ALTA -->
+                        <!-- BOX 2: Previsão de Alta -->
                         <div class="kpi-box box-previsao">
                             <div class="kpi-title">Leitos em Previsão de Alta</div>
                             
-                            <div class="kpi-content-centered-large" style="min-height: 160px; margin-top: 20px;">
-                                ${renderGaugeLargo((totalPrevisao / totalLeitos * 100), totalPrevisao)}
-                                <div class="kpi-items-lateral-centered" style="margin-top: 25px;">
+                            <div class="kpi-content">
+                                ${renderGaugeV5((totalPrevisao / totalLeitos * 100), '#f97316', totalPrevisao)}
+                                
+                                <div class="kpi-items-lateral">
                                     <div class="item-lateral">
                                         <span class="label">Apartamento</span>
                                         <span class="valor">${previsaoApto}</span>
@@ -1054,18 +1062,17 @@
                             </div>
                         </div>
 
-                        <!-- BOX 3: DISPONÍVEIS -->
+                        <!-- BOX 3: Disponíveis -->
                         <div class="kpi-box box-disponiveis">
-                            <div class="kpi-title">
-                                Leitos Disponíveis
-                                <div style="font-size: 10px; color: #9ca3af; margin-top: 6px; font-weight: 400; text-transform: none; letter-spacing: 0;">
-                                    Capacidade por tipo de leito (não simultâneo)
-                                </div>
-                            </div>
+                            <div class="kpi-title">Leitos Disponíveis</div>
                             
-                            <div class="kpi-content-centered-large" style="min-height: 160px;">
-                                ${renderGaugeLargo((totalDisponiveis / totalLeitos * 100), totalDisponiveis)}
-                                <div class="kpi-items-lateral-centered" style="margin-top: 25px;">
+                            <div class="kpi-content">
+                                ${renderGaugeV5((totalDisponiveis / totalLeitos * 100), '#3b82f6', totalDisponiveis)}
+                                
+                                <div class="kpi-items-lateral">
+                                    <div style="font-size: 11px; color: #6b7280; margin-bottom: 8px; font-style: italic;">
+                                        Capacidade por tipo de leito (não simultâneo)
+                                    </div>
                                     <div class="item-lateral">
                                         <span class="label">Apartamento</span>
                                         <span class="valor">até ${disponiveisApto}</span>
@@ -1091,11 +1098,9 @@
                         <div class="kpi-box box-tph">
                             <div class="kpi-title">TPH Médio</div>
                             
-                            <div style="display: flex; justify-content: center; align-items: center; margin: 30px 0;">
-                                <div style="text-align: center;">
-                                    <div style="font-size: 72px; font-weight: 700; color: #ffffff; line-height: 1;">${tphMedio}</div>
-                                    <div style="color: #9ca3af; font-size: 13px; margin-top: 8px;">dias</div>
-                                </div>
+                            <div class="kpi-tph-container">
+                                <div class="kpi-tph-numero">${tphMedioGeral}</div>
+                                <div class="kpi-tph-label">dias</div>
                             </div>
                             
                             <div class="kpi-detalhes">
@@ -1110,7 +1115,7 @@
                                     <tbody>
                                         ${hospitais.map(h => `
                                             <tr>
-                                                <td class="hospital-name-nowrap"><strong>${h.nome}</strong></td>
+                                                <td>${h.nome}</td>
                                                 <td>${h.tph.medio}</td>
                                             </tr>
                                         `).join('')}
@@ -1125,30 +1130,29 @@
                             
                             <div class="kpi-valores-duplos-divididos">
                                 <div class="kpi-valor-metade">
-                                    <div class="valor">${ppsMedio}</div>
+                                    <div class="valor">${ppsMedioGeral}</div>
                                     <div class="label">PPS Médio</div>
                                 </div>
                                 <div class="divisor-vertical"></div>
                                 <div class="kpi-valor-metade">
-                                    <div class="valor">${totalPpsMenor40.toString().padStart(2, '0')}</div>
+                                    <div class="valor">${totalPPSMenor40.toString().padStart(2, '0')}</div>
                                     <div class="label">PPS < 40%</div>
                                 </div>
                             </div>
                             
                             <div class="kpi-detalhes">
+                                <div class="detalhe-titulo">PPS < 40% por Hospital</div>
                                 <table class="hospitais-table">
                                     <thead>
                                         <tr>
                                             <th>Hospital</th>
-                                            <th>PPS Médio</th>
                                             <th>PPS < 40%</th>
                                         </tr>
                                     </thead>
                                     <tbody>
                                         ${hospitais.map(h => `
                                             <tr>
-                                                <td class="hospital-name-nowrap"><strong>${h.nome}</strong></td>
-                                                <td>${h.pps.medio}</td>
+                                                <td>${h.nome}</td>
                                                 <td>${h.pps.menor40.length}</td>
                                             </tr>
                                         `).join('')}
@@ -1174,19 +1178,18 @@
                             </div>
                             
                             <div class="kpi-detalhes">
+                                <div class="detalhe-titulo">Diretivas Pendentes por Hospital</div>
                                 <table class="hospitais-table">
                                     <thead>
                                         <tr>
                                             <th>Hospital</th>
-                                            <th>SPICT-BR Elegíveis</th>
                                             <th>Diretivas Pendentes</th>
                                         </tr>
                                     </thead>
                                     <tbody>
                                         ${hospitais.map(h => `
                                             <tr>
-                                                <td class="hospital-name-nowrap"><strong>${h.nome}</strong></td>
-                                                <td>${h.spict.elegiveis}</td>
+                                                <td>${h.nome}</td>
                                                 <td>${h.spict.diretivas}</td>
                                             </tr>
                                         `).join('')}
@@ -1199,30 +1202,26 @@
             `;
         }
 
-        // =================== RENDER KPI HOSPITALAR ===================
+        // =================== RENDER DASHBOARD HOSPITALAR ===================
         
         function renderKPIHospitalar(hospitalId) {
             const dados = processarDadosHospital(hospitalId);
             
-            // Calcular porcentagem de previsão de alta
-            const porcentagemPrevisao = dados.ocupados.total > 0 
-                ? (dados.previsao.total / dados.ocupados.total * 100)
-                : 0;
-            
             return `
                 <div class="dashboard-section hospitalar">
                     <div class="dashboard-header-section">
-                        <h2>${dados.nome}</h2>
+                        <h2>🏥 ${dados.nome}</h2>
                         <span class="badge hospital">${hospitalId}</span>
                     </div>
                     
                     <div class="kpis-grid">
-                        <!-- BOX 1: OCUPADOS -->
+                        <!-- BOX 1: Leitos Ocupados -->
                         <div class="kpi-box box-ocupados">
                             <div class="kpi-title">Leitos Ocupados</div>
                             
-                            <div class="kpi-content-centered">
+                            <div class="kpi-content">
                                 ${renderGaugeV5(dados.taxaOcupacao, '#22c55e', dados.ocupados.total)}
+                                
                                 <div class="kpi-items-lateral">
                                     <div class="item-lateral">
                                         <span class="label">Apartamento</span>
@@ -1245,12 +1244,13 @@
                             </div>
                         </div>
 
-                        <!-- BOX 2: PREVISÃO DE ALTA -->
+                        <!-- BOX 2: Previsão de Alta -->
                         <div class="kpi-box box-previsao">
                             <div class="kpi-title">Leitos em Previsão de Alta</div>
                             
-                            <div class="kpi-content-centered">
-                                ${renderGaugeV5(porcentagemPrevisao, '#f97316', dados.previsao.total)}
+                            <div class="kpi-content">
+                                ${renderGaugeV5((dados.previsao.total / dados.totalLeitos * 100), '#f97316', dados.previsao.total)}
+                                
                                 <div class="kpi-items-lateral">
                                     <div class="item-lateral">
                                         <span class="label">Apartamento</span>
@@ -1273,14 +1273,15 @@
                             </div>
                         </div>
 
-                        <!-- BOX 3: DISPONÍVEIS -->
+                        <!-- BOX 3: Disponíveis -->
                         <div class="kpi-box box-disponiveis">
                             <div class="kpi-title">Leitos Disponíveis</div>
                             
-                            <div class="kpi-content-centered">
-                                ${renderGaugeV5(dados.disponiveis.total > 0 ? (dados.disponiveis.total / dados.totalLeitos * 100) : 0, '#3b82f6', dados.disponiveis.total)}
+                            <div class="kpi-content">
+                                ${renderGaugeV5((dados.disponiveis.total / dados.totalLeitos * 100), '#3b82f6', dados.disponiveis.total)}
+                                
                                 <div class="kpi-items-lateral">
-                                    <div class="item-lateral" style="font-size: 11px; color: #9ca3af; margin-bottom: 5px;">
+                                    <div style="font-size: 11px; color: #6b7280; margin-bottom: 8px; font-style: italic;">
                                         Capacidade por tipo de leito (não simultâneo)
                                     </div>
                                     <div class="item-lateral">
@@ -1308,35 +1309,30 @@
                         <div class="kpi-box box-tph">
                             <div class="kpi-title">TPH Médio</div>
                             
-                            <div style="display: flex; justify-content: center; align-items: center; margin: 30px 0;">
-                                <div style="text-align: center;">
-                                    <div style="font-size: 72px; font-weight: 700; color: #ffffff; line-height: 1;">${dados.tph.medio}</div>
-                                    <div style="color: #9ca3af; font-size: 13px; margin-top: 8px;">dias</div>
-                                </div>
+                            <div class="kpi-tph-container">
+                                <div class="kpi-tph-numero">${dados.tph.medio}</div>
+                                <div class="kpi-tph-label">dias</div>
                             </div>
                             
                             <div class="kpi-detalhes">
                                 <div class="detalhe-titulo">Nº Diárias > 5</div>
-                                ${dados.tph.leitosMais5.length > 0 ? `
+                                ${dados.tph.lista.length > 0 ? `
                                     <table class="hospitais-table">
                                         <thead>
                                             <tr>
                                                 <th>Leito</th>
-                                                <th>Diárias</th>
+                                                <th>Matrícula</th>
+                                                <th>Dias</th>
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            ${dados.tph.leitosMais5.map(l => {
-                                                const admData = new Date(l.adm_at);
-                                                const hoje = new Date();
-                                                const dias = Math.floor((hoje - admData) / (1000 * 60 * 60 * 24));
-                                                return `
-                                                    <tr>
-                                                        <td>${l.leito}</td>
-                                                        <td>${dias}</td>
-                                                    </tr>
-                                                `;
-                                            }).join('')}
+                                            ${dados.tph.lista.map(l => `
+                                                <tr>
+                                                    <td>${l.leito}</td>
+                                                    <td>${l.matricula || '---'}</td>
+                                                    <td>${l.dias}</td>
+                                                </tr>
+                                            `).join('')}
                                         </tbody>
                                     </table>
                                 ` : '<div class="sem-dados">Nenhum leito com mais de 5 diárias</div>'}
@@ -1454,9 +1450,9 @@
                 document.getElementById('loading').style.display = 'none';
                 document.getElementById('content').style.display = 'block';
                 
-                console.log('Dados carregados com sucesso!');
+                console.log('✅ Dados carregados com sucesso!');
             } catch (error) {
-                console.error('Erro ao carregar dados:', error);
+                console.error('❌ Erro ao carregar dados:', error);
                 document.getElementById('loading').innerHTML = `
                     <p style="color: #ef4444;">❌ Erro ao carregar dados</p>
                     <p style="color: #9ca3af; font-size: 14px; margin-top: 10px;">${error.message}</p>
