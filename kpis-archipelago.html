@@ -912,6 +912,12 @@
                 exclusivo_enf_masc: 0
             };
 
+            // ✅ HOSPITAIS HÍBRIDOS (H1, H3, H5): TUDO EM FLEXÍVEIS
+            if (hospitalId === 'H1' || hospitalId === 'H3' || hospitalId === 'H5') {
+                modalidade.flexiveis = leitos.length;
+                return modalidade;
+            }
+
             // Para OCUPADOS e EM PREVISÃO: classificar por categoria escolhida
             leitos.forEach(leito => {
                 const catEscolhida = leito.categoriaEscolhida || leito.categoria || '';
@@ -1399,12 +1405,14 @@
 
                         <!-- BOX 2: Previsão de Alta -->
                         <div class="kpi-box box-previsao">
+                                    <div class="kpi-subtitle">Total de Leitos com alta na data de hoje</div>
                             <div class="kpi-title">Leitos em Previsão de Alta</div>
                             
                             <div class="kpi-content">
                                 ${renderGaugeV5((dados.previsao.total / dados.totalLeitos * 100), '#f97316', dados.previsao.total)}
                                 
                                 <div class="kpi-items-lista">
+                                    <div class="kpi-subtitle">Total de Leitos com alta na data de hoje</div>
                                     <div class="item-lista">
                                         <span class="label">Apartamento</span>
                                         <span class="valor">${dados.previsao.apartamento}</span>
