@@ -229,6 +229,249 @@
             display: block;
         }
 
+        /* =================== ESTILOS DE IMPRESSÃO =================== */
+        @media print {
+            /* Ocultar elementos de navegação */
+            .hamburger,
+            .side-menu,
+            .menu-overlay,
+            .action-buttons,
+            .btn,
+            .btn-print,
+            .btn-whatsapp,
+            .btn-reload {
+                display: none !important;
+            }
+
+            /* Resetar background e cores */
+            body {
+                background: white !important;
+                color: black !important;
+            }
+
+            .page-container {
+                max-width: 100%;
+                padding: 0;
+                margin: 0;
+            }
+
+            /* Header mais compacto */
+            .page-header {
+                background: white !important;
+                border-left: none !important;
+                padding: 10px 0 !important;
+                margin-bottom: 10px !important;
+                border-radius: 0 !important;
+                page-break-after: avoid;
+            }
+
+            .page-header h1 {
+                color: black !important;
+                font-size: 18px !important;
+                margin: 0 !important;
+            }
+
+            .page-header-left {
+                gap: 10px !important;
+            }
+
+            .timestamp {
+                color: #666 !important;
+                font-size: 10px !important;
+            }
+
+            /* DASHBOARD EXECUTIVO: 1 página */
+            .dashboard-section.executivo {
+                page-break-after: always !important;
+                page-break-inside: avoid;
+                background: white !important;
+                border: 1px solid #ddd !important;
+                border-left: 3px solid #8b5cf6 !important;
+                padding: 15px !important;
+                margin-bottom: 0 !important;
+            }
+
+            /* CADA HOSPITAL: 1 página */
+            .dashboard-section.hospitalar {
+                page-break-before: always !important;
+                page-break-after: always !important;
+                page-break-inside: avoid;
+                background: white !important;
+                border: 1px solid #ddd !important;
+                border-left: 3px solid #60a5fa !important;
+                padding: 15px !important;
+                margin-bottom: 0 !important;
+            }
+
+            /* Último hospital: não quebrar página depois */
+            .dashboard-section.hospitalar:last-child {
+                page-break-after: auto !important;
+            }
+
+            /* Header das seções */
+            .dashboard-header-section {
+                margin-bottom: 15px !important;
+                padding-bottom: 10px !important;
+                border-bottom: 1px solid #ddd !important;
+            }
+
+            .dashboard-header-section h2 {
+                color: black !important;
+                font-size: 16px !important;
+                margin: 0 !important;
+            }
+
+            .badge {
+                font-size: 9px !important;
+                padding: 3px 8px !important;
+                background: #f0f0f0 !important;
+                color: #666 !important;
+                border: 1px solid #ddd !important;
+            }
+
+            /* KPI Grid mais compacto */
+            .kpis-grid {
+                gap: 10px !important;
+                grid-template-columns: repeat(3, 1fr) !important;
+            }
+
+            /* KPI Boxes */
+            .kpi-box {
+                background: white !important;
+                border: 1px solid #ddd !important;
+                padding: 12px !important;
+                min-height: auto !important;
+                page-break-inside: avoid;
+            }
+
+            .kpi-title {
+                color: black !important;
+                font-size: 11px !important;
+                margin-bottom: 8px !important;
+                font-weight: 700 !important;
+            }
+
+            /* Valores dos KPIs */
+            .kpi-valor-unico .valor {
+                font-size: 28px !important;
+                color: black !important;
+            }
+
+            .kpi-valor-unico .label {
+                font-size: 10px !important;
+                color: #666 !important;
+            }
+
+            .kpi-valores-duplos-divididos {
+                gap: 8px !important;
+            }
+
+            .kpi-valor-metade .valor {
+                font-size: 22px !important;
+                color: black !important;
+            }
+
+            .kpi-valor-metade .label {
+                font-size: 9px !important;
+                color: #666 !important;
+            }
+
+            .divisor-vertical {
+                background: #ddd !important;
+            }
+
+            /* Capacidade e Modalidade */
+            .kpi-capacidade-item,
+            .kpi-modalidade-item {
+                font-size: 10px !important;
+                padding: 6px 8px !important;
+            }
+
+            .kpi-capacidade-item .tipo,
+            .kpi-modalidade-item .tipo {
+                color: #666 !important;
+            }
+
+            .kpi-capacidade-item .valor,
+            .kpi-modalidade-item .valor {
+                color: black !important;
+                font-weight: 700 !important;
+            }
+
+            /* Detalhes (tabelas) */
+            .kpi-detalhes {
+                margin-top: 8px !important;
+                padding-top: 8px !important;
+                border-top: 1px solid #eee !important;
+            }
+
+            .detalhe-titulo {
+                font-size: 9px !important;
+                color: #666 !important;
+                margin-bottom: 6px !important;
+            }
+
+            .hospitais-table {
+                font-size: 9px !important;
+            }
+
+            .hospitais-table th {
+                background: #f5f5f5 !important;
+                color: black !important;
+                padding: 4px !important;
+                font-weight: 700 !important;
+            }
+
+            .hospitais-table td {
+                padding: 4px !important;
+                border-bottom: 1px solid #eee !important;
+                color: black !important;
+            }
+
+            .sem-dados {
+                font-size: 9px !important;
+                color: #999 !important;
+            }
+
+            /* Gauge */
+            .gauge-container {
+                margin: 8px auto !important;
+            }
+
+            .gauge-container svg {
+                filter: grayscale(100%) !important;
+            }
+
+            /* Remover loading */
+            #loading {
+                display: none !important;
+            }
+
+            /* Forçar exibição do conteúdo */
+            #content {
+                display: block !important;
+            }
+
+            /* Ajustar margens da página */
+            @page {
+                margin: 1.5cm;
+                size: A4 portrait;
+            }
+
+            /* Otimizar espaços */
+            .page-header {
+                margin-bottom: 5px !important;
+            }
+
+            /* Box especiais */
+            .box-taxa-ocupacao,
+            .box-tph,
+            .box-pps,
+            .box-spict {
+                border-left: 3px solid #ddd !important;
+            }
+        }
+
         /* =================== DASHBOARD SECTION =================== */
         .dashboard-section {
             background: rgba(255, 255, 255, 0.05);
