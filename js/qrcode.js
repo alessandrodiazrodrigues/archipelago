@@ -21,6 +21,27 @@ let isGenerating = false;
 let generationProgress = 0;
 let totalQRCodes = 0;
 
+// Função para obter nome do leito formatado
+function getNomeLeitoFormatado(hospitalId, numeroLeito) {
+    // H2 (Cruz Azul) tem numeração especial
+    if (hospitalId === 'H2') {
+        if (numeroLeito >= 1 && numeroLeito <= 20) {
+            // Apartamentos 1-20
+            return `Apartamento ${String(numeroLeito).padStart(2, '0')}`;
+        } else if (numeroLeito >= 21 && numeroLeito <= 36) {
+            // Enfermarias 21-36 com numeração especial
+            // 21=711.1, 22=711.2, 23=713.1, 24=713.2, etc
+            const parIndex = Math.floor((numeroLeito - 21) / 2); // 0,0,1,1,2,2,3,3...
+            const numeroQuarto = 711 + (parIndex * 2); // 711, 711, 713, 713, 715, 715...
+            const subNumero = ((numeroLeito - 21) % 2) + 1; // 1,2,1,2,1,2...
+            return `Enfermaria ${numeroQuarto}.${subNumero}`;
+        }
+    }
+    
+    // Outros hospitais: apenas "Leito XX"
+    return `Leito ${String(numeroLeito).padStart(2, '0')}`;
+}
+
 // Função principal para abrir modal
 window.openQRCodesSimple = function() {
     console.log('🔵 Abrindo gerador de QR Codes otimizado V3.3...');
@@ -96,14 +117,15 @@ window.generateQRCodesSimple = function() {
     for (let i = 1; i <= hospital.leitos; i++) {
         const qrURL = `${QR_API.BASE_URL}/?h=${hospitalId}&l=${i}`;
         const imgURL = `${QR_API.API_URL}?size=${QR_API.SIZE}x${QR_API.SIZE}&data=${encodeURIComponent(qrURL)}`;
+        const nomeLeitoFormatado = getNomeLeitoFormatado(hospitalId, i);
         
         container.innerHTML += `
             <div class="qr-item">
                 <div class="qr-label">
                     <strong>${hospital.nome}</strong><br>
-                    Leito ${String(i).padStart(2, '0')}
+                    ${nomeLeitoFormatado}
                 </div>
-                <img src="${imgURL}" alt="QR Code Leito ${i}" class="qr-img" loading="lazy">
+                <img src="${imgURL}" alt="QR Code ${nomeLeitoFormatado}" class="qr-img" loading="lazy">
             </div>
         `;
     }
@@ -171,6 +193,7 @@ async function generateHospitalQRCodes(hospitalId, hospital, container) {
     for (let i = 1; i <= hospital.leitos; i++) {
         const qrURL = `${QR_API.BASE_URL}/?h=${hospitalId}&l=${i}`;
         const imgURL = `${QR_API.API_URL}?size=${QR_API.SIZE}x${QR_API.SIZE}&data=${encodeURIComponent(qrURL)}`;
+        const nomeLeitoFormatado = getNomeLeitoFormatado(hospitalId, i);
         
         // Criar elemento
         const qrItem = document.createElement('div');
@@ -178,9 +201,9 @@ async function generateHospitalQRCodes(hospitalId, hospital, container) {
         qrItem.innerHTML = `
             <div class="qr-label">
                 <strong>${hospital.nome}</strong><br>
-                Leito ${String(i).padStart(2, '0')}
+                ${nomeLeitoFormatado}
             </div>
-            <img src="${imgURL}" alt="QR Code" class="qr-img" loading="lazy">
+            <img src="${imgURL}" alt="QR Code ${nomeLeitoFormatado}" class="qr-img" loading="lazy">
         `;
         
         grid.appendChild(qrItem);
