@@ -435,41 +435,59 @@ function addOptimizedStyles() {
         
         /* IMPRESSÃO OTIMIZADA - 12 POR A4 (3x4) */
         @media print {
-            body * {
-                display: none !important;
+            @page {
+                margin: 10mm;
+                size: A4 portrait;
             }
             
-            .qr-modal-content,
-            .qr-modal-content * {
-                display: block !important;
+            /* Esconder elementos desnecessários */
+            body > *:not(.qr-modal-simple) {
+                display: none !important;
             }
             
             .qr-modal-simple {
                 position: static !important;
                 background: white !important;
+                display: block !important;
+                overflow: visible !important;
             }
             
             .qr-modal-content {
                 width: 100% !important;
                 max-width: none !important;
+                max-height: none !important;
                 border: none !important;
                 box-shadow: none !important;
                 margin: 0 !important;
+                overflow: visible !important;
+                border-radius: 0 !important;
             }
             
             .qr-modal-header,
             .qr-controls,
-            .progress-container {
+            .progress-container,
+            .close-btn {
                 display: none !important;
+            }
+            
+            .qr-modal-body {
+                padding: 0 !important;
+            }
+            
+            .qr-container {
+                width: 100% !important;
             }
             
             .qr-container h3 {
                 page-break-before: always;
+                page-break-after: avoid;
                 margin: 0 0 5mm 0 !important;
-                font-size: 18px !important;
+                font-size: 16px !important;
                 background: white !important;
                 border: none !important;
-                padding: 2mm !important;
+                padding: 2mm 0 !important;
+                color: #000 !important;
+                text-align: left !important;
             }
             
             .qr-container h3:first-child {
@@ -479,19 +497,24 @@ function addOptimizedStyles() {
             .qr-grid {
                 display: grid !important;
                 grid-template-columns: repeat(3, 1fr) !important;
-                gap: 3mm !important;
+                gap: 2mm !important;
                 page-break-inside: avoid;
                 margin-bottom: 5mm !important;
             }
             
             .qr-item {
-                width: 65mm !important;
-                height: 70mm !important;
+                width: 62mm !important;
+                height: 68mm !important;
                 padding: 2mm !important;
                 page-break-inside: avoid !important;
                 border: 1px solid #333 !important;
                 background: white !important;
                 margin: 0 !important;
+                border-radius: 2mm !important;
+                display: flex !important;
+                flex-direction: column !important;
+                align-items: center !important;
+                justify-content: center !important;
             }
             
             .qr-item:nth-child(12n+1) {
@@ -499,20 +522,25 @@ function addOptimizedStyles() {
             }
             
             .qr-label {
-                font-size: 12px !important;
+                font-size: 11px !important;
                 margin-bottom: 2mm !important;
                 color: #000 !important;
+                line-height: 1.3 !important;
+                text-align: center !important;
             }
             
             .qr-label strong {
                 color: #000 !important;
-                font-size: 13px !important;
+                font-size: 12px !important;
+                font-weight: bold !important;
             }
             
             .qr-img {
-                width: 50mm !important;
-                height: 50mm !important;
+                width: 48mm !important;
+                height: 48mm !important;
                 border: none !important;
+                border-radius: 1mm !important;
+                display: block !important;
             }
         }
         
