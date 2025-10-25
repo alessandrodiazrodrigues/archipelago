@@ -748,19 +748,19 @@
         }
 
         .gauge-largo-number {
-            font-size: 72px; /* ✅ NÚMERO EM CIMA - MAIOR */
+            font-size: 65px; /* ✅ REDUZIDO 10% (era 72px) */
             font-weight: 700;
             color: white;
             line-height: 1;
-            margin-bottom: 8px;
+            margin-bottom: 10px; /* ✅ AUMENTADO espaço (era 8px) */
         }
 
         .gauge-largo-label {
-            font-size: 11px;
+            font-size: 10px; /* ✅ REDUZIDO (era 11px) */
             color: #9ca3af;
             text-transform: uppercase;
             letter-spacing: 1px;
-            margin-bottom: 8px;
+            margin-bottom: 10px; /* ✅ AUMENTADO espaço (era 8px) */
         }
 
         .gauge-largo-percentage {
@@ -1705,7 +1705,8 @@
         // =================== RENDER DASHBOARD EXECUTIVO ===================
         
         function renderKPIExecutivo() {
-            const hospitais = ['H1', 'H2', 'H3', 'H4', 'H5'].map(processarDadosHospital);
+            // ✅ ORDEM ALFABÉTICA: Adventista, Cruz Azul, Neomater, Santa Clara, Sta Marcelina
+            const hospitais = ['H5', 'H2', 'H1', 'H4', 'H3'].map(processarDadosHospital);
             
             // Consolidar dados
             const totalLeitos = hospitais.reduce((sum, h) => sum + h.totalLeitos, 0);
@@ -2202,7 +2203,8 @@
                 document.getElementById('kpi-executivo').innerHTML = renderKPIExecutivo();
                 
                 let htmlHospitalares = '';
-                ['H1', 'H2', 'H3', 'H4', 'H5'].forEach(hospitalId => {
+                // ✅ ORDEM ALFABÉTICA: Adventista, Cruz Azul, Neomater, Santa Clara, Sta Marcelina
+                ['H5', 'H2', 'H1', 'H4', 'H3'].forEach(hospitalId => {
                     htmlHospitalares += renderKPIHospitalar(hospitalId);
                 });
                 document.getElementById('kpis-hospitalares').innerHTML = htmlHospitalares;
@@ -2238,7 +2240,8 @@
         }
 
         function copiarParaWhatsApp() {
-            const hospitais = ['H1', 'H2', 'H3', 'H4', 'H5'].map(processarDadosHospital);
+            // ✅ ORDEM ALFABÉTICA: Adventista, Cruz Azul, Neomater, Santa Clara, Sta Marcelina
+            const hospitais = ['H5', 'H2', 'H1', 'H4', 'H3'].map(processarDadosHospital);
             
             const totalLeitos = hospitais.reduce((sum, h) => sum + h.totalLeitos, 0);
             const totalOcupados = hospitais.reduce((sum, h) => sum + h.ocupados.total, 0);
