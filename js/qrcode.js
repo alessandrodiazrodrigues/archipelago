@@ -1,5 +1,6 @@
-// =================== QRCODE-OPTIMIZED.JS - GERADOR OTIMIZADO ===================
-// Sistema otimizado com carregamento sequencial e quantidades V3.1 corretas
+// =================== QRCODE-OPTIMIZED.JS - GERADOR OTIMIZADO V3.3 ===================
+// ✅ CORRIGIDO: 5 hospitais com quantidades corretas (79 QR codes total)
+// Sistema otimizado com carregamento sequencial
 
 const QR_API = {
     BASE_URL: 'https://qrcode-seven-gamma.vercel.app',
@@ -9,8 +10,9 @@ const QR_API = {
     HOSPITAIS: {
         H1: { nome: 'Neomater', leitos: 10 },
         H2: { nome: 'Cruz Azul', leitos: 36 },
-        H3: { nome: 'Santa Marcelina', leitos: 13 },
-        H4: { nome: 'Santa Clara', leitos: 7 }
+        H3: { nome: 'Sta Marcelina', leitos: 7 },
+        H4: { nome: 'Santa Clara', leitos: 13 },
+        H5: { nome: 'Adventista', leitos: 13 }
     }
 };
 
@@ -21,7 +23,7 @@ let totalQRCodes = 0;
 
 // Função principal para abrir modal
 window.openQRCodesSimple = function() {
-    console.log('🔵 Abrindo gerador de QR Codes otimizado...');
+    console.log('🔵 Abrindo gerador de QR Codes otimizado V3.3...');
     
     // Prevenir múltiplas aberturas
     if (document.querySelector('.qr-modal-simple')) {
@@ -35,7 +37,7 @@ window.openQRCodesSimple = function() {
     modal.innerHTML = `
         <div class="qr-modal-content">
             <div class="qr-modal-header">
-                <h2>📱 QR Codes dos Leitos - Sistema V3.1</h2>
+                <h2>📱 QR Codes dos Leitos - Sistema V3.3 Corrigido</h2>
                 <button onclick="closeQRModalSimple()" class="close-btn">✕</button>
             </div>
             <div class="qr-modal-body">
@@ -43,11 +45,12 @@ window.openQRCodesSimple = function() {
                     <select id="qrHospitalSelect" onchange="generateQRCodesSimple()">
                         <option value="H1">Neomater (10 leitos)</option>
                         <option value="H2">Cruz Azul (36 leitos)</option>
-                        <option value="H3">Santa Marcelina (13 leitos)</option>
-                        <option value="H4">Santa Clara (7 leitos)</option>
+                        <option value="H3">Sta Marcelina (7 leitos)</option>
+                        <option value="H4">Santa Clara (13 leitos)</option>
+                        <option value="H5">Adventista (13 leitos)</option>
                     </select>
                     <button onclick="generateAllQRCodesOptimized()" class="btn-all" id="btnGenerateAll">
-                        Gerar Todos (66 QR Codes)
+                        Gerar Todos (79 QR Codes)
                     </button>
                     <button onclick="window.print()" class="btn-print">🖨️ Imprimir</button>
                 </div>
@@ -56,7 +59,7 @@ window.openQRCodesSimple = function() {
                 <div id="progressContainer" class="progress-container" style="display: none;">
                     <div class="progress-info">
                         <span id="progressText">Gerando QR Codes...</span>
-                        <span id="progressCount">0/66</span>
+                        <span id="progressCount">0/79</span>
                     </div>
                     <div class="progress-bar">
                         <div id="progressFill" class="progress-fill"></div>
@@ -153,7 +156,7 @@ window.generateAllQRCodesOptimized = async function() {
     } finally {
         isGenerating = false;
         btnGenerateAll.disabled = false;
-        btnGenerateAll.textContent = 'Gerar Todos (66 QR Codes)';
+        btnGenerateAll.textContent = 'Gerar Todos (79 QR Codes)';
     }
 };
 
@@ -305,7 +308,7 @@ function addOptimizedStyles() {
             border-radius: 8px;
             font-size: 16px;
             background: white;
-            min-width: 200px;
+            min-width: 250px;
         }
         
         .qr-controls button {
@@ -548,9 +551,9 @@ function addOptimizedStyles() {
 document.addEventListener('DOMContentLoaded', function() {
     // Substituir função openQRCodes pela versão otimizada
     window.openQRCodes = window.openQRCodesSimple;
-    console.log('✅ Sistema QR Code V3.1 Otimizado carregado');
+    console.log('✅ Sistema QR Code V3.3 CORRIGIDO carregado');
     console.log('📱 Base URL: https://qrcode-seven-gamma.vercel.app');
-    console.log('🏥 Totais V3.1: H1:10, H2:36, H3:13, H4:7 = 66 QR codes');
+    console.log('🏥 Totais CORRETOS: H1:10, H2:36, H3:7, H4:13, H5:13 = 79 QR codes');
     console.log('🖨️ Impressão: 12 QR codes por A4 (3x4)');
     console.log('⚡ Carregamento sequencial com delay otimizado');
 });
