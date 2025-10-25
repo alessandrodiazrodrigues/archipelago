@@ -6,7 +6,7 @@
 
 // =================== CONFIGURAÇÕES GLOBAIS V3.3.2 ===================
 window.CONFIG = {
-    AUTH_PASSWORD: '170284',
+    AUTH_PASSWORD: '1234',
     ADM_EMAIL: 'cvcalessandro@gmail.com',
     ADM_PASSWORD: '9446',
     REFRESH_INTERVAL: 240000, // 4 minutos
