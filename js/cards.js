@@ -987,16 +987,16 @@ function createAdmissaoForm(hospitalNome, leitoNumero, hospitalId) {
             </div>
             
             <!-- ID LEITO | DIRETIVAS | TIPO DE QUARTO (3 COLUNAS) -->
-<div style="margin-bottom: 20px;">
-                <div class="form-grid-3-cols" style="display: grid; grid-template-columns: ${(isHibrido || isCruzAzulEnfermaria || isApartamentoFixo || hospitalId === 'H4') ? '1fr 1fr 1fr' : '1fr 1fr'}; gap: 15px;">
-                                        <div>
-                        <label style="display: block; margin-bottom: 5px; color: #e2e8f0; font-weight: 600; font-size: 12px;">IDENTIFICAÇÃO DO LEITO <span style="color: #ef4444;">*</span></label>
-                        ${isCruzAzulEnfermaria 
-                            ? `<input id="admIdentificacaoLeito" type="text" value="${identificacaoFixa}" readonly style="width: 100%; padding: 12px; background: #1f2937; color: #9ca3af; border: 1px solid rgba(255,255,255,0.2); border-radius: 6px; font-size: 14px; cursor: not-allowed;">
-                               <div style="font-size: 10px; color: rgba(255,255,255,0.5); margin-top: 3px;">🔒 Numeração fixa (Cruz Azul - Enfermaria)</div>`
-                            : `<input id="admIdentificacaoLeito" type="text" placeholder="Ex: 21 ou 711.1 (máx. 10)" maxlength="10" required style="width: 100%; padding: 12px; background: #374151; color: #ffffff; border: 1px solid rgba(255,255,255,0.3); border-radius: 6px; font-size: 14px;">`
-                        }
-                    </div>
+            <div style="margin-bottom: 20px;">
+                <div class="form-grid-3-cols" style="display: grid; grid-template-columns: ${(isHibrido || isCruzAzulEnfermaria || isApartamentoFixo || hospitalId === 'H4') ? '1fr 1fr 1fr' : '1fr 1fr'}; gap: 15px;">
+                    <div>
+                        <label style="display: block; margin-bottom: 5px; color: #e2e8f0; font-weight: 600; font-size: 12px; white-space: nowrap;">IDENTIFICAÇÃO DO LEITO <span style="color: #ef4444;">*</span></label>
+                        ${isCruzAzulEnfermaria 
+                            ? `<input id="admIdentificacaoLeito" type="text" value="${identificacaoFixa}" readonly style="width: 100%; padding: 12px; background: #1f2937; color: #9ca3af; border: 1px solid rgba(255,255,255,0.2); border-radius: 6px; font-size: 14px; cursor: not-allowed;">
+                               <div style="font-size: 10px; color: rgba(255,255,255,0.5); margin-top: 3px;">🔒 Numeração fixa (Cruz Azul - Enfermaria)</div>`
+                            : `<input id="admIdentificacaoLeito" type="text" placeholder="Ex: 21 ou 711.1 (máx. 10)" maxlength="10" required style="width: 100%; padding: 12px; background: #374151; color: #ffffff; border: 1px solid rgba(255,255,255,0.3); border-radius: 6px; font-size: 14px;">`
+                        }
+                    </div>
                     
                     <!-- DIRETIVAS -->
                     <div>
@@ -1214,7 +1214,7 @@ function createAtualizacaoForm(hospitalNome, leitoNumero, dadosLeito) {
                 <div class="form-grid-3-cols" style="display: grid; grid-template-columns: ${(isHibrido || isCruzAzulEnfermaria || isApartamentoFixo || hospitalId === 'H4') ? '1fr 1fr 1fr' : '1fr 1fr'}; gap: 15px;">
                     <!-- IDENTIFICAÇÃO DO LEITO -->
                     <div>
-                        <label style="display: block; margin-bottom: 5px; color: #e2e8f0; font-weight: 600;">IDENTIFICAÇÃO DO LEITO <span style="color: #ef4444;">*</span></label>
+                        <label style="display: block; margin-bottom: 5px; color: #e2e8f0; font-weight: 600; white-space: nowrap;">IDENTIFICAÇÃO DO LEITO <span style="color: #ef4444;">*</span></label>
                         ${isCruzAzulEnfermaria 
                             ? `<input id="updIdentificacaoLeito" type="text" value="${identificacaoAtual}" readonly style="width: 100%; padding: 12px; background: #1f2937; color: #9ca3af; border: 1px solid rgba(255,255,255,0.2); border-radius: 6px; font-size: 14px; cursor: not-allowed;">`
                             : `<input id="updIdentificacaoLeito" type="text" value="${identificacaoAtual}" placeholder="Ex: 21 ou 711.1 (máx. 10)" maxlength="10" required style="width: 100%; padding: 12px; background: #374151; color: #ffffff; border: 1px solid rgba(255,255,255,0.3); border-radius: 6px; font-size: 14px;">`
@@ -1320,7 +1320,13 @@ function createAtualizacaoForm(hospitalNome, leitoNumero, dadosLeito) {
                 <div>
                     <label style="display: block; margin-bottom: 5px; color: #e2e8f0; font-weight: 600;">PREVISÃO ALTA</label>
                     <select id="updPrevAlta" style="width: 100%; padding: 12px; background: #374151 !important; color: #ffffff !important; border: 1px solid rgba(255,255,255,0.3); border-radius: 6px; font-size: 14px;">
-                        ${window.PREVISAO_ALTA_OPTIONS.map(opt => `<option value="${opt}" ${dadosLeito?.prevAlta === opt ? 'selected' : ''}>${opt}</option>`).join('')}
+                        ${window.PREVISAO_ALTA_OPTIONS.map(opt => {
+                            const previsaoAtual = (dadosLeito?.prevAlta || '').trim();
+                            const isSelected = previsaoAtual === opt || 
+                                              (previsaoAtual === 'SP' && opt === 'Sem Previsão') ||
+                                              (previsaoAtual === 'Sem Previsão' && opt === 'Sem Previsão');
+                            return `<option value="${opt}" ${isSelected ? 'selected' : ''}>${opt}</option>`;
+                        }).join('')}
                     </select>
                 </div>
             </div>
@@ -1393,8 +1399,14 @@ function forcarPreMarcacao(modal, dadosLeito) {
     
     // Marcar concessões
     const concessoesCheckboxes = modal.querySelectorAll('#updConcessoes input[type="checkbox"]');
+    const naoSeAplicaCheckbox = Array.from(concessoesCheckboxes)
+        .find(cb => cb.value === 'Não se aplica');
+    
     concessoesCheckboxes.forEach(checkbox => {
-        if (concessoesAtuais.includes(checkbox.value)) {
+        if (checkbox.value === 'Não se aplica') {
+            // Marcar "Não se aplica" apenas se não há outras concessões
+            checkbox.checked = concessoesAtuais.length === 0;
+        } else if (concessoesAtuais.includes(checkbox.value)) {
             checkbox.checked = true;
         }
     });
@@ -1408,6 +1420,50 @@ function forcarPreMarcacao(modal, dadosLeito) {
     });
     
     logDebug(`Pré-marcação concluída`);
+}
+
+// ⭐ NOVO V3.3.2: LÓGICA "NÃO SE APLICA" PARA CONCESSÕES
+function setupConcessoesLogic(modal, concessoesId) {
+    const container = modal.querySelector(`#${concessoesId}`);
+    if (!container) return;
+    
+    const naoSeAplicaCheckbox = Array.from(container.querySelectorAll('input[type="checkbox"]'))
+        .find(cb => cb.value === 'Não se aplica');
+    
+    if (!naoSeAplicaCheckbox) return;
+    
+    const outrasCheckboxes = Array.from(container.querySelectorAll('input[type="checkbox"]'))
+        .filter(cb => cb.value !== 'Não se aplica');
+    
+    // Evento: "Não se aplica" marcado
+    naoSeAplicaCheckbox.addEventListener('change', function() {
+        if (this.checked) {
+            // Desmarcar todas as outras
+            outrasCheckboxes.forEach(cb => cb.checked = false);
+        }
+    });
+    
+    // Evento: Qualquer outra marcada
+    outrasCheckboxes.forEach(checkbox => {
+        checkbox.addEventListener('change', function() {
+            if (this.checked) {
+                // Desmarcar "Não se aplica"
+                naoSeAplicaCheckbox.checked = false;
+            } else {
+                // Se nenhuma estiver marcada, marcar "Não se aplica"
+                const algumaOutraMarcada = outrasCheckboxes.some(cb => cb.checked);
+                if (!algumaOutraMarcada) {
+                    naoSeAplicaCheckbox.checked = true;
+                }
+            }
+        });
+    });
+    
+    // Estado inicial: se nenhuma marcada, marcar "Não se aplica"
+    const algumaOutraMarcada = outrasCheckboxes.some(cb => cb.checked);
+    if (!algumaOutraMarcada) {
+        naoSeAplicaCheckbox.checked = true;
+    }
 }
 
 // =================== EVENT LISTENERS DOS MODAIS ===================
@@ -1576,6 +1632,13 @@ function setupModalEventListeners(modal, tipo) {
             closeModal(modal);
         }
     });
+    
+    // ⭐ NOVO V3.3.2: Configurar lógica "Não se aplica"
+    if (tipo === 'admissao') {
+        setupConcessoesLogic(modal, 'admConcessoes');
+    } else {
+        setupConcessoesLogic(modal, 'updConcessoes');
+    }
 }
 
 // =================== CLOSE MODAL ===================
@@ -1657,6 +1720,19 @@ function coletarDadosFormulario(modal, tipo) {
 }
 
 // =================== COLETAR CHECKBOXES SELECIONADOS ===================
+function coletarCheckboxesSelecionados(modal, seletor) {
+    const checkboxes = modal.querySelectorAll(`${seletor} input[type="checkbox"]`);
+    const selecionados = [];
+    
+    checkboxes.forEach(checkbox => {
+        if (checkbox.checked && checkbox.value !== 'Não se aplica') {
+            selecionados.push(checkbox.value);
+        }
+    });
+    
+    return selecionados;
+}
+
 // =================== VALIDAR LIMITE ENFERMARIAS SANTA CLARA ===================
 function validarLimiteEnfermarias(hospitalId, tipoQuarto) {
     // Só valida se for Santa Clara tentando admitir Enfermaria
@@ -1690,19 +1766,6 @@ function validarLimiteEnfermarias(hospitalId, tipoQuarto) {
     }
     
     return { valido: true };
-}
-
-function coletarCheckboxesSelecionados(modal, seletor) {
-    const checkboxes = modal.querySelectorAll(`${seletor} input[type="checkbox"]`);
-    const selecionados = [];
-    
-    checkboxes.forEach(checkbox => {
-        if (checkbox.checked) {
-            selecionados.push(checkbox.value);
-        }
-    });
-    
-    return selecionados;
 }
 
 // ✅ CORREÇÃO 3: FORMATAÇÃO AUTOMÁTICA MATRÍCULA (10 DÍGITOS SEM HÍFEN)
@@ -1843,19 +1906,19 @@ function formatarDataHora(dataISO) {
 
 // =================== FUNÇÕES DE LOG ===================
 function logInfo(message, data = null) {
-    console.log(`🔵 [CARDS V3.3 FINAL] ${message}`, data || '');
+    console.log(`🔵 [CARDS V3.3.2 FINAL] ${message}`, data || '');
 }
 
 function logError(message, error = null) {
-    console.error(`🔴 [CARDS V3.3 FINAL ERROR] ${message}`, error || '');
+    console.error(`🔴 [CARDS V3.3.2 FINAL ERROR] ${message}`, error || '');
 }
 
 function logSuccess(message) {
-    console.log(`🟢 [CARDS V3.3 FINAL SUCCESS] ${message}`);
+    console.log(`🟢 [CARDS V3.3.2 FINAL SUCCESS] ${message}`);
 }
 
 function logDebug(message, data = null) {
-    console.log(`🟡 [CARDS V3.3 FINAL DEBUG] ${message}`, data || '');
+    console.log(`🟡 [CARDS V3.3.2 FINAL DEBUG] ${message}`, data || '');
 }
 
 // =================== CSS CONSOLIDADO COMPLETO V3.3 FINAL ===================
@@ -2061,7 +2124,7 @@ if (!document.getElementById('cardsConsolidadoCSS')) {
 
 // =================== INICIALIZAÇÃO V3.3 FINAL ===================
 document.addEventListener('DOMContentLoaded', function() {
-    logSuccess('✅ CARDS.JS V3.3 FINAL CARREGADO COM CORREÇÕES');
+    logSuccess('✅ CARDS.JS V3.3.2 FINAL CARREGADO COM TODAS AS CORREÇÕES');
     
     // Verificar listas
     if (window.CONCESSOES_LIST.length !== 12) {
@@ -2094,11 +2157,10 @@ document.addEventListener('DOMContentLoaded', function() {
         logSuccess(`✅ ${window.DIRETIVAS_OPTIONS.length} opções de diretivas confirmadas (NOVO V3.3)`);
     }
     
-    logInfo('🚀 CORREÇÕES APLICADAS V3.3.1:');
-    logInfo('  • ✅ CORREÇÃO 2: Concessões - "Não se aplica" como primeira opção');
-    logInfo('  • ✅ CORREÇÃO 3: Matrícula - 10 dígitos sem hífen');
-    logInfo('  • ✅ CORREÇÃO 5: "Sem Previsão" ao invés de "SP"');
-    logInfo('  • ✅ CORREÇÃO 6: Diretivas - "Não se aplica" ao invés de "N/A"');
+    logInfo('🚀 CORREÇÕES APLICADAS V3.3.2:');
+    logInfo('  • ✅ CORREÇÃO 16: Pré-seleção "Sem Previsão" normalizada');
+    logInfo('  • ✅ CORREÇÃO 17: Labels sem quebra de linha');
+    logInfo('  • ✅ CORREÇÃO 18: Lógica "Não se aplica" implementada');
 });
 
 // =================== EXPORTS ===================
@@ -2112,11 +2174,9 @@ window.getBadgeGenero = getBadgeGenero;
 window.getBadgeDiretivas = getBadgeDiretivas;
 window.formatarMatricula = formatarMatricula;
 
-logSuccess('🎉 CARDS.JS V3.3.1 COMPLETO E CORRIGIDO!');
-logInfo('📋 RESUMO DAS CORREÇÕES:');
-logInfo('  • ✅ 12 concessões (+ "Não se aplica")');
-logInfo('  • ✅ Matrícula até 10 dígitos');
-logInfo('  • ✅ "Sem Previsão" ao invés de "SP"');
-logInfo('  • ✅ "Não se aplica" ao invés de "N/A" nas diretivas');
-logInfo('  • ✅ Identificação do leito aceita apenas números');
-console.log('✅ CARDS.JS V3.3.1 COMPLETO CARREGADO COM CORREÇÕES!');
+logSuccess('🎉 CARDS.JS V3.3.2 COMPLETO E CORRIGIDO!');
+logInfo('📋 RESUMO DAS CORREÇÕES V3.3.2:');
+logInfo('  • ✅ CORREÇÃO 16: Pré-seleção "Sem Previsão" funcionando');
+logInfo('  • ✅ CORREÇÃO 17: Label "IDENTIFICAÇÃO DO LEITO *" sem quebra');
+logInfo('  • ✅ CORREÇÃO 18: "Não se aplica" com lógica exclusiva');
+console.log('✅ CARDS.JS V3.3.2 FINAL CARREGADO COM TODAS AS CORREÇÕES!');
