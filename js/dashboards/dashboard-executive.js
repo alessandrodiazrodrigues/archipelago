@@ -1266,7 +1266,7 @@ function getExecutiveCSS() {
                 display: block;
                 font-size: 12px;
                 color: #9ca3af;
-                margin-top: 4px;
+                margin-top: 10px;
                 text-transform: uppercase;
             }
             
