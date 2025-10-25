@@ -674,7 +674,7 @@
             text-transform: uppercase;
             letter-spacing: 0.5px;
             margin-bottom: 20px;
-            text-align: center; /* ✅ CENTRALIZADO */
+            text-align: center;
         }
 
         /* =================== GAUGE MEIA-ROSCA (NORMAL) =================== */
@@ -696,7 +696,7 @@
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            font-size: 43px; /* ✅ REDUZIDO 10% (era 48px) */
+            font-size: 43px;
             font-weight: 700;
             color: white;
             line-height: 1;
@@ -732,10 +732,10 @@
         /* =================== GAUGE LARGO (EXECUTIVO - MAIOR) =================== */
         .gauge-largo-container {
             position: relative;
-            width: 500px; /* ✅ AUMENTADO (era 450px) */
-            height: 280px; /* ✅ AUMENTADO para não cortar (era 250px) */
+            width: 500px;
+            height: 280px;
             margin: 0 auto;
-            padding-top: 20px; /* ✅ PADDING para não cortar o topo */
+            padding-top: 20px;
         }
 
         .gauge-largo-info {
@@ -748,23 +748,23 @@
         }
 
         .gauge-largo-number {
-            font-size: 65px; /* ✅ REDUZIDO 10% (era 72px) */
+            font-size: 58px; /* ✅ REDUZIDO 10% (era 65px) */
             font-weight: 700;
             color: white;
             line-height: 1;
-            margin-bottom: 10px; /* ✅ AUMENTADO espaço (era 8px) */
+            margin-bottom: 12px; /* ✅ AUMENTADO para afastar mais (era 10px) */
         }
 
         .gauge-largo-label {
-            font-size: 10px; /* ✅ REDUZIDO (era 11px) */
+            font-size: 10px;
             color: #9ca3af;
             text-transform: uppercase;
             letter-spacing: 1px;
-            margin-bottom: 10px; /* ✅ AUMENTADO espaço (era 8px) */
+            margin-bottom: 10px;
         }
 
         .gauge-largo-percentage {
-            font-size: 60px; /* ✅ AUMENTADO 25% (era 48px) */
+            font-size: 60px;
             font-weight: 700;
             color: #22c55e;
             padding: 6px 16px;
@@ -780,6 +780,7 @@
             color: #6b7280;
             line-height: 1.4;
             margin-top: 8px;
+            white-space: nowrap; /* ✅ FORÇAR UMA LINHA SÓ */
         }
 
         /* =================== CONTEÚDO DO BOX (NOVO LAYOUT) =================== */
@@ -827,7 +828,7 @@
             color: #ffffff;
         }
 
-        /* Texto acima da lista (para Disponíveis) */
+        /* Texto acima da lista (para Disponíveis e Ocupados) */
         .kpi-subtitle {
             font-size: 11px;
             color: #6b7280;
@@ -897,7 +898,7 @@
         }
 
         .kpi-valor-metade .valor {
-            font-size: 72px;
+            font-size: 43px; /* ✅ IGUALADO AO GAUGE (era 72px) */
             font-weight: 700;
             color: white;
             line-height: 1;
@@ -924,7 +925,7 @@
         }
 
         .kpi-tph-numero {
-            font-size: 80px;
+            font-size: 43px; /* ✅ IGUALADO AO GAUGE (era 80px) */
             font-weight: 700;
             color: white;
             line-height: 1;
@@ -1063,10 +1064,10 @@
                 <a href="index.html" class="side-menu-item">
                     Leitos
                 </a>
-                <a href="index.html#dash1" class="side-menu-item">
+                <a href="js/dashboards/dashboard-hospital.js" class="side-menu-item" onclick="window.location.href='index.html'; setTimeout(() => { if(typeof window.renderizarDashboardHospital === 'function') window.renderizarDashboardHospital('todos'); }, 500); closeMenu(); return false;">
                     Dashboard Hospitalar
                 </a>
-                <a href="index.html#dash2" class="side-menu-item">
+                <a href="js/dashboards/dashboard-executive.js" class="side-menu-item" onclick="window.location.href='index.html'; setTimeout(() => { if(typeof window.renderizarDashboardExecutivo === 'function') window.renderizarDashboardExecutivo(); }, 500); closeMenu(); return false;">
                     Dashboard Executivo
                 </a>
                 <a href="#" class="side-menu-item active" onclick="closeMenu(); return false;">
@@ -1119,14 +1120,12 @@
     <script>
         // =================== FUNÇÕES AUXILIARES DE STATUS ===================
         
-        // ✅ CORREÇÃO: Verificar se leito está ocupado (case-insensitive + "Em uso")
         function isOcupado(leito) {
             if (!leito || !leito.status) return false;
             const status = leito.status.toLowerCase();
             return status === 'ocupado' || status === 'em uso';
         }
         
-        // ✅ CORREÇÃO: Verificar se leito está vago (case-insensitive)
         function isVago(leito) {
             if (!leito || !leito.status) return false;
             return leito.status.toLowerCase() === 'vago';
@@ -1147,13 +1146,13 @@
         }
 
         function calcularGaugeOffset(porcentagem) {
-            const circunferencia = Math.PI * 55; // Meia rosca
+            const circunferencia = Math.PI * 55;
             const progresso = (porcentagem / 100) * circunferencia;
             return circunferencia - progresso;
         }
 
         function calcularGaugeLargoOffset(porcentagem) {
-            const circunferencia = Math.PI * 200; // ✅ Gauge largo MAIOR
+            const circunferencia = Math.PI * 200;
             const progresso = (porcentagem / 100) * circunferencia;
             return circunferencia - progresso;
         }
@@ -1196,12 +1195,10 @@
             const maxDias = 30;
             const porcentagem = (dias / maxDias) * 100;
             
-            // Determinar cor baseado na porcentagem
             let corClass = 'green';
             if (porcentagem >= 67) corClass = 'red';
             else if (porcentagem >= 47) corClass = 'yellow';
             
-            // Criar 20 blocos
             const totalBlocos = 20;
             const blocosCheios = Math.round((dias / maxDias) * totalBlocos);
             
@@ -1249,9 +1246,7 @@
                             <div class="gauge-largo-number">${numeroTotal}</div>
                             <div class="gauge-largo-label">LEITOS OCUPADOS</div>
                             <div class="gauge-largo-percentage">${porcentagem.toFixed(0)}%</div>
-                            <div class="gauge-largo-subtitle">
-                                Total da Rede Externa<br/>(5 Hospitais)
-                            </div>
+                            <div class="gauge-largo-subtitle">Total da Rede Externa (5 Hospitais)</div>
                         </div>
                     </div>
                 </div>
@@ -1300,13 +1295,11 @@
 
             const vagos = leitos.filter(l => isVago(l));
 
-            // ====== REGRA 1: H1, H3, H5 (HÍBRIDOS PUROS) ======
             if (hospitalId === 'H1' || hospitalId === 'H3' || hospitalId === 'H5') {
                 modalidade.flexiveis = vagos.length;
                 return modalidade;
             }
 
-            // ====== REGRA 2: H4 - SANTA CLARA (HÍBRIDO COM LIMITES) ======
             if (hospitalId === 'H4') {
                 const ocupados = leitos.filter(l => isOcupado(l));
                 
@@ -1327,51 +1320,38 @@
                 return modalidade;
             }
 
-            // ====== REGRA 3: H2 - CRUZ AZUL (TIPOS FIXOS + LEITO IRMÃO) ======
             if (hospitalId === 'H2') {
                 vagos.forEach(leitoVago => {
                     const tipo = leitoVago.tipo || '';
                     
-                    // APTOs vagos → Exclusivamente Apartamentos
                     if (tipo === 'APTO' || tipo === 'Apartamento') {
                         modalidade.exclusivo_apto++;
                         return;
                     }
                     
-                    // ENFERMARIAs → Sistema de Leito Irmão
                     if (tipo === 'ENFERMARIA' || tipo === 'Enfermaria') {
                         const numeroLeito = leitoVago.leito;
                         
                         if (!numeroLeito || typeof numeroLeito !== 'number') {
-                            // Sem número de leito → Sem restrição
                             modalidade.exclusivo_enf_sem_restricao++;
                             return;
                         }
                         
-                        // ✅ LÓGICA CORRIGIDA: Leitos irmãos são números consecutivos
-                        // Ímpares (21, 23, 25...) → irmão é +1
-                        // Pares (22, 24, 26...) → irmão é -1
                         const numeroIrmao = (numeroLeito % 2 === 0) 
-                            ? numeroLeito - 1  // Par → irmão é o anterior
-                            : numeroLeito + 1; // Ímpar → irmão é o próximo
+                            ? numeroLeito - 1
+                            : numeroLeito + 1;
                         
-                        // Buscar irmão pelo campo 'leito'
                         const irmao = leitos.find(l => l.leito === numeroIrmao);
                         
                         if (!irmao || isVago(irmao)) {
-                            // Ambos vagos OU irmão não encontrado → Sem restrição
                             modalidade.exclusivo_enf_sem_restricao++;
                         } else if (irmao.isolamento && irmao.isolamento !== 'Não Isolamento') {
-                            // Irmão com isolamento → BLOQUEADO (não conta)
-                            // Não incrementa nada
                         } else {
-                            // Irmão ocupado → Verificar gênero do paciente no irmão
                             if (irmao.genero === 'Feminino') {
                                 modalidade.exclusivo_enf_fem++;
                             } else if (irmao.genero === 'Masculino') {
                                 modalidade.exclusivo_enf_masc++;
                             } else {
-                                // Sem gênero definido → Sem restrição
                                 modalidade.exclusivo_enf_sem_restricao++;
                             }
                         }
@@ -1381,7 +1361,6 @@
                 return modalidade;
             }
 
-            // Fallback (não deveria chegar aqui)
             return modalidade;
         }
 
@@ -1394,14 +1373,11 @@
                 exclusivo_enf_masc: 0
             };
 
-            // ✅ HOSPITAIS HÍBRIDOS PUROS (H1, H3, H5): TUDO EM FLEXÍVEIS
-            // H4 é híbrido mas com limitações, então não entra aqui
             if (hospitalId === 'H1' || hospitalId === 'H3' || hospitalId === 'H5') {
                 modalidade.flexiveis = leitos.length;
                 return modalidade;
             }
 
-            // Para OCUPADOS e EM PREVISÃO: classificar por categoria escolhida
             leitos.forEach(leito => {
                 const catEscolhida = leito.categoriaEscolhida || leito.categoria || '';
                 const genero = leito.genero || '';
@@ -1409,7 +1385,6 @@
                 if (catEscolhida === 'Apartamento') {
                     modalidade.exclusivo_apto++;
                 } else if (catEscolhida === 'Enfermaria') {
-                    // Enfermarias sempre sem restrição quando ocupadas (exceto H2)
                     if (hospitalId === 'H2') {
                         if (genero === 'Feminino') {
                             modalidade.exclusivo_enf_fem++;
@@ -1422,7 +1397,6 @@
                         modalidade.exclusivo_enf_sem_restricao++;
                     }
                 } else {
-                    // Híbrido ou indefinido
                     modalidade.flexiveis++;
                 }
             });
@@ -1445,14 +1419,11 @@
             
             console.log(`${hospitalId}: ${leitos.length} leitos encontrados`);
             
-            // Calcular ocupados
             const ocupados = leitos.filter(l => isOcupado(l));
             
-            // ✅ Para hospitais HÍBRIDOS: usar categoria_escolhida
             let ocupadosApto, ocupadosEnfFem, ocupadosEnfMasc;
             
             if (hospitalId === 'H1' || hospitalId === 'H3' || hospitalId === 'H4' || hospitalId === 'H5') {
-                // Híbridos: baseado em categoria_escolhida + gênero
                 ocupadosApto = ocupados.filter(l => 
                     l.categoriaEscolhida === 'Apartamento'
                 ).length;
@@ -1463,7 +1434,6 @@
                     l.categoriaEscolhida === 'Enfermaria' && l.genero === 'Masculino'
                 ).length;
             } else {
-                // H2 - CRUZ AZUL: baseado em tipo + gênero do paciente
                 ocupadosApto = ocupados.filter(l => 
                     l.tipo === 'Apartamento' || l.tipo === 'APTO'
                 ).length;
@@ -1475,14 +1445,11 @@
                 ).length;
             }
             
-            // Calcular previsão de alta
             const previsaoAlta = leitos.filter(l => l.prevAlta && l.prevAlta.trim() !== '');
             
-            // ✅ Para hospitais HÍBRIDOS: usar categoria_escolhida
             let previsaoApto, previsaoEnfFem, previsaoEnfMasc;
             
             if (hospitalId === 'H1' || hospitalId === 'H3' || hospitalId === 'H4' || hospitalId === 'H5') {
-                // Híbridos: baseado em categoria_escolhida + gênero
                 previsaoApto = previsaoAlta.filter(l => 
                     l.categoriaEscolhida === 'Apartamento'
                 ).length;
@@ -1493,7 +1460,6 @@
                     l.categoriaEscolhida === 'Enfermaria' && l.genero === 'Masculino'
                 ).length;
             } else {
-                // H2 - CRUZ AZUL: baseado em tipo + gênero do paciente
                 previsaoApto = previsaoAlta.filter(l => 
                     l.tipo === 'Apartamento' || l.tipo === 'APTO'
                 ).length;
@@ -1505,19 +1471,15 @@
                 ).length;
             }
             
-            // Calcular disponíveis
             const vagos = leitos.filter(l => isVago(l));
             
-            // ✅ H2 tem lógica diferente para vagos
             let vagosApto, vagosEnfFem, vagosEnfMasc;
             
             if (hospitalId === 'H2') {
-                // H2: Dividir enfermarias por gênero baseado no leito irmão ocupado
                 vagosApto = vagos.filter(l => 
                     l.tipo === 'Apartamento' || l.tipo === 'APTO'
                 ).length;
                 
-                // Contar enfermarias por gênero do irmão ocupado
                 vagosEnfFem = 0;
                 vagosEnfMasc = 0;
                 let vagosEnfSemRestricao = 0;
@@ -1533,23 +1495,16 @@
                             return;
                         }
                         
-                        // ✅ LÓGICA CORRIGIDA: Leitos irmãos são números consecutivos
-                        // Ímpares (21, 23, 25...) → irmão é +1
-                        // Pares (22, 24, 26...) → irmão é -1
                         const numeroIrmao = (numeroLeito % 2 === 0) 
-                            ? numeroLeito - 1  // Par → irmão é o anterior
-                            : numeroLeito + 1; // Ímpar → irmão é o próximo
+                            ? numeroLeito - 1
+                            : numeroLeito + 1;
                         
-                        // Buscar irmão pelo campo 'leito'
                         const irmao = leitos.find(l => l.leito === numeroIrmao);
                         
                         if (!irmao || isVago(irmao)) {
-                            // Ambos vagos OU irmão não encontrado → Sem restrição
                             vagosEnfSemRestricao++;
                         } else if (irmao.isolamento && irmao.isolamento !== 'Não Isolamento') {
-                            // Irmão com isolamento → BLOQUEADO (não conta)
                         } else {
-                            // Irmão ocupado → Dividir por gênero do paciente no irmão
                             if (irmao.genero === 'Feminino') {
                                 vagosEnfFem++;
                             } else if (irmao.genero === 'Masculino') {
@@ -1561,7 +1516,6 @@
                     }
                 });
                 
-                // DEBUG H2
                 console.log('[H2 VAGOS DEBUG]', {
                     vagosApto,
                     vagosEnfFem,
@@ -1570,7 +1524,6 @@
                     totalVagos: vagos.length
                 });
             } else {
-                // Outros hospitais
                 vagosApto = vagos.filter(l => 
                     l.tipo === 'Apartamento' || l.tipo === 'APTO' || l.tipo === 'Híbrido'
                 ).length;
@@ -1582,19 +1535,16 @@
                 ).length;
             }
 
-            // ✅ HOSPITAIS HÍBRIDOS: Disponíveis podem ser QUALQUER tipo
             let vagosAptoFinal = vagosApto;
             let vagosEnfFemFinal = vagosEnfFem;
             let vagosEnfMascFinal = vagosEnfMasc;
             
             if (hospitalId === 'H1' || hospitalId === 'H3' || hospitalId === 'H5') {
-                // Para híbridos: TODOS os vagos podem ser usados como qualquer tipo
                 vagosAptoFinal = vagos.length;
                 vagosEnfFemFinal = vagos.length;
                 vagosEnfMascFinal = vagos.length;
             }
             
-            // TPH médio
             const tphValues = ocupados
                 .map(l => {
                     if (!l.admAt) return 0;
@@ -1621,7 +1571,6 @@
                 return { ...l, dias };
             });
             
-            // PPS
             const ppsValues = ocupados
                 .map(l => parseInt(l.pps) || 0)
                 .filter(v => v > 0);
@@ -1630,7 +1579,6 @@
                 : 0;
             const ppsMenor40 = ocupados.filter(l => parseInt(l.pps) < 40);
             
-            // SPICT
             const spictElegiveis = ocupados.filter(l => 
                 l.spict && l.spict.toLowerCase() === 'elegivel'
             );
@@ -1638,14 +1586,12 @@
                 l.spict && l.spict.toLowerCase() === 'elegivel' && (!l.diretivas || l.diretivas.trim() === '' || l.diretivas === 'Não')
             );
             
-            // Calcular taxa de ocupação
             const totalLeitos = leitos.length;
             const taxaOcupacao = totalLeitos > 0 ? (ocupados.length / totalLeitos * 100) : 0;
             
-            // USAR NOVA FUNÇÃO DE CÁLCULO DE MODALIDADES
             const modalidadeOcupados = calcularModalidadePorTipo(ocupados, hospitalId);
             const modalidadePrevisao = calcularModalidadePorTipo(previsaoAlta, hospitalId);
-            const modalidadeDisponiveis = calcularModalidadesVagos(leitos, hospitalId); // ✅ NOVA FUNÇÃO PARA VAGOS!
+            const modalidadeDisponiveis = calcularModalidadesVagos(leitos, hospitalId);
             
             return {
                 nome: hospitalId === 'H1' ? 'NEOMATER' :
@@ -1676,16 +1622,6 @@
                     enf_masculina: vagosEnfMascFinal,
                     modalidade: modalidadeDisponiveis
                 },
-                // DEBUG
-                ...(hospitalId === 'H2' && console.log('[H2 RETURN DEBUG]', {
-                    hospitalId,
-                    vagosAptoFinal,
-                    vagosEnfFemFinal,
-                    vagosEnfMascFinal,
-                    disponiveis_apartamento: vagosAptoFinal,
-                    disponiveis_enf_feminina: vagosEnfFemFinal,
-                    disponiveis_enf_masculina: vagosEnfMascFinal
-                }) ? {} : {}),
                 tph: {
                     medio: tphMedio,
                     lista: leitosMais5Diarias
@@ -1705,17 +1641,14 @@
         // =================== RENDER DASHBOARD EXECUTIVO ===================
         
         function renderKPIExecutivo() {
-            // ✅ ORDEM ALFABÉTICA: Adventista, Cruz Azul, Neomater, Santa Clara, Sta Marcelina
             const hospitais = ['H5', 'H2', 'H1', 'H4', 'H3'].map(processarDadosHospital);
             
-            // Consolidar dados
             const totalLeitos = hospitais.reduce((sum, h) => sum + h.totalLeitos, 0);
             const totalOcupados = hospitais.reduce((sum, h) => sum + h.ocupados.total, 0);
             const totalPrevisao = hospitais.reduce((sum, h) => sum + h.previsao.total, 0);
             const totalDisponiveis = hospitais.reduce((sum, h) => sum + h.disponiveis.total, 0);
             const taxaOcupacao = (totalOcupados / totalLeitos * 100);
             
-            // Consolidar por tipo
             const previsaoApto = hospitais.reduce((sum, h) => sum + h.previsao.apartamento, 0);
             const previsaoEnfFem = hospitais.reduce((sum, h) => sum + h.previsao.enf_feminina, 0);
             const previsaoEnfMasc = hospitais.reduce((sum, h) => sum + h.previsao.enf_masculina, 0);
@@ -1724,7 +1657,6 @@
             const disponiveisEnfFem = hospitais.reduce((sum, h) => sum + h.disponiveis.enf_feminina, 0);
             const disponiveisEnfMasc = hospitais.reduce((sum, h) => sum + h.disponiveis.enf_masculina, 0);
             
-            // Consolidar modalidades
             const modalidadePrevisao = {
                 flexiveis: hospitais.reduce((sum, h) => sum + h.previsao.modalidade.flexiveis, 0),
                 exclusivo_apto: hospitais.reduce((sum, h) => sum + h.previsao.modalidade.exclusivo_apto, 0),
@@ -1741,20 +1673,17 @@
                 exclusivo_enf_masc: hospitais.reduce((sum, h) => sum + h.disponiveis.modalidade.exclusivo_enf_masc, 0)
             };
             
-            // TPH médio
             const tphTodos = hospitais.map(h => parseFloat(h.tph.medio)).filter(v => v > 0);
             const tphMedioGeral = tphTodos.length > 0 
                 ? (tphTodos.reduce((a, b) => a + b, 0) / tphTodos.length).toFixed(1)
                 : 0;
             
-            // PPS médio
             const ppsTodos = hospitais.map(h => h.pps.medio).filter(v => v > 0);
             const ppsMedioGeral = ppsTodos.length > 0
                 ? Math.round(ppsTodos.reduce((a, b) => a + b, 0) / ppsTodos.length)
                 : 0;
             const totalPPSMenor40 = hospitais.reduce((sum, h) => sum + h.pps.menor40.length, 0);
             
-            // SPICT
             const totalSpict = hospitais.reduce((sum, h) => sum + h.spict.elegiveis, 0);
             const totalDiretivas = hospitais.reduce((sum, h) => sum + h.spict.diretivas, 0);
             
@@ -1803,7 +1732,7 @@
                             <div class="kpi-title">Leitos em Previsão de Alta</div>
                             
                             <div class="kpi-content">
-                                ${renderGaugeV5((totalPrevisao / totalLeitos * 100), '#f97316', totalPrevisao)}
+                                ${renderGaugeV5((totalPrevisao / totalOcupados * 100), '#f97316', totalPrevisao)}
                                 
                                 <div class="kpi-items-lista">
                                     <div class="kpi-subtitle">Total de Leitos com alta na data de hoje</div>
@@ -1988,6 +1917,7 @@
                                 ${renderGaugeV5(dados.taxaOcupacao, '#22c55e', dados.ocupados.total)}
                                 
                                 <div class="kpi-items-lista">
+                                    <div class="kpi-subtitle">Total de Leitos Ocupados</div>
                                     <div class="item-lista">
                                         <span class="label">Apartamento</span>
                                         <span class="valor">${dados.ocupados.apartamento}</span>
@@ -2014,7 +1944,7 @@
                             <div class="kpi-title">Leitos em Previsão de Alta</div>
                             
                             <div class="kpi-content">
-                                ${renderGaugeV5((dados.previsao.total / dados.totalLeitos * 100), '#f97316', dados.previsao.total)}
+                                ${renderGaugeV5((dados.previsao.total / dados.ocupados.total * 100), '#f97316', dados.previsao.total)}
                                 
                                 <div class="kpi-items-lista">
                                     <div class="kpi-subtitle">Total de Leitos com alta na data de hoje</div>
@@ -2203,7 +2133,6 @@
                 document.getElementById('kpi-executivo').innerHTML = renderKPIExecutivo();
                 
                 let htmlHospitalares = '';
-                // ✅ ORDEM ALFABÉTICA: Adventista, Cruz Azul, Neomater, Santa Clara, Sta Marcelina
                 ['H5', 'H2', 'H1', 'H4', 'H3'].forEach(hospitalId => {
                     htmlHospitalares += renderKPIHospitalar(hospitalId);
                 });
@@ -2240,7 +2169,6 @@
         }
 
         function copiarParaWhatsApp() {
-            // ✅ ORDEM ALFABÉTICA: Adventista, Cruz Azul, Neomater, Santa Clara, Sta Marcelina
             const hospitais = ['H5', 'H2', 'H1', 'H4', 'H3'].map(processarDadosHospital);
             
             const totalLeitos = hospitais.reduce((sum, h) => sum + h.totalLeitos, 0);
