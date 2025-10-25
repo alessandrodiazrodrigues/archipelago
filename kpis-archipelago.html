@@ -1445,7 +1445,12 @@
                 ).length;
             }
             
-            const previsaoAlta = leitos.filter(l => l.prevAlta && l.prevAlta.trim() !== '');
+            // ✅ CORREÇÃO: Previsão de alta APENAS HOJE (Hoje Ouro, Hoje 2R, Hoje 3R)
+            const previsaoAlta = leitos.filter(l => {
+                if (!l.prevAlta || l.prevAlta.trim() === '') return false;
+                const prev = l.prevAlta.toLowerCase();
+                return prev.includes('hoje');
+            });
             
             let previsaoApto, previsaoEnfFem, previsaoEnfMasc;
             
