@@ -471,31 +471,30 @@ function renderGaugeExecutivoHorizontal(ocupacao) {
     else if (ocupacao >= 50) cor = '#eab308'; // amarelo
     
     // Calcular offset para o progresso
-    const circunferencia = Math.PI * 110; // raio 55 * 2 * PI
+    const circunferencia = Math.PI * 90; // semicírculo: raio 45 * PI = 141.37
     const progresso = (ocupacao / 100) * circunferencia;
-    const offset = circunferencia - progresso;
     
-    // Criar SVG customizado (igual ao KPIs Archipelago)
-    container.style.width = '140px';
-    container.style.height = '80px';
+    // Criar SVG customizado (tamanho médio, igual ao original)
+    container.style.width = '120px';
+    container.style.height = '70px';
     container.style.position = 'relative';
     
     container.innerHTML = `
-        <svg viewBox="0 0 140 80" style="width: 100%; height: 100%;">
-            <!-- Fundo cinza -->
-            <path d="M 15 70 A 55 55 0 0 1 125 70" 
+        <svg viewBox="0 0 120 70" style="width: 100%; height: 100%;">
+            <!-- Fundo cinza (arco completo da esquerda para direita) -->
+            <path d="M 10 60 A 50 50 0 0 1 110 60" 
                   fill="none" 
                   stroke="rgba(255,255,255,0.1)" 
-                  stroke-width="14" 
+                  stroke-width="12" 
                   stroke-linecap="round"/>
-            <!-- Progresso colorido -->
-            <path d="M 15 70 A 55 55 0 0 1 125 70" 
+            <!-- Progresso colorido (começa da esquerda) -->
+            <path d="M 10 60 A 50 50 0 0 1 110 60" 
                   fill="none" 
                   stroke="${cor}" 
-                  stroke-width="14" 
+                  stroke-width="12" 
                   stroke-linecap="round"
-                  stroke-dasharray="172.8"
-                  stroke-dashoffset="${offset}"/>
+                  stroke-dasharray="${progresso} ${circunferencia}"
+                  pathLength="${circunferencia}"/>
         </svg>
     `;
 }
@@ -822,8 +821,8 @@ function getExecutiveCSS() {
             }
             
             .gauge-container #gaugeOcupacaoExecutivo {
-                width: 140px;
-                height: 80px;
+                width: 120px;
+                height: 70px;
             }
             
             .gauge-text {
