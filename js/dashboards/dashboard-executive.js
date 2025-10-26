@@ -556,14 +556,14 @@ function renderHeatmapConcessoes() {
     
     hospitaisComDados.forEach(hospitalId => {
         const hospital = CONFIG.HOSPITAIS[hospitalId];
-        html += `<th colspan="4" style="background: ${hospital.cor}; color: white; border-left: 2px solid rgba(255,255,255,0.5);">${hospital.nome}</th>`;
+        html += `<th colspan="4" style="background: ${hospital.cor}; color: white; border-left: 3px solid rgba(255,255,255,0.5);">${hospital.nome}</th>`;
     });
     
     html += '</tr><tr><th style="background: ' + (window.fundoBranco ? '#f3f4f6' : '#1e293b') + '; color: ' + (window.fundoBranco ? '#000' : '#fff') + ';"></th>';
     
     hospitaisComDados.forEach((hospitalId, idx) => {
         periodos.forEach((periodo, pIdx) => {
-            html += '<th style="font-size: 11px; ' + (pIdx === 0 ? 'border-left: 2px solid rgba(255,255,255,0.5);' : '') + ' background: ' + (window.fundoBranco ? '#f3f4f6' : 'rgba(255,255,255,0.05)') + '; color: ' + (window.fundoBranco ? '#000' : '#fff') + ';">' + periodo + '</th>';
+            html += '<th style="font-size: 11px; ' + (pIdx === 0 ? 'border-left: 3px solid rgba(255,255,255,0.5);' : '') + ' background: ' + (window.fundoBranco ? '#f3f4f6' : 'rgba(255,255,255,0.05)') + '; color: ' + (window.fundoBranco ? '#000' : '#fff') + ';">' + periodo + '</th>';
         });
     });
     
@@ -579,7 +579,7 @@ function renderHeatmapConcessoes() {
                 const cor = getCorPorValor(valor);
                 const corTexto = getCorTexto(valor);
                 
-                html += '<td class="heatmap-cell" style="background: ' + cor + '; color: ' + corTexto + '; ' + (pIdx === 0 ? 'border-left: 2px solid rgba(255,255,255,0.5);' : '') + '" title="' + concessao + ' - ' + CONFIG.HOSPITAIS[hospitalId].nome + ' - ' + periodo + ': ' + valor + ' casos">' + (valor > 0 ? valor : '—') + '</td>';
+                html += '<td class="heatmap-cell" style="background: ' + cor + '; color: ' + corTexto + '; ' + (pIdx === 0 ? 'border-left: 3px solid rgba(255,255,255,0.5);' : '') + '" title="' + concessao + ' - ' + CONFIG.HOSPITAIS[hospitalId].nome + ' - ' + periodo + ': ' + valor + ' casos">' + (valor > 0 ? valor : '—') + '</td>';
             });
         });
         
@@ -640,14 +640,14 @@ function renderHeatmapLinhas() {
     
     hospitaisComDados.forEach(hospitalId => {
         const hospital = CONFIG.HOSPITAIS[hospitalId];
-        html += `<th colspan="4" style="background: ${hospital.cor}; color: white; border-left: 2px solid rgba(255,255,255,0.5);">${hospital.nome}</th>`;
+        html += `<th colspan="4" style="background: ${hospital.cor}; color: white; border-left: 3px solid rgba(255,255,255,0.5);">${hospital.nome}</th>`;
     });
     
     html += '</tr><tr><th style="background: ' + (window.fundoBranco ? '#f3f4f6' : '#1e293b') + '; color: ' + (window.fundoBranco ? '#000' : '#fff') + ';"></th>';
     
     hospitaisComDados.forEach(() => {
         periodos.forEach((periodo, pIdx) => {
-            html += '<th style="font-size: 11px; ' + (pIdx === 0 ? 'border-left: 2px solid rgba(255,255,255,0.5);' : '') + ' background: ' + (window.fundoBranco ? '#f3f4f6' : 'rgba(255,255,255,0.05)') + '; color: ' + (window.fundoBranco ? '#000' : '#fff') + ';">' + periodo + '</th>';
+            html += '<th style="font-size: 11px; ' + (pIdx === 0 ? 'border-left: 3px solid rgba(255,255,255,0.5);' : '') + ' background: ' + (window.fundoBranco ? '#f3f4f6' : 'rgba(255,255,255,0.05)') + '; color: ' + (window.fundoBranco ? '#000' : '#fff') + ';">' + periodo + '</th>';
         });
     });
     
@@ -663,7 +663,7 @@ function renderHeatmapLinhas() {
                 const cor = getCorPorValor(valor);
                 const corTexto = getCorTexto(valor);
                 
-                html += '<td class="heatmap-cell" style="background: ' + cor + '; color: ' + corTexto + '; ' + (pIdx === 0 ? 'border-left: 2px solid rgba(255,255,255,0.5);' : '') + '" title="' + linha + ' - ' + CONFIG.HOSPITAIS[hospitalId].nome + ' - ' + periodo + ': ' + valor + ' casos">' + (valor > 0 ? valor : '—') + '</td>';
+                html += '<td class="heatmap-cell" style="background: ' + cor + '; color: ' + corTexto + '; ' + (pIdx === 0 ? 'border-left: 3px solid rgba(255,255,255,0.5);' : '') + '" title="' + linha + ' - ' + CONFIG.HOSPITAIS[hospitalId].nome + ' - ' + periodo + ': ' + valor + ' casos">' + (valor > 0 ? valor : '—') + '</td>';
             });
         });
         
@@ -819,7 +819,7 @@ function getExecutiveCSS() {
             
             .gauge-text {
                 position: absolute;
-                top: 55%;
+                top: 60%;
                 left: 50%;
                 transform: translate(-50%, -50%);
                 text-align: center;
@@ -832,7 +832,7 @@ function getExecutiveCSS() {
                 font-weight: 700;
                 color: white;
                 line-height: 1;
-                margin-bottom: 8px;
+                margin-bottom: 15px;
             }
             
             .gauge-label {
