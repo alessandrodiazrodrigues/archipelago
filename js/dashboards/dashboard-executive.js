@@ -316,6 +316,7 @@ window.renderDashboardExecutivo = function() {
                 width: 20px;
                 height: 20px;
                 border-radius: 4px;
+                border: 1px solid rgba(0, 0, 0, 0.2);
             }
         </style>
     `;
@@ -494,15 +495,16 @@ function renderGaugeExecutivoHorizontal(ocupacao) {
 // =================== FUNÇÃO PARA OBTER COR POR VALOR ===================
 function getCorPorValor(valor) {
     if (valor === 0) return window.fundoBranco ? '#f8f9fa' : '#2d3748';
-    if (valor <= 2) return '#93c5fd';  // Azul claro
-    if (valor <= 4) return '#60a5fa';  // Azul médio
-    if (valor <= 6) return '#3b82f6';  // Azul forte
-    return '#1e40af';                  // Azul escuro
+    if (valor <= 2) return '#E5E5E5';  // Cinza claro
+    if (valor <= 4) return '#C6A664';  // Dourado suave
+    if (valor <= 6) return '#0055A4';  // Azul-claro
+    return '#003366';                  // Azul-escuro
 }
 
 function getCorTexto(valor) {
     if (valor === 0) return window.fundoBranco ? '#6b7280' : '#9ca3af';
-    return '#ffffff';  // Texto branco para todas as faixas coloridas
+    if (valor <= 4) return '#1e293b';  // Texto escuro para cinza e dourado
+    return '#ffffff';  // Texto branco para azul-claro e azul-escuro
 }
 
 // =================== HEATMAP CONCESSÕES ===================
@@ -528,19 +530,19 @@ function renderHeatmapConcessoes() {
         <div class="heatmap-legenda">
             <strong>Escala:</strong>
             <div class="legenda-item">
-                <div class="legenda-cor" style="background: #93c5fd"></div>
+                <div class="legenda-cor" style="background: #E5E5E5"></div>
                 <span>1-2</span>
             </div>
             <div class="legenda-item">
-                <div class="legenda-cor" style="background: #60a5fa"></div>
+                <div class="legenda-cor" style="background: #C6A664"></div>
                 <span>3-4</span>
             </div>
             <div class="legenda-item">
-                <div class="legenda-cor" style="background: #3b82f6"></div>
+                <div class="legenda-cor" style="background: #0055A4"></div>
                 <span>5-6</span>
             </div>
             <div class="legenda-item">
-                <div class="legenda-cor" style="background: #1e40af"></div>
+                <div class="legenda-cor" style="background: #003366"></div>
                 <span>7+</span>
             </div>
         </div>
@@ -612,19 +614,19 @@ function renderHeatmapLinhas() {
         <div class="heatmap-legenda">
             <strong>Escala:</strong>
             <div class="legenda-item">
-                <div class="legenda-cor" style="background: #93c5fd"></div>
+                <div class="legenda-cor" style="background: #E5E5E5"></div>
                 <span>1-2</span>
             </div>
             <div class="legenda-item">
-                <div class="legenda-cor" style="background: #60a5fa"></div>
+                <div class="legenda-cor" style="background: #C6A664"></div>
                 <span>3-4</span>
             </div>
             <div class="legenda-item">
-                <div class="legenda-cor" style="background: #3b82f6"></div>
+                <div class="legenda-cor" style="background: #0055A4"></div>
                 <span>5-6</span>
             </div>
             <div class="legenda-item">
-                <div class="legenda-cor" style="background: #1e40af"></div>
+                <div class="legenda-cor" style="background: #003366"></div>
                 <span>7+</span>
             </div>
         </div>
