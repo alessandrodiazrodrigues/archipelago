@@ -1,5 +1,8 @@
-// =================== DASHBOARD HOSPITALAR V3.3 - VERSÃO SIMPLIFICADA ===================
-// =================== GAUGE SVG + BARRAS2 FIXO + ROSCA HOJE FIXA ===================
+// =================== DASHBOARD HOSPITALAR V3.3.3 - VERSÃO CORRIGIDA ===================
+// ✅ SEM ChartDataLabels (números via tooltip)
+// ✅ Lista de matrículas abaixo de Análise Preditiva
+// ✅ Legendas HTML apenas com itens existentes
+// ✅ Botão copiar WhatsApp no header
 
 // Estado global para fundo branco
 window.fundoBranco = false;
@@ -74,8 +77,154 @@ window.atualizarTodasAsCores = function() {
     }
 };
 
+// =================== FUNÇÃO COPIAR WHATSAPP ===================
+window.copiarDashboardParaWhatsApp = function() {
+    const hospitaisIds = ['H5', 'H2', 'H1', 'H4', 'H3'];
+    const hospitaisNomes = {
+        'H1': 'NEOMATER',
+        'H2': 'CRUZ AZUL',
+        'H3': 'STA MARCELINA',
+        'H4': 'SANTA CLARA',
+        'H5': 'ADVENTISTA'
+    };
+    
+    let texto = `*DASHBOARD HOSPITALAR*\n`;
+    texto += `${new Date().toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })}\n\n`;
+    
+    hospitaisIds.forEach((hospitalId, index) => {
+        const hospital = window.hospitalData[hospitalId];
+        if (!hospital || !hospital.leitos) return;
+        
+        const nome = hospitaisNomes[hospitalId];
+        texto += `━━━━━━━━━━━━━━━━━\n`;
+        texto += `*${index + 1}. ${nome}*\n`;
+        texto += `━━━━━━━━━━━━━━━━━\n\n`;
+        
+        // ALTAS PREVISTAS HOJE
+        const altasHoje = {
+            'Ouro': [],
+            '2R': [],
+            '3R': []
+        };
+        
+        hospital.leitos.forEach(leito => {
+            if (leito.status === 'ocupado') {
+                const prevAlta = leito.prevAlta || (leito.paciente && leito.paciente.prevAlta);
+                const matricula = leito.matricula || (leito.paciente && leito.paciente.matricula) || 'S/N';
+                
+                if (prevAlta === 'Hoje Ouro') altasHoje['Ouro'].push(matricula);
+                else if (prevAlta === 'Hoje 2R') altasHoje['2R'].push(matricula);
+                else if (prevAlta === 'Hoje 3R') altasHoje['3R'].push(matricula);
+            }
+        });
+        
+        const temAltas = altasHoje['Ouro'].length > 0 || altasHoje['2R'].length > 0 || altasHoje['3R'].length > 0;
+        
+        if (temAltas) {
+            texto += `📊 *Altas Previstas HOJE:*\n`;
+            if (altasHoje['Ouro'].length > 0) {
+                texto += `• Hoje Ouro: ${altasHoje['Ouro'].join(', ')}\n`;
+            }
+            if (altasHoje['2R'].length > 0) {
+                texto += `• Hoje 2R: ${altasHoje['2R'].join(', ')}\n`;
+            }
+            if (altasHoje['3R'].length > 0) {
+                texto += `• Hoje 3R: ${altasHoje['3R'].join(', ')}\n`;
+            }
+            texto += `\n`;
+        }
+        
+        // CONCESSÕES HOJE
+        const concessoesHoje = {};
+        
+        hospital.leitos.forEach(leito => {
+            if (leito.status === 'ocupado') {
+                const concessoes = leito.concessoes || (leito.paciente && leito.paciente.concessoes);
+                const prevAlta = leito.prevAlta || (leito.paciente && leito.paciente.prevAlta);
+                const matricula = leito.matricula || (leito.paciente && leito.paciente.matricula) || 'S/N';
+                
+                if (concessoes && prevAlta && prevAlta.includes('Hoje')) {
+                    const concessoesList = Array.isArray(concessoes) ? 
+                        concessoes : 
+                        String(concessoes).split('|');
+                    
+                    concessoesList.forEach(concessao => {
+                        if (concessao && concessao.trim()) {
+                            const nome = concessao.trim();
+                            if (!concessoesHoje[nome]) {
+                                concessoesHoje[nome] = [];
+                            }
+                            concessoesHoje[nome].push(matricula);
+                        }
+                    });
+                }
+            }
+        });
+        
+        const concessoesOrdenadas = Object.entries(concessoesHoje)
+            .sort((a, b) => b[1].length - a[1].length);
+        
+        if (concessoesOrdenadas.length > 0) {
+            texto += `🏥 *Concessões (HOJE):*\n`;
+            concessoesOrdenadas.forEach(([nome, mats]) => {
+                texto += `• ${nome}: ${mats.join(', ')}\n`;
+            });
+            texto += `\n`;
+        }
+        
+        // LINHAS DE CUIDADO HOJE
+        const linhasHoje = {};
+        
+        hospital.leitos.forEach(leito => {
+            if (leito.status === 'ocupado') {
+                const linhas = leito.linhas || (leito.paciente && leito.paciente.linhas);
+                const prevAlta = leito.prevAlta || (leito.paciente && leito.paciente.prevAlta);
+                const matricula = leito.matricula || (leito.paciente && leito.paciente.matricula) || 'S/N';
+                
+                if (linhas && prevAlta && prevAlta.includes('Hoje')) {
+                    const linhasList = Array.isArray(linhas) ? 
+                        linhas : 
+                        String(linhas).split('|');
+                    
+                    linhasList.forEach(linha => {
+                        if (linha && linha.trim()) {
+                            const nome = linha.trim();
+                            if (!linhasHoje[nome]) {
+                                linhasHoje[nome] = [];
+                            }
+                            linhasHoje[nome].push(matricula);
+                        }
+                    });
+                }
+            }
+        });
+        
+        const linhasOrdenadas = Object.entries(linhasHoje)
+            .sort((a, b) => b[1].length - a[1].length);
+        
+        if (linhasOrdenadas.length > 0) {
+            texto += `🩺 *Linhas de Cuidado (HOJE):*\n`;
+            linhasOrdenadas.forEach(([nome, mats]) => {
+                texto += `• ${nome}: ${mats.join(', ')}\n`;
+            });
+            texto += `\n`;
+        }
+        
+        if (!temAltas && concessoesOrdenadas.length === 0 && linhasOrdenadas.length === 0) {
+            texto += `_Nenhuma atividade prevista hoje_\n\n`;
+        }
+    });
+    
+    navigator.clipboard.writeText(texto).then(() => {
+        alert('✅ Dados copiados para o WhatsApp!\n\nCole e envie.');
+    }).catch(err => {
+        console.error('Erro ao copiar:', err);
+        alert('❌ Erro ao copiar. Tente novamente.');
+    });
+};
+
 window.renderDashboardHospitalar = function() {
-    logInfo('Renderizando Dashboard Hospitalar V3.3 SIMPLIFICADO');
+    logInfo('Renderizando Dashboard Hospitalar V3.3.3 CORRIGIDO');
     
     let container = document.getElementById('dashHospitalarContent');
     if (!container) {
@@ -100,7 +249,7 @@ window.renderDashboardHospitalar = function() {
         container.innerHTML = `
             <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 400px; text-align: center; color: white; background: linear-gradient(135deg, #1a1f2e 0%, #2d3748 100%); border-radius: 12px; margin: 20px; padding: 40px;">
                 <div style="width: 60px; height: 60px; border: 3px solid #60a5fa; border-top-color: transparent; border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 20px;"></div>
-                <h2 style="color: #60a5fa; margin-bottom: 10px; font-size: 20px;">Aguardando dados reais da API V3.3</h2>
+                <h2 style="color: #60a5fa; margin-bottom: 10px; font-size: 20px;">Aguardando dados reais da API V3.3.3</h2>
                 <p style="color: #9ca3af; font-size: 14px;">Conectando com Google Apps Script...</p>
             </div>
             <style>
@@ -142,14 +291,17 @@ window.renderDashboardHospitalar = function() {
     container.innerHTML = `
         <div style="background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); min-height: 100vh; padding: 20px; color: white;">
             <div class="dashboard-header" style="margin-bottom: 30px; padding: 20px; background: rgba(255, 255, 255, 0.05); border-radius: 12px; border-left: 4px solid #60a5fa;">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-                    <h2 style="margin: 0; color: #ffffff; font-size: 24px; font-weight: 700; white-space: nowrap;">Dashboard Hospitalar V3.3</h2>
-                </div>
-                <div style="display: flex; justify-content: flex-end;">
-                    <button id="toggleFundoBtn" class="toggle-fundo-btn" style="padding: 8px 16px; background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 8px; color: #e2e8f0; font-size: 14px; cursor: pointer; transition: all 0.3s ease; display: flex; align-items: center; gap: 8px;">
-                        <span id="toggleIcon">🌙</span>
-                        <span id="toggleText">ESCURO</span>
-                    </button>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; flex-wrap: wrap; gap: 15px;">
+                    <h2 style="margin: 0; color: #ffffff; font-size: 24px; font-weight: 700; white-space: nowrap;">Dashboard Hospitalar V3.3.3</h2>
+                    <div style="display: flex; gap: 10px;">
+                        <button onclick="window.copiarDashboardParaWhatsApp()" class="btn-whatsapp" style="padding: 8px 16px; background: #25D366; border: none; border-radius: 8px; color: white; font-size: 14px; cursor: pointer; font-weight: 600; display: flex; align-items: center; gap: 8px; transition: all 0.3s ease;">
+                            📱 WhatsApp
+                        </button>
+                        <button id="toggleFundoBtn" class="toggle-fundo-btn" style="padding: 8px 16px; background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 8px; color: #e2e8f0; font-size: 14px; cursor: pointer; transition: all 0.3s ease; display: flex; align-items: center; gap: 8px;">
+                            <span id="toggleIcon">🌙</span>
+                            <span id="toggleText">ESCURO</span>
+                        </button>
+                    </div>
                 </div>
             </div>
             
@@ -206,7 +358,7 @@ window.renderDashboardHospitalar = function() {
                 renderLinhasHospital(hospitalId);
             });
             
-            logSuccess('Dashboard Hospitalar V3.3 SIMPLIFICADO renderizado');
+            logSuccess('Dashboard Hospitalar V3.3.3 CORRIGIDO renderizado');
         }, 100);
     };
     
@@ -291,6 +443,7 @@ function renderHospitalSection(hospitalId) {
                     <div class="chart-container">
                         <canvas id="graficoAltas${hospitalId}"></canvas>
                     </div>
+                    <div id="listaAltas${hospitalId}"></div>
                 </div>
                 
                 <div class="grafico-item">
@@ -371,10 +524,9 @@ function renderGaugeHospital(hospitalId) {
     const kpis = calcularKPIsHospital(hospitalId);
     const ocupacao = kpis.ocupacao;
     
-    // ✅ CORES DINÂMICAS BASEADAS EM OCUPAÇÃO
-    let cor = '#22c55e'; // Verde (0-49%)
-    if (ocupacao >= 85) cor = '#ef4444'; // Vermelho (85-100%)
-    else if (ocupacao >= 50) cor = '#eab308'; // Amarelo (50-84%)
+    let cor = '#22c55e';
+    if (ocupacao >= 85) cor = '#ef4444';
+    else if (ocupacao >= 50) cor = '#eab308';
     
     const circunferencia = Math.PI * 90;
     const progresso = (ocupacao / 100) * circunferencia;
@@ -448,7 +600,7 @@ const backgroundPlugin = {
     }
 };
 
-// =================== ANÁLISE PREDITIVA DE ALTAS - BARRAS2 FIXO (SEM LEGENDA) ===================
+// =================== ANÁLISE PREDITIVA DE ALTAS - BARRAS AZUL + LISTA MATRÍCULAS ===================
 function renderAltasHospital(hospitalId) {
     const canvas = document.getElementById(`graficoAltas${hospitalId}`);
     if (!canvas || typeof Chart === 'undefined') return;
@@ -474,17 +626,25 @@ function renderAltasHospital(hospitalId) {
         '96H': [0, 0, 0, 0, 0]
     };
     
+    // ✅ NOVO: Coletar matrículas das altas HOJE
+    const altasHoje = {
+        'Ouro': [],
+        '2R': [],
+        '3R': []
+    };
+    
     hospital.leitos.forEach(leito => {
         if (leito.status === 'ocupado') {
             const prevAlta = leito.prevAlta || (leito.paciente && leito.paciente.prevAlta);
+            const matricula = leito.matricula || (leito.paciente && leito.paciente.matricula) || 'S/N';
             
             if (prevAlta) {
                 let index = -1;
                 let tipo = '';
                 
-                if (prevAlta === 'Hoje Ouro') { index = 0; tipo = 'Ouro'; }
-                else if (prevAlta === 'Hoje 2R') { index = 0; tipo = '2R'; }
-                else if (prevAlta === 'Hoje 3R') { index = 0; tipo = '3R'; }
+                if (prevAlta === 'Hoje Ouro') { index = 0; tipo = 'Ouro'; altasHoje['Ouro'].push(matricula); }
+                else if (prevAlta === 'Hoje 2R') { index = 0; tipo = '2R'; altasHoje['2R'].push(matricula); }
+                else if (prevAlta === 'Hoje 3R') { index = 0; tipo = '3R'; altasHoje['3R'].push(matricula); }
                 else if (prevAlta === '24h Ouro') { index = 1; tipo = 'Ouro'; }
                 else if (prevAlta === '24h 2R') { index = 1; tipo = '2R'; }
                 else if (prevAlta === '24h 3R') { index = 1; tipo = '3R'; }
@@ -504,10 +664,9 @@ function renderAltasHospital(hospitalId) {
     
     const ctx = canvas.getContext('2d');
     
-    // BARRAS AZUL (HOJE E 24H SOMAM OURO+2R+3R) - SEM LEGENDA HTML
     const dadosSimplificados = [
-        dados['Ouro'][0] + dados['2R'][0] + dados['3R'][0], // HOJE = soma
-        dados['Ouro'][1] + dados['2R'][1] + dados['3R'][1], // 24H = soma
+        dados['Ouro'][0] + dados['2R'][0] + dados['3R'][0],
+        dados['Ouro'][1] + dados['2R'][1] + dados['3R'][1],
         dados['48H'][2],
         dados['72H'][3],
         dados['96H'][4]
@@ -578,9 +737,46 @@ function renderAltasHospital(hospitalId) {
         },
         plugins: [backgroundPlugin]
     });
+    
+    // ✅ LISTA DE MATRÍCULAS ABAIXO DO GRÁFICO
+    const listaDiv = document.getElementById(`listaAltas${hospitalId}`);
+    if (listaDiv) {
+        const temAltas = altasHoje['Ouro'].length > 0 || altasHoje['2R'].length > 0 || altasHoje['3R'].length > 0;
+        
+        if (temAltas) {
+            let listaHtml = '<div class="lista-concessoes">';
+            listaHtml += '<h5 style="margin: 0 0 10px 0; color: ' + corTexto + '; font-size: 13px; font-weight: 600;">Matrículas das Altas Previstas HOJE:</h5>';
+            
+            if (altasHoje['Ouro'].length > 0) {
+                listaHtml += `<div style="margin-bottom: 8px; padding: 8px; background: rgba(255,255,255,0.05); border-radius: 6px; border-left: 3px solid #FFD700;">`;
+                listaHtml += `<strong style="color: ${corTexto}; font-size: 12px;">Hoje Ouro:</strong> `;
+                listaHtml += `<span style="color: ${corTexto}; font-size: 11px;">${altasHoje['Ouro'].join(', ')}</span>`;
+                listaHtml += `</div>`;
+            }
+            
+            if (altasHoje['2R'].length > 0) {
+                listaHtml += `<div style="margin-bottom: 8px; padding: 8px; background: rgba(255,255,255,0.05); border-radius: 6px; border-left: 3px solid #C0C0C0;">`;
+                listaHtml += `<strong style="color: ${corTexto}; font-size: 12px;">Hoje 2R:</strong> `;
+                listaHtml += `<span style="color: ${corTexto}; font-size: 11px;">${altasHoje['2R'].join(', ')}</span>`;
+                listaHtml += `</div>`;
+            }
+            
+            if (altasHoje['3R'].length > 0) {
+                listaHtml += `<div style="margin-bottom: 8px; padding: 8px; background: rgba(255,255,255,0.05); border-radius: 6px; border-left: 3px solid #CD7F32;">`;
+                listaHtml += `<strong style="color: ${corTexto}; font-size: 12px;">Hoje 3R:</strong> `;
+                listaHtml += `<span style="color: ${corTexto}; font-size: 11px;">${altasHoje['3R'].join(', ')}</span>`;
+                listaHtml += `</div>`;
+            }
+            
+            listaHtml += '</div>';
+            listaDiv.innerHTML = listaHtml;
+        } else {
+            listaDiv.innerHTML = '';
+        }
+    }
 }
 
-// =================== CONCESSÕES - ROSCA HOJE FIXA COM LISTA DE MATRÍCULAS (SEM LEGENDA HTML) ===================
+// =================== CONCESSÕES - ROSCA HOJE (SEM DATALABELS) ===================
 function renderConcessoesHospital(hospitalId) {
     const canvas = document.getElementById(`graficoConcessoes${hospitalId}`);
     if (!canvas || typeof Chart === 'undefined') return;
@@ -595,8 +791,6 @@ function renderConcessoesHospital(hospitalId) {
     
     if (!window.chartInstances) window.chartInstances = {};
     
-    const categorias = ['HOJE', '24H', '48H', '72H', '96H'];
-    
     const concessoesPorTimeline = {};
     
     hospital.leitos.forEach(leito => {
@@ -605,40 +799,31 @@ function renderConcessoesHospital(hospitalId) {
             const prevAlta = leito.prevAlta || (leito.paciente && leito.paciente.prevAlta);
             const matricula = leito.matricula || (leito.paciente && leito.paciente.matricula);
             
-            if (concessoes && prevAlta) {
+            if (concessoes && prevAlta && prevAlta.includes('Hoje')) {
                 const concessoesList = Array.isArray(concessoes) ? 
                     concessoes : 
                     String(concessoes).split('|');
                 
-                let timelineIndex = -1;
-                if (prevAlta.includes('Hoje')) timelineIndex = 0;
-                else if (prevAlta.includes('24h')) timelineIndex = 1;
-                else if (prevAlta === '48h' || prevAlta === '48H') timelineIndex = 2;
-                else if (prevAlta === '72h' || prevAlta === '72H') timelineIndex = 3;
-                else if (prevAlta === '96h' || prevAlta === '96H') timelineIndex = 4;
-                
-                if (timelineIndex >= 0) {
-                    concessoesList.forEach(concessao => {
-                        if (concessao && concessao.trim()) {
-                            const nome = concessao.trim();
-                            if (!concessoesPorTimeline[nome]) {
-                                concessoesPorTimeline[nome] = {
-                                    dados: [0, 0, 0, 0, 0],
-                                    matriculas: { 'HOJE': [], '24H': [], '48H': [], '72H': [], '96H': [] }
-                                };
-                            }
-                            concessoesPorTimeline[nome].dados[timelineIndex]++;
-                            concessoesPorTimeline[nome].matriculas[categorias[timelineIndex]].push(matricula || 'S/N');
+                concessoesList.forEach(concessao => {
+                    if (concessao && concessao.trim()) {
+                        const nome = concessao.trim();
+                        if (!concessoesPorTimeline[nome]) {
+                            concessoesPorTimeline[nome] = {
+                                total: 0,
+                                matriculas: []
+                            };
                         }
-                    });
-                }
+                        concessoesPorTimeline[nome].total++;
+                        concessoesPorTimeline[nome].matriculas.push(matricula || 'S/N');
+                    }
+                });
             }
         }
     });
     
     const concessoesOrdenadas = Object.entries(concessoesPorTimeline)
-        .map(([nome, obj]) => [nome, obj.dados, obj.dados.reduce((a, b) => a + b, 0), obj.matriculas])
-        .sort((a, b) => b[2] - a[2])
+        .map(([nome, obj]) => [nome, obj.total, obj.matriculas])
+        .sort((a, b) => b[1] - a[1])
         .slice(0, 6);
     
     if (concessoesOrdenadas.length === 0) return;
@@ -646,11 +831,10 @@ function renderConcessoesHospital(hospitalId) {
     const corTexto = window.fundoBranco ? '#000000' : '#ffffff';
     const ctx = canvas.getContext('2d');
     
-    // ROSCA HOJE - SEM LEGENDA HTML
-    const dadosHoje = concessoesOrdenadas.map(([nome, dados]) => dados[0]);
+    const dadosHoje = concessoesOrdenadas.map(([nome, total]) => total);
     const labels = concessoesOrdenadas.map(([nome]) => nome);
     const cores = labels.map(label => getCorExata(label, 'concessao'));
-    const matriculas = concessoesOrdenadas.map(([nome, dados, total, mats]) => mats['HOJE']);
+    const matriculas = concessoesOrdenadas.map(([nome, total, mats]) => mats);
     
     window.chartInstances[chartKey] = new Chart(ctx, {
         type: 'doughnut',
@@ -680,21 +864,23 @@ function renderConcessoesHospital(hospitalId) {
                 tooltip: {
                     backgroundColor: 'rgba(26, 31, 46, 0.95)',
                     titleColor: '#ffffff',
-                    bodyColor: '#ffffff'
-                },
-                datalabels: {
-                    color: '#ffffff',
-                    font: { size: 14, weight: 'bold' },
-                    formatter: (value) => {
-                        return value > 0 ? value : '';
+                    bodyColor: '#ffffff',
+                    callbacks: {
+                        label: function(context) {
+                            const label = context.label || '';
+                            const value = context.parsed || 0;
+                            const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                            const percentage = ((value / total) * 100).toFixed(1);
+                            return `${label}: ${value} (${percentage}%)`;
+                        }
                     }
                 }
             }
         },
-        plugins: [backgroundPlugin, ChartDataLabels]
+        plugins: [backgroundPlugin]
     });
     
-    // LISTA DE CONCESSÕES COM MATRÍCULAS (MANTIDA)
+    // ✅ LISTA SÓ COM AS QUE EXISTEM
     const listaDiv = document.getElementById(`listaConcessoes${hospitalId}`);
     if (listaDiv) {
         let listaHtml = '<div class="lista-concessoes">';
@@ -715,7 +901,7 @@ function renderConcessoesHospital(hospitalId) {
     }
 }
 
-// =================== LINHAS DE CUIDADO - ROSCA HOJE FIXA COM LISTA DE MATRÍCULAS (SEM LEGENDA HTML) ===================
+// =================== LINHAS DE CUIDADO - ROSCA HOJE (SEM DATALABELS) ===================
 function renderLinhasHospital(hospitalId) {
     const canvas = document.getElementById(`graficoLinhas${hospitalId}`);
     if (!canvas || typeof Chart === 'undefined') return;
@@ -730,8 +916,6 @@ function renderLinhasHospital(hospitalId) {
     
     if (!window.chartInstances) window.chartInstances = {};
     
-    const categorias = ['HOJE', '24H', '48H', '72H', '96H'];
-    
     const linhasPorTimeline = {};
     
     hospital.leitos.forEach(leito => {
@@ -740,40 +924,31 @@ function renderLinhasHospital(hospitalId) {
             const prevAlta = leito.prevAlta || (leito.paciente && leito.paciente.prevAlta);
             const matricula = leito.matricula || (leito.paciente && leito.paciente.matricula);
             
-            if (linhas && prevAlta) {
+            if (linhas && prevAlta && prevAlta.includes('Hoje')) {
                 const linhasList = Array.isArray(linhas) ? 
                     linhas : 
                     String(linhas).split('|');
                 
-                let timelineIndex = -1;
-                if (prevAlta.includes('Hoje')) timelineIndex = 0;
-                else if (prevAlta.includes('24h')) timelineIndex = 1;
-                else if (prevAlta === '48h' || prevAlta === '48H') timelineIndex = 2;
-                else if (prevAlta === '72h' || prevAlta === '72H') timelineIndex = 3;
-                else if (prevAlta === '96h' || prevAlta === '96H') timelineIndex = 4;
-                
-                if (timelineIndex >= 0) {
-                    linhasList.forEach(linha => {
-                        if (linha && linha.trim()) {
-                            const nome = linha.trim();
-                            if (!linhasPorTimeline[nome]) {
-                                linhasPorTimeline[nome] = {
-                                    dados: [0, 0, 0, 0, 0],
-                                    matriculas: { 'HOJE': [], '24H': [], '48H': [], '72H': [], '96H': [] }
-                                };
-                            }
-                            linhasPorTimeline[nome].dados[timelineIndex]++;
-                            linhasPorTimeline[nome].matriculas[categorias[timelineIndex]].push(matricula || 'S/N');
+                linhasList.forEach(linha => {
+                    if (linha && linha.trim()) {
+                        const nome = linha.trim();
+                        if (!linhasPorTimeline[nome]) {
+                            linhasPorTimeline[nome] = {
+                                total: 0,
+                                matriculas: []
+                            };
                         }
-                    });
-                }
+                        linhasPorTimeline[nome].total++;
+                        linhasPorTimeline[nome].matriculas.push(matricula || 'S/N');
+                    }
+                });
             }
         }
     });
     
     const linhasOrdenadas = Object.entries(linhasPorTimeline)
-        .map(([nome, obj]) => [nome, obj.dados, obj.dados.reduce((a, b) => a + b, 0), obj.matriculas])
-        .sort((a, b) => b[2] - a[2])
+        .map(([nome, obj]) => [nome, obj.total, obj.matriculas])
+        .sort((a, b) => b[1] - a[1])
         .slice(0, 6);
     
     if (linhasOrdenadas.length === 0) return;
@@ -781,11 +956,10 @@ function renderLinhasHospital(hospitalId) {
     const corTexto = window.fundoBranco ? '#000000' : '#ffffff';
     const ctx = canvas.getContext('2d');
     
-    // ROSCA HOJE - SEM LEGENDA HTML
-    const dadosHoje = linhasOrdenadas.map(([nome, dados]) => dados[0]);
+    const dadosHoje = linhasOrdenadas.map(([nome, total]) => total);
     const labels = linhasOrdenadas.map(([nome]) => nome);
     const cores = labels.map(label => getCorExata(label, 'linha'));
-    const matriculas = linhasOrdenadas.map(([nome, dados, total, mats]) => mats['HOJE']);
+    const matriculas = linhasOrdenadas.map(([nome, total, mats]) => mats);
     
     window.chartInstances[chartKey] = new Chart(ctx, {
         type: 'doughnut',
@@ -815,21 +989,23 @@ function renderLinhasHospital(hospitalId) {
                 tooltip: {
                     backgroundColor: 'rgba(26, 31, 46, 0.95)',
                     titleColor: '#ffffff',
-                    bodyColor: '#ffffff'
-                },
-                datalabels: {
-                    color: '#ffffff',
-                    font: { size: 14, weight: 'bold' },
-                    formatter: (value) => {
-                        return value > 0 ? value : '';
+                    bodyColor: '#ffffff',
+                    callbacks: {
+                        label: function(context) {
+                            const label = context.label || '';
+                            const value = context.parsed || 0;
+                            const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                            const percentage = ((value / total) * 100).toFixed(1);
+                            return `${label}: ${value} (${percentage}%)`;
+                        }
                     }
                 }
             }
         },
-        plugins: [backgroundPlugin, ChartDataLabels]
+        plugins: [backgroundPlugin]
     });
     
-    // LISTA DE LINHAS COM MATRÍCULAS (MANTIDA)
+    // ✅ LISTA SÓ COM AS QUE EXISTEM
     const listaDiv = document.getElementById(`listaLinhas${hospitalId}`);
     if (listaDiv) {
         let listaHtml = '<div class="lista-concessoes">';
@@ -852,14 +1028,14 @@ function renderLinhasHospital(hospitalId) {
 
 // Função de força de atualização
 window.forceDataRefresh = function() {
-    logInfo('Forçando atualização dos dados hospitalares V3.3...');
+    logInfo('Forçando atualização dos dados hospitalares V3.3.3...');
     
     const container = document.getElementById('dashHospitalarContent');
     if (container) {
         container.innerHTML = `
             <div style="text-align: center; padding: 50px;">
                 <div style="color: #60a5fa; font-size: 18px; margin-bottom: 15px;">
-                    Recarregando dados reais da API V3.3...
+                    Recarregando dados reais da API V3.3.3...
                 </div>
             </div>
         `;
@@ -885,6 +1061,12 @@ function getHospitalConsolidadoCSS() {
             @keyframes pulse {
                 0%, 100% { opacity: 1; }
                 50% { opacity: 0.5; }
+            }
+            
+            .btn-whatsapp:hover {
+                background: #128C7E !important;
+                transform: translateY(-1px);
+                box-shadow: 0 4px 12px rgba(37, 211, 102, 0.4);
             }
             
             .toggle-fundo-btn:hover {
@@ -1194,6 +1376,11 @@ function getHospitalConsolidadoCSS() {
                     margin-bottom: 12px !important;
                 }
                 
+                .btn-whatsapp {
+                    padding: 6px 12px !important;
+                    font-size: 12px !important;
+                }
+                
                 .toggle-fundo-btn {
                     padding: 4px 8px !important;
                     font-size: 11px !important;
@@ -1270,19 +1457,20 @@ window.renderLinhasHospital = renderLinhasHospital;
 
 // Funções de log
 function logInfo(message) {
-    console.log(`🔵 [DASHBOARD HOSPITALAR V3.3 SIMPLIFICADO] ${message}`);
+    console.log(`🔵 [DASHBOARD HOSPITALAR V3.3.3] ${message}`);
 }
 
 function logSuccess(message) {
-    console.log(`✅ [DASHBOARD HOSPITALAR V3.3 SIMPLIFICADO] ${message}`);
+    console.log(`✅ [DASHBOARD HOSPITALAR V3.3.3] ${message}`);
 }
 
 function logError(message, error) {
-    console.error(`❌ [DASHBOARD HOSPITALAR V3.3 SIMPLIFICADO] ${message}`, error || '');
+    console.error(`❌ [DASHBOARD HOSPITALAR V3.3.3] ${message}`, error || '');
 }
 
-console.log('🎯 Dashboard Hospitalar V3.3 SIMPLIFICADO - VERSÃO LIMPA!');
-console.log('✅ SIMPLIFICAÇÃO: Análise de Altas fixada em Barras2 (sem seletor, sem legenda HTML)');
-console.log('✅ SIMPLIFICAÇÃO: Concessões fixadas em Rosca HOJE (sem seletor, sem legenda HTML, mantém lista de matrículas)');
-console.log('✅ SIMPLIFICAÇÃO: Linhas fixadas em Rosca HOJE (sem seletor, sem legenda HTML, mantém lista de matrículas)');
-console.log('🚀 READY: Sistema V3.3 SIMPLIFICADO funcional!');
+console.log('🎯 Dashboard Hospitalar V3.3.3 - VERSÃO CORRIGIDA!');
+console.log('✅ CORREÇÃO: SEM dependência ChartDataLabels');
+console.log('✅ CORREÇÃO: Lista de matrículas abaixo de Análise Preditiva');
+console.log('✅ CORREÇÃO: Legendas HTML apenas com itens existentes');
+console.log('✅ NOVO: Botão copiar WhatsApp no header');
+console.log('🚀 READY: Sistema V3.3.3 100% funcional!');
