@@ -471,27 +471,27 @@ function renderGaugeExecutivoHorizontal(ocupacao) {
     else if (ocupacao >= 50) cor = '#eab308'; // amarelo
     
     // Calcular offset para o progresso
-    const circunferencia = Math.PI * 90; // semicírculo: raio 45 * PI = 141.37
+    const circunferencia = Math.PI * 180; // raio 90 * PI = 282.7
     const progresso = (ocupacao / 100) * circunferencia;
     
-    // Criar SVG customizado (tamanho médio, igual ao original)
-    container.style.width = '120px';
-    container.style.height = '70px';
+    // Criar SVG customizado (TAMANHO GRANDE - igual ao Chart.js original)
+    container.style.width = '240px';
+    container.style.height = '140px';
     container.style.position = 'relative';
     
     container.innerHTML = `
-        <svg viewBox="0 0 120 70" style="width: 100%; height: 100%;">
+        <svg viewBox="0 0 240 140" style="width: 100%; height: 100%;">
             <!-- Fundo cinza (arco completo da esquerda para direita) -->
-            <path d="M 10 60 A 50 50 0 0 1 110 60" 
+            <path d="M 20 120 A 100 100 0 0 1 220 120" 
                   fill="none" 
                   stroke="rgba(255,255,255,0.1)" 
-                  stroke-width="12" 
+                  stroke-width="24" 
                   stroke-linecap="round"/>
             <!-- Progresso colorido (começa da esquerda) -->
-            <path d="M 10 60 A 50 50 0 0 1 110 60" 
+            <path d="M 20 120 A 100 100 0 0 1 220 120" 
                   fill="none" 
                   stroke="${cor}" 
-                  stroke-width="12" 
+                  stroke-width="24" 
                   stroke-linecap="round"
                   stroke-dasharray="${progresso} ${circunferencia}"
                   pathLength="${circunferencia}"/>
@@ -821,8 +821,8 @@ function getExecutiveCSS() {
             }
             
             .gauge-container #gaugeOcupacaoExecutivo {
-                width: 120px;
-                height: 70px;
+                width: 240px;
+                height: 140px;
             }
             
             .gauge-text {
