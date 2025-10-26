@@ -819,11 +819,15 @@ function getExecutiveCSS() {
             
             .gauge-text {
                 position: absolute;
-                top: 60%;
+                top: 50%;
                 left: 50%;
                 transform: translate(-50%, -50%);
                 text-align: center;
                 pointer-events: none;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                gap: 25px;
             }
             
             .gauge-value {
@@ -832,7 +836,7 @@ function getExecutiveCSS() {
                 font-weight: 700;
                 color: white;
                 line-height: 1;
-                margin-bottom: 15px;
+                margin: 0;
             }
             
             .gauge-label {
@@ -841,6 +845,8 @@ function getExecutiveCSS() {
                 color: #9ca3af;
                 text-transform: uppercase;
                 letter-spacing: 0.5px;
+                margin: 0;
+                white-space: nowrap;
             }
             
             .hospitais-percentuais {
