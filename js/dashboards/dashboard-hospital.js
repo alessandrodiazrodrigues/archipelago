@@ -834,8 +834,6 @@ function renderConcessoesHospital(hospitalId) {
         }
     });
     
-    const corTexto = window.fundoBranco ? '#000000' : '#ffffff';
-    
     let html = '<div class="timeline-boxes-grid">';
     
     ['HOJE', '24H', '48H'].forEach(timeline => {
@@ -843,7 +841,7 @@ function renderConcessoesHospital(hospitalId) {
             .sort((a, b) => b[1].length - a[1].length);
         
         html += `<div class="timeline-box">`;
-        html += `<div class="timeline-box-header" style="color: ${corTexto};">${timeline}</div>`;
+        html += `<div class="timeline-box-header">${timeline}</div>`;
         
         html += `<div class="timeline-chart-container">`;
         html += `<canvas id="graficoConcessoes${hospitalId}_${timeline}" class="timeline-chart"></canvas>`;
@@ -857,8 +855,8 @@ function renderConcessoesHospital(hospitalId) {
             concessoes.forEach(([nome, mats]) => {
                 const cor = getCorExata(nome, 'concessao');
                 html += `<div class="timeline-item" style="border-left-color: ${cor};">`;
-                html += `<div class="timeline-item-name" style="color: ${corTexto};">${nome}</div>`;
-                html += `<div class="timeline-item-mats" style="color: ${corTexto};">${mats.join(', ')}</div>`;
+                html += `<div class="timeline-item-name">${nome}</div>`;
+                html += `<div class="timeline-item-mats">${mats.join(', ')}</div>`;
                 html += `</div>`;
             });
         }
@@ -1022,8 +1020,6 @@ function renderLinhasHospital(hospitalId) {
         }
     });
     
-    const corTexto = window.fundoBranco ? '#000000' : '#ffffff';
-    
     let html = '<div class="timeline-boxes-grid">';
     
     ['HOJE', '24H', '48H'].forEach(timeline => {
@@ -1031,7 +1027,7 @@ function renderLinhasHospital(hospitalId) {
             .sort((a, b) => b[1].length - a[1].length);
         
         html += `<div class="timeline-box">`;
-        html += `<div class="timeline-box-header" style="color: ${corTexto};">${timeline}</div>`;
+        html += `<div class="timeline-box-header">${timeline}</div>`;
         
         html += `<div class="timeline-chart-container">`;
         html += `<canvas id="graficoLinhas${hospitalId}_${timeline}" class="timeline-chart"></canvas>`;
@@ -1045,8 +1041,8 @@ function renderLinhasHospital(hospitalId) {
             linhas.forEach(([nome, mats]) => {
                 const cor = getCorExata(nome, 'linha');
                 html += `<div class="timeline-item" style="border-left-color: ${cor};">`;
-                html += `<div class="timeline-item-name" style="color: ${corTexto};">${nome}</div>`;
-                html += `<div class="timeline-item-mats" style="color: ${corTexto};">${mats.join(', ')}</div>`;
+                html += `<div class="timeline-item-name">${nome}</div>`;
+                html += `<div class="timeline-item-mats">${mats.join(', ')}</div>`;
                 html += `</div>`;
             });
         }
@@ -1441,7 +1437,7 @@ function getHospitalConsolidadoCSS() {
             
             .timeline-item-mats {
                 font-size: 11px;
-                color: #9ca3af;
+                color: #ffffff;
                 line-height: 1.4;
             }
             
