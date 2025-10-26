@@ -269,7 +269,7 @@ window.renderDashboardExecutivo = function() {
             .heatmap-table td {
                 padding: 12px;
                 text-align: center;
-                border: 1px solid rgba(255, 255, 255, 0.1);
+                border: 2px solid rgba(15, 23, 42, 0.3);
             }
             
             .heatmap-table th {
@@ -493,15 +493,16 @@ function renderGaugeExecutivoHorizontal(ocupacao) {
 
 // =================== FUNÇÃO PARA OBTER COR POR VALOR ===================
 function getCorPorValor(valor) {
-    if (valor === 0) return window.fundoBranco ? '#ffffff' : '#f8f9fa';
-    if (valor <= 3) return '#E5E5E5';
-    if (valor <= 6) return '#C6A664';
-    if (valor <= 9) return '#0055A4';
-    return '#003366';
+    if (valor === 0) return window.fundoBranco ? '#f8f9fa' : '#2d3748';
+    if (valor <= 2) return '#93c5fd';  // Azul claro
+    if (valor <= 4) return '#60a5fa';  // Azul médio
+    if (valor <= 6) return '#3b82f6';  // Azul forte
+    return '#1e40af';                  // Azul escuro
 }
 
 function getCorTexto(valor) {
-    return valor > 6 ? '#ffffff' : '#1e293b';
+    if (valor === 0) return window.fundoBranco ? '#6b7280' : '#9ca3af';
+    return '#ffffff';  // Texto branco para todas as faixas coloridas
 }
 
 // =================== HEATMAP CONCESSÕES ===================
@@ -527,20 +528,20 @@ function renderHeatmapConcessoes() {
         <div class="heatmap-legenda">
             <strong>Escala:</strong>
             <div class="legenda-item">
-                <div class="legenda-cor" style="background: #E5E5E5"></div>
-                <span>1-3</span>
+                <div class="legenda-cor" style="background: #93c5fd"></div>
+                <span>1-2</span>
             </div>
             <div class="legenda-item">
-                <div class="legenda-cor" style="background: #C6A664"></div>
-                <span>4-6</span>
+                <div class="legenda-cor" style="background: #60a5fa"></div>
+                <span>3-4</span>
             </div>
             <div class="legenda-item">
-                <div class="legenda-cor" style="background: #0055A4"></div>
-                <span>7-9</span>
+                <div class="legenda-cor" style="background: #3b82f6"></div>
+                <span>5-6</span>
             </div>
             <div class="legenda-item">
-                <div class="legenda-cor" style="background: #003366"></div>
-                <span>10+</span>
+                <div class="legenda-cor" style="background: #1e40af"></div>
+                <span>7+</span>
             </div>
         </div>
         
@@ -611,20 +612,20 @@ function renderHeatmapLinhas() {
         <div class="heatmap-legenda">
             <strong>Escala:</strong>
             <div class="legenda-item">
-                <div class="legenda-cor" style="background: #E5E5E5"></div>
-                <span>1-3</span>
+                <div class="legenda-cor" style="background: #93c5fd"></div>
+                <span>1-2</span>
             </div>
             <div class="legenda-item">
-                <div class="legenda-cor" style="background: #C6A664"></div>
-                <span>4-6</span>
+                <div class="legenda-cor" style="background: #60a5fa"></div>
+                <span>3-4</span>
             </div>
             <div class="legenda-item">
-                <div class="legenda-cor" style="background: #0055A4"></div>
-                <span>7-9</span>
+                <div class="legenda-cor" style="background: #3b82f6"></div>
+                <span>5-6</span>
             </div>
             <div class="legenda-item">
-                <div class="legenda-cor" style="background: #003366"></div>
-                <span>10+</span>
+                <div class="legenda-cor" style="background: #1e40af"></div>
+                <span>7+</span>
             </div>
         </div>
         
@@ -816,7 +817,7 @@ function getExecutiveCSS() {
             
             .gauge-text {
                 position: absolute;
-                top: 70%;
+                top: 55%;
                 left: 50%;
                 transform: translate(-50%, -50%);
                 text-align: center;
@@ -825,18 +826,19 @@ function getExecutiveCSS() {
             
             .gauge-value {
                 display: block;
-                font-size: 32px;
+                font-size: 36px;
                 font-weight: 700;
                 color: white;
                 line-height: 1;
+                margin-bottom: 8px;
             }
             
             .gauge-label {
                 display: block;
-                font-size: 12px;
+                font-size: 11px;
                 color: #9ca3af;
-                margin-top: 10px;
                 text-transform: uppercase;
+                letter-spacing: 0.5px;
             }
             
             .hospitais-percentuais {
