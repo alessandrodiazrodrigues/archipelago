@@ -2,7 +2,8 @@
 // ✅ SEM ChartDataLabels (números via tooltip)
 // ✅ Lista de matrículas abaixo de Análise Preditiva
 // ✅ Legendas HTML apenas com itens existentes
-// ✅ Botão copiar WhatsApp no header
+// ✅ Mensagem quando não há concessões/linhas HOJE
+// ✅ Botão "Copiar para WhatsApp" no header
 
 // Estado global para fundo branco
 window.fundoBranco = false;
@@ -224,7 +225,7 @@ window.copiarDashboardParaWhatsApp = function() {
 };
 
 window.renderDashboardHospitalar = function() {
-    logInfo('Renderizando Dashboard Hospitalar V3.3.3 CORRIGIDO');
+    logInfo('Renderizando Dashboard Hospitalar V3.3.3 FINAL');
     
     let container = document.getElementById('dashHospitalarContent');
     if (!container) {
@@ -249,7 +250,7 @@ window.renderDashboardHospitalar = function() {
         container.innerHTML = `
             <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 400px; text-align: center; color: white; background: linear-gradient(135deg, #1a1f2e 0%, #2d3748 100%); border-radius: 12px; margin: 20px; padding: 40px;">
                 <div style="width: 60px; height: 60px; border: 3px solid #60a5fa; border-top-color: transparent; border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 20px;"></div>
-                <h2 style="color: #60a5fa; margin-bottom: 10px; font-size: 20px;">Aguardando dados reais da API V3.3.3</h2>
+                <h2 style="color: #60a5fa; margin-bottom: 10px; font-size: 20px;">Aguardando dados reais da API V3.3.3 Final</h2>
                 <p style="color: #9ca3af; font-size: 14px;">Conectando com Google Apps Script...</p>
             </div>
             <style>
@@ -268,7 +269,10 @@ window.renderDashboardHospitalar = function() {
         return;
     }
     
-    const hospitaisComDados = Object.keys(CONFIG.HOSPITAIS).filter(hospitalId => {
+    // ✅ ORDEM ALFABÉTICA DOS HOSPITAIS
+    const ordemAlfabetica = ['H5', 'H2', 'H1', 'H4', 'H3']; // ADVENTISTA, CRUZ AZUL, NEOMATER, SANTA CLARA, STA MARCELINA
+    
+    const hospitaisComDados = ordemAlfabetica.filter(hospitalId => {
         const hospital = window.hospitalData[hospitalId];
         return hospital && hospital.leitos && hospital.leitos.some(l => l.status === 'ocupado' || l.status === 'vago');
     });
@@ -292,10 +296,10 @@ window.renderDashboardHospitalar = function() {
         <div style="background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); min-height: 100vh; padding: 20px; color: white;">
             <div class="dashboard-header" style="margin-bottom: 30px; padding: 20px; background: rgba(255, 255, 255, 0.05); border-radius: 12px; border-left: 4px solid #60a5fa;">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; flex-wrap: wrap; gap: 15px;">
-                    <h2 style="margin: 0; color: #ffffff; font-size: 24px; font-weight: 700; white-space: nowrap;">Dashboard Hospitalar V3.3.3</h2>
+                    <h2 style="margin: 0; color: #ffffff; font-size: 24px; font-weight: 700; white-space: nowrap;">Dashboard Hospitalar V3.3.3 Final</h2>
                     <div style="display: flex; gap: 10px;">
                         <button onclick="window.copiarDashboardParaWhatsApp()" class="btn-whatsapp" style="padding: 8px 16px; background: #25D366; border: none; border-radius: 8px; color: white; font-size: 14px; cursor: pointer; font-weight: 600; display: flex; align-items: center; gap: 8px; transition: all 0.3s ease;">
-                            📱 WhatsApp
+                            Copiar para WhatsApp
                         </button>
                         <button id="toggleFundoBtn" class="toggle-fundo-btn" style="padding: 8px 16px; background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 8px; color: #e2e8f0; font-size: 14px; cursor: pointer; transition: all 0.3s ease; display: flex; align-items: center; gap: 8px;">
                             <span id="toggleIcon">🌙</span>
@@ -358,7 +362,7 @@ window.renderDashboardHospitalar = function() {
                 renderLinhasHospital(hospitalId);
             });
             
-            logSuccess('Dashboard Hospitalar V3.3.3 CORRIGIDO renderizado');
+            logSuccess('Dashboard Hospitalar V3.3.3 FINAL renderizado');
         }, 100);
     };
     
@@ -826,7 +830,19 @@ function renderConcessoesHospital(hospitalId) {
         .sort((a, b) => b[1] - a[1])
         .slice(0, 6);
     
-    if (concessoesOrdenadas.length === 0) return;
+    if (concessoesOrdenadas.length === 0) {
+        // ✅ MENSAGEM QUANDO NÃO HÁ CONCESSÕES HOJE
+        const corTexto = window.fundoBranco ? '#000000' : '#ffffff';
+        const listaDiv = document.getElementById(`listaConcessoes${hospitalId}`);
+        if (listaDiv) {
+            listaDiv.innerHTML = `
+                <div style="text-align: center; padding: 30px; color: #9ca3af; font-style: italic;">
+                    Não há concessões previstas hoje
+                </div>
+            `;
+        }
+        return;
+    }
     
     const corTexto = window.fundoBranco ? '#000000' : '#ffffff';
     const ctx = canvas.getContext('2d');
@@ -951,7 +967,19 @@ function renderLinhasHospital(hospitalId) {
         .sort((a, b) => b[1] - a[1])
         .slice(0, 6);
     
-    if (linhasOrdenadas.length === 0) return;
+    if (linhasOrdenadas.length === 0) {
+        // ✅ MENSAGEM QUANDO NÃO HÁ LINHAS HOJE
+        const corTexto = window.fundoBranco ? '#000000' : '#ffffff';
+        const listaDiv = document.getElementById(`listaLinhas${hospitalId}`);
+        if (listaDiv) {
+            listaDiv.innerHTML = `
+                <div style="text-align: center; padding: 30px; color: #9ca3af; font-style: italic;">
+                    Não há linhas de cuidado previstas hoje
+                </div>
+            `;
+        }
+        return;
+    }
     
     const corTexto = window.fundoBranco ? '#000000' : '#ffffff';
     const ctx = canvas.getContext('2d');
@@ -1028,14 +1056,14 @@ function renderLinhasHospital(hospitalId) {
 
 // Função de força de atualização
 window.forceDataRefresh = function() {
-    logInfo('Forçando atualização dos dados hospitalares V3.3.3...');
+    logInfo('Forçando atualização dos dados hospitalares V3.3.3 Final...');
     
     const container = document.getElementById('dashHospitalarContent');
     if (container) {
         container.innerHTML = `
             <div style="text-align: center; padding: 50px;">
                 <div style="color: #60a5fa; font-size: 18px; margin-bottom: 15px;">
-                    Recarregando dados reais da API V3.3.3...
+                    Recarregando dados reais da API V3.3.3 Final...
                 </div>
             </div>
         `;
@@ -1457,20 +1485,21 @@ window.renderLinhasHospital = renderLinhasHospital;
 
 // Funções de log
 function logInfo(message) {
-    console.log(`🔵 [DASHBOARD HOSPITALAR V3.3.3] ${message}`);
+    console.log(`🔵 [DASHBOARD HOSPITALAR V3.3.3 FINAL] ${message}`);
 }
 
 function logSuccess(message) {
-    console.log(`✅ [DASHBOARD HOSPITALAR V3.3.3] ${message}`);
+    console.log(`✅ [DASHBOARD HOSPITALAR V3.3.3 FINAL] ${message}`);
 }
 
 function logError(message, error) {
-    console.error(`❌ [DASHBOARD HOSPITALAR V3.3.3] ${message}`, error || '');
+    console.error(`❌ [DASHBOARD HOSPITALAR V3.3.3 FINAL] ${message}`, error || '');
 }
 
 console.log('🎯 Dashboard Hospitalar V3.3.3 - VERSÃO CORRIGIDA!');
 console.log('✅ CORREÇÃO: SEM dependência ChartDataLabels');
 console.log('✅ CORREÇÃO: Lista de matrículas abaixo de Análise Preditiva');
 console.log('✅ CORREÇÃO: Legendas HTML apenas com itens existentes');
-console.log('✅ NOVO: Botão copiar WhatsApp no header');
+console.log('✅ CORREÇÃO: Mensagem quando não há concessões/linhas HOJE');
+console.log('✅ NOVO: Botão "Copiar para WhatsApp" no header');
 console.log('🚀 READY: Sistema V3.3.3 100% funcional!');
