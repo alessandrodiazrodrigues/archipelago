@@ -1,4 +1,4 @@
-// =================== DASHBOARD EXECUTIVO V3.3 - HEATMAP TEMPORAL ===================
+// =================== DASHBOARD EXECUTIVO V3.3 - HEATMAP TEMPORAL + BARRAS ===================
 // =================== USANDO CORES DO API.JS - SEM DUPLICAÇÃO ===================
 
 // Estado global para fundo branco (compartilhado com dashboard hospitalar)
@@ -64,6 +64,30 @@ const backgroundPluginExec = {
         ctx.restore();
     }
 };
+
+// =================== NOVA FUNÇÃO: RENDER BARRA DE OCUPAÇÃO ===================
+function renderBarraOcupacao(porcentagem) {
+    // Determinar cor baseada na porcentagem
+    let cor = '#22c55e'; // verde
+    if (porcentagem >= 85) cor = '#ef4444'; // vermelho
+    else if (porcentagem >= 50) cor = '#f59e0b'; // amarelo
+    
+    const totalBlocos = 20;
+    const blocosCheios = Math.round((porcentagem / 100) * totalBlocos);
+    
+    let blocos = '';
+    for (let i = 0; i < totalBlocos; i++) {
+        blocos += `<div class="ocupacao-gauge-block ${i < blocosCheios ? 'filled' : 'empty'}"></div>`;
+    }
+    
+    return `
+        <div class="ocupacao-mini-gauge">
+            <div class="ocupacao-gauge-bar" style="color: ${cor};">
+                ${blocos}
+            </div>
+        </div>
+    `;
+}
 
 window.renderDashboardExecutivo = function() {
     logInfo('Renderizando Dashboard Executivo V3.3: REDE HOSPITALAR EXTERNA (5 HOSPITAIS)');
@@ -161,8 +185,11 @@ window.renderDashboardExecutivo = function() {
                             const kpiHosp = calcularKPIsHospital(hospitalId);
                             return `
                                 <div class="hospital-item">
-                                    <span class="hospital-nome">${CONFIG.HOSPITAIS[hospitalId].nome}</span>
-                                    <span class="hospital-pct">${kpiHosp.ocupacao}%</span>
+                                    <div class="hospital-info">
+                                        <span class="hospital-nome">${CONFIG.HOSPITAIS[hospitalId].nome}</span>
+                                        <span class="hospital-pct">${kpiHosp.ocupacao}%</span>
+                                    </div>
+                                    ${renderBarraOcupacao(kpiHosp.ocupacao)}
                                 </div>
                             `;
                         }).join('')}
@@ -317,6 +344,48 @@ window.renderDashboardExecutivo = function() {
                 height: 20px;
                 border-radius: 4px;
                 border: 1px solid rgba(0, 0, 0, 0.2);
+            }
+            
+            /* ✅ ESTILOS PARA BARRA DE OCUPAÇÃO */
+            .hospital-item {
+                display: flex;
+                flex-direction: column;
+                gap: 6px;
+                padding: 6px 0;
+                color: white;
+            }
+            
+            .hospital-info {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                font-size: 12px;
+            }
+            
+            .ocupacao-mini-gauge {
+                width: 100%;
+            }
+            
+            .ocupacao-gauge-bar {
+                display: flex;
+                align-items: center;
+                gap: 2px;
+                height: 8px;
+            }
+            
+            .ocupacao-gauge-block {
+                flex: 1;
+                height: 100%;
+                border-radius: 1px;
+                transition: all 0.3s ease;
+            }
+            
+            .ocupacao-gauge-block.filled {
+                background: currentColor;
+            }
+            
+            .ocupacao-gauge-block.empty {
+                background: rgba(255, 255, 255, 0.1);
             }
         </style>
     `;
@@ -862,15 +931,6 @@ function getExecutiveCSS() {
                 border-top: 1px solid rgba(255, 255, 255, 0.1);
             }
             
-            .hospital-item {
-                display: flex;
-                justify-content: space-between;
-                align-items: center;
-                font-size: 12px;
-                padding: 4px 0;
-                color: white;
-            }
-            
             .kpi-box {
                 background: #1a1f2e;
                 border-radius: 12px;
@@ -1016,5 +1076,5 @@ function logError(message) {
     console.error('[DASHBOARD EXECUTIVO V3.3] ' + message);
 }
 
-console.log('Dashboard Executivo V3.3 - HEATMAP TEMPORAL carregado!');
+console.log('Dashboard Executivo V3.3 - HEATMAP TEMPORAL + BARRAS DE OCUPAÇÃO carregado!');
 console.log('Hospitais em ordem alfabética: ADVENTISTA, CRUZ AZUL, NEOMATER, SANTA CLARA, STA MARCELINA');
