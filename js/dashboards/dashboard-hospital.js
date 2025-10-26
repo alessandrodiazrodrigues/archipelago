@@ -517,7 +517,7 @@ function renderHospitalSection(hospitalId) {
                 
                 <div class="grafico-item">
                     <div class="chart-header">
-                        <h4>Linhas de Cuidado em ${hoje}</h4>
+                        <h4>Linhas de Cuidado Previstas em ${hoje}</h4>
                     </div>
                     <div id="linhasBoxes${hospitalId}" class="timeline-boxes-container"></div>
                 </div>
@@ -741,7 +741,9 @@ function renderAltasHospital(hospitalId) {
             barPercentage: 0.6,
             categoryPercentage: 0.8,
             plugins: {
-                legend: { display: false },
+                legend: { 
+                    display: false
+                },
                 tooltip: {
                     backgroundColor: 'rgba(26, 31, 46, 0.95)',
                     titleColor: '#ffffff',
@@ -906,7 +908,7 @@ function renderDoughnutConcessoes(hospitalId, timeline, dados) {
                 display: true,
                 position: 'bottom',
                 labels: {
-                    color: window.fundoBranco ? '#000000' : '#ffffff',
+                    color: '#ffffff',
                     font: { size: 11 },
                     padding: 10,
                     generateLabels: function(chart) {
@@ -1094,7 +1096,7 @@ function renderDoughnutLinhas(hospitalId, timeline, dados) {
                 display: true,
                 position: 'bottom',
                 labels: {
-                    color: window.fundoBranco ? '#000000' : '#ffffff',
+                    color: '#ffffff',
                     font: { size: 11 },
                     padding: 10,
                     generateLabels: function(chart) {
