@@ -1,10 +1,17 @@
-// =================== DASHBOARD HOSPITALAR V3.3.5 - GRÁFICOS DE ROSCA NOS BOXES ===================
+// =================== DASHBOARD HOSPITALAR V3.3.6 - SEM CHARTDATALABELS ===================
 // ✅ Análise Preditiva: BARRAS HORIZONTAIS
 // ✅ Concessões/Linhas: LAYOUT 3 BOXES com GRÁFICOS DE ROSCA
+// ✅ Funciona SEM ChartDataLabels (números na legenda)
 // ✅ WhatsApp: Inclui HOJE, 24H e 48H
 
 // Estado global para fundo branco
 window.fundoBranco = false;
+
+// Verificar se ChartDataLabels está disponível
+const hasDataLabels = typeof ChartDataLabels !== 'undefined';
+if (!hasDataLabels) {
+    console.warn('⚠️ ChartDataLabels não está carregado. Números serão mostrados na legenda.');
+}
 
 // Função para obter cores Pantone EXATAS do api.js
 function getCorExata(itemName, tipo = 'concessao') {
@@ -277,7 +284,7 @@ window.copiarDashboardParaWhatsApp = function() {
 };
 
 window.renderDashboardHospitalar = function() {
-    logInfo('Renderizando Dashboard Hospitalar V3.3.5 FINAL');
+    logInfo('Renderizando Dashboard Hospitalar V3.3.6 (SEM DataLabels)');
     
     let container = document.getElementById('dashHospitalarContent');
     if (!container) {
@@ -302,7 +309,7 @@ window.renderDashboardHospitalar = function() {
         container.innerHTML = `
             <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 400px; text-align: center; color: white; background: linear-gradient(135deg, #1a1f2e 0%, #2d3748 100%); border-radius: 12px; margin: 20px; padding: 40px;">
                 <div style="width: 60px; height: 60px; border: 3px solid #60a5fa; border-top-color: transparent; border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 20px;"></div>
-                <h2 style="color: #60a5fa; margin-bottom: 10px; font-size: 20px;">Aguardando dados reais da API V3.3.5 Final</h2>
+                <h2 style="color: #60a5fa; margin-bottom: 10px; font-size: 20px;">Aguardando dados reais da API V3.3.6</h2>
                 <p style="color: #9ca3af; font-size: 14px;">Conectando com Google Apps Script...</p>
             </div>
             <style>
@@ -322,7 +329,7 @@ window.renderDashboardHospitalar = function() {
     }
     
     // ✅ ORDEM ALFABÉTICA DOS HOSPITAIS
-    const ordemAlfabetica = ['H5', 'H2', 'H1', 'H4', 'H3']; // ADVENTISTA, CRUZ AZUL, NEOMATER, SANTA CLARA, STA MARCELINA
+    const ordemAlfabetica = ['H5', 'H2', 'H1', 'H4', 'H3'];
     
     const hospitaisComDados = ordemAlfabetica.filter(hospitalId => {
         const hospital = window.hospitalData[hospitalId];
@@ -348,7 +355,7 @@ window.renderDashboardHospitalar = function() {
         <div style="background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); min-height: 100vh; padding: 20px; color: white;">
             <div class="dashboard-header" style="margin-bottom: 30px; padding: 20px; background: rgba(255, 255, 255, 0.05); border-radius: 12px; border-left: 4px solid #60a5fa;">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; flex-wrap: wrap; gap: 15px;">
-                    <h2 style="margin: 0; color: #ffffff; font-size: 24px; font-weight: 700; white-space: nowrap;">Dashboard Hospitalar V3.3.5 Final</h2>
+                    <h2 style="margin: 0; color: #ffffff; font-size: 24px; font-weight: 700; white-space: nowrap;">Dashboard Hospitalar V3.3.6</h2>
                     <div style="display: flex; gap: 10px;">
                         <button onclick="window.copiarDashboardParaWhatsApp()" class="btn-whatsapp" style="padding: 8px 16px; background: #25D366; border: none; border-radius: 8px; color: white; font-size: 14px; cursor: pointer; font-weight: 600; display: flex; align-items: center; gap: 8px; transition: all 0.3s ease;">
                             Copiar para WhatsApp
@@ -414,7 +421,7 @@ window.renderDashboardHospitalar = function() {
                 renderLinhasHospital(hospitalId);
             });
             
-            logSuccess('Dashboard Hospitalar V3.3.5 FINAL renderizado');
+            logSuccess('Dashboard Hospitalar V3.3.6 renderizado');
         }, 100);
     };
     
@@ -728,7 +735,7 @@ function renderAltasHospital(hospitalId) {
             }]
         },
         options: {
-            indexAxis: 'y', // ✅ BARRAS HORIZONTAIS
+            indexAxis: 'y',
             responsive: true,
             maintainAspectRatio: false,
             barPercentage: 0.6,
@@ -836,7 +843,6 @@ function renderConcessoesHospital(hospitalId) {
         html += `<div class="timeline-box">`;
         html += `<div class="timeline-box-header" style="color: ${corTexto};">${timeline}</div>`;
         
-        // ✅ GRÁFICO DE ROSCA
         html += `<div class="timeline-chart-container">`;
         html += `<canvas id="graficoConcessoes${hospitalId}_${timeline}" class="timeline-chart"></canvas>`;
         html += `</div>`;
@@ -862,7 +868,6 @@ function renderConcessoesHospital(hospitalId) {
     
     container.innerHTML = html;
     
-    // Renderizar gráficos de rosca
     setTimeout(() => {
         ['HOJE', '24H', '48H'].forEach(timeline => {
             renderDoughnutConcessoes(hospitalId, timeline, concessoesPorTimeline[timeline]);
@@ -870,7 +875,7 @@ function renderConcessoesHospital(hospitalId) {
     }, 100);
 }
 
-// =================== RENDERIZAR GRÁFICO DE ROSCA CONCESSÕES ===================
+// =================== RENDERIZAR GRÁFICO DE ROSCA CONCESSÕES (SEM DataLabels) ===================
 function renderDoughnutConcessoes(hospitalId, timeline, dados) {
     const canvas = document.getElementById(`graficoConcessoes${hospitalId}_${timeline}`);
     if (!canvas || typeof Chart === 'undefined') return;
@@ -893,6 +898,67 @@ function renderDoughnutConcessoes(hospitalId, timeline, dados) {
     
     const ctx = canvas.getContext('2d');
     
+    const chartOptions = {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+            legend: {
+                display: true,
+                position: 'bottom',
+                labels: {
+                    color: window.fundoBranco ? '#000000' : '#ffffff',
+                    font: { size: 11 },
+                    padding: 10,
+                    generateLabels: function(chart) {
+                        const data = chart.data;
+                        if (data.labels.length && data.datasets.length) {
+                            return data.labels.map((label, i) => {
+                                const value = data.datasets[0].data[i];
+                                const total = data.datasets[0].data.reduce((a, b) => a + b, 0);
+                                const percent = ((value / total) * 100).toFixed(0);
+                                return {
+                                    text: `${label}: ${value} (${percent}%)`,
+                                    fillStyle: data.datasets[0].backgroundColor[i],
+                                    hidden: false,
+                                    index: i
+                                };
+                            });
+                        }
+                        return [];
+                    }
+                }
+            },
+            tooltip: {
+                backgroundColor: 'rgba(26, 31, 46, 0.95)',
+                titleColor: '#ffffff',
+                bodyColor: '#ffffff',
+                callbacks: {
+                    label: function(context) {
+                        const value = context.parsed;
+                        const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                        const percent = ((value / total) * 100).toFixed(1);
+                        return `${context.label}: ${value} (${percent}%)`;
+                    }
+                }
+            }
+        }
+    };
+    
+    const chartPlugins = [backgroundPlugin];
+    
+    if (hasDataLabels) {
+        chartOptions.plugins.datalabels = {
+            color: '#ffffff',
+            font: { size: 14, weight: 'bold' },
+            formatter: (value, context) => {
+                const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                const porcentagem = ((value / total) * 100).toFixed(0);
+                return `${value}\n(${porcentagem}%)`;
+            }
+        };
+        chartPlugins.push(ChartDataLabels);
+    }
+    
     window.chartInstances[chartKey] = new Chart(ctx, {
         type: 'doughnut',
         data: {
@@ -904,38 +970,8 @@ function renderDoughnutConcessoes(hospitalId, timeline, dados) {
                 borderColor: window.fundoBranco ? '#ffffff' : '#1a1f2e'
             }]
         },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: {
-                    display: false
-                },
-                tooltip: {
-                    backgroundColor: 'rgba(26, 31, 46, 0.95)',
-                    titleColor: '#ffffff',
-                    bodyColor: '#ffffff',
-                    callbacks: {
-                        label: function(context) {
-                            return `${context.label}: ${context.parsed}`;
-                        }
-                    }
-                },
-                datalabels: {
-                    color: '#ffffff',
-                    font: {
-                        size: 14,
-                        weight: 'bold'
-                    },
-                    formatter: (value, context) => {
-                        const total = context.dataset.data.reduce((a, b) => a + b, 0);
-                        const porcentagem = ((value / total) * 100).toFixed(0);
-                        return `${value}\n(${porcentagem}%)`;
-                    }
-                }
-            }
-        },
-        plugins: [backgroundPlugin, ChartDataLabels]
+        options: chartOptions,
+        plugins: chartPlugins
     });
 }
 
@@ -995,7 +1031,6 @@ function renderLinhasHospital(hospitalId) {
         html += `<div class="timeline-box">`;
         html += `<div class="timeline-box-header" style="color: ${corTexto};">${timeline}</div>`;
         
-        // ✅ GRÁFICO DE ROSCA
         html += `<div class="timeline-chart-container">`;
         html += `<canvas id="graficoLinhas${hospitalId}_${timeline}" class="timeline-chart"></canvas>`;
         html += `</div>`;
@@ -1021,7 +1056,6 @@ function renderLinhasHospital(hospitalId) {
     
     container.innerHTML = html;
     
-    // Renderizar gráficos de rosca
     setTimeout(() => {
         ['HOJE', '24H', '48H'].forEach(timeline => {
             renderDoughnutLinhas(hospitalId, timeline, linhasPorTimeline[timeline]);
@@ -1029,7 +1063,7 @@ function renderLinhasHospital(hospitalId) {
     }, 100);
 }
 
-// =================== RENDERIZAR GRÁFICO DE ROSCA LINHAS ===================
+// =================== RENDERIZAR GRÁFICO DE ROSCA LINHAS (SEM DataLabels) ===================
 function renderDoughnutLinhas(hospitalId, timeline, dados) {
     const canvas = document.getElementById(`graficoLinhas${hospitalId}_${timeline}`);
     if (!canvas || typeof Chart === 'undefined') return;
@@ -1052,6 +1086,67 @@ function renderDoughnutLinhas(hospitalId, timeline, dados) {
     
     const ctx = canvas.getContext('2d');
     
+    const chartOptions = {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+            legend: {
+                display: true,
+                position: 'bottom',
+                labels: {
+                    color: window.fundoBranco ? '#000000' : '#ffffff',
+                    font: { size: 11 },
+                    padding: 10,
+                    generateLabels: function(chart) {
+                        const data = chart.data;
+                        if (data.labels.length && data.datasets.length) {
+                            return data.labels.map((label, i) => {
+                                const value = data.datasets[0].data[i];
+                                const total = data.datasets[0].data.reduce((a, b) => a + b, 0);
+                                const percent = ((value / total) * 100).toFixed(0);
+                                return {
+                                    text: `${label}: ${value} (${percent}%)`,
+                                    fillStyle: data.datasets[0].backgroundColor[i],
+                                    hidden: false,
+                                    index: i
+                                };
+                            });
+                        }
+                        return [];
+                    }
+                }
+            },
+            tooltip: {
+                backgroundColor: 'rgba(26, 31, 46, 0.95)',
+                titleColor: '#ffffff',
+                bodyColor: '#ffffff',
+                callbacks: {
+                    label: function(context) {
+                        const value = context.parsed;
+                        const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                        const percent = ((value / total) * 100).toFixed(1);
+                        return `${context.label}: ${value} (${percent}%)`;
+                    }
+                }
+            }
+        }
+    };
+    
+    const chartPlugins = [backgroundPlugin];
+    
+    if (hasDataLabels) {
+        chartOptions.plugins.datalabels = {
+            color: '#ffffff',
+            font: { size: 14, weight: 'bold' },
+            formatter: (value, context) => {
+                const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                const porcentagem = ((value / total) * 100).toFixed(0);
+                return `${value}\n(${porcentagem}%)`;
+            }
+        };
+        chartPlugins.push(ChartDataLabels);
+    }
+    
     window.chartInstances[chartKey] = new Chart(ctx, {
         type: 'doughnut',
         data: {
@@ -1063,51 +1158,21 @@ function renderDoughnutLinhas(hospitalId, timeline, dados) {
                 borderColor: window.fundoBranco ? '#ffffff' : '#1a1f2e'
             }]
         },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: {
-                    display: false
-                },
-                tooltip: {
-                    backgroundColor: 'rgba(26, 31, 46, 0.95)',
-                    titleColor: '#ffffff',
-                    bodyColor: '#ffffff',
-                    callbacks: {
-                        label: function(context) {
-                            return `${context.label}: ${context.parsed}`;
-                        }
-                    }
-                },
-                datalabels: {
-                    color: '#ffffff',
-                    font: {
-                        size: 14,
-                        weight: 'bold'
-                    },
-                    formatter: (value, context) => {
-                        const total = context.dataset.data.reduce((a, b) => a + b, 0);
-                        const porcentagem = ((value / total) * 100).toFixed(0);
-                        return `${value}\n(${porcentagem}%)`;
-                    }
-                }
-            }
-        },
-        plugins: [backgroundPlugin, ChartDataLabels]
+        options: chartOptions,
+        plugins: chartPlugins
     });
 }
 
 // Função de força de atualização
 window.forceDataRefresh = function() {
-    logInfo('Forçando atualização dos dados hospitalares V3.3.5 Final...');
+    logInfo('Forçando atualização dos dados hospitalares V3.3.6...');
     
     const container = document.getElementById('dashHospitalarContent');
     if (container) {
         container.innerHTML = `
             <div style="text-align: center; padding: 50px;">
                 <div style="color: #60a5fa; font-size: 18px; margin-bottom: 15px;">
-                    Recarregando dados reais da API V3.3.5 Final...
+                    Recarregando dados reais da API V3.3.6...
                 </div>
             </div>
         `;
@@ -1672,20 +1737,20 @@ window.renderDoughnutLinhas = renderDoughnutLinhas;
 
 // Funções de log
 function logInfo(message) {
-    console.log(`🔵 [DASHBOARD HOSPITALAR V3.3.5 FINAL] ${message}`);
+    console.log(`🔵 [DASHBOARD HOSPITALAR V3.3.6] ${message}`);
 }
 
 function logSuccess(message) {
-    console.log(`✅ [DASHBOARD HOSPITALAR V3.3.5 FINAL] ${message}`);
+    console.log(`✅ [DASHBOARD HOSPITALAR V3.3.6] ${message}`);
 }
 
 function logError(message, error) {
-    console.error(`❌ [DASHBOARD HOSPITALAR V3.3.5 FINAL] ${message}`, error || '');
+    console.error(`❌ [DASHBOARD HOSPITALAR V3.3.6] ${message}`, error || '');
 }
 
-console.log('🎯 Dashboard Hospitalar V3.3.5 - GRÁFICOS DE ROSCA NOS BOXES!');
-console.log('✅ CORREÇÃO: Análise Preditiva com BARRAS HORIZONTAIS');
-console.log('✅ CORREÇÃO: Concessões/Linhas com GRÁFICOS DE ROSCA em cada box');
-console.log('✅ CORREÇÃO: Layout 3 boxes (HOJE, 24H, 48H) com gráfico + lista');
-console.log('✅ CORREÇÃO: WhatsApp inclui HOJE, 24H e 48H');
-console.log('🚀 READY: Sistema V3.3.5 100% funcional!');
+console.log('🎯 Dashboard Hospitalar V3.3.6 - SEM CHARTDATALABELS!');
+console.log('✅ Análise Preditiva: BARRAS HORIZONTAIS');
+console.log('✅ Concessões/Linhas: GRÁFICOS DE ROSCA (números na legenda)');
+console.log('✅ Funciona SEM ChartDataLabels');
+console.log('⚠️ Para números DENTRO dos gráficos, adicione ChartDataLabels ao HTML');
+console.log('🚀 READY: Sistema V3.3.6 100% funcional!');
