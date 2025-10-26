@@ -1,3 +1,4 @@
+// js/dashboards/dashboard-hospital.js
 // =================== DASHBOARD HOSPITALAR V3.3.6 - SEM CHARTDATALABELS ===================
 // ✅ Análise Preditiva: BARRAS HORIZONTAIS
 // ✅ Concessões/Linhas: LAYOUT 3 BOXES com GRÁFICOS DE ROSCA
@@ -875,7 +876,7 @@ function renderConcessoesHospital(hospitalId) {
     }, 100);
 }
 
-// =================== RENDERIZAR GRÁFICO DE ROSCA CONCESSÕES (SEM DataLabels) ===================
+// =================== RENDERIZAR GRÁFICO DE ROSCA CONCESSÕES (SEM LEGENDA) ===================
 function renderDoughnutConcessoes(hospitalId, timeline, dados) {
     const canvas = document.getElementById(`graficoConcessoes${hospitalId}_${timeline}`);
     if (!canvas || typeof Chart === 'undefined') return;
@@ -903,30 +904,7 @@ function renderDoughnutConcessoes(hospitalId, timeline, dados) {
         maintainAspectRatio: false,
         plugins: {
             legend: {
-                display: true,
-                position: 'bottom',
-                labels: {
-                    color: '#ffffff',
-                    font: { size: 11 },
-                    padding: 10,
-                    generateLabels: function(chart) {
-                        const data = chart.data;
-                        if (data.labels.length && data.datasets.length) {
-                            return data.labels.map((label, i) => {
-                                const value = data.datasets[0].data[i];
-                                const total = data.datasets[0].data.reduce((a, b) => a + b, 0);
-                                const percent = ((value / total) * 100).toFixed(0);
-                                return {
-                                    text: `${label}: ${value} (${percent}%)`,
-                                    fillStyle: data.datasets[0].backgroundColor[i],
-                                    hidden: false,
-                                    index: i
-                                };
-                            });
-                        }
-                        return [];
-                    }
-                }
+                display: false
             },
             tooltip: {
                 backgroundColor: 'rgba(26, 31, 46, 0.95)',
@@ -1061,7 +1039,7 @@ function renderLinhasHospital(hospitalId) {
     }, 100);
 }
 
-// =================== RENDERIZAR GRÁFICO DE ROSCA LINHAS (SEM DataLabels) ===================
+// =================== RENDERIZAR GRÁFICO DE ROSCA LINHAS (SEM LEGENDA) ===================
 function renderDoughnutLinhas(hospitalId, timeline, dados) {
     const canvas = document.getElementById(`graficoLinhas${hospitalId}_${timeline}`);
     if (!canvas || typeof Chart === 'undefined') return;
@@ -1089,30 +1067,7 @@ function renderDoughnutLinhas(hospitalId, timeline, dados) {
         maintainAspectRatio: false,
         plugins: {
             legend: {
-                display: true,
-                position: 'bottom',
-                labels: {
-                    color: '#ffffff',
-                    font: { size: 11 },
-                    padding: 10,
-                    generateLabels: function(chart) {
-                        const data = chart.data;
-                        if (data.labels.length && data.datasets.length) {
-                            return data.labels.map((label, i) => {
-                                const value = data.datasets[0].data[i];
-                                const total = data.datasets[0].data.reduce((a, b) => a + b, 0);
-                                const percent = ((value / total) * 100).toFixed(0);
-                                return {
-                                    text: `${label}: ${value} (${percent}%)`,
-                                    fillStyle: data.datasets[0].backgroundColor[i],
-                                    hidden: false,
-                                    index: i
-                                };
-                            });
-                        }
-                        return [];
-                    }
-                }
+                display: false
             },
             tooltip: {
                 backgroundColor: 'rgba(26, 31, 46, 0.95)',
@@ -1748,7 +1703,7 @@ function logError(message, error) {
 
 console.log('🎯 Dashboard Hospitalar V3.3.6 - SEM CHARTDATALABELS!');
 console.log('✅ Análise Preditiva: BARRAS HORIZONTAIS');
-console.log('✅ Concessões/Linhas: GRÁFICOS DE ROSCA (números na legenda)');
+console.log('✅ Concessões/Linhas: GRÁFICOS DE ROSCA (SEM legenda do Chart.js)');
 console.log('✅ Funciona SEM ChartDataLabels');
 console.log('⚠️ Para números DENTRO dos gráficos, adicione ChartDataLabels ao HTML');
 console.log('🚀 READY: Sistema V3.3.6 100% funcional!');
