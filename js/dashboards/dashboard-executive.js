@@ -829,27 +829,23 @@ function getExecutiveCSS() {
             
             .gauge-value {
                 position: absolute;
-                top: 50%;
+                top: 65%;
                 left: 50%;
-                transform: translate(-50%, -50%);
+                transform: translateX(-50%);
                 font-size: 36px;
                 font-weight: 700;
-                color: white;
+                color: #22c55e;
                 line-height: 1;
                 margin: 0;
+                padding: 6px 16px;
+                border-radius: 12px;
+                background: rgba(34, 197, 94, 0.2);
+                border: 1px solid #22c55e;
+                display: inline-block;
             }
             
             .gauge-label {
-                position: absolute;
-                top: 85%;
-                left: 50%;
-                transform: translateX(-50%);
-                font-size: 11px;
-                color: #9ca3af;
-                text-transform: uppercase;
-                letter-spacing: 0.5px;
-                margin: 0;
-                white-space: nowrap;
+                display: none;
             }
             
             .hospitais-percentuais {
