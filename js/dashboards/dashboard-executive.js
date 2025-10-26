@@ -476,7 +476,9 @@ function renderGaugeExecutivoHorizontal(ocupacao) {
                     'rgba(255,255,255,0.1)'
                 ],
                 borderWidth: 0,
-                cutout: '75%'
+                cutout: '75%',
+                borderRadius: 20,
+                spacing: 0
             }]
         },
         options: {
