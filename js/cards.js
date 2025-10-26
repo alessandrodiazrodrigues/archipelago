@@ -225,7 +225,20 @@ window.renderCards = function() {
         return;
     }
     
-    hospital.leitos.forEach(leito => {
+    // ✅ CORREÇÃO: ORDENAR CARDS - OCUPADOS PRIMEIRO, DEPOIS VAGOS
+    const leitosOrdenados = hospital.leitos.sort((a, b) => {
+        const aOcupado = (a.status === 'ocupado' || a.status === 'Em uso' || a.status === 'Ocupado');
+        const bOcupado = (b.status === 'ocupado' || b.status === 'Em uso' || b.status === 'Ocupado');
+        
+        // Se status diferente, ocupados vêm primeiro
+        if (aOcupado && !bOcupado) return -1;
+        if (!aOcupado && bOcupado) return 1;
+        
+        // Se mesmo status, ordenar por número do leito (crescente)
+        return (a.leito || 0) - (b.leito || 0);
+    });
+    
+    leitosOrdenados.forEach(leito => {
         const card = createCard(leito, hospitalNome);
         container.appendChild(card);
     });
@@ -986,7 +999,7 @@ function createAdmissaoForm(hospitalNome, leitoNumero, hospitalId) {
                 </div>
             </div>
             
-            <!-- ID LEITO | DIRETIVAS | TIPO DE QUARTO (3 COLUNAS) -->
+            <!-- ✅ LINHA 1 REORGANIZADA: IDENTIFICAÇÃO | TIPO QUARTO | ISOLAMENTO -->
             <div style="margin-bottom: 20px;">
                 <div class="form-grid-3-cols" style="display: grid; grid-template-columns: ${(isHibrido || isCruzAzulEnfermaria || isApartamentoFixo || hospitalId === 'H4') ? '1fr 1fr 1fr' : '1fr 1fr'}; gap: 15px;">
                     <div>
@@ -996,14 +1009,6 @@ function createAdmissaoForm(hospitalNome, leitoNumero, hospitalId) {
                                <div style="font-size: 10px; color: rgba(255,255,255,0.5); margin-top: 3px;">🔒 Numeração fixa (Cruz Azul - Enfermaria)</div>`
                             : `<input id="admIdentificacaoLeito" type="text" placeholder="Ex: 21 ou 711.1 (máx. 10)" maxlength="10" required style="width: 100%; padding: 12px; background: #374151; color: #ffffff; border: 1px solid rgba(255,255,255,0.3); border-radius: 6px; font-size: 14px;">`
                         }
-                    </div>
-                    
-                    <!-- DIRETIVAS -->
-                    <div>
-                        <label style="display: block; margin-bottom: 5px; color: #e2e8f0; font-weight: 600;">DIRETIVAS</label>
-                        <select id="admDiretivas" style="width: 100%; padding: 12px; background: #374151 !important; color: #ffffff !important; border: 1px solid rgba(255,255,255,0.3); border-radius: 6px; font-size: 14px;">
-                            ${window.DIRETIVAS_OPTIONS.map((opcao, index) => `<option value="${opcao}" ${index === 0 ? 'selected' : ''}>${opcao}</option>`).join('')}
-                        </select>
                     </div>
                     
                     <!-- ⭐ TIPO DE QUARTO -->
@@ -1027,13 +1032,8 @@ function createAdmissaoForm(hospitalNome, leitoNumero, hospitalId) {
                         }
                     </div>
                     ` : ''}
-                </div>
-            </div>
-            
-            <!-- ISOLAMENTO, REGIÃO, GÊNERO: 3 COLUNAS OBRIGATÓRIAS -->
-            <div style="margin-bottom: 20px;">
-                
-                <div class="form-grid-3-cols" style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px;">
+                    
+                    <!-- ISOLAMENTO -->
                     <div>
                         <label style="display: block; margin-bottom: 5px; color: #e2e8f0; font-weight: 600;">ISOLAMENTO <span style="color: #ef4444;">*</span></label>
                         <select id="admIsolamento" required style="width: 100%; padding: 12px; background: #374151 !important; color: #ffffff !important; border: 1px solid rgba(255,255,255,0.3); border-radius: 6px; font-size: 14px;">
@@ -1041,13 +1041,12 @@ function createAdmissaoForm(hospitalNome, leitoNumero, hospitalId) {
                             ${window.ISOLAMENTO_OPTIONS.map(opcao => `<option value="${opcao}">${opcao}</option>`).join('')}
                         </select>
                     </div>
-                    <div>
-                        <label style="display: block; margin-bottom: 5px; color: #e2e8f0; font-weight: 600;">REGIÃO <span style="color: #ef4444;">*</span></label>
-                        <select id="admRegiao" required style="width: 100%; padding: 12px; background: #374151 !important; color: #ffffff !important; border: 1px solid rgba(255,255,255,0.3); border-radius: 6px; font-size: 14px;">
-                            <option value="">Selecionar...</option>
-                            ${window.REGIAO_OPTIONS.map(regiao => `<option value="${regiao}">${regiao}</option>`).join('')}
-                        </select>
-                    </div>
+                </div>
+            </div>
+            
+            <!-- ✅ LINHA 2 REORGANIZADA: GÊNERO | REGIÃO | PREVISÃO ALTA -->
+            <div style="margin-bottom: 20px;">
+                <div class="form-grid-3-cols" style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px;">
                     <div>
                         <label style="display: block; margin-bottom: 5px; color: #e2e8f0; font-weight: 600;">GÊNERO <span style="color: #ef4444;">*</span></label>
                         <select id="admSexo" required ${generoDisabled ? 'disabled' : ''} style="width: 100%; padding: 12px; background: ${generoDisabled ? '#1f2937' : '#374151'} !important; color: ${generoDisabled ? '#9ca3af' : '#ffffff'} !important; border: 1px solid rgba(255,255,255,0.3); border-radius: 6px; font-size: 14px;">
@@ -1059,10 +1058,23 @@ function createAdmissaoForm(hospitalNome, leitoNumero, hospitalId) {
                         </select>
                         ${generoDisabled ? '<div style="font-size: 10px; color: rgba(255,255,255,0.5); margin-top: 3px;">🔒 Gênero definido pelo leito irmão</div>' : ''}
                     </div>
+                    <div>
+                        <label style="display: block; margin-bottom: 5px; color: #e2e8f0; font-weight: 600;">REGIÃO <span style="color: #ef4444;">*</span></label>
+                        <select id="admRegiao" required style="width: 100%; padding: 12px; background: #374151 !important; color: #ffffff !important; border: 1px solid rgba(255,255,255,0.3); border-radius: 6px; font-size: 14px;">
+                            <option value="">Selecionar...</option>
+                            ${window.REGIAO_OPTIONS.map(regiao => `<option value="${regiao}">${regiao}</option>`).join('')}
+                        </select>
+                    </div>
+                    <div>
+                        <label style="display: block; margin-bottom: 5px; color: #e2e8f0; font-weight: 600;">PREVISÃO ALTA</label>
+                        <select id="admPrevAlta" style="width: 100%; padding: 12px; background: #374151 !important; color: #ffffff !important; border: 1px solid rgba(255,255,255,0.3); border-radius: 6px; font-size: 14px;">
+                            ${window.PREVISAO_ALTA_OPTIONS.map(opt => `<option value="${opt}">${opt}</option>`).join('')}
+                        </select>
+                    </div>
                 </div>
             </div>
             
-            <!-- INICIAIS, MATRÍCULA, IDADE: 3 COLUNAS -->
+            <!-- LINHA 3: INICIAIS, MATRÍCULA, IDADE: 3 COLUNAS -->
             <div class="form-grid-3-cols" style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; margin-bottom: 20px;">
                 <div>
                     <label style="display: block; margin-bottom: 5px; color: #e2e8f0; font-weight: 600;">INICIAIS</label>
@@ -1081,7 +1093,7 @@ function createAdmissaoForm(hospitalNome, leitoNumero, hospitalId) {
                 </div>
             </div>
             
-            <!-- PPS, SPICT, PREVISÃO ALTA: 3 COLUNAS -->
+            <!-- ✅ LINHA 4 REORGANIZADA: PPS | SPICT-BR | DIRETIVAS -->
             <div class="form-grid-3-cols" style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; margin-bottom: 20px;">
                 <div>
                     <label style="display: block; margin-bottom: 5px; color: #e2e8f0; font-weight: 600;">PPS</label>
@@ -1098,9 +1110,9 @@ function createAdmissaoForm(hospitalNome, leitoNumero, hospitalId) {
                     </select>
                 </div>
                 <div>
-                    <label style="display: block; margin-bottom: 5px; color: #e2e8f0; font-weight: 600;">PREVISÃO ALTA</label>
-                    <select id="admPrevAlta" style="width: 100%; padding: 12px; background: #374151 !important; color: #ffffff !important; border: 1px solid rgba(255,255,255,0.3); border-radius: 6px; font-size: 14px;">
-                        ${window.PREVISAO_ALTA_OPTIONS.map(opt => `<option value="${opt}">${opt}</option>`).join('')}
+                    <label style="display: block; margin-bottom: 5px; color: #e2e8f0; font-weight: 600;">DIRETIVAS</label>
+                    <select id="admDiretivas" style="width: 100%; padding: 12px; background: #374151 !important; color: #ffffff !important; border: 1px solid rgba(255,255,255,0.3); border-radius: 6px; font-size: 14px;">
+                        ${window.DIRETIVAS_OPTIONS.map((opcao, index) => `<option value="${opcao}" ${index === 0 ? 'selected' : ''}>${opcao}</option>`).join('')}
                     </select>
                 </div>
             </div>
@@ -1207,9 +1219,7 @@ function createAtualizacaoForm(hospitalNome, leitoNumero, dadosLeito) {
                 <strong>Hospital:</strong> ${hospitalNome} | <strong>ID:</strong> ${idSequencial} | <strong>Leito:</strong> ${leitoPersonalizado}
             </div>
             
-            <!-- ⭐ CORREÇÃO 3: LAYOUT IGUAL AO ADMITIR (3 COLUNAS) -->
-            
-            <!-- ID LEITO | DIRETIVAS | TIPO DE QUARTO (3 COLUNAS) -->
+            <!-- ✅ LINHA 1 REORGANIZADA: IDENTIFICAÇÃO | TIPO QUARTO | ISOLAMENTO -->
             <div style="margin-bottom: 20px;">
                 <div class="form-grid-3-cols" style="display: grid; grid-template-columns: ${(isHibrido || isCruzAzulEnfermaria || isApartamentoFixo || hospitalId === 'H4') ? '1fr 1fr 1fr' : '1fr 1fr'}; gap: 15px;">
                     <!-- IDENTIFICAÇÃO DO LEITO -->
@@ -1220,14 +1230,6 @@ function createAtualizacaoForm(hospitalNome, leitoNumero, dadosLeito) {
                             : `<input id="updIdentificacaoLeito" type="text" value="${identificacaoAtual}" placeholder="Ex: 21 ou 711.1 (máx. 10)" maxlength="10" required style="width: 100%; padding: 12px; background: #374151; color: #ffffff; border: 1px solid rgba(255,255,255,0.3); border-radius: 6px; font-size: 14px;">`
                         }
                         ${isCruzAzulEnfermaria ? '<div style="font-size: 10px; color: rgba(255,255,255,0.5); margin-top: 3px;">🔒 Identificação fixa</div>' : ''}
-                    </div>
-                    
-                    <!-- DIRETIVAS -->
-                    <div>
-                        <label style="display: block; margin-bottom: 5px; color: #e2e8f0; font-weight: 600;">DIRETIVAS</label>
-                        <select id="updDiretivas" style="width: 100%; padding: 12px; background: #374151 !important; color: #ffffff !important; border: 1px solid rgba(255,255,255,0.3); border-radius: 6px; font-size: 14px;">
-                            ${window.DIRETIVAS_OPTIONS.map(opcao => `<option value="${opcao}" ${diretivasAtual === opcao ? 'selected' : ''}>${opcao}</option>`).join('')}
-                        </select>
                     </div>
                     
                     <!-- ⭐ TIPO DE QUARTO -->
@@ -1251,16 +1253,25 @@ function createAtualizacaoForm(hospitalNome, leitoNumero, dadosLeito) {
                         }
                     </div>
                     ` : ''}
-                </div>
-            </div>
-            
-            <!-- ISOLAMENTO, REGIÃO, GÊNERO: 3 COLUNAS OBRIGATÓRIAS -->
-            <div style="margin-bottom: 20px;">
-                <div class="form-grid-3-cols" style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px;">
+                    
+                    <!-- ISOLAMENTO -->
                     <div>
                         <label style="display: block; margin-bottom: 5px; color: #e2e8f0; font-weight: 600;">ISOLAMENTO <span style="color: #ef4444;">*</span></label>
                         <select id="updIsolamento" required style="width: 100%; padding: 12px; background: #374151 !important; color: #ffffff !important; border: 1px solid rgba(255,255,255,0.3); border-radius: 6px; font-size: 14px;">
                             ${window.ISOLAMENTO_OPTIONS.map(opcao => `<option value="${opcao}" ${isolamentoAtual === opcao ? 'selected' : ''}>${opcao}</option>`).join('')}
+                        </select>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- ✅ LINHA 2 REORGANIZADA: GÊNERO | REGIÃO | PREVISÃO ALTA -->
+            <div style="margin-bottom: 20px;">
+                <div class="form-grid-3-cols" style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px;">
+                    <div>
+                        <label style="display: block; margin-bottom: 5px; color: #e2e8f0; font-weight: 600;">GÊNERO <span style="color: #ef4444;">*</span></label>
+                        <select id="updSexo" required style="width: 100%; padding: 12px; background: #374151 !important; color: #ffffff !important; border: 1px solid rgba(255,255,255,0.3); border-radius: 6px; font-size: 14px;">
+                            <option value="">Selecionar...</option>
+                            ${window.SEXO_OPTIONS.map(sexo => `<option value="${sexo}" ${sexoAtual === sexo ? 'selected' : ''}>${sexo}</option>`).join('')}
                         </select>
                     </div>
                     <div>
@@ -1271,16 +1282,21 @@ function createAtualizacaoForm(hospitalNome, leitoNumero, dadosLeito) {
                         </select>
                     </div>
                     <div>
-                        <label style="display: block; margin-bottom: 5px; color: #e2e8f0; font-weight: 600;">GÊNERO <span style="color: #ef4444;">*</span></label>
-                        <select id="updSexo" required style="width: 100%; padding: 12px; background: #374151 !important; color: #ffffff !important; border: 1px solid rgba(255,255,255,0.3); border-radius: 6px; font-size: 14px;">
-                            <option value="">Selecionar...</option>
-                            ${window.SEXO_OPTIONS.map(sexo => `<option value="${sexo}" ${sexoAtual === sexo ? 'selected' : ''}>${sexo}</option>`).join('')}
+                        <label style="display: block; margin-bottom: 5px; color: #e2e8f0; font-weight: 600;">PREVISÃO ALTA</label>
+                        <select id="updPrevAlta" style="width: 100%; padding: 12px; background: #374151 !important; color: #ffffff !important; border: 1px solid rgba(255,255,255,0.3); border-radius: 6px; font-size: 14px;">
+                            ${window.PREVISAO_ALTA_OPTIONS.map(opt => {
+                                const previsaoAtual = (dadosLeito?.prevAlta || '').trim();
+                                const isSelected = previsaoAtual === opt || 
+                                                  (previsaoAtual === 'SP' && opt === 'Sem Previsão') ||
+                                                  (previsaoAtual === 'Sem Previsão' && opt === 'Sem Previsão');
+                                return `<option value="${opt}" ${isSelected ? 'selected' : ''}>${opt}</option>`;
+                            }).join('')}
                         </select>
                     </div>
                 </div>
             </div>
             
-            <!-- INICIAIS, MATRÍCULA, IDADE: 3 COLUNAS -->
+            <!-- LINHA 3: INICIAIS, MATRÍCULA, IDADE: 3 COLUNAS -->
             <div class="form-grid-3-cols" style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; margin-bottom: 20px;">
                 <div>
                     <label style="display: block; margin-bottom: 5px; color: #e2e8f0; font-weight: 600;">INICIAIS</label>
@@ -1299,7 +1315,7 @@ function createAtualizacaoForm(hospitalNome, leitoNumero, dadosLeito) {
                 </div>
             </div>
             
-            <!-- PPS, SPICT, PREVISÃO ALTA: 3 COLUNAS -->
+            <!-- ✅ LINHA 4 REORGANIZADA: PPS | SPICT-BR | DIRETIVAS -->
             <div class="form-grid-3-cols" style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; margin-bottom: 20px;">
                 <div>
                     <label style="display: block; margin-bottom: 5px; color: #e2e8f0; font-weight: 600;">PPS</label>
@@ -1318,15 +1334,9 @@ function createAtualizacaoForm(hospitalNome, leitoNumero, dadosLeito) {
                 </div>
                 
                 <div>
-                    <label style="display: block; margin-bottom: 5px; color: #e2e8f0; font-weight: 600;">PREVISÃO ALTA</label>
-                    <select id="updPrevAlta" style="width: 100%; padding: 12px; background: #374151 !important; color: #ffffff !important; border: 1px solid rgba(255,255,255,0.3); border-radius: 6px; font-size: 14px;">
-                        ${window.PREVISAO_ALTA_OPTIONS.map(opt => {
-                            const previsaoAtual = (dadosLeito?.prevAlta || '').trim();
-                            const isSelected = previsaoAtual === opt || 
-                                              (previsaoAtual === 'SP' && opt === 'Sem Previsão') ||
-                                              (previsaoAtual === 'Sem Previsão' && opt === 'Sem Previsão');
-                            return `<option value="${opt}" ${isSelected ? 'selected' : ''}>${opt}</option>`;
-                        }).join('')}
+                    <label style="display: block; margin-bottom: 5px; color: #e2e8f0; font-weight: 600;">DIRETIVAS</label>
+                    <select id="updDiretivas" style="width: 100%; padding: 12px; background: #374151 !important; color: #ffffff !important; border: 1px solid rgba(255,255,255,0.3); border-radius: 6px; font-size: 14px;">
+                        ${window.DIRETIVAS_OPTIONS.map(opcao => `<option value="${opcao}" ${diretivasAtual === opcao ? 'selected' : ''}>${opcao}</option>`).join('')}
                     </select>
                 </div>
             </div>
@@ -2158,9 +2168,8 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     logInfo('🚀 CORREÇÕES APLICADAS V3.3.2:');
-    logInfo('  • ✅ CORREÇÃO 16: Pré-seleção "Sem Previsão" normalizada');
-    logInfo('  • ✅ CORREÇÃO 17: Labels sem quebra de linha');
-    logInfo('  • ✅ CORREÇÃO 18: Lógica "Não se aplica" implementada');
+    logInfo('  • ✅ CORREÇÃO 19: Reorganização do modal (4 linhas)');
+    logInfo('  • ✅ CORREÇÃO 20: Ordenação dos cards (ocupados → vagos)');
 });
 
 // =================== EXPORTS ===================
@@ -2176,7 +2185,6 @@ window.formatarMatricula = formatarMatricula;
 
 logSuccess('🎉 CARDS.JS V3.3.2 COMPLETO E CORRIGIDO!');
 logInfo('📋 RESUMO DAS CORREÇÕES V3.3.2:');
-logInfo('  • ✅ CORREÇÃO 16: Pré-seleção "Sem Previsão" funcionando');
-logInfo('  • ✅ CORREÇÃO 17: Label "IDENTIFICAÇÃO DO LEITO *" sem quebra');
-logInfo('  • ✅ CORREÇÃO 18: "Não se aplica" com lógica exclusiva');
+logInfo('  • ✅ CORREÇÃO 19: Modal reorganizado (IDENTIFICAÇÃO | TIPO | ISOLAMENTO / GÊNERO | REGIÃO | PREV ALTA / INICIAIS | MATRÍCULA | IDADE / PPS | SPICT | DIRETIVAS)');
+logInfo('  • ✅ CORREÇÃO 20: Cards ordenados (primeiro ocupados crescente, depois vagos crescente)');
 console.log('✅ CARDS.JS V3.3.2 FINAL CARREGADO COM TODAS AS CORREÇÕES!');
