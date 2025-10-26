@@ -1,7 +1,7 @@
-// =================== DASHBOARD HOSPITALAR V3.3.6 - SEM CHARTDATALABELS ===================
+// =================== DASHBOARD HOSPITALAR V3.3.7 - SEM LEGENDAS HTML ===================
 // ✅ Análise Preditiva: BARRAS HORIZONTAIS
-// ✅ Concessões/Linhas: LAYOUT 3 BOXES com GRÁFICOS DE ROSCA
-// ✅ Funciona SEM ChartDataLabels (números na legenda)
+// ✅ Concessões/Linhas: APENAS GRÁFICOS DE ROSCA (sem lista HTML)
+// ✅ Legendas dos gráficos SEMPRE BRANCAS
 // ✅ WhatsApp: Inclui HOJE, 24H e 48H
 
 // Estado global para fundo branco
@@ -284,7 +284,7 @@ window.copiarDashboardParaWhatsApp = function() {
 };
 
 window.renderDashboardHospitalar = function() {
-    logInfo('Renderizando Dashboard Hospitalar V3.3.6 (SEM DataLabels)');
+    logInfo('Renderizando Dashboard Hospitalar V3.3.7 (SEM Legendas HTML)');
     
     let container = document.getElementById('dashHospitalarContent');
     if (!container) {
@@ -309,7 +309,7 @@ window.renderDashboardHospitalar = function() {
         container.innerHTML = `
             <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 400px; text-align: center; color: white; background: linear-gradient(135deg, #1a1f2e 0%, #2d3748 100%); border-radius: 12px; margin: 20px; padding: 40px;">
                 <div style="width: 60px; height: 60px; border: 3px solid #60a5fa; border-top-color: transparent; border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 20px;"></div>
-                <h2 style="color: #60a5fa; margin-bottom: 10px; font-size: 20px;">Aguardando dados reais da API V3.3.6</h2>
+                <h2 style="color: #60a5fa; margin-bottom: 10px; font-size: 20px;">Aguardando dados reais da API V3.3.7</h2>
                 <p style="color: #9ca3af; font-size: 14px;">Conectando com Google Apps Script...</p>
             </div>
             <style>
@@ -355,7 +355,7 @@ window.renderDashboardHospitalar = function() {
         <div style="background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); min-height: 100vh; padding: 20px; color: white;">
             <div class="dashboard-header" style="margin-bottom: 30px; padding: 20px; background: rgba(255, 255, 255, 0.05); border-radius: 12px; border-left: 4px solid #60a5fa;">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; flex-wrap: wrap; gap: 15px;">
-                    <h2 style="margin: 0; color: #ffffff; font-size: 24px; font-weight: 700; white-space: nowrap;">Dashboard Hospitalar V3.3.6</h2>
+                    <h2 style="margin: 0; color: #ffffff; font-size: 24px; font-weight: 700; white-space: nowrap;">Dashboard Hospitalar V3.3.7</h2>
                     <div style="display: flex; gap: 10px;">
                         <button onclick="window.copiarDashboardParaWhatsApp()" class="btn-whatsapp" style="padding: 8px 16px; background: #25D366; border: none; border-radius: 8px; color: white; font-size: 14px; cursor: pointer; font-weight: 600; display: flex; align-items: center; gap: 8px; transition: all 0.3s ease;">
                             Copiar para WhatsApp
@@ -421,7 +421,7 @@ window.renderDashboardHospitalar = function() {
                 renderLinhasHospital(hospitalId);
             });
             
-            logSuccess('Dashboard Hospitalar V3.3.6 renderizado');
+            logSuccess('Dashboard Hospitalar V3.3.7 renderizado');
         }, 100);
     };
     
@@ -789,7 +789,7 @@ function renderAltasHospital(hospitalId) {
     });
 }
 
-// =================== CONCESSÕES - LAYOUT 3 BOXES COM GRÁFICOS DE ROSCA ===================
+// =================== CONCESSÕES - APENAS GRÁFICOS DE ROSCA ===================
 function renderConcessoesHospital(hospitalId) {
     const container = document.getElementById(`concessoesBoxes${hospitalId}`);
     if (!container) return;
@@ -842,26 +842,10 @@ function renderConcessoesHospital(hospitalId) {
         
         html += `<div class="timeline-box">`;
         html += `<div class="timeline-box-header">${timeline}</div>`;
-        
-        html += `<div class="timeline-chart-container">`;
+        html += `<div class="timeline-chart-container-full">`;
         html += `<canvas id="graficoConcessoes${hospitalId}_${timeline}" class="timeline-chart"></canvas>`;
         html += `</div>`;
-        
-        html += `<div class="timeline-box-content">`;
-        
-        if (concessoes.length === 0) {
-            html += `<div style="text-align: center; padding: 20px; color: #9ca3af; font-style: italic; font-size: 12px;">Sem concessões</div>`;
-        } else {
-            concessoes.forEach(([nome, mats]) => {
-                const cor = getCorExata(nome, 'concessao');
-                html += `<div class="timeline-item" style="border-left-color: ${cor};">`;
-                html += `<div class="timeline-item-name">${nome}</div>`;
-                html += `<div class="timeline-item-mats">${mats.join(', ')}</div>`;
-                html += `</div>`;
-            });
-        }
-        
-        html += `</div></div>`;
+        html += `</div>`;
     });
     
     html += '</div>';
@@ -875,7 +859,7 @@ function renderConcessoesHospital(hospitalId) {
     }, 100);
 }
 
-// =================== RENDERIZAR GRÁFICO DE ROSCA CONCESSÕES (SEM DataLabels) ===================
+// =================== RENDERIZAR GRÁFICO DE ROSCA CONCESSÕES ===================
 function renderDoughnutConcessoes(hospitalId, timeline, dados) {
     const canvas = document.getElementById(`graficoConcessoes${hospitalId}_${timeline}`);
     if (!canvas || typeof Chart === 'undefined') return;
@@ -890,7 +874,10 @@ function renderDoughnutConcessoes(hospitalId, timeline, dados) {
     const concessoes = Object.entries(dados)
         .sort((a, b) => b[1].length - a[1].length);
     
-    if (concessoes.length === 0) return;
+    if (concessoes.length === 0) {
+        canvas.parentElement.innerHTML = `<div style="display: flex; align-items: center; justify-content: center; height: 100%; color: #9ca3af; font-style: italic; font-size: 14px;">Sem concessões</div>`;
+        return;
+    }
     
     const labels = concessoes.map(([nome]) => nome);
     const values = concessoes.map(([, mats]) => mats.length);
@@ -908,7 +895,7 @@ function renderDoughnutConcessoes(hospitalId, timeline, dados) {
                 labels: {
                     color: '#ffffff',
                     font: { size: 11 },
-                    padding: 10,
+                    padding: 8,
                     generateLabels: function(chart) {
                         const data = chart.data;
                         if (data.labels.length && data.datasets.length) {
@@ -975,7 +962,7 @@ function renderDoughnutConcessoes(hospitalId, timeline, dados) {
     });
 }
 
-// =================== LINHAS DE CUIDADO - LAYOUT 3 BOXES COM GRÁFICOS DE ROSCA ===================
+// =================== LINHAS DE CUIDADO - APENAS GRÁFICOS DE ROSCA ===================
 function renderLinhasHospital(hospitalId) {
     const container = document.getElementById(`linhasBoxes${hospitalId}`);
     if (!container) return;
@@ -1028,26 +1015,10 @@ function renderLinhasHospital(hospitalId) {
         
         html += `<div class="timeline-box">`;
         html += `<div class="timeline-box-header">${timeline}</div>`;
-        
-        html += `<div class="timeline-chart-container">`;
+        html += `<div class="timeline-chart-container-full">`;
         html += `<canvas id="graficoLinhas${hospitalId}_${timeline}" class="timeline-chart"></canvas>`;
         html += `</div>`;
-        
-        html += `<div class="timeline-box-content">`;
-        
-        if (linhas.length === 0) {
-            html += `<div style="text-align: center; padding: 20px; color: #9ca3af; font-style: italic; font-size: 12px;">Sem linhas de cuidado</div>`;
-        } else {
-            linhas.forEach(([nome, mats]) => {
-                const cor = getCorExata(nome, 'linha');
-                html += `<div class="timeline-item" style="border-left-color: ${cor};">`;
-                html += `<div class="timeline-item-name">${nome}</div>`;
-                html += `<div class="timeline-item-mats">${mats.join(', ')}</div>`;
-                html += `</div>`;
-            });
-        }
-        
-        html += `</div></div>`;
+        html += `</div>`;
     });
     
     html += '</div>';
@@ -1061,7 +1032,7 @@ function renderLinhasHospital(hospitalId) {
     }, 100);
 }
 
-// =================== RENDERIZAR GRÁFICO DE ROSCA LINHAS (SEM DataLabels) ===================
+// =================== RENDERIZAR GRÁFICO DE ROSCA LINHAS ===================
 function renderDoughnutLinhas(hospitalId, timeline, dados) {
     const canvas = document.getElementById(`graficoLinhas${hospitalId}_${timeline}`);
     if (!canvas || typeof Chart === 'undefined') return;
@@ -1076,7 +1047,10 @@ function renderDoughnutLinhas(hospitalId, timeline, dados) {
     const linhas = Object.entries(dados)
         .sort((a, b) => b[1].length - a[1].length);
     
-    if (linhas.length === 0) return;
+    if (linhas.length === 0) {
+        canvas.parentElement.innerHTML = `<div style="display: flex; align-items: center; justify-content: center; height: 100%; color: #9ca3af; font-style: italic; font-size: 14px;">Sem linhas de cuidado</div>`;
+        return;
+    }
     
     const labels = linhas.map(([nome]) => nome);
     const values = linhas.map(([, mats]) => mats.length);
@@ -1094,7 +1068,7 @@ function renderDoughnutLinhas(hospitalId, timeline, dados) {
                 labels: {
                     color: '#ffffff',
                     font: { size: 11 },
-                    padding: 10,
+                    padding: 8,
                     generateLabels: function(chart) {
                         const data = chart.data;
                         if (data.labels.length && data.datasets.length) {
@@ -1163,14 +1137,14 @@ function renderDoughnutLinhas(hospitalId, timeline, dados) {
 
 // Função de força de atualização
 window.forceDataRefresh = function() {
-    logInfo('Forçando atualização dos dados hospitalares V3.3.6...');
+    logInfo('Forçando atualização dos dados hospitalares V3.3.7...');
     
     const container = document.getElementById('dashHospitalarContent');
     if (container) {
         container.innerHTML = `
             <div style="text-align: center; padding: 50px;">
                 <div style="color: #60a5fa; font-size: 18px; margin-bottom: 15px;">
-                    Recarregando dados reais da API V3.3.6...
+                    Recarregando dados reais da API V3.3.7...
                 </div>
             </div>
         `;
@@ -1355,7 +1329,7 @@ function getHospitalConsolidadoCSS() {
                 max-height: 370px !important;
             }
             
-            /* =================== TIMELINE BOXES (3 COLUNAS COM GRÁFICOS) =================== */
+            /* =================== TIMELINE BOXES (SÓ GRÁFICOS) =================== */
             .timeline-boxes-container {
                 width: 100%;
                 margin-top: 15px;
@@ -1373,7 +1347,7 @@ function getHospitalConsolidadoCSS() {
                 border-radius: 8px;
                 border: 1px solid rgba(255, 255, 255, 0.1);
                 overflow: hidden;
-                min-height: 400px;
+                min-height: 300px;
                 display: flex;
                 flex-direction: column;
             }
@@ -1390,55 +1364,19 @@ function getHospitalConsolidadoCSS() {
                 border-bottom: 1px solid rgba(255, 255, 255, 0.1);
             }
             
-            .timeline-chart-container {
-                height: 200px;
-                padding: 15px;
+            .timeline-chart-container-full {
+                flex: 1;
+                padding: 20px;
                 background: rgba(0, 0, 0, 0.1);
                 display: flex;
                 align-items: center;
                 justify-content: center;
+                min-height: 250px;
             }
             
             .timeline-chart {
-                max-height: 180px !important;
-            }
-            
-            .timeline-box-content {
-                padding: 12px;
-                flex: 1;
-                overflow-y: auto;
-                max-height: 250px;
-            }
-            
-            .timeline-item {
-                background: rgba(255, 255, 255, 0.03);
-                border-radius: 6px;
-                padding: 10px;
-                margin-bottom: 8px;
-                border-left: 3px solid;
-                transition: all 0.2s ease;
-            }
-            
-            .timeline-item:hover {
-                background: rgba(255, 255, 255, 0.07);
-                transform: translateX(2px);
-            }
-            
-            .timeline-item:last-child {
-                margin-bottom: 0;
-            }
-            
-            .timeline-item-name {
-                font-size: 13px;
-                font-weight: 600;
-                margin-bottom: 6px;
-                color: #ffffff;
-            }
-            
-            .timeline-item-mats {
-                font-size: 11px;
-                color: #ffffff;
-                line-height: 1.4;
+                max-height: 100% !important;
+                max-width: 100% !important;
             }
             
             @media (max-width: 1024px) and (min-width: 769px) {
@@ -1468,9 +1406,8 @@ function getHospitalConsolidadoCSS() {
                     gap: 12px;
                 }
                 
-                .timeline-chart-container {
-                    height: 180px;
-                    padding: 12px;
+                .timeline-box {
+                    min-height: 280px;
                 }
             }
             
@@ -1616,7 +1553,7 @@ function getHospitalConsolidadoCSS() {
                 }
                 
                 .timeline-box {
-                    min-height: 350px;
+                    min-height: 250px;
                 }
                 
                 .timeline-box-header {
@@ -1624,30 +1561,9 @@ function getHospitalConsolidadoCSS() {
                     padding: 10px;
                 }
                 
-                .timeline-chart-container {
-                    height: 150px;
-                    padding: 10px;
-                }
-                
-                .timeline-chart {
-                    max-height: 130px !important;
-                }
-                
-                .timeline-box-content {
-                    padding: 8px;
-                    max-height: 180px;
-                }
-                
-                .timeline-item {
-                    padding: 8px;
-                }
-                
-                .timeline-item-name {
-                    font-size: 12px;
-                }
-                
-                .timeline-item-mats {
-                    font-size: 10px;
+                .timeline-chart-container-full {
+                    min-height: 200px;
+                    padding: 15px;
                 }
             }
             
@@ -1689,13 +1605,9 @@ function getHospitalConsolidadoCSS() {
                     font-size: 10px !important;
                 }
                 
-                .timeline-chart-container {
-                    height: 120px;
-                    padding: 8px;
-                }
-                
-                .timeline-chart {
-                    max-height: 100px !important;
+                .timeline-chart-container-full {
+                    min-height: 180px;
+                    padding: 10px;
                 }
             }
             
@@ -1716,8 +1628,8 @@ function getHospitalConsolidadoCSS() {
                     height: 200px !important;
                 }
                 
-                .timeline-chart-container {
-                    height: 140px;
+                .timeline-chart-container-full {
+                    min-height: 180px;
                 }
             }
         </style>
@@ -1735,20 +1647,19 @@ window.renderDoughnutLinhas = renderDoughnutLinhas;
 
 // Funções de log
 function logInfo(message) {
-    console.log(`🔵 [DASHBOARD HOSPITALAR V3.3.6] ${message}`);
+    console.log(`🔵 [DASHBOARD HOSPITALAR V3.3.7] ${message}`);
 }
 
 function logSuccess(message) {
-    console.log(`✅ [DASHBOARD HOSPITALAR V3.3.6] ${message}`);
+    console.log(`✅ [DASHBOARD HOSPITALAR V3.3.7] ${message}`);
 }
 
 function logError(message, error) {
-    console.error(`❌ [DASHBOARD HOSPITALAR V3.3.6] ${message}`, error || '');
+    console.error(`❌ [DASHBOARD HOSPITALAR V3.3.7] ${message}`, error || '');
 }
 
-console.log('🎯 Dashboard Hospitalar V3.3.6 - SEM CHARTDATALABELS!');
+console.log('🎯 Dashboard Hospitalar V3.3.7 - SEM LEGENDAS HTML!');
 console.log('✅ Análise Preditiva: BARRAS HORIZONTAIS');
-console.log('✅ Concessões/Linhas: GRÁFICOS DE ROSCA (números na legenda)');
-console.log('✅ Funciona SEM ChartDataLabels');
-console.log('⚠️ Para números DENTRO dos gráficos, adicione ChartDataLabels ao HTML');
-console.log('🚀 READY: Sistema V3.3.6 100% funcional!');
+console.log('✅ Concessões/Linhas: APENAS GRÁFICOS DE ROSCA');
+console.log('✅ Legendas dos gráficos: SEMPRE BRANCAS');
+console.log('🚀 READY: Sistema V3.3.7 limpo e funcional!');
