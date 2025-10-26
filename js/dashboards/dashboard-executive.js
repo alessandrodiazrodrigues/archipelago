@@ -819,19 +819,19 @@ function getExecutiveCSS() {
             
             .gauge-text {
                 position: absolute;
-                top: 70%;
-                left: 50%;
-                transform: translate(-50%, -50%);
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
                 text-align: center;
                 pointer-events: none;
-                display: flex;
-                flex-direction: column;
-                align-items: center;
-                gap: 25px;
             }
             
             .gauge-value {
-                display: block;
+                position: absolute;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
                 font-size: 36px;
                 font-weight: 700;
                 color: white;
@@ -840,7 +840,10 @@ function getExecutiveCSS() {
             }
             
             .gauge-label {
-                display: block;
+                position: absolute;
+                top: 85%;
+                left: 50%;
+                transform: translateX(-50%);
                 font-size: 11px;
                 color: #9ca3af;
                 text-transform: uppercase;
