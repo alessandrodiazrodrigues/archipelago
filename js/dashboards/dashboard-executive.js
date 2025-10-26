@@ -699,7 +699,7 @@ window.renderDashboardExecutivo = function() {
             <!-- 6 BOXES DO HTML KPIs -->
             <div class="kpis-grid-executivo">
                 
-                <!-- BOX 1: Ocupação Geral com Régua -->
+                <!-- BOX 1: Ocupação Geral com Tabela e Régua -->
                 <div class="kpi-box box-ocupacao-geral">
                     <div class="kpi-title">Ocupação Geral - Rede Externa</div>
                     
@@ -707,17 +707,33 @@ window.renderDashboardExecutivo = function() {
                         ${renderGaugeLargo(taxaOcupacao, totalOcupados)}
                     </div>
                     
-                    <!-- RÉGUA POR HOSPITAL -->
-                    <div class="hospitais-percentuais">
-                        ${hospitais.map(h => `
-                            <div class="hospital-item">
-                                <div class="hospital-info">
-                                    <span class="hospital-nome">${h.nome}</span>
-                                    <span class="hospital-pct">${h.taxaOcupacao.toFixed(1)}%</span>
-                                </div>
-                                ${renderBarraOcupacao(h.taxaOcupacao)}
-                            </div>
-                        `).join('')}
+                    <!-- TABELA COM RÉGUA POR HOSPITAL -->
+                    <div class="kpi-detalhes">
+                        <table class="hospitais-table-ocupacao">
+                            <thead>
+                                <tr>
+                                    <th></th>
+                                    <th>Leitos Fixos</th>
+                                    <th>Leitos Ocupados</th>
+                                    <th>Taxa Ocupação</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${hospitais.map(h => `
+                                    <tr>
+                                        <td><strong>${h.nome}</strong></td>
+                                        <td>${h.totalLeitos}</td>
+                                        <td>${h.ocupados.total}</td>
+                                        <td>${h.taxaOcupacao.toFixed(1)}%</td>
+                                    </tr>
+                                    <tr class="regua-row">
+                                        <td colspan="4" style="padding: 4px 8px;">
+                                            ${renderBarraOcupacao(h.taxaOcupacao)}
+                                        </td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
                     </div>
                 </div>
 
@@ -1632,37 +1648,55 @@ function getExecutiveCSS() {
                 background: rgba(255, 255, 255, 0.03);
             }
             
-            /* RÉGUA DE OCUPAÇÃO */
-            .hospitais-percentuais {
-                margin-top: 15px;
-                padding-top: 15px;
-                border-top: 1px solid rgba(255, 255, 255, 0.1);
+            /* TABELA DE OCUPAÇÃO COM RÉGUA */
+            .hospitais-table-ocupacao {
+                width: 100%;
+                border-collapse: collapse;
+                font-size: 13px;
             }
             
-            .hospital-item {
-                display: flex;
-                flex-direction: column;
-                gap: 6px;
-                padding: 6px 0;
-                color: white;
+            .hospitais-table-ocupacao thead {
+                border-bottom: 2px solid rgba(255, 255, 255, 0.1);
             }
             
-            .hospital-info {
-                display: flex;
-                justify-content: space-between;
-                align-items: center;
-                font-size: 12px;
-            }
-            
-            .hospital-nome {
+            .hospitais-table-ocupacao th {
+                text-align: left;
+                padding: 10px 8px;
+                color: #60a5fa;
                 font-weight: 600;
+                text-transform: uppercase;
+                font-size: 11px;
+                letter-spacing: 0.5px;
             }
             
-            .hospital-pct {
-                font-weight: 700;
-                color: #22c55e;
+            .hospitais-table-ocupacao th:nth-child(2),
+            .hospitais-table-ocupacao th:nth-child(3),
+            .hospitais-table-ocupacao th:nth-child(4) {
+                text-align: center;
             }
             
+            .hospitais-table-ocupacao tbody tr:not(.regua-row) td {
+                padding: 10px 8px;
+                color: #e5e7eb;
+                border-bottom: none;
+            }
+            
+            .hospitais-table-ocupacao tbody tr:not(.regua-row) td:nth-child(2),
+            .hospitais-table-ocupacao tbody tr:not(.regua-row) td:nth-child(3),
+            .hospitais-table-ocupacao tbody tr:not(.regua-row) td:nth-child(4) {
+                text-align: center;
+            }
+            
+            .hospitais-table-ocupacao tbody tr.regua-row td {
+                padding: 4px 8px 12px 8px;
+                border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            }
+            
+            .hospitais-table-ocupacao tbody tr:not(.regua-row):hover {
+                background: rgba(255, 255, 255, 0.03);
+            }
+            
+            /* RÉGUA DE OCUPAÇÃO */
             .ocupacao-mini-gauge {
                 width: 100%;
             }
