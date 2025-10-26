@@ -150,7 +150,7 @@ window.renderDashboardExecutivo = function() {
                 <div class="kpi-gauge-principal">
                     <h3 style="color: #9ca3af; font-size: 14px; margin-bottom: 15px; text-align: center;">Ocupação Geral da Rede</h3>
                     <div class="gauge-container">
-                        <canvas id="gaugeOcupacaoExecutivo"></canvas>
+                        <div id="gaugeOcupacaoExecutivo"></div>
                         <div class="gauge-text">
                             <span class="gauge-value">${kpis.ocupacaoGeral}%</span>
                             <span class="gauge-label">Ocupação Geral</span>
@@ -456,42 +456,48 @@ function calcularKPIsHospital(hospitalId) {
 }
 
 function renderGaugeExecutivoHorizontal(ocupacao) {
-    const canvas = document.getElementById('gaugeOcupacaoExecutivo');
-    if (!canvas || typeof Chart === 'undefined') return;
+    const container = document.getElementById('gaugeOcupacaoExecutivo');
+    if (!container) return;
     
+    // Limpar qualquer Chart.js anterior
     if (window.chartInstances && window.chartInstances.gaugeExecutivo) {
         window.chartInstances.gaugeExecutivo.destroy();
     }
     
-    if (!window.chartInstances) window.chartInstances = {};
+    // Calcular cor baseada na ocupação
+    let cor = '#22c55e'; // verde
+    if (ocupacao >= 85) cor = '#ef4444'; // vermelho
+    else if (ocupacao >= 70) cor = '#f97316'; // laranja
+    else if (ocupacao >= 50) cor = '#eab308'; // amarelo
     
-    const ctx = canvas.getContext('2d');
-    window.chartInstances.gaugeExecutivo = new Chart(ctx, {
-        type: 'doughnut',
-        data: {
-            datasets: [{
-                data: [ocupacao, 100 - ocupacao],
-                backgroundColor: [
-                    ocupacao >= 85 ? '#ef4444' : ocupacao >= 70 ? '#f97316' : ocupacao >= 50 ? '#eab308' : '#22c55e',
-                    'rgba(255,255,255,0.1)'
-                ],
-                borderWidth: 0,
-                cutout: '75%',
-                borderRadius: 20,
-                spacing: 0
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: { display: false },
-                tooltip: { enabled: true }
-            },
-            rotation: -90,
-            circumference: 180
-        }
-    });
+    // Calcular offset para o progresso
+    const circunferencia = Math.PI * 110; // raio 55 * 2 * PI
+    const progresso = (ocupacao / 100) * circunferencia;
+    const offset = circunferencia - progresso;
+    
+    // Criar SVG customizado (igual ao KPIs Archipelago)
+    container.style.width = '140px';
+    container.style.height = '80px';
+    container.style.position = 'relative';
+    
+    container.innerHTML = `
+        <svg viewBox="0 0 140 80" style="width: 100%; height: 100%;">
+            <!-- Fundo cinza -->
+            <path d="M 15 70 A 55 55 0 0 1 125 70" 
+                  fill="none" 
+                  stroke="rgba(255,255,255,0.1)" 
+                  stroke-width="14" 
+                  stroke-linecap="round"/>
+            <!-- Progresso colorido -->
+            <path d="M 15 70 A 55 55 0 0 1 125 70" 
+                  fill="none" 
+                  stroke="${cor}" 
+                  stroke-width="14" 
+                  stroke-linecap="round"
+                  stroke-dasharray="172.8"
+                  stroke-dashoffset="${offset}"/>
+        </svg>
+    `;
 }
 
 // =================== FUNÇÃO PARA OBTER COR POR VALOR ===================
@@ -815,8 +821,9 @@ function getExecutiveCSS() {
                 justify-content: center;
             }
             
-            .gauge-container canvas {
-                max-height: 150px !important;
+            .gauge-container #gaugeOcupacaoExecutivo {
+                width: 140px;
+                height: 80px;
             }
             
             .gauge-text {
