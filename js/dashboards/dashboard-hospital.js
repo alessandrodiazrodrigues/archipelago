@@ -1,9 +1,41 @@
 // js/dashboards/dashboard-hospital.js
-// =================== DASHBOARD HOSPITALAR V3.4.0 - COM KPIS CONSOLIDADOS ===================
+// =================== DASHBOARD HOSPITALAR V3.5.0 - CORES ARCHIPELAGO APLICADAS ===================
+// ✅ PALETA DE CORES OFICIAL ARCHIPELAGO
 // ✅ KPIs Completos (6 boxes do kpis-archipelago.html)
 // ✅ Análise Preditiva: BARRAS HORIZONTAIS
 // ✅ Concessões/Linhas: LAYOUT 3 BOXES com GRÁFICOS DE ROSCA
 // ✅ Funciona SEM ChartDataLabels (números na legenda)
+
+/* ============================================
+   CORES OFICIAIS ARCHIPELAGO
+   ============================================ */
+const CORES_ARCHIPELAGO = {
+    // Azuis (Identidade da marca)
+    azulMarinhoEscuro: '#131b2e',
+    azulEscuro: '#172945',
+    azulMedio: '#1c5083',
+    azulPrincipal: '#0676bb',    // ← COR PRIMÁRIA
+    azulAcinzentado: '#577a97',
+    azulClaro: '#a9c0d2',
+    
+    // Neutros (Textos e backgrounds)
+    cinzaEscuro: '#3c3a3e',
+    cinzaMedio: '#b2adaa',
+    cinzaClaro: '#e9e5e2',
+    
+    // Alertas (Status e avisos)
+    laranja: '#c86420',
+    amarelo: '#f59a1d',
+    verde: '#29ad8d',
+    
+    // KPIs
+    ocupados: '#29ad8d',      // Verde
+    previsao: '#c86420',      // Laranja
+    disponiveis: '#0676bb',   // Azul Principal
+    tph: '#577a97',           // Azul acinzentado
+    pps: '#1c5083',           // Azul médio
+    spict: '#172945'          // Azul escuro
+};
 
 // Estado global para fundo branco
 window.fundoBranco = false;
@@ -18,7 +50,7 @@ if (!hasDataLabels) {
 function getCorExata(itemName, tipo = 'concessao') {
     if (!itemName || typeof itemName !== 'string') {
         console.warn(`⚠️ [CORES] Item inválido: "${itemName}"`);
-        return '#6b7280';
+        return CORES_ARCHIPELAGO.cinzaMedio;
     }
     
     const paleta = tipo === 'concessao' ? 
@@ -27,7 +59,7 @@ function getCorExata(itemName, tipo = 'concessao') {
     
     if (!paleta) {
         console.error(`❌ [CORES] Paleta não carregada! Verifique se api.js está carregado antes.`);
-        return '#6b7280';
+        return CORES_ARCHIPELAGO.cinzaMedio;
     }
     
     let cor = paleta[itemName];
@@ -46,7 +78,7 @@ function getCorExata(itemName, tipo = 'concessao') {
     }
     
     console.error(`❌ [CORES] COR NÃO ENCONTRADA: "${itemName}"`);
-    return '#6b7280';
+    return CORES_ARCHIPELAGO.cinzaMedio;
 }
 
 // =================== FUNÇÕES AUXILIARES DE STATUS ===================
@@ -64,8 +96,8 @@ function isVago(leito) {
 
 // =================== FUNÇÃO PARA ATUALIZAR TODAS AS CORES ===================
 window.atualizarTodasAsCores = function() {
-    const corTexto = window.fundoBranco ? '#000000' : '#ffffff';
-    const corGrid = window.fundoBranco ? 'rgba(0, 0, 0, 0.1)' : 'rgba(255, 255, 255, 0.1)';
+    const corTexto = window.fundoBranco ? CORES_ARCHIPELAGO.cinzaEscuro : '#ffffff';
+    const corGrid = window.fundoBranco ? 'rgba(60, 58, 62, 0.1)' : 'rgba(255, 255, 255, 0.1)';
     
     if (window.chartInstances) {
         Object.values(window.chartInstances).forEach(chart => {
@@ -543,7 +575,7 @@ function processarDadosHospital(hospitalId) {
     };
 }
 
-// =================== RENDER GAUGE V5 ===================
+// =================== RENDER GAUGE V5 COM CORES ARCHIPELAGO ===================
 
 function calcularGaugeOffset(porcentagem) {
     const circunferencia = Math.PI * 55;
@@ -553,7 +585,8 @@ function calcularGaugeOffset(porcentagem) {
 
 function renderGaugeV5(porcentagem, cor, numero) {
     const offset = calcularGaugeOffset(porcentagem);
-    const badgeClass = cor === '#22c55e' ? 'green' : (cor === '#f97316' ? 'orange' : 'blue');
+    const badgeClass = cor === CORES_ARCHIPELAGO.ocupados ? 'green' : 
+                       (cor === CORES_ARCHIPELAGO.previsao ? 'orange' : 'blue');
     
     return `
         <div class="v5-gauge-container">
@@ -608,7 +641,7 @@ function renderModalidadeContratual(modalidade) {
     `;
 }
 
-// =================== RENDER MINI GAUGE TPH ===================
+// =================== RENDER MINI GAUGE TPH COM CORES ARCHIPELAGO ===================
 
 function renderMiniGaugeTPH(dias) {
     const maxDias = 30;
@@ -639,7 +672,7 @@ function renderMiniGaugeTPH(dias) {
 // =================== RENDER DASHBOARD HOSPITALAR ===================
 
 window.renderDashboardHospitalar = function() {
-    logInfo('Renderizando Dashboard Hospitalar V3.4.0 (COM KPIS)');
+    logInfo('Renderizando Dashboard Hospitalar V3.5.0 (COM CORES ARCHIPELAGO)');
     
     let container = document.getElementById('dashHospitalarContent');
     if (!container) {
@@ -662,10 +695,10 @@ window.renderDashboardHospitalar = function() {
     
     if (!window.hospitalData || Object.keys(window.hospitalData).length === 0) {
         container.innerHTML = `
-            <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 400px; text-align: center; color: white; background: linear-gradient(135deg, #1a1f2e 0%, #2d3748 100%); border-radius: 12px; margin: 20px; padding: 40px;">
-                <div style="width: 60px; height: 60px; border: 3px solid #60a5fa; border-top-color: transparent; border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 20px;"></div>
-                <h2 style="color: #60a5fa; margin-bottom: 10px; font-size: 20px;">Aguardando dados reais da API V3.4.0</h2>
-                <p style="color: #9ca3af; font-size: 14px;">Conectando com Google Apps Script...</p>
+            <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 400px; text-align: center; color: white; background: linear-gradient(135deg, ${CORES_ARCHIPELAGO.azulMarinhoEscuro} 0%, ${CORES_ARCHIPELAGO.azulEscuro} 100%); border-radius: 12px; margin: 20px; padding: 40px;">
+                <div style="width: 60px; height: 60px; border: 3px solid ${CORES_ARCHIPELAGO.azulPrincipal}; border-top-color: transparent; border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 20px;"></div>
+                <h2 style="color: ${CORES_ARCHIPELAGO.azulPrincipal}; margin-bottom: 10px; font-size: 20px;">Aguardando dados reais da API V3.5.0</h2>
+                <p style="color: ${CORES_ARCHIPELAGO.cinzaMedio}; font-size: 14px;">Conectando com Google Apps Script...</p>
             </div>
             <style>
                 @keyframes spin {
@@ -692,10 +725,10 @@ window.renderDashboardHospitalar = function() {
     
     if (hospitaisComDados.length === 0) {
         container.innerHTML = `
-            <div style="text-align: center; padding: 50px; color: white; background: #1a1f2e; border-radius: 12px;">
-                <h3 style="color: #f59e0b; margin-bottom: 15px;">Nenhum dado hospitalar disponível</h3>
-                <p style="color: #9ca3af; margin-bottom: 20px;">Aguardando dados reais da planilha Google.</p>
-                <button onclick="window.forceDataRefresh()" style="background: #3b82f6; color: white; border: none; padding: 12px 24px; border-radius: 6px; cursor: pointer; font-size: 14px;">
+            <div style="text-align: center; padding: 50px; color: white; background: ${CORES_ARCHIPELAGO.azulMarinhoEscuro}; border-radius: 12px;">
+                <h3 style="color: ${CORES_ARCHIPELAGO.amarelo}; margin-bottom: 15px;">Nenhum dado hospitalar disponível</h3>
+                <p style="color: ${CORES_ARCHIPELAGO.cinzaMedio}; margin-bottom: 20px;">Aguardando dados reais da planilha Google.</p>
+                <button onclick="window.forceDataRefresh()" style="background: ${CORES_ARCHIPELAGO.azulPrincipal}; color: white; border: none; padding: 12px 24px; border-radius: 6px; cursor: pointer; font-size: 14px;">
                     Recarregar Dados Reais
                 </button>
             </div>
@@ -706,15 +739,15 @@ window.renderDashboardHospitalar = function() {
     const hoje = new Date().toLocaleDateString('pt-BR');
     
     container.innerHTML = `
-        <div style="background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); min-height: 100vh; padding: 20px; color: white;">
-            <div class="dashboard-header" style="margin-bottom: 30px; padding: 20px; background: rgba(255, 255, 255, 0.05); border-radius: 12px; border-left: 4px solid #60a5fa;">
+        <div style="background: linear-gradient(135deg, ${CORES_ARCHIPELAGO.azulMarinhoEscuro} 0%, ${CORES_ARCHIPELAGO.azulEscuro} 100%); min-height: 100vh; padding: 20px; color: white; font-family: 'Poppins', sans-serif;">
+            <div class="dashboard-header" style="margin-bottom: 30px; padding: 20px; background: rgba(255, 255, 255, 0.05); border-radius: 12px; border-left: 4px solid ${CORES_ARCHIPELAGO.azulPrincipal};">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; flex-wrap: wrap; gap: 15px;">
-                    <h2 style="margin: 0; color: #ffffff; font-size: 24px; font-weight: 700; white-space: nowrap;">Dashboard Hospitalar V3.4.0</h2>
+                    <h2 style="margin: 0; color: #ffffff; font-size: 24px; font-weight: 700; white-space: nowrap; font-family: 'Poppins', sans-serif;">Dashboard Hospitalar V3.5.0</h2>
                     <div style="display: flex; gap: 10px;">
-                        <button onclick="window.copiarDashboardParaWhatsApp()" class="btn-whatsapp" style="padding: 8px 16px; background: #25D366; border: none; border-radius: 8px; color: white; font-size: 14px; cursor: pointer; font-weight: 600; display: flex; align-items: center; gap: 8px; transition: all 0.3s ease;">
+                        <button onclick="window.copiarDashboardParaWhatsApp()" class="btn-whatsapp" style="padding: 8px 16px; background: #25D366; border: none; border-radius: 8px; color: white; font-size: 14px; cursor: pointer; font-weight: 600; display: flex; align-items: center; gap: 8px; transition: all 0.3s ease; font-family: 'Poppins', sans-serif;">
                             Copiar para WhatsApp
                         </button>
-                        <button id="toggleFundoBtn" class="toggle-fundo-btn" style="padding: 8px 16px; background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 8px; color: #e2e8f0; font-size: 14px; cursor: pointer; transition: all 0.3s ease; display: flex; align-items: center; gap: 8px;">
+                        <button id="toggleFundoBtn" class="toggle-fundo-btn" style="padding: 8px 16px; background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 8px; color: #e2e8f0; font-size: 14px; cursor: pointer; transition: all 0.3s ease; display: flex; align-items: center; gap: 8px; font-family: 'Poppins', sans-serif;">
                             <span id="toggleIcon">🌙</span>
                             <span id="toggleText">ESCURO</span>
                         </button>
@@ -773,7 +806,7 @@ window.renderDashboardHospitalar = function() {
                 renderLinhasHospital(hospitalId);
             });
             
-            logSuccess('Dashboard Hospitalar V3.4.0 renderizado');
+            logSuccess('Dashboard Hospitalar V3.5.0 renderizado com cores Archipelago!');
         }, 100);
     };
     
@@ -785,7 +818,6 @@ window.renderDashboardHospitalar = function() {
 function renderHospitalSection(hospitalId, hoje) {
     const dados = processarDadosHospital(hospitalId);
     
-    // Proteger contra undefined
     if (!dados || !dados.tph || !dados.pps || !dados.spict) {
         console.error(`Dados inválidos para hospital ${hospitalId}`);
         return '';
@@ -804,7 +836,7 @@ function renderHospitalSection(hospitalId, hoje) {
                     <div class="kpi-title">Leitos Ocupados</div>
                     
                     <div class="kpi-content">
-                        ${renderGaugeV5(dados.taxaOcupacao, '#22c55e', dados.ocupados.total)}
+                        ${renderGaugeV5(dados.taxaOcupacao, CORES_ARCHIPELAGO.ocupados, dados.ocupados.total)}
                         
                         <div class="kpi-items-lista">
                             <div class="kpi-subtitle">Total de Leitos Ocupados</div>
@@ -834,7 +866,7 @@ function renderHospitalSection(hospitalId, hoje) {
                     <div class="kpi-title">Leitos em Previsão de Alta</div>
                     
                     <div class="kpi-content">
-                        ${renderGaugeV5((dados.previsao.total / dados.ocupados.total * 100) || 0, '#f97316', dados.previsao.total)}
+                        ${renderGaugeV5((dados.previsao.total / dados.ocupados.total * 100) || 0, CORES_ARCHIPELAGO.previsao, dados.previsao.total)}
                         
                         <div class="kpi-items-lista">
                             <div class="kpi-subtitle">Total de Leitos com alta na data de hoje</div>
@@ -864,7 +896,7 @@ function renderHospitalSection(hospitalId, hoje) {
                     <div class="kpi-title">Leitos Disponíveis</div>
                     
                     <div class="kpi-content">
-                        ${renderGaugeV5((dados.disponiveis.total / dados.totalLeitos * 100) || 0, '#3b82f6', dados.disponiveis.total)}
+                        ${renderGaugeV5((dados.disponiveis.total / dados.totalLeitos * 100) || 0, CORES_ARCHIPELAGO.disponiveis, dados.disponiveis.total)}
                         
                         <div class="kpi-items-lista">
                             <div class="kpi-subtitle">Capacidade por tipo de leito (não simultâneo)</div>
@@ -1044,7 +1076,7 @@ const backgroundPlugin = {
     }
 };
 
-// =================== ANÁLISE PREDITIVA DE ALTAS - BARRAS HORIZONTAIS ===================
+// =================== ANÁLISE PREDITIVA DE ALTAS - BARRAS HORIZONTAIS COM CORES ARCHIPELAGO ===================
 function renderAltasHospital(hospitalId) {
     const canvas = document.getElementById(`graficoAltas${hospitalId}`);
     if (!canvas || typeof Chart === 'undefined') return;
@@ -1095,8 +1127,8 @@ function renderAltasHospital(hospitalId) {
         }
     });
     
-    const corTexto = window.fundoBranco ? '#000000' : '#ffffff';
-    const corGrid = window.fundoBranco ? 'rgba(0, 0, 0, 0.1)' : 'rgba(255, 255, 255, 0.1)';
+    const corTexto = window.fundoBranco ? CORES_ARCHIPELAGO.cinzaEscuro : '#ffffff';
+    const corGrid = window.fundoBranco ? 'rgba(60, 58, 62, 0.1)' : 'rgba(255, 255, 255, 0.1)';
     
     const ctx = canvas.getContext('2d');
     
@@ -1118,7 +1150,7 @@ function renderAltasHospital(hospitalId) {
             datasets: [{
                 label: 'Previsão de Alta',
                 data: dadosSimplificados,
-                backgroundColor: '#0055A4',
+                backgroundColor: CORES_ARCHIPELAGO.azulPrincipal,
                 borderWidth: 0
             }]
         },
@@ -1133,9 +1165,11 @@ function renderAltasHospital(hospitalId) {
                     display: false
                 },
                 tooltip: {
-                    backgroundColor: 'rgba(26, 31, 46, 0.95)',
+                    backgroundColor: `rgba(19, 27, 46, 0.95)`,
                     titleColor: '#ffffff',
                     bodyColor: '#ffffff',
+                    titleFont: { family: 'Poppins', size: 13, weight: 600 },
+                    bodyFont: { family: 'Poppins', size: 12 },
                     callbacks: {
                         label: function(context) {
                             return `Beneficiários: ${context.parsed.x}`;
@@ -1152,12 +1186,12 @@ function renderAltasHospital(hospitalId) {
                         display: true,
                         text: 'Beneficiários',
                         color: corTexto,
-                        font: { size: 12, weight: 600 }
+                        font: { family: 'Poppins', size: 12, weight: 600 }
                     },
                     ticks: {
                         stepSize: 1,
                         color: corTexto,
-                        font: { size: 11 },
+                        font: { family: 'Poppins', size: 11 },
                         callback: function(value) {
                             return Number.isInteger(value) && value >= 0 ? value : '';
                         }
@@ -1167,7 +1201,7 @@ function renderAltasHospital(hospitalId) {
                 y: {
                     ticks: {
                         color: corTexto,
-                        font: { size: 12, weight: 600 }
+                        font: { family: 'Poppins', size: 12, weight: 600 }
                     },
                     grid: { color: corGrid }
                 }
@@ -1238,7 +1272,7 @@ function renderConcessoesHospital(hospitalId) {
         html += `<div class="timeline-box-content">`;
         
         if (concessoes.length === 0) {
-            html += `<div style="text-align: center; padding: 20px; color: #9ca3af; font-style: italic; font-size: 12px;">Sem concessões</div>`;
+            html += `<div style="text-align: center; padding: 20px; color: ${CORES_ARCHIPELAGO.cinzaMedio}; font-style: italic; font-size: 12px;">Sem concessões</div>`;
         } else {
             concessoes.forEach(([nome, mats]) => {
                 const cor = getCorExata(nome, 'concessao');
@@ -1294,9 +1328,11 @@ function renderDoughnutConcessoes(hospitalId, timeline, dados) {
                 display: false
             },
             tooltip: {
-                backgroundColor: 'rgba(26, 31, 46, 0.95)',
+                backgroundColor: `rgba(19, 27, 46, 0.95)`,
                 titleColor: '#ffffff',
                 bodyColor: '#ffffff',
+                titleFont: { family: 'Poppins', size: 13, weight: 600 },
+                bodyFont: { family: 'Poppins', size: 12 },
                 callbacks: {
                     label: function(context) {
                         const value = context.parsed;
@@ -1314,7 +1350,7 @@ function renderDoughnutConcessoes(hospitalId, timeline, dados) {
     if (hasDataLabels) {
         chartOptions.plugins.datalabels = {
             color: '#ffffff',
-            font: { size: 14, weight: 'bold' },
+            font: { family: 'Poppins', size: 14, weight: 'bold' },
             formatter: (value, context) => {
                 const total = context.dataset.data.reduce((a, b) => a + b, 0);
                 const porcentagem = ((value / total) * 100).toFixed(0);
@@ -1401,7 +1437,7 @@ function renderLinhasHospital(hospitalId) {
         html += `<div class="timeline-box-content">`;
         
         if (linhas.length === 0) {
-            html += `<div style="text-align: center; padding: 20px; color: #9ca3af; font-style: italic; font-size: 12px;">Sem linhas de cuidado</div>`;
+            html += `<div style="text-align: center; padding: 20px; color: ${CORES_ARCHIPELAGO.cinzaMedio}; font-style: italic; font-size: 12px;">Sem linhas de cuidado</div>`;
         } else {
             linhas.forEach(([nome, mats]) => {
                 const cor = getCorExata(nome, 'linha');
@@ -1457,9 +1493,11 @@ function renderDoughnutLinhas(hospitalId, timeline, dados) {
                 display: false
             },
             tooltip: {
-                backgroundColor: 'rgba(26, 31, 46, 0.95)',
+                backgroundColor: `rgba(19, 27, 46, 0.95)`,
                 titleColor: '#ffffff',
                 bodyColor: '#ffffff',
+                titleFont: { family: 'Poppins', size: 13, weight: 600 },
+                bodyFont: { family: 'Poppins', size: 12 },
                 callbacks: {
                     label: function(context) {
                         const value = context.parsed;
@@ -1477,7 +1515,7 @@ function renderDoughnutLinhas(hospitalId, timeline, dados) {
     if (hasDataLabels) {
         chartOptions.plugins.datalabels = {
             color: '#ffffff',
-            font: { size: 14, weight: 'bold' },
+            font: { family: 'Poppins', size: 14, weight: 'bold' },
             formatter: (value, context) => {
                 const total = context.dataset.data.reduce((a, b) => a + b, 0);
                 const porcentagem = ((value / total) * 100).toFixed(0);
@@ -1503,10 +1541,16 @@ function renderDoughnutLinhas(hospitalId, timeline, dados) {
     });
 }
 
-// =================== CSS CONSOLIDADO ===================
+// =================== CSS CONSOLIDADO COM CORES ARCHIPELAGO ===================
 function getHospitalConsolidadoCSS() {
     return `
         <style id="hospitalConsolidadoCSS">
+            @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap');
+            
+            * {
+                font-family: 'Poppins', sans-serif;
+            }
+            
             @keyframes pulse {
                 0%, 100% { opacity: 1; }
                 50% { opacity: 0.5; }
@@ -1524,8 +1568,8 @@ function getHospitalConsolidadoCSS() {
             }
             
             .toggle-fundo-btn.active {
-                background: #f59e0b !important;
-                border-color: #f59e0b !important;
+                background: ${CORES_ARCHIPELAGO.amarelo} !important;
+                border-color: ${CORES_ARCHIPELAGO.amarelo} !important;
                 color: #000000 !important;
             }
             
@@ -1536,7 +1580,7 @@ function getHospitalConsolidadoCSS() {
             }
             
             .hospital-card {
-                background: #1a1f2e;
+                background: ${CORES_ARCHIPELAGO.azulMarinhoEscuro};
                 border-radius: 16px;
                 padding: 25px;
                 box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
@@ -1554,7 +1598,7 @@ function getHospitalConsolidadoCSS() {
             }
             
             .hospital-title {
-                color: #60a5fa;
+                color: ${CORES_ARCHIPELAGO.azulPrincipal};
                 font-size: 20px;
                 font-weight: 700;
                 margin: 0 0 20px 0;
@@ -1587,17 +1631,17 @@ function getHospitalConsolidadoCSS() {
                 border-color: rgba(255, 255, 255, 0.2);
             }
             
-            .box-ocupados { border-top: 3px solid #22c55e; }
-            .box-previsao { border-top: 3px solid #f97316; }
-            .box-disponiveis { border-top: 3px solid #3b82f6; }
-            .box-tph { border-top: 3px solid #8b5cf6; }
-            .box-pps { border-top: 3px solid #ec4899; }
-            .box-spict { border-top: 3px solid #14b8a6; }
+            .box-ocupados { border-top: 3px solid ${CORES_ARCHIPELAGO.ocupados}; }
+            .box-previsao { border-top: 3px solid ${CORES_ARCHIPELAGO.previsao}; }
+            .box-disponiveis { border-top: 3px solid ${CORES_ARCHIPELAGO.disponiveis}; }
+            .box-tph { border-top: 3px solid ${CORES_ARCHIPELAGO.tph}; }
+            .box-pps { border-top: 3px solid ${CORES_ARCHIPELAGO.pps}; }
+            .box-spict { border-top: 3px solid ${CORES_ARCHIPELAGO.spict}; }
             
             .kpi-title {
                 font-size: 11px;
                 font-weight: 600;
-                color: #9ca3af;
+                color: ${CORES_ARCHIPELAGO.cinzaMedio};
                 text-transform: uppercase;
                 letter-spacing: 0.5px;
                 margin-bottom: 15px;
@@ -1639,21 +1683,21 @@ function getHospitalConsolidadoCSS() {
             }
             
             .v5-badge-below.green {
-                background: rgba(34, 197, 94, 0.2);
-                color: #22c55e;
-                border-color: #22c55e;
+                background: rgba(41, 173, 141, 0.2);
+                color: ${CORES_ARCHIPELAGO.verde};
+                border-color: ${CORES_ARCHIPELAGO.verde};
             }
             
             .v5-badge-below.orange {
-                background: rgba(249, 115, 22, 0.2);
-                color: #f97316;
-                border-color: #f97316;
+                background: rgba(200, 100, 32, 0.2);
+                color: ${CORES_ARCHIPELAGO.laranja};
+                border-color: ${CORES_ARCHIPELAGO.laranja};
             }
             
             .v5-badge-below.blue {
-                background: rgba(59, 130, 246, 0.2);
-                color: #3b82f6;
-                border-color: #3b82f6;
+                background: rgba(6, 118, 187, 0.2);
+                color: ${CORES_ARCHIPELAGO.azulPrincipal};
+                border-color: ${CORES_ARCHIPELAGO.azulPrincipal};
             }
             
             /* CONTEÚDO DO BOX */
@@ -1691,7 +1735,7 @@ function getHospitalConsolidadoCSS() {
             
             .item-lista .label {
                 font-size: 12px;
-                color: #9ca3af;
+                color: ${CORES_ARCHIPELAGO.cinzaMedio};
             }
             
             .item-lista .valor {
@@ -1702,7 +1746,7 @@ function getHospitalConsolidadoCSS() {
             
             .kpi-subtitle {
                 font-size: 10px;
-                color: #6b7280;
+                color: ${CORES_ARCHIPELAGO.azulAcinzentado};
                 font-style: italic;
                 text-align: center;
                 margin-bottom: 8px;
@@ -1717,7 +1761,7 @@ function getHospitalConsolidadoCSS() {
             .detalhe-titulo {
                 font-size: 10px;
                 font-weight: 600;
-                color: #60a5fa;
+                color: ${CORES_ARCHIPELAGO.azulPrincipal};
                 text-transform: uppercase;
                 letter-spacing: 0.5px;
                 margin-bottom: 8px;
@@ -1745,7 +1789,7 @@ function getHospitalConsolidadoCSS() {
             
             .lista-item-compacto .label {
                 font-size: 11px;
-                color: #9ca3af;
+                color: ${CORES_ARCHIPELAGO.cinzaMedio};
             }
             
             .lista-item-compacto .valor {
@@ -1777,7 +1821,7 @@ function getHospitalConsolidadoCSS() {
             
             .kpi-valor-metade .label {
                 font-size: 11px;
-                color: #9ca3af;
+                color: ${CORES_ARCHIPELAGO.cinzaMedio};
                 text-transform: uppercase;
                 letter-spacing: 0.5px;
             }
@@ -1803,7 +1847,7 @@ function getHospitalConsolidadoCSS() {
             
             .kpi-tph-label {
                 font-size: 13px;
-                color: #9ca3af;
+                color: ${CORES_ARCHIPELAGO.cinzaMedio};
                 margin-top: 6px;
             }
             
@@ -1840,12 +1884,12 @@ function getHospitalConsolidadoCSS() {
             .tph-gauge-label {
                 font-size: 11px;
                 font-weight: 600;
-                color: #9ca3af;
+                color: ${CORES_ARCHIPELAGO.cinzaMedio};
             }
             
-            .tph-gauge-bar.green { color: #22c55e; }
-            .tph-gauge-bar.yellow { color: #f59e0b; }
-            .tph-gauge-bar.red { color: #ef4444; }
+            .tph-gauge-bar.green { color: ${CORES_ARCHIPELAGO.verde}; }
+            .tph-gauge-bar.yellow { color: ${CORES_ARCHIPELAGO.amarelo}; }
+            .tph-gauge-bar.red { color: ${CORES_ARCHIPELAGO.laranja}; }
             
             /* TABELAS */
             .hospitais-table {
@@ -1861,7 +1905,7 @@ function getHospitalConsolidadoCSS() {
             .hospitais-table th {
                 text-align: left;
                 padding: 6px;
-                color: #60a5fa;
+                color: ${CORES_ARCHIPELAGO.azulPrincipal};
                 font-weight: 600;
                 text-transform: uppercase;
                 font-size: 9px;
@@ -1885,7 +1929,7 @@ function getHospitalConsolidadoCSS() {
             .sem-dados {
                 text-align: center;
                 padding: 15px;
-                color: #6b7280;
+                color: ${CORES_ARCHIPELAGO.azulAcinzentado};
                 font-style: italic;
                 font-size: 11px;
             }
@@ -1965,14 +2009,14 @@ function getHospitalConsolidadoCSS() {
             }
             
             .timeline-box-header {
-                background: rgba(96, 165, 250, 0.2);
+                background: rgba(6, 118, 187, 0.2);
                 padding: 12px;
                 text-align: center;
                 font-size: 14px;
                 font-weight: 700;
                 text-transform: uppercase;
                 letter-spacing: 0.5px;
-                color: #60a5fa;
+                color: ${CORES_ARCHIPELAGO.azulPrincipal};
                 border-bottom: 1px solid rgba(255, 255, 255, 0.1);
             }
             
@@ -2049,19 +2093,20 @@ function getHospitalConsolidadoCSS() {
 
 // Funções de log
 function logInfo(message) {
-    console.log(`🔵 [DASHBOARD HOSPITALAR V3.4.0] ${message}`);
+    console.log(`🔵 [DASHBOARD HOSPITALAR V3.5.0] ${message}`);
 }
 
 function logSuccess(message) {
-    console.log(`✅ [DASHBOARD HOSPITALAR V3.4.0] ${message}`);
+    console.log(`✅ [DASHBOARD HOSPITALAR V3.5.0] ${message}`);
 }
 
 function logError(message, error) {
-    console.error(`❌ [DASHBOARD HOSPITALAR V3.4.0] ${message}`, error || '');
+    console.error(`❌ [DASHBOARD HOSPITALAR V3.5.0] ${message}`, error || '');
 }
 
-console.log('🎯 Dashboard Hospitalar V3.4.0 - COM KPIS CONSOLIDADOS!');
-console.log('✅ KPIs Completos (6 boxes)');
-console.log('✅ Análise Preditiva: BARRAS HORIZONTAIS');
-console.log('✅ Concessões/Linhas: GRÁFICOS DE ROSCA');
-console.log('🚀 READY: Sistema V3.4.0 100% funcional!');
+console.log('🎨 Dashboard Hospitalar V3.5.0 - CORES ARCHIPELAGO APLICADAS!');
+console.log('✅ Paleta oficial: 12 cores aplicadas');
+console.log('✅ Fonte Poppins em tudo');
+console.log('✅ KPIs com cores corretas');
+console.log('✅ Gráficos com paleta oficial');
+console.log('🚀 READY: Sistema V3.5.0 100% funcional com identidade visual Archipelago!');
