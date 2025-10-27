@@ -1,43 +1,4 @@
-/* =================== DASHBOARDS.CSS V3.4 - PALETA ARCHIPELAGO =================== */
-
-/* IMPORTAR FONTE POPPINS */
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap');
-
-/* VARIÁVEIS DE CORES ARCHIPELAGO */
-:root {
-    /* Azuis Archipelago */
-    --azul-marinho: #131b2e;
-    --azul-escuro: #172945;
-    --azul-medio: #1c5083;
-    --azul-principal: #0676bb;
-    --azul-acinzentado: #577a97;
-    --azul-claro: #a9c0d2;
-    
-    /* Neutros */
-    --cinza-escuro: #3c3a3e;
-    --cinza-medio: #b2adaa;
-    --cinza-claro: #e9e5e2;
-    
-    /* Alertas */
-    --laranja: #c86420;
-    --amarelo: #f59a1d;
-    --verde: #29ad8d;
-    
-    /* Backgrounds */
-    --bg-primary: #131b2e;
-    --bg-secondary: #172945;
-    --bg-tertiary: #1c5083;
-    --bg-card: rgba(23, 41, 69, 0.8);
-    
-    /* Textos */
-    --text-primary: #ffffff;
-    --text-secondary: #a9c0d2;
-    --text-muted: #577a97;
-    
-    /* Bordas */
-    --border-color: rgba(169, 192, 210, 0.2);
-    --border-hover: rgba(169, 192, 210, 0.4);
-}
+/* =================== DASHBOARDS.CSS V3.0 - CORREÇÃO COMPLETA =================== */
 
 /* RESET E BASE */
 * {
@@ -47,25 +8,10 @@
 body {
     margin: 0;
     padding: 0;
-    font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-    background: var(--bg-primary);
-    color: var(--text-primary);
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: #0f172a;
+    color: white;
     line-height: 1.6;
-}
-
-/* MODO CLARO */
-body.light-mode {
-    background: #ffffff url('../imagens/Grafismo_Fundo.svg') no-repeat top left;
-    background-size: 800px auto;
-    background-attachment: fixed;
-    color: var(--cinza-escuro);
-    --bg-primary: #ffffff;
-    --bg-secondary: var(--cinza-claro);
-    --bg-card: rgba(233, 229, 226, 0.8);
-    --text-primary: var(--cinza-escuro);
-    --text-secondary: var(--azul-medio);
-    --text-muted: var(--cinza-medio);
-    --border-color: rgba(178, 173, 170, 0.3);
 }
 
 /* =================== LAYOUT PRINCIPAL =================== */
@@ -74,8 +20,9 @@ body.light-mode {
     min-height: 100vh;
 }
 
-/* =================== DASHBOARD HOSPITALAR - LAYOUT VERTICAL =================== */
+/* =================== DASHBOARD HOSPITALAR - LAYOUT VERTICAL FORÇADO =================== */
 
+/* CORREÇÃO CRÍTICA: Layout dos gráficos hospitalares deve ser VERTICAL */
 .hospitalar-grid {
     display: flex;
     flex-direction: column;
@@ -84,14 +31,13 @@ body.light-mode {
 }
 
 .hospital-section {
-    background: var(--bg-card);
+    background: #1a1f2e;
     border-radius: 12px;
     padding: 25px;
-    color: var(--text-primary);
+    color: white;
     box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
-    border: 1px solid var(--border-color);
+    border: 1px solid rgba(255, 255, 255, 0.1);
     width: 100%;
-    backdrop-filter: blur(10px);
 }
 
 .hospital-title {
@@ -99,7 +45,7 @@ body.light-mode {
     font-size: 20px;
     font-weight: 700;
     text-transform: uppercase;
-    color: var(--azul-principal);
+    color: #60a5fa;
     text-align: center;
     letter-spacing: 0.5px;
 }
@@ -111,11 +57,10 @@ body.light-mode {
     gap: 15px;
     margin-bottom: 25px;
     padding: 20px;
-    background: rgba(169, 192, 210, 0.1);
+    background: rgba(255, 255, 255, 0.05);
     border-radius: 10px;
     flex-wrap: wrap;
     justify-content: center;
-    border: 1px solid var(--border-color);
 }
 
 .hospital-gauge {
@@ -134,7 +79,7 @@ body.light-mode {
     transform: translateX(-50%);
     font-size: 12px;
     font-weight: 600;
-    color: var(--azul-principal);
+    color: #60a5fa;
     text-transform: uppercase;
 }
 
@@ -151,52 +96,42 @@ body.light-mode {
     display: flex;
     flex-direction: column;
     justify-content: center;
-    background: rgba(169, 192, 210, 0.1);
+    background: rgba(255, 255, 255, 0.05);
     border-radius: 8px;
     padding: 12px 8px;
-    border: 1px solid var(--border-color);
-    transition: all 0.3s ease;
-}
-
-.kpi-mini:hover {
-    background: rgba(169, 192, 210, 0.15);
-    border-color: var(--border-hover);
-    transform: translateY(-2px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .kpi-mini .kpi-value {
     font-size: 22px;
     font-weight: 700;
     margin-bottom: 4px;
-    color: var(--azul-principal);
+    color: #60a5fa;
 }
 
 .kpi-mini .kpi-label {
     font-size: 10px;
-    color: var(--text-muted);
+    color: #9ca3af;
     text-transform: uppercase;
     letter-spacing: 0.5px;
 }
 
-/* GRÁFICOS HOSPITALARES EM LAYOUT VERTICAL */
+/* *** CORREÇÃO PRINCIPAL: GRÁFICOS HOSPITALARES EM LAYOUT VERTICAL *** */
 .hospital-graficos {
     display: flex;
-    flex-direction: column;
+    flex-direction: column; /* FORÇAR COLUNA ÚNICA */
     gap: 25px;
     width: 100%;
 }
 
+/* Cada container de gráfico ocupa toda a largura disponível */
 .hospital-section .chart-container {
     width: 100%;
     margin-bottom: 25px;
-    background: rgba(0, 0, 0, 0.15);
+    background: rgba(0, 0, 0, 0.2);
     border-radius: 12px;
     padding: 20px;
-    border: 1px solid var(--border-color);
-}
-
-body.light-mode .hospital-section .chart-container {
-    background: rgba(233, 229, 226, 0.5);
+    border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .hospital-section .chart-container:last-child {
@@ -220,7 +155,7 @@ body.light-mode .hospital-section .chart-container {
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.5px;
-    color: var(--text-primary);
+    color: #e2e8f0;
 }
 
 /* Controles dos gráficos */
@@ -232,10 +167,10 @@ body.light-mode .hospital-section .chart-container {
 
 .chart-btn {
     padding: 8px 12px;
-    background: rgba(169, 192, 210, 0.1);
-    border: 1px solid var(--border-color);
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
     border-radius: 6px;
-    color: var(--text-primary);
+    color: #e2e8f0;
     cursor: pointer;
     font-size: 12px;
     transition: all 0.3s ease;
@@ -245,20 +180,20 @@ body.light-mode .hospital-section .chart-container {
 }
 
 .chart-btn:hover {
-    background: rgba(169, 192, 210, 0.2);
-    border-color: var(--azul-principal);
+    background: rgba(255, 255, 255, 0.2);
+    border-color: #60a5fa;
     transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(6, 118, 187, 0.3);
+    box-shadow: 0 4px 12px rgba(96, 165, 250, 0.2);
 }
 
 .chart-btn.active {
-    background: var(--azul-principal);
-    border-color: var(--azul-principal);
+    background: #60a5fa;
+    border-color: #60a5fa;
     color: white;
-    box-shadow: 0 4px 16px rgba(6, 118, 187, 0.4);
+    box-shadow: 0 4px 16px rgba(96, 165, 250, 0.4);
 }
 
-/* Canvas dos gráficos */
+/* Canvas dos gráficos com altura fixa adequada */
 .chart-container canvas {
     max-height: 400px !important;
     width: 100% !important;
@@ -267,12 +202,13 @@ body.light-mode .hospital-section .chart-container {
 
 /* =================== DASHBOARD EXECUTIVO =================== */
 
+/* Grid principal do dashboard executivo */
 .dashboard-executivo {
     display: flex;
     flex-direction: column;
     gap: 25px;
     padding: 20px;
-    background: var(--bg-primary);
+    background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
     min-height: 100vh;
 }
 
@@ -285,21 +221,14 @@ body.light-mode .hospital-section .chart-container {
 }
 
 .executivo-kpi-card {
-    background: var(--bg-card);
+    background: #1a1f2e;
     border-radius: 12px;
     padding: 20px;
-    color: var(--text-primary);
+    color: white;
     box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
-    border: 1px solid var(--border-color);
+    border: 1px solid rgba(255, 255, 255, 0.1);
     position: relative;
     overflow: hidden;
-    backdrop-filter: blur(10px);
-    transition: all 0.3s ease;
-}
-
-.executivo-kpi-card:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
 }
 
 .executivo-kpi-card::before {
@@ -309,10 +238,10 @@ body.light-mode .hospital-section .chart-container {
     left: 0;
     right: 0;
     height: 3px;
-    background: linear-gradient(90deg, var(--verde), var(--azul-principal), var(--azul-claro), var(--amarelo));
+    background: linear-gradient(90deg, #22c55e, #06b6d4, #8b5cf6, #f97316);
 }
 
-/* Gráficos executivos */
+/* Gráficos executivos em layout vertical */
 .executivo-graficos {
     display: flex;
     flex-direction: column;
@@ -320,215 +249,14 @@ body.light-mode .hospital-section .chart-container {
 }
 
 .executivo-grafico-card {
-    background: var(--bg-card);
+    background: #1a1f2e;
     border-radius: 12px;
     padding: 25px;
-    border: 1px solid var(--border-color);
+    border: 1px solid rgba(255, 255, 255, 0.1);
     box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
-    backdrop-filter: blur(10px);
-}
-
-/* =================== BADGES (CORES ARCHIPELAGO) =================== */
-
-/* Status de Ocupação */
-.badge-ocupado {
-    background: var(--laranja);
-    color: white;
-    padding: 4px 12px;
-    border-radius: 16px;
-    font-size: 11px;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-}
-
-.badge-vago {
-    background: var(--verde);
-    color: white;
-    padding: 4px 12px;
-    border-radius: 16px;
-    font-size: 11px;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-}
-
-/* Tipo de Leito */
-.badge-apartamento {
-    background: var(--azul-principal);
-    color: white;
-    padding: 4px 12px;
-    border-radius: 16px;
-    font-size: 11px;
-    font-weight: 600;
-}
-
-.badge-enfermaria {
-    background: var(--azul-medio);
-    color: white;
-    padding: 4px 12px;
-    border-radius: 16px;
-    font-size: 11px;
-    font-weight: 600;
-}
-
-/* Previsão de Alta - Medalhas */
-.badge-hoje-ouro {
-    background: linear-gradient(135deg, var(--amarelo), #ffd700);
-    color: white;
-    padding: 4px 12px;
-    border-radius: 16px;
-    font-size: 11px;
-    font-weight: 700;
-    text-transform: uppercase;
-    box-shadow: 0 2px 8px rgba(245, 154, 29, 0.4);
-}
-
-.badge-hoje-prata {
-    background: linear-gradient(135deg, var(--azul-claro), #c0c0c0);
-    color: var(--cinza-escuro);
-    padding: 4px 12px;
-    border-radius: 16px;
-    font-size: 11px;
-    font-weight: 700;
-    text-transform: uppercase;
-    box-shadow: 0 2px 8px rgba(169, 192, 210, 0.4);
-}
-
-.badge-hoje-bronze {
-    background: linear-gradient(135deg, var(--laranja), #cd7f32);
-    color: white;
-    padding: 4px 12px;
-    border-radius: 16px;
-    font-size: 11px;
-    font-weight: 700;
-    text-transform: uppercase;
-    box-shadow: 0 2px 8px rgba(200, 100, 32, 0.4);
-}
-
-/* Previsão de Alta - Horas */
-.badge-24h {
-    background: var(--azul-principal);
-    color: white;
-}
-
-.badge-48h {
-    background: var(--azul-medio);
-    color: white;
-}
-
-.badge-72h {
-    background: var(--azul-escuro);
-    color: white;
-}
-
-.badge-96h {
-    background: var(--azul-marinho);
-    color: white;
-}
-
-.badge-sp {
-    background: var(--azul-acinzentado);
-    color: white;
-}
-
-/* SPICT-BR */
-.badge-spict-elegivel {
-    background: rgba(200, 100, 32, 0.15);
-    border: 1px solid var(--laranja);
-    color: var(--laranja);
-    padding: 4px 12px;
-    border-radius: 16px;
-    font-size: 11px;
-    font-weight: 600;
-}
-
-.badge-spict-nao-elegivel {
-    background: rgba(41, 173, 141, 0.15);
-    border: 1px solid var(--verde);
-    color: var(--verde);
-    padding: 4px 12px;
-    border-radius: 16px;
-    font-size: 11px;
-    font-weight: 600;
-}
-
-/* =================== BOTÕES =================== */
-
-.btn-primary {
-    background: var(--azul-principal);
-    color: white;
-    border: none;
-    padding: 10px 20px;
-    border-radius: 8px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    font-family: 'Poppins', sans-serif;
-}
-
-.btn-primary:hover {
-    background: var(--azul-medio);
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(6, 118, 187, 0.4);
-}
-
-.btn-secondary {
-    background: var(--azul-acinzentado);
-    color: white;
-    border: none;
-    padding: 10px 20px;
-    border-radius: 8px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    font-family: 'Poppins', sans-serif;
-}
-
-.btn-secondary:hover {
-    background: var(--azul-medio);
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(87, 122, 151, 0.4);
-}
-
-.btn-success {
-    background: var(--verde);
-    color: white;
-    border: none;
-    padding: 10px 20px;
-    border-radius: 8px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    font-family: 'Poppins', sans-serif;
-}
-
-.btn-success:hover {
-    background: #22967a;
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(41, 173, 141, 0.4);
-}
-
-.btn-warning {
-    background: var(--amarelo);
-    color: white;
-    border: none;
-    padding: 10px 20px;
-    border-radius: 8px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    font-family: 'Poppins', sans-serif;
-}
-
-.btn-warning:hover {
-    background: var(--laranja);
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(245, 154, 29, 0.4);
 }
 
 /* =================== RESPONSIVIDADE =================== */
-
 @media (max-width: 1200px) {
     .hospitalar-grid {
         grid-template-columns: 1fr;
@@ -550,10 +278,6 @@ body.light-mode .hospital-section .chart-container {
 }
 
 @media (max-width: 768px) {
-    body.light-mode {
-        background-size: 400px auto;
-    }
-    
     .main-content {
         padding: 15px;
     }
@@ -615,10 +339,6 @@ body.light-mode .hospital-section .chart-container {
 }
 
 @media (max-width: 480px) {
-    body.light-mode {
-        background-size: 300px auto;
-    }
-    
     .chart-controls {
         gap: 4px;
     }
@@ -646,29 +366,27 @@ body.light-mode .hospital-section .chart-container {
     }
 }
 
-/* =================== ANIMAÇÕES =================== */
+/* =================== ANIMAÇÕES E TRANSIÇÕES =================== */
+.chart-container {
+    transition: all 0.3s ease;
+    position: relative;
+}
 
-@keyframes fadeIn {
-    from {
-        opacity: 0;
-        transform: translateY(20px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
+.chart-container:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
 }
 
 .hospital-section {
-    animation: fadeIn 0.4s ease-out;
+    transition: all 0.3s ease;
 }
 
-.executivo-kpi-card {
-    animation: fadeIn 0.4s ease-out;
+.hospital-section:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 12px 35px rgba(0, 0, 0, 0.4);
 }
 
 /* =================== UTILITÁRIOS =================== */
-
 .hidden {
     display: none !important;
 }
@@ -686,8 +404,8 @@ body.light-mode .hospital-section .chart-container {
     width: 30px;
     height: 30px;
     margin: -15px 0 0 -15px;
-    border: 2px solid var(--border-color);
-    border-top-color: var(--azul-principal);
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-top-color: #60a5fa;
     border-radius: 50%;
     animation: spin 1s linear infinite;
 }
@@ -697,8 +415,50 @@ body.light-mode .hospital-section .chart-container {
     to { transform: rotate(360deg); }
 }
 
-/* =================== SCROLL PERSONALIZADO =================== */
+/* =================== CORREÇÕES ESPECÍFICAS PARA GRÁFICOS =================== */
 
+/* Garantir que gráficos não quebrem o layout */
+.chart-container {
+    overflow: hidden;
+    position: relative;
+    height: auto;
+    min-height: 400px;
+}
+
+/* Forçar largura correta nos canvas */
+canvas {
+    display: block !important;
+    max-width: 100% !important;
+}
+
+/* Legenda dos gráficos com espaçamento adequado */
+.chart-legend {
+    margin-top: 15px;
+    text-align: center;
+}
+
+/* =================== CORES E TEMAS =================== */
+:root {
+    --color-primary: #60a5fa;
+    --color-success: #22c55e;
+    --color-warning: #f97316;
+    --color-danger: #ef4444;
+    --color-info: #06b6d4;
+    --color-secondary: #8b5cf6;
+    
+    --bg-primary: #0f172a;
+    --bg-secondary: #1a1f2e;
+    --bg-tertiary: #2d3748;
+    
+    --text-primary: #e2e8f0;
+    --text-secondary: #9ca3af;
+    --text-muted: #6b7280;
+    
+    --border-color: rgba(255, 255, 255, 0.1);
+    --hover-color: rgba(255, 255, 255, 0.05);
+}
+
+/* =================== SCROLL PERSONALIZADO =================== */
 ::-webkit-scrollbar {
     width: 8px;
     height: 8px;
@@ -709,40 +469,10 @@ body.light-mode .hospital-section .chart-container {
 }
 
 ::-webkit-scrollbar-thumb {
-    background: var(--azul-principal);
+    background: var(--color-primary);
     border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-    background: var(--azul-medio);
-}
-
-/* =================== IMPRESSÃO =================== */
-
-@media print {
-    body {
-        background: white !important;
-        color: black !important;
-    }
-    
-    body.light-mode {
-        background: white !important;
-    }
-    
-    .chart-btn,
-    .btn-primary,
-    .btn-secondary {
-        display: none !important;
-    }
-    
-    .hospital-section,
-    .executivo-kpi-card {
-        page-break-inside: avoid;
-        box-shadow: none;
-        border: 1px solid #ccc;
-    }
-    
-    .chart-container {
-        page-break-inside: avoid;
-    }
+    background: #3b82f6;
 }
