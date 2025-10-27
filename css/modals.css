@@ -1,4 +1,10 @@
 /* =================== MODAIS GERAIS =================== */
+/* Versão: 3.4.0 - PALETA OFICIAL ARCHIPELAGO + POPPINS */
+
+/* =================== IMPORTAÇÃO DA FONTE POPPINS =================== */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap');
+
+/* =================== MODAL BASE =================== */
 .modal {
     position: fixed;
     top: 0;
@@ -11,6 +17,7 @@
     justify-content: center;
     z-index: 1000;
     overflow-y: auto;
+    font-family: 'Poppins', sans-serif;
 }
 
 .modal.hidden {
@@ -18,7 +25,7 @@
 }
 
 .modal-content {
-    background: #1a1f2e;
+    background: #172945;
     border-radius: 12px;
     max-width: 900px;
     width: 90%;
@@ -26,6 +33,7 @@
     overflow-y: auto;
     color: #ffffff;
     box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    font-family: 'Poppins', sans-serif;
 }
 
 .modal-header {
@@ -41,7 +49,8 @@
     font-size: 18px;
     font-weight: 700;
     text-transform: uppercase;
-    color: #60a5fa;
+    color: #0676bb;
+    font-family: 'Poppins', sans-serif;
 }
 
 .modal-close {
@@ -54,6 +63,7 @@
     font-size: 18px;
     font-weight: 700;
     transition: all 0.3s ease;
+    font-family: 'Poppins', sans-serif;
 }
 
 .modal-close:hover {
@@ -63,6 +73,7 @@
 
 .modal-body {
     padding: 20px;
+    font-family: 'Poppins', sans-serif;
 }
 
 .modal-footer {
@@ -85,6 +96,7 @@
     text-transform: uppercase;
     cursor: pointer;
     transition: all 0.3s ease;
+    font-family: 'Poppins', sans-serif;
 }
 
 .btn-cancel:hover {
@@ -94,7 +106,7 @@
 
 .btn-save {
     padding: 12px 30px;
-    background: #3b82f6;
+    background: #0676bb;
     color: #ffffff;
     border: none;
     border-radius: 8px;
@@ -102,15 +114,16 @@
     text-transform: uppercase;
     cursor: pointer;
     transition: all 0.3s ease;
+    font-family: 'Poppins', sans-serif;
 }
 
 .btn-save:hover {
-    background: #2563eb;
+    background: #1c5083;
 }
 
 .btn-alta {
     padding: 12px 30px;
-    background: #ef4444;
+    background: #c86420;
     color: #ffffff;
     border: none;
     border-radius: 8px;
@@ -118,10 +131,11 @@
     text-transform: uppercase;
     cursor: pointer;
     transition: all 0.3s ease;
+    font-family: 'Poppins', sans-serif;
 }
 
 .btn-alta:hover {
-    background: #dc2626;
+    background: #b35818;
 }
 
 /* =================== FORMULÁRIOS DENTRO DOS MODAIS =================== */
@@ -139,11 +153,12 @@
 
 .form-group label {
     font-size: 10px;
-    color: rgba(255, 255, 255, 0.6);
+    color: #a9c0d2;
     text-transform: uppercase;
     font-weight: 600;
     margin-bottom: 6px;
     letter-spacing: 0.5px;
+    font-family: 'Poppins', sans-serif;
 }
 
 .form-group input,
@@ -157,19 +172,21 @@
     color: #ffffff;
     font-size: 14px;
     transition: all 0.3s ease;
+    font-family: 'Poppins', sans-serif;
 }
 
 .form-group input:focus,
 .form-group select:focus,
 .form-group textarea:focus {
     outline: none;
-    border-color: #60a5fa;
+    border-color: #0676bb;
     background: rgba(255, 255, 255, 0.1);
-    box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.1);
+    box-shadow: 0 0 0 3px rgba(6, 118, 187, 0.1);
 }
 
 .form-group input::placeholder {
     color: rgba(255, 255, 255, 0.4);
+    font-family: 'Poppins', sans-serif;
 }
 
 .form-group input[readonly] {
@@ -185,7 +202,7 @@
 }
 
 .form-section h3 {
-    background: #60a5fa;
+    background: #0676bb;
     color: #ffffff;
     padding: 12px 15px;
     border-radius: 6px;
@@ -194,6 +211,7 @@
     font-weight: 700;
     margin: 0 0 15px 0;
     letter-spacing: 0.5px;
+    font-family: 'Poppins', sans-serif;
 }
 
 .checkbox-grid {
@@ -222,13 +240,14 @@
     margin-right: 12px;
     width: 16px;
     height: 16px;
-    accent-color: #60a5fa;
+    accent-color: #0676bb;
 }
 
 .checkbox-item span {
     font-size: 14px;
     font-weight: 500;
     color: #ffffff;
+    font-family: 'Poppins', sans-serif;
 }
 
 /* =================== INFORMAÇÕES DE LEITO =================== */
@@ -249,17 +268,19 @@
 
 .leito-info-item .label {
     font-size: 10px;
-    color: rgba(255, 255, 255, 0.6);
+    color: #a9c0d2;
     text-transform: uppercase;
     font-weight: 600;
     margin-bottom: 4px;
     letter-spacing: 0.5px;
+    font-family: 'Poppins', sans-serif;
 }
 
 .leito-info-item .value {
     font-size: 16px;
     font-weight: 700;
-    color: #60a5fa;
+    color: #0676bb;
+    font-family: 'Poppins', sans-serif;
 }
 
 /* =================== INFORMAÇÕES DE INTERNAÇÃO =================== */
@@ -280,14 +301,16 @@
 
 .internacao-info .info-label {
     font-size: 12px;
-    color: rgba(255, 255, 255, 0.6);
+    color: #a9c0d2;
     margin-bottom: 4px;
+    font-family: 'Poppins', sans-serif;
 }
 
 .internacao-info .info-value {
     font-size: 14px;
     font-weight: 600;
     color: #ffffff;
+    font-family: 'Poppins', sans-serif;
 }
 
 /* =================== RESPONSIVIDADE MOBILE =================== */
@@ -353,7 +376,7 @@
     
     .form-group input,
     .form-group select {
-        font-size: 16px; /* Evita zoom no iOS */
+        font-size: 16px;
     }
 }
 
@@ -409,11 +432,11 @@ body.menu-open {
 
 .modal-body::-webkit-scrollbar-thumb,
 .checkbox-grid::-webkit-scrollbar-thumb {
-    background: rgba(96, 165, 250, 0.5);
+    background: rgba(6, 118, 187, 0.5);
     border-radius: 3px;
 }
 
 .modal-body::-webkit-scrollbar-thumb:hover,
 .checkbox-grid::-webkit-scrollbar-thumb:hover {
-    background: rgba(96, 165, 250, 0.7);
+    background: rgba(6, 118, 187, 0.7);
 }
