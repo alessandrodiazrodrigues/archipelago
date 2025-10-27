@@ -1,10 +1,13 @@
 /* ============================================
    ARCHIPELAGO DASHBOARD - CORES E TIPOGRAFIA
-   Versão: 3.4.0
+   Versão: 3.4.2 FINAL CORRIGIDA
    Data: 27/Outubro/2025
    
-   ATENÇÃO: Este arquivo aplica APENAS cores e fontes.
-   Layouts e tamanhos NÃO foram alterados.
+   CORREÇÃO APLICADA:
+   - Modo claro: cards brancos + grafismo
+   - Modo escuro: cards azul escuro sem grafismo
+   - Todas as cores da paleta oficial
+   - Fonte Poppins em tudo
    ============================================ */
 
 /* ----- IMPORTAÇÃO DA FONTE POPPINS ----- */
@@ -13,24 +16,24 @@
 /* ----- VARIÁVEIS DE CORES OFICIAIS ----- */
 :root {
   /* AZUIS - Paleta Principal */
-  --primary-navy: #131b2e;        /* Azul marinho escuro - Backgrounds principais */
-  --primary-dark-blue: #172945;   /* Azul escuro - Headers, cards modo escuro */
-  --primary-medium-blue: #1c5083; /* Azul médio - Elementos de destaque */
-  --primary-blue: #0676bb;        /* Azul principal - Botões, CTAs, links */
-  --primary-light-blue: #577a97;  /* Azul acinzentado - Textos secundários */
-  --primary-lighter-blue: #a9c0d2;/* Azul claro - Backgrounds suaves */
+  --primary-navy: #131b2e;
+  --primary-dark-blue: #172945;
+  --primary-medium-blue: #1c5083;
+  --primary-blue: #0676bb;
+  --primary-light-blue: #577a97;
+  --primary-lighter-blue: #a9c0d2;
   
   /* NEUTROS - Cinzas */
-  --neutral-dark: #3c3a3e;        /* Cinza escuro - Textos principais */
-  --neutral-medium: #b2adaa;      /* Cinza médio - Bordas, separadores */
-  --neutral-light: #e9e5e2;       /* Cinza claro - Backgrounds claros */
+  --neutral-dark: #3c3a3e;
+  --neutral-medium: #b2adaa;
+  --neutral-light: #e9e5e2;
   
   /* LARANJAS - Alertas e Destaques */
-  --warning-orange: #c86420;      /* Laranja - Avisos, alertas */
-  --alert-yellow: #f59a1d;        /* Amarelo - Destaques importantes */
+  --warning-orange: #c86420;
+  --alert-yellow: #f59a1d;
   
   /* VERDE - Sucesso */
-  --success-green: #29ad8d;       /* Verde - Confirmações, status positivo */
+  --success-green: #29ad8d;
   
   /* BACKGROUNDS MODO ESCURO */
   --bg-dark: #131b2e;
@@ -40,11 +43,11 @@
 
 /* ----- RESET E CONFIGURAÇÃO GLOBAL ----- */
 * {
-  font-family: 'Poppins', sans-serif;
+  font-family: 'Poppins', sans-serif !important;
 }
 
 body {
-  font-family: 'Poppins', sans-serif;
+  font-family: 'Poppins', sans-serif !important;
   font-weight: 400;
   font-size: 16px;
   line-height: 1.6;
@@ -53,10 +56,9 @@ body {
 
 /* ----- HIERARQUIA TIPOGRÁFICA ----- */
 
-/* Títulos H1 */
 h1,
 .titulo-principal {
-  font-family: 'Poppins', sans-serif;
+  font-family: 'Poppins', sans-serif !important;
   font-weight: 700;
   font-size: 32px;
   line-height: 1.2;
@@ -64,98 +66,88 @@ h1,
   color: var(--primary-navy);
 }
 
-/* Títulos H2 */
 h2,
 .subtitulo {
-  font-family: 'Poppins', sans-serif;
+  font-family: 'Poppins', sans-serif !important;
   font-weight: 600;
   font-size: 24px;
   line-height: 1.3;
   color: var(--primary-navy);
 }
 
-/* Títulos H3 */
 h3,
 .titulo-secao {
-  font-family: 'Poppins', sans-serif;
+  font-family: 'Poppins', sans-serif !important;
   font-weight: 600;
   font-size: 20px;
   line-height: 1.4;
   color: var(--primary-navy);
 }
 
-/* Títulos H4 */
 h4,
 .titulo-pequeno {
-  font-family: 'Poppins', sans-serif;
+  font-family: 'Poppins', sans-serif !important;
   font-weight: 500;
   font-size: 18px;
   line-height: 1.4;
   color: var(--primary-medium-blue);
 }
 
-/* Parágrafos */
 p {
-  font-family: 'Poppins', sans-serif;
+  font-family: 'Poppins', sans-serif !important;
   font-weight: 400;
   font-size: 16px;
   line-height: 1.6;
   color: var(--neutral-dark);
 }
 
-/* Labels */
 label,
 .label {
-  font-family: 'Poppins', sans-serif;
+  font-family: 'Poppins', sans-serif !important;
   font-weight: 500;
   font-size: 14px;
   letter-spacing: 0.3px;
   color: var(--primary-light-blue);
 }
 
-/* Botões */
 button,
 .botao,
 .btn {
-  font-family: 'Poppins', sans-serif;
+  font-family: 'Poppins', sans-serif !important;
   font-weight: 500;
   font-size: 14px;
   letter-spacing: 0.5px;
 }
 
-/* Inputs */
 input,
 select,
 textarea {
-  font-family: 'Poppins', sans-serif;
+  font-family: 'Poppins', sans-serif !important;
   font-weight: 400;
   font-size: 16px;
   color: var(--neutral-dark);
   border-color: var(--neutral-medium);
 }
 
-/* Badges e Tags */
 .badge,
 .tag {
-  font-family: 'Poppins', sans-serif;
+  font-family: 'Poppins', sans-serif !important;
   font-weight: 500;
   font-size: 14px;
   letter-spacing: 0.3px;
 }
 
-/* Números Grandes (KPIs) */
 .kpi-number,
 .numero-grande {
-  font-family: 'Poppins', sans-serif;
+  font-family: 'Poppins', sans-serif !important;
   font-weight: 700;
   font-size: 48px;
   line-height: 1;
   color: var(--primary-blue);
 }
 
-/* Labels de KPIs */
 .kpi-label {
-  font-family: 'Poppins', sans-serif;
+  font-family: 'Poppins', sans-serif !important;
   font-weight: 500;
   font-size: 14px;
   text-transform: uppercase;
@@ -163,19 +155,17 @@ textarea {
   color: var(--primary-light-blue);
 }
 
-/* Textos Pequenos */
 .texto-pequeno,
 small {
-  font-family: 'Poppins', sans-serif;
+  font-family: 'Poppins', sans-serif !important;
   font-weight: 400;
   font-size: 14px;
   line-height: 1.5;
   color: var(--primary-light-blue);
 }
 
-/* Caption */
 .caption {
-  font-family: 'Poppins', sans-serif;
+  font-family: 'Poppins', sans-serif !important;
   font-weight: 400;
   font-size: 12px;
   line-height: 1.4;
@@ -183,99 +173,144 @@ small {
 }
 
 /* ============================================
-   CORES - COMPONENTES GLOBAIS
+   MODO CLARO (PADRÃO)
    ============================================ */
 
-/* ----- HEADER GLOBAL ----- */
-.header-global,
-header {
-  background: white;
-  border-bottom: 1px solid var(--neutral-medium);
+/* Body - Fundo branco + grafismo */
+body:not(.dark-mode) {
+  background: white !important;
+  background-image: url('../imagens/Grafismo_Fundo.svg') !important;
+  background-repeat: no-repeat !important;
+  background-position: top left !important;
+  background-size: auto !important;
+  background-attachment: fixed !important;
+  color: var(--neutral-dark) !important;
 }
 
-.logo,
-.logo-titulo {
-  color: var(--primary-navy);
+/* Header */
+body:not(.dark-mode) .header-global,
+body:not(.dark-mode) header {
+  background: white !important;
+  border-bottom: 1px solid var(--neutral-medium) !important;
 }
 
-.timestamp,
-.countdown-timer {
-  color: var(--primary-light-blue);
+body:not(.dark-mode) .logo,
+body:not(.dark-mode) .logo-titulo {
+  color: var(--primary-navy) !important;
 }
 
-/* ----- MENU LATERAL ----- */
-.menu-lateral {
-  background: white;
-  border-right: 1px solid var(--neutral-medium);
+body:not(.dark-mode) .timestamp,
+body:not(.dark-mode) .countdown-timer {
+  color: var(--primary-light-blue) !important;
 }
 
-.menu-item {
-  color: var(--neutral-dark);
+/* Menu Lateral */
+body:not(.dark-mode) .menu-lateral {
+  background: white !important;
+  border-right: 1px solid var(--neutral-medium) !important;
 }
 
-.menu-item:hover {
-  background: var(--primary-lighter-blue);
-  color: var(--primary-blue);
+body:not(.dark-mode) .menu-item {
+  color: var(--neutral-dark) !important;
 }
 
-.menu-item.active {
-  background: var(--primary-blue);
-  color: white;
+body:not(.dark-mode) .menu-item:hover {
+  background: var(--primary-lighter-blue) !important;
+  color: var(--primary-blue) !important;
 }
 
-/* ----- ABAS DE HOSPITAIS ----- */
-.tab-hospital,
-.hospital-tab {
-  background: var(--neutral-light);
-  color: var(--neutral-dark);
-  border: 1px solid var(--neutral-medium);
+body:not(.dark-mode) .menu-item.active {
+  background: var(--primary-blue) !important;
+  color: white !important;
 }
 
-.tab-hospital:hover,
-.hospital-tab:hover {
-  background: var(--primary-lighter-blue);
-  color: var(--primary-blue);
+/* Abas de Hospitais */
+body:not(.dark-mode) .tab-hospital,
+body:not(.dark-mode) .hospital-tab {
+  background: var(--neutral-light) !important;
+  color: var(--neutral-dark) !important;
+  border: 1px solid var(--neutral-medium) !important;
 }
 
-.tab-hospital.active,
-.hospital-tab.active {
-  background: var(--primary-blue);
-  color: white;
-  border-color: var(--primary-blue);
+body:not(.dark-mode) .tab-hospital:hover,
+body:not(.dark-mode) .hospital-tab:hover {
+  background: var(--primary-lighter-blue) !important;
+  color: var(--primary-blue) !important;
 }
 
-/* ============================================
-   CORES - TELA 1: GESTÃO DE LEITOS
-   ============================================ */
-
-/* ----- CARDS DE LEITOS ----- */
-.leito-card,
-.hospital-card {
-  background: white;
-  border: 1px solid var(--neutral-medium);
+body:not(.dark-mode) .tab-hospital.active,
+body:not(.dark-mode) .hospital-tab.active {
+  background: var(--primary-blue) !important;
+  color: white !important;
+  border-color: var(--primary-blue) !important;
 }
 
-.leito-numero,
-.leito-header {
-  color: var(--primary-blue);
+/* CARDS - BRANCOS NO MODO CLARO */
+body:not(.dark-mode) .leito-card,
+body:not(.dark-mode) .hospital-card,
+body:not(.dark-mode) .kpi-card,
+body:not(.dark-mode) .card-em-alta,
+body:not(.dark-mode) .grafico-container,
+body:not(.dark-mode) .gauge-container {
+  background: white !important;
+  border: 1px solid var(--neutral-medium) !important;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05) !important;
 }
 
-.hospital-nome {
-  color: var(--primary-light-blue);
+/* Textos dentro dos cards - modo claro */
+body:not(.dark-mode) .hospital-nome {
+  color: var(--primary-navy) !important;
 }
 
-.label-campo {
-  color: var(--primary-light-blue);
-  background: var(--primary-lighter-blue);
+body:not(.dark-mode) .leito-numero,
+body:not(.dark-mode) .leito-header {
+  color: var(--primary-blue) !important;
 }
 
-.valor-campo {
-  color: var(--neutral-dark);
+body:not(.dark-mode) .label-campo {
+  color: var(--primary-light-blue) !important;
+  background: transparent !important;
+}
+
+body:not(.dark-mode) .valor-campo {
+  color: var(--neutral-dark) !important;
+}
+
+body:not(.dark-mode) h1,
+body:not(.dark-mode) h2,
+body:not(.dark-mode) h3,
+body:not(.dark-mode) h4 {
+  color: var(--primary-navy) !important;
+}
+
+body:not(.dark-mode) .dashboard-titulo,
+body:not(.dark-mode) .grafico-titulo {
+  color: var(--primary-navy) !important;
+}
+
+body:not(.dark-mode) .kpi-value,
+body:not(.dark-mode) .kpi-valor {
+  color: var(--primary-blue) !important;
+}
+
+body:not(.dark-mode) .kpi-label {
+  color: var(--primary-light-blue) !important;
+}
+
+/* Seções azuis - manter azul */
+body:not(.dark-mode) .secao-concessoes-titulo,
+body:not(.dark-mode) .secao-linhas-titulo,
+body:not(.dark-mode) [class*="titulo"][class*="secao"] {
+  background: var(--primary-blue) !important;
+  color: white !important;
+}
+
+body:not(.dark-mode) .secao-conteudo {
+  background: #f8f9fa !important;
+  color: var(--neutral-dark) !important;
 }
 
 /* ----- BADGES DE STATUS ----- */
-
-/* Status de Ocupação */
 .badge-ocupado {
   background: var(--warning-orange) !important;
   color: white !important;
@@ -286,7 +321,6 @@ header {
   color: white !important;
 }
 
-/* Tipo de Leito */
 .badge-apto {
   background: var(--primary-blue) !important;
   color: white !important;
@@ -298,7 +332,6 @@ header {
   color: white !important;
 }
 
-/* Isolamento */
 .badge-isolamento-sim {
   background: var(--warning-orange) !important;
   color: white !important;
@@ -309,26 +342,24 @@ header {
   color: var(--primary-navy) !important;
 }
 
-/* Previsão de Alta - Medalhas */
 .badge-hoje-ouro {
   background: linear-gradient(135deg, var(--alert-yellow) 0%, #ffd700 100%) !important;
   color: var(--primary-navy) !important;
-  font-weight: 600;
+  font-weight: 600 !important;
 }
 
 .badge-hoje-prata {
   background: linear-gradient(135deg, var(--primary-lighter-blue) 0%, #e0e0e0 100%) !important;
   color: var(--primary-navy) !important;
-  font-weight: 600;
+  font-weight: 600 !important;
 }
 
 .badge-hoje-bronze {
   background: linear-gradient(135deg, var(--warning-orange) 0%, #cd7f32 100%) !important;
   color: white !important;
-  font-weight: 600;
+  font-weight: 600 !important;
 }
 
-/* Previsão de Alta - Horas */
 .badge-24h {
   background: var(--primary-blue) !important;
   color: white !important;
@@ -354,7 +385,6 @@ header {
   color: white !important;
 }
 
-/* SPICT-BR */
 .badge-elegivel {
   background: rgba(200, 100, 32, 0.15) !important;
   color: var(--warning-orange) !important;
@@ -367,7 +397,6 @@ header {
   border: 1px solid var(--success-green) !important;
 }
 
-/* Diretivas */
 .badge-diretivas-sim {
   background: var(--success-green) !important;
   color: white !important;
@@ -379,377 +408,161 @@ header {
 }
 
 /* ----- BOTÕES ----- */
-
-/* Botão Atualizar */
 .btn-atualizar {
   background: var(--primary-blue) !important;
   color: white !important;
-  border: none;
+  border: none !important;
 }
 
 .btn-atualizar:hover {
   background: var(--primary-medium-blue) !important;
 }
 
-/* Botão Admitir */
 .btn-admitir {
   background: var(--success-green) !important;
   color: white !important;
-  border: none;
+  border: none !important;
 }
 
 .btn-admitir:hover {
   background: #22967a !important;
 }
 
-/* Botão Alta */
 .btn-alta {
   background: var(--warning-orange) !important;
   color: white !important;
-  border: none;
+  border: none !important;
 }
 
 .btn-alta:hover {
   background: #b35818 !important;
 }
 
-/* ----- SEÇÕES DE CONCESSÕES E LINHAS ----- */
-.secao-concessoes-titulo,
-.secao-linhas-titulo {
-  background: var(--primary-blue);
-  color: white;
-}
-
-.secao-conteudo {
-  background: var(--primary-lighter-blue);
-  color: var(--neutral-dark);
-}
-
-.texto-nenhuma {
-  color: var(--primary-light-blue);
-}
-
-/* ============================================
-   CORES - TELA 2: DASHBOARD HOSPITALAR
-   ============================================ */
-
-/* ----- HEADER DO DASHBOARD ----- */
-.dashboard-header {
-  background: white;
-  border-bottom: 2px solid var(--primary-blue);
-}
-
-.dashboard-titulo {
-  color: var(--primary-navy);
-}
-
-.hospital-name-display,
-.hospital-nome-destaque {
-  color: var(--primary-blue);
-}
-
-/* Botão Tema */
 .btn-tema,
 .btn-toggle-theme {
-  background: white;
-  color: var(--primary-navy);
-  border: 2px solid var(--primary-lighter-blue);
+  background: white !important;
+  color: var(--primary-navy) !important;
+  border: 2px solid var(--primary-lighter-blue) !important;
 }
 
-/* ----- KPIS (Cards de Indicadores) ----- */
-.kpi-card {
-  background: white;
-  border: 1px solid var(--neutral-medium);
+/* Gauge */
+.gauge-background {
+  stroke: var(--neutral-light) !important;
 }
 
-.kpi-value,
-.kpi-valor {
-  color: var(--primary-blue) !important;
-}
-
-.kpi-label {
-  color: var(--primary-light-blue);
-}
-
-/* ----- GAUGE DE OCUPAÇÃO ----- */
-.gauge-container {
-  background: white;
-  border: 1px solid var(--neutral-medium);
+.gauge-progress {
+  stroke: var(--primary-blue) !important;
 }
 
 .gauge-porcentagem,
 .gauge-label {
-  color: var(--primary-blue);
+  color: var(--primary-blue) !important;
 }
 
 .gauge-subtitle {
-  color: var(--primary-light-blue);
-}
-
-/* SVG do Gauge - Arco de Fundo */
-.gauge-background {
-  stroke: var(--neutral-light);
-}
-
-/* SVG do Gauge - Arco de Progresso */
-.gauge-progress {
-  stroke: var(--primary-blue);
-}
-
-/* ----- GRÁFICOS ----- */
-.grafico-container {
-  background: white;
-  border: 1px solid var(--neutral-medium);
-}
-
-.grafico-titulo,
-.grafico-header {
-  color: var(--primary-navy);
-}
-
-/* ============================================
-   CORES - TELA 3: DASHBOARD EXECUTIVO
-   ============================================ */
-
-/* ----- GAUGE CENTRAL ----- */
-.gauge-executivo,
-.gauge-ocupacao-geral {
-  background: white;
-  border: 1px solid var(--neutral-medium);
-}
-
-.gauge-ocupacao-geral-valor {
-  color: var(--primary-blue) !important;
-}
-
-.gauge-label-geral {
-  color: var(--primary-light-blue);
-}
-
-/* ----- LISTA DE HOSPITAIS ----- */
-.hospital-list-item,
-.hospital-item {
-  color: var(--neutral-dark);
-}
-
-.hospital-percentual {
-  color: var(--primary-blue) !important;
-}
-
-/* ----- CARDS "EM ALTA" ----- */
-.card-em-alta {
-  background: white;
-  border: 1px solid var(--neutral-medium);
-}
-
-.em-alta-numero {
-  color: var(--primary-blue) !important;
-}
-
-.em-alta-label {
-  color: var(--primary-light-blue);
+  color: var(--primary-light-blue) !important;
 }
 
 /* ============================================
    MODO ESCURO
    ============================================ */
 
-.dark-mode {
-  background: var(--bg-dark);
-  color: white;
+.dark-mode,
+body.dark-mode {
+  background: var(--bg-dark) !important;
+  background-image: none !important;
+  color: white !important;
 }
 
-/* ----- HEADER E MENU (Modo Escuro) ----- */
 .dark-mode .header-global,
 .dark-mode header {
-  background: var(--bg-dark-card);
-  border-bottom-color: var(--primary-medium-blue);
+  background: var(--bg-dark-card) !important;
+  border-bottom-color: var(--primary-medium-blue) !important;
 }
 
 .dark-mode .logo,
 .dark-mode .logo-titulo {
-  color: white;
+  color: white !important;
 }
 
 .dark-mode .timestamp,
 .dark-mode .countdown-timer {
-  color: var(--primary-lighter-blue);
+  color: var(--primary-lighter-blue) !important;
 }
 
 .dark-mode .menu-lateral {
-  background: var(--bg-dark-card);
-  border-right-color: var(--primary-medium-blue);
+  background: var(--bg-dark-card) !important;
+  border-right-color: var(--primary-medium-blue) !important;
 }
 
 .dark-mode .menu-item {
-  color: var(--primary-lighter-blue);
+  color: var(--primary-lighter-blue) !important;
 }
 
 .dark-mode .menu-item:hover {
-  background: var(--bg-dark-elevated);
-  color: white;
+  background: var(--bg-dark-elevated) !important;
+  color: white !important;
 }
 
 .dark-mode .menu-item.active {
-  background: var(--primary-blue);
+  background: var(--primary-blue) !important;
 }
 
-/* ----- CARDS E COMPONENTES (Modo Escuro) ----- */
 .dark-mode .leito-card,
 .dark-mode .hospital-card,
 .dark-mode .kpi-card,
 .dark-mode .card-em-alta,
 .dark-mode .grafico-container,
 .dark-mode .gauge-container {
-  background: var(--bg-dark-card);
-  border-color: var(--primary-medium-blue);
+  background: var(--bg-dark-card) !important;
+  border-color: var(--primary-medium-blue) !important;
 }
 
 .dark-mode .hospital-nome,
 .dark-mode .label-campo,
 .dark-mode .kpi-label,
 .dark-mode .gauge-subtitle {
-  color: var(--primary-lighter-blue);
+  color: var(--primary-lighter-blue) !important;
 }
 
 .dark-mode .valor-campo,
 .dark-mode h1,
 .dark-mode h2,
 .dark-mode h3,
+.dark-mode h4,
 .dark-mode .dashboard-titulo,
 .dark-mode .grafico-titulo {
-  color: white;
+  color: white !important;
 }
 
 .dark-mode .secao-conteudo {
-  background: var(--bg-dark-elevated);
-  color: white;
+  background: var(--bg-dark-elevated) !important;
+  color: white !important;
 }
 
 .dark-mode .gauge-background {
-  stroke: var(--bg-dark-elevated);
+  stroke: var(--bg-dark-elevated) !important;
 }
 
-/* ----- ABAS (Modo Escuro) ----- */
 .dark-mode .tab-hospital,
 .dark-mode .hospital-tab {
-  background: var(--bg-dark-card);
-  color: var(--primary-lighter-blue);
-  border-color: var(--primary-medium-blue);
+  background: var(--bg-dark-card) !important;
+  color: var(--primary-lighter-blue) !important;
+  border-color: var(--primary-medium-blue) !important;
 }
 
 .dark-mode .tab-hospital:hover,
 .dark-mode .hospital-tab:hover {
-  background: var(--bg-dark-elevated);
-  color: white;
+  background: var(--bg-dark-elevated) !important;
+  color: white !important;
 }
 
 .dark-mode .tab-hospital.active,
 .dark-mode .hospital-tab.active {
-  background: var(--primary-blue);
-  color: white;
-}
-
-/* ============================================
-   BACKGROUND COM GRAFISMO
-   ============================================ */
-
-/* Adicionar imagem de fundo no body (modo claro) */
-body {
-  background-image: url('../imagens/Grafismo_Fundo.svg');
-  background-repeat: no-repeat;
-  background-position: top left;
-  background-size: auto;
-  background-attachment: fixed;
-}
-
-/* Remover background no modo escuro */
-.dark-mode {
-  background-image: none;
-  background-color: var(--bg-dark);
+  background: var(--primary-blue) !important;
+  color: white !important;
 }
 
 /* ============================================
    FIM DO ARQUIVO
-   ============================================ */
-
-/* ============================================
-   CORREÇÃO URGENTE - ADICIONAR NO FINAL DO CSS
-   Data: 27/Out/2025
-   
-   INSTRUÇÕES:
-   1. Abrir: css/archipelago-cores-fontes.css
-   2. Ir até o FINAL do arquivo
-   3. COLAR todo este conteúdo
-   4. Salvar
-   5. Recarregar página (Ctrl+Shift+R)
-   ============================================ */
-
-/* FORÇAR MODO CLARO - Body */
-body:not(.dark-mode) {
-    background: white !important;
-    background-image: url('../imagens/Grafismo_Fundo.svg') !important;
-    background-repeat: no-repeat !important;
-    background-position: top left !important;
-    background-size: auto !important;
-    background-attachment: fixed !important;
-    color: #3c3a3e !important;
-}
-
-/* FORÇAR CARDS BRANCOS - Modo Claro */
-body:not(.dark-mode) .hospital-card,
-body:not(.dark-mode) .leito-card,
-body:not(.dark-mode) [class*="card-"] {
-    background: white !important;
-    background-color: white !important;
-    border: 1px solid #b2adaa !important;
-}
-
-/* FORÇAR TEXTOS ESCUROS - Modo Claro */
-body:not(.dark-mode) .hospital-card *,
-body:not(.dark-mode) .leito-card *,
-body:not(.dark-mode) [class*="card-"] * {
-    color: #3c3a3e !important;
-}
-
-/* EXCEÇÕES - Badges e elementos coloridos */
-body:not(.dark-mode) .badge-ocupado,
-body:not(.dark-mode) .badge-vago,
-body:not(.dark-mode) .badge-apto,
-body:not(.dark-mode) .badge-enf,
-body:not(.dark-mode) [class*="badge-"] {
-    color: white !important; /* Badges mantém texto branco */
-}
-
-/* FORÇAR MODO ESCURO - Body */
-body.dark-mode {
-    background: #131b2e !important;
-    background-image: none !important;
-    color: white !important;
-}
-
-/* FORÇAR CARDS ESCUROS - Modo Escuro */
-body.dark-mode .hospital-card,
-body.dark-mode .leito-card,
-body.dark-mode [class*="card-"] {
-    background: #172945 !important;
-    background-color: #172945 !important;
-    border: 1px solid #1c5083 !important;
-}
-
-/* FORÇAR TEXTOS CLAROS - Modo Escuro */
-body.dark-mode .hospital-card *,
-body.dark-mode .leito-card *,
-body.dark-mode [class*="card-"] * {
-    color: white !important;
-}
-
-/* EXCEÇÕES - Labels */
-body.dark-mode .label-campo,
-body.dark-mode .kpi-label {
-    color: #a9c0d2 !important;
-}
-
-/* ============================================
-   FIM DA CORREÇÃO
    ============================================ */
