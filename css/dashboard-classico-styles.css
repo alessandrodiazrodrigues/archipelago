@@ -1,38 +1,6 @@
-/* =================== DASHBOARD CLÁSSICO V3.4 - CSS CORRIGIDO ===================
-   Cliente: Guilherme Santoro
-   Desenvolvedor: Alessandro Rodrigues
-   Data: 27/Outubro/2025
-   Versão: V3.4.0 - PALETA OFICIAL + POPPINS
-   ============================================================================== */
-
-/* =================== IMPORTAÇÃO DA FONTE POPPINS =================== */
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap');
-
-/* =================== VARIÁVEIS DE CORES OFICIAIS ARCHIPELAGO =================== */
-:root {
-    /* AZUIS - Paleta Principal */
-    --primary-navy: #131b2e;        /* Azul marinho escuro */
-    --primary-dark-blue: #172945;   /* Azul escuro */
-    --primary-medium-blue: #1c5083; /* Azul médio */
-    --primary-blue: #0676bb;        /* Azul principal */
-    --primary-light-blue: #577a97;  /* Azul acinzentado */
-    --primary-lighter-blue: #a9c0d2;/* Azul claro */
-    
-    /* NEUTROS - Cinzas */
-    --neutral-dark: #3c3a3e;        /* Cinza escuro */
-    --neutral-medium: #b2adaa;      /* Cinza médio */
-    --neutral-light: #e9e5e2;       /* Cinza claro */
-    
-    /* ALERTAS - Cores de status */
-    --warning-orange: #c86420;      /* Laranja */
-    --alert-yellow: #f59a1d;        /* Amarelo */
-    --success-green: #29ad8d;       /* Verde */
-}
-
-/* =================== FORÇA FONT POPPINS EM TUDO =================== */
-* {
-    font-family: 'Poppins', sans-serif !important;
-}
+/* =================== DASHBOARD CLÁSSICO - ESTILOS ADICIONAIS =================== */
+/* Estilos para legendas verticais e layout clássico */
+/* ============================================================================== */
 
 /* =================== LEGENDAS VERTICAIS (ESTILO ANTIGO) =================== */
 .legend-items-vertical {
@@ -43,7 +11,6 @@
     padding: 15px;
     background: rgba(255, 255, 255, 0.03);
     border-radius: 8px;
-    font-family: 'Poppins', sans-serif;
 }
 
 .legend-item-vertical {
@@ -56,7 +23,6 @@
     border-radius: 6px;
     transition: all 0.3s ease;
     font-size: 13px;
-    font-family: 'Poppins', sans-serif;
 }
 
 .legend-item-vertical:hover {
@@ -76,14 +42,12 @@
     color: #e2e8f0;
     font-weight: 500;
     font-size: 13px;
-    font-family: 'Poppins', sans-serif;
 }
 
 .legend-item-vertical .legend-value {
-    color: var(--primary-blue);
+    color: #60a5fa;
     font-weight: 600;
     font-size: 14px;
-    font-family: 'Poppins', sans-serif;
 }
 
 /* =================== AJUSTES PARA GRÁFICOS DE BARRAS =================== */
@@ -103,9 +67,9 @@
 
 /* =================== ÍCONES SEM EMOJI =================== */
 .kpi-icon {
-    font-family: 'Poppins', sans-serif;
+    font-family: monospace;
     font-size: 32px;
-    color: var(--primary-blue);
+    color: #60a5fa;
     font-weight: normal;
 }
 
@@ -116,24 +80,24 @@
 
 /* =================== AJUSTES PARA MODO CLARO =================== */
 body.fundo-branco .legend-item-vertical {
-    background: var(--neutral-light);
-    border-color: var(--neutral-medium);
+    background: #f3f4f6;
+    border-color: #e5e7eb;
 }
 
 body.fundo-branco .legend-item-vertical:hover {
-    background: var(--neutral-medium);
+    background: #e5e7eb;
 }
 
 body.fundo-branco .legend-item-vertical .legend-label {
-    color: var(--neutral-dark);
+    color: #1e293b;
 }
 
 body.fundo-branco .legend-item-vertical .legend-value {
-    color: var(--primary-blue);
+    color: #3b82f6;
 }
 
 body.fundo-branco .legend-items-vertical {
-    background: var(--neutral-light);
+    background: #f9fafb;
 }
 
 /* =================== RESPONSIVIDADE =================== */
@@ -174,242 +138,10 @@ body.fundo-branco .legend-items-vertical {
 }
 
 .legend-items-vertical::-webkit-scrollbar-thumb {
-    background: rgba(6, 118, 187, 0.5);
+    background: rgba(96, 165, 250, 0.5);
     border-radius: 3px;
 }
 
 .legend-items-vertical::-webkit-scrollbar-thumb:hover {
-    background: rgba(6, 118, 187, 0.7);
+    background: rgba(96, 165, 250, 0.7);
 }
-
-/* =================== CORES DOS GRÁFICOS =================== */
-/* Usar as cores da paleta oficial para os gráficos Chart.js */
-
-/* Análise Preditiva de Altas */
-.chart-altas-hoje-ouro { background-color: var(--alert-yellow) !important; }
-.chart-altas-hoje-prata { background-color: var(--primary-lighter-blue) !important; }
-.chart-altas-hoje-bronze { background-color: var(--warning-orange) !important; }
-.chart-altas-24h { background-color: var(--primary-blue) !important; }
-.chart-altas-48h { background-color: var(--primary-medium-blue) !important; }
-.chart-altas-72h { background-color: var(--primary-dark-blue) !important; }
-.chart-altas-96h { background-color: var(--primary-navy) !important; }
-.chart-altas-sp { background-color: var(--primary-light-blue) !important; }
-
-/* Gauge - Cores baseadas na ocupação */
-.gauge-baixa { stroke: var(--success-green) !important; }
-.gauge-media { stroke: var(--primary-medium-blue) !important; }
-.gauge-alta { stroke: var(--primary-blue) !important; }
-.gauge-critica { stroke: var(--warning-orange) !important; }
-
-/* =================== AJUSTES DE LAYOUT PARA DASHBOARDS =================== */
-
-/* Container principal do dashboard */
-.dashboard-container {
-    font-family: 'Poppins', sans-serif;
-}
-
-/* Títulos dos gráficos */
-.chart-title,
-.grafico-titulo {
-    font-family: 'Poppins', sans-serif;
-    font-weight: 600;
-    color: #ffffff;
-}
-
-/* Labels dos eixos */
-.chart-axis-label {
-    font-family: 'Poppins', sans-serif;
-    font-weight: 400;
-}
-
-/* Tooltips */
-.chart-tooltip {
-    font-family: 'Poppins', sans-serif;
-    background: var(--primary-navy);
-    border: 1px solid var(--primary-blue);
-}
-
-/* KPIs no dashboard clássico */
-.kpi-classico {
-    font-family: 'Poppins', sans-serif;
-}
-
-.kpi-classico-valor {
-    color: var(--primary-blue);
-    font-weight: 700;
-    font-family: 'Poppins', sans-serif;
-}
-
-.kpi-classico-label {
-    color: var(--primary-lighter-blue);
-    font-weight: 500;
-    font-family: 'Poppins', sans-serif;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-}
-
-/* =================== GAUGE SVG NO DASHBOARD CLÁSSICO =================== */
-.gauge-classico-container {
-    font-family: 'Poppins', sans-serif;
-}
-
-.gauge-classico-valor {
-    font-family: 'Poppins', sans-serif;
-    font-weight: 700;
-    fill: var(--primary-blue);
-}
-
-.gauge-classico-label {
-    font-family: 'Poppins', sans-serif;
-    font-weight: 500;
-    fill: var(--primary-lighter-blue);
-}
-
-/* Arco de fundo do gauge */
-.gauge-classico-background {
-    stroke: var(--neutral-light);
-}
-
-/* Arco de progresso do gauge */
-.gauge-classico-progress {
-    stroke: var(--primary-blue);
-}
-
-/* =================== TABELAS NO DASHBOARD CLÁSSICO =================== */
-.table-classico {
-    font-family: 'Poppins', sans-serif;
-}
-
-.table-classico thead {
-    background: var(--primary-blue);
-    color: #ffffff;
-    font-weight: 600;
-}
-
-.table-classico tbody tr:hover {
-    background: rgba(6, 118, 187, 0.1);
-}
-
-.table-classico th,
-.table-classico td {
-    font-family: 'Poppins', sans-serif;
-}
-
-/* =================== CARDS NO DASHBOARD CLÁSSICO =================== */
-.card-classico {
-    background: rgba(255, 255, 255, 0.03);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 12px;
-    font-family: 'Poppins', sans-serif;
-}
-
-.card-classico-header {
-    background: var(--primary-dark-blue);
-    color: #ffffff;
-    font-weight: 600;
-    font-family: 'Poppins', sans-serif;
-}
-
-.card-classico-body {
-    font-family: 'Poppins', sans-serif;
-}
-
-/* =================== BOTÕES NO DASHBOARD CLÁSSICO =================== */
-.btn-classico-primary {
-    background: var(--primary-blue);
-    color: #ffffff;
-    font-family: 'Poppins', sans-serif;
-    font-weight: 500;
-}
-
-.btn-classico-primary:hover {
-    background: var(--primary-medium-blue);
-}
-
-.btn-classico-secondary {
-    background: var(--neutral-dark);
-    color: #ffffff;
-    font-family: 'Poppins', sans-serif;
-    font-weight: 500;
-}
-
-.btn-classico-secondary:hover {
-    background: var(--neutral-medium);
-}
-
-/* =================== BADGES NO DASHBOARD CLÁSSICO =================== */
-.badge-classico-ocupado {
-    background: var(--alert-yellow);
-    color: var(--primary-navy);
-    font-family: 'Poppins', sans-serif;
-    font-weight: 600;
-}
-
-.badge-classico-vago {
-    background: var(--success-green);
-    color: #ffffff;
-    font-family: 'Poppins', sans-serif;
-    font-weight: 600;
-}
-
-.badge-classico-bloqueado {
-    background: var(--warning-orange);
-    color: #ffffff;
-    font-family: 'Poppins', sans-serif;
-    font-weight: 600;
-}
-
-/* =================== MODO ESCURO =================== */
-.dark-mode .legend-items-vertical {
-    background: rgba(255, 255, 255, 0.03);
-}
-
-.dark-mode .legend-item-vertical {
-    background: rgba(255, 255, 255, 0.05);
-    border-color: rgba(255, 255, 255, 0.1);
-}
-
-.dark-mode .legend-item-vertical:hover {
-    background: rgba(255, 255, 255, 0.1);
-}
-
-.dark-mode .kpi-icon {
-    color: var(--primary-blue);
-}
-
-.dark-mode .card-classico {
-    background: rgba(255, 255, 255, 0.03);
-    border-color: rgba(255, 255, 255, 0.1);
-}
-
-.dark-mode .table-classico thead {
-    background: var(--primary-blue);
-}
-
-.dark-mode .table-classico tbody tr:hover {
-    background: rgba(6, 118, 187, 0.1);
-}
-
-/* =================== IMPRESSÃO =================== */
-@media print {
-    .legend-items-vertical {
-        background: white;
-        border: 1px solid var(--neutral-medium);
-    }
-    
-    .legend-item-vertical {
-        background: white;
-        border-color: var(--neutral-medium);
-    }
-    
-    .legend-item-vertical .legend-label {
-        color: var(--neutral-dark);
-    }
-    
-    .chart-wrapper.chart-wide .chart-container {
-        height: auto;
-        page-break-inside: avoid;
-    }
-}
-
-/* =================== FIM DO ARQUIVO =================== */
