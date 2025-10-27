@@ -567,6 +567,66 @@ function processarDadosHospital(hospitalId) {
     };
 }
 
+// =================== FUNÇÃO: COPIAR PARA WHATSAPP ===================
+function copiarParaWhatsAppExecutivo() {
+    const hospitais = ORDEM_ALFABETICA_HOSPITAIS.map(processarDadosHospital);
+    
+    // Calcular totais
+    const totalLeitos = hospitais.reduce((sum, h) => sum + h.totalLeitos, 0);
+    const totalOcupados = hospitais.reduce((sum, h) => sum + h.ocupados.total, 0);
+    const taxaOcupacao = ((totalOcupados / totalLeitos) * 100).toFixed(1);
+    
+    // Data formatada
+    const agora = new Date();
+    const dataFormatada = agora.toLocaleDateString('pt-BR', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+    });
+    
+    // Montar texto
+    let texto = `*KPIs ARCHIPELAGO*\n`;
+    texto += `${dataFormatada}\n`;
+    texto += `━━━━━━━━━━━━━━━━━\n`;
+    texto += `*REDE EXTERNA (5 HOSPITAIS)*\n`;
+    texto += `━━━━━━━━━━━━━━━━━\n`;
+    texto += `Taxa de Ocupacao: *${taxaOcupacao}%*\n`;
+    texto += `Leitos Ocupados: *${totalOcupados}/${totalLeitos}*\n\n`;
+    
+    // Dados por hospital
+    hospitais.forEach((h, index) => {
+        texto += `*${index + 1}. ${h.nome}*\n`;
+        texto += `━━━━━━━━━━━━━━━━━\n`;
+        texto += `• Taxa: ${h.taxaOcupacao.toFixed(1)}%\n`;
+        texto += `• Ocupados: ${h.ocupados.total}/${h.totalLeitos}\n`;
+        texto += `• Previsao Alta: ${h.previsao.total}\n`;
+        texto += `• Disponiveis: ${h.disponiveis.total}\n`;
+        texto += `• TPH: ${h.tph.medio} dias\n`;
+        texto += `• PPS Medio: ${h.pps.medio}\n`;
+        texto += `• SPICT: ${h.spict.elegiveis} | Diretivas: ${h.spict.diretivas}\n\n`;
+        texto += `_Modalidades Disponiveis:_\n`;
+        texto += `  Flexiveis: ${h.disponiveis.modalidade.flexiveis}\n`;
+        texto += `  Exclus. Apto: ${h.disponiveis.modalidade.exclusivo_apto}\n`;
+        texto += `  Exclus. Enf s/ Restr: ${h.disponiveis.modalidade.exclusivo_enf_sem_restricao}\n`;
+        texto += `  Exclus. Enf Fem: ${h.disponiveis.modalidade.exclusivo_enf_fem}\n`;
+        texto += `  Exclus. Enf Masc: ${h.disponiveis.modalidade.exclusivo_enf_masc}\n`;
+        
+        if (index < hospitais.length - 1) {
+            texto += `\n`;
+        }
+    });
+    
+    // Copiar para clipboard
+    navigator.clipboard.writeText(texto).then(() => {
+        alert('Texto copiado para a area de transferencia!\n\nCole no WhatsApp e envie.');
+    }).catch(err => {
+        console.error('Erro ao copiar:', err);
+        alert('Erro ao copiar. Tente novamente.');
+    });
+}
+
 // =================== FUNÇÃO PRINCIPAL: RENDER DASHBOARD ===================
 window.renderDashboardExecutivo = function() {
     logInfo('Renderizando Dashboard Executivo V3.4: REDE HOSPITALAR EXTERNA (5 HOSPITAIS)');
@@ -689,7 +749,10 @@ window.renderDashboardExecutivo = function() {
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
                     <h2 style="margin: 0; color: #ffffff; font-size: 24px; font-weight: 700;">Rede Hospitalar Externa - Dashboard Geral V3.4</h2>
                 </div>
-                <div style="display: flex; justify-content: flex-end;">
+                <div style="display: flex; justify-content: flex-end; gap: 15px;">
+                    <button id="btnWhatsAppExec" style="padding: 8px 16px; background: #25D366; border: 1px solid #25D366; border-radius: 8px; color: white; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.3s ease; display: flex; align-items: center; gap: 8px;">
+                        Copiar para WhatsApp
+                    </button>
                     <button id="toggleFundoBtnExec" class="toggle-fundo-btn" style="padding: 8px 16px; background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 8px; color: #e2e8f0; font-size: 14px; cursor: pointer; transition: all 0.3s ease; display: flex; align-items: center; gap: 8px;">
                         <span id="toggleTextExec">Tema Escuro</span>
                     </button>
@@ -932,6 +995,12 @@ window.renderDashboardExecutivo = function() {
         
         ${getExecutiveCSS()}
     `;
+    
+    // Event listener para botão WhatsApp
+    const btnWhatsApp = document.getElementById('btnWhatsAppExec');
+    if (btnWhatsApp) {
+        btnWhatsApp.addEventListener('click', copiarParaWhatsAppExecutivo);
+    }
     
     const toggleBtn = document.getElementById('toggleFundoBtnExec');
     if (toggleBtn) {
@@ -1837,6 +1906,13 @@ function getExecutiveCSS() {
                 background: #f59e0b !important;
                 border-color: #f59e0b !important;
                 color: #000000 !important;
+            }
+
+            /* BOTÃO WHATSAPP */
+            #btnWhatsAppExec:hover {
+                background: #1da851 !important;
+                transform: translateY(-1px);
+                box-shadow: 0 4px 12px rgba(37, 211, 102, 0.3);
             }
             
             /* RESPONSIVE */
