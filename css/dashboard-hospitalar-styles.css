@@ -1,57 +1,26 @@
-/* =================== DASHBOARD HOSPITALAR V3.4 - CSS CORRIGIDO ===================
+/* =================== DASHBOARD HOSPITALAR V3.3 - CSS ===================
    Cliente: Guilherme Santoro
    Desenvolvedor: Alessandro Rodrigues
-   Data: 27/Outubro/2025
-   Versão: V3.4.0 - PALETA OFICIAL + POPPINS
-   ============================================================================== */
+   Data: Outubro/2025
+   Versão: V3.3 FINAL
+   ======================================================================= */
 
-/* =================== IMPORTAÇÃO DA FONTE POPPINS =================== */
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap');
-
-/* =================== VARIÁVEIS DE CORES OFICIAIS ARCHIPELAGO =================== */
-:root {
-    /* AZUIS - Paleta Principal */
-    --primary-navy: #131b2e;        /* Azul marinho escuro */
-    --primary-dark-blue: #172945;   /* Azul escuro */
-    --primary-medium-blue: #1c5083; /* Azul médio */
-    --primary-blue: #0676bb;        /* Azul principal */
-    --primary-light-blue: #577a97;  /* Azul acinzentado */
-    --primary-lighter-blue: #a9c0d2;/* Azul claro */
-    
-    /* NEUTROS - Cinzas */
-    --neutral-dark: #3c3a3e;        /* Cinza escuro */
-    --neutral-medium: #b2adaa;      /* Cinza médio */
-    --neutral-light: #e9e5e2;       /* Cinza claro */
-    
-    /* ALERTAS - Cores de status */
-    --warning-orange: #c86420;      /* Laranja */
-    --alert-yellow: #f59a1d;        /* Amarelo */
-    --success-green: #29ad8d;       /* Verde */
-}
-
-/* =================== FORÇA FONT POPPINS EM TUDO =================== */
-* {
-    font-family: 'Poppins', sans-serif !important;
-}
-
-/* =================== CONTAINER PRINCIPAL =================== */
+/* Container principal */
 .dashboard-hospitalar-container {
     width: 100%;
     padding: 20px;
-    font-family: 'Poppins', sans-serif;
 }
 
-/* =================== SEÇÃO DE CADA HOSPITAL =================== */
+/* Seção de cada hospital */
 .hospital-section {
     margin-bottom: 50px;
     padding: 30px;
-    background: linear-gradient(135deg, var(--primary-dark-blue) 0%, var(--primary-navy) 100%);
+    background: linear-gradient(135deg, #1f2937 0%, #111827 100%);
     border-radius: 16px;
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-    font-family: 'Poppins', sans-serif;
 }
 
-/* =================== HEADER DO HOSPITAL =================== */
+/* Header do hospital */
 .hospital-header {
     margin-bottom: 30px;
     padding-bottom: 20px;
@@ -63,23 +32,22 @@
     font-size: 28px;
     font-weight: 700;
     color: #ffffff;
-    font-family: 'Poppins', sans-serif;
 }
 
 .hospital-stats {
     display: flex;
     gap: 15px;
     align-items: center;
-    color: var(--neutral-medium);
+    color: #9ca3af;
     font-size: 14px;
-    font-family: 'Poppins', sans-serif;
 }
 
 .hospital-stats .separator {
-    color: var(--primary-light-blue);
+    color: #4b5563;
 }
 
-/* =================== KPIs - GRID PRINCIPAL =================== */
+/* ============ KPIs ============ */
+
 .kpis-container {
     margin-bottom: 40px;
 }
@@ -98,7 +66,6 @@
     padding: 20px;
     text-align: center;
     transition: all 0.3s ease;
-    font-family: 'Poppins', sans-serif;
 }
 
 .kpi-box:hover {
@@ -115,23 +82,21 @@
 .kpi-value {
     font-size: 32px;
     font-weight: 700;
-    color: var(--primary-blue);
+    color: #ffffff;
     margin-bottom: 5px;
-    font-family: 'Poppins', sans-serif;
 }
 
 .kpi-label {
     font-size: 12px;
     text-transform: uppercase;
-    color: var(--primary-lighter-blue);
+    color: #9ca3af;
     font-weight: 600;
     letter-spacing: 0.5px;
-    font-family: 'Poppins', sans-serif;
 }
 
-/* =================== GAUGE ESPECIAL =================== */
+/* Gauge especial */
 .kpi-gauge {
-    background: linear-gradient(135deg, rgba(6, 118, 187, 0.1) 0%, rgba(41, 173, 141, 0.1) 100%);
+    background: linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(16, 185, 129, 0.1) 100%);
 }
 
 .gauge-container {
@@ -153,21 +118,19 @@
     transform: translate(-50%, -20%);
     font-size: 36px;
     font-weight: 700;
-    color: var(--primary-blue);
-    font-family: 'Poppins', sans-serif;
+    color: #ffffff;
 }
 
 .gauge-label {
     font-size: 12px;
     text-transform: uppercase;
-    color: var(--primary-lighter-blue);
+    color: #9ca3af;
     font-weight: 600;
     letter-spacing: 0.5px;
     margin-top: 10px;
-    font-family: 'Poppins', sans-serif;
 }
 
-/* =================== KPIs SECUNDÁRIOS (V3.3) =================== */
+/* KPIs Secundários (novos V3.3) */
 .kpis-secondary {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -178,12 +141,11 @@
     background: rgba(255, 255, 255, 0.03);
     border-radius: 10px;
     padding: 15px;
-    border-left: 3px solid var(--primary-blue);
-    font-family: 'Poppins', sans-serif;
+    border-left: 3px solid #3b82f6;
 }
 
 .kpi-card.kpi-destaque {
-    border-left-color: var(--alert-yellow);
+    border-left-color: #f59e0b;
     background: rgba(245, 158, 11, 0.05);
 }
 
@@ -191,41 +153,37 @@
     margin: 0 0 10px 0;
     font-size: 12px;
     text-transform: uppercase;
-    color: var(--primary-lighter-blue);
+    color: #9ca3af;
     font-weight: 600;
     letter-spacing: 0.5px;
-    font-family: 'Poppins', sans-serif;
 }
 
 .kpi-detail {
     display: flex;
     flex-direction: column;
     gap: 8px;
-    font-family: 'Poppins', sans-serif;
 }
 
 .kpi-detail span {
     font-size: 14px;
     color: #e5e7eb;
-    font-family: 'Poppins', sans-serif;
 }
 
 .kpi-detail strong {
     color: #ffffff;
     font-weight: 700;
-    font-family: 'Poppins', sans-serif;
 }
 
 .kpi-valor-grande {
     font-size: 28px;
     font-weight: 700;
-    color: var(--primary-blue);
+    color: #ffffff;
     text-align: center;
     padding: 10px 0;
-    font-family: 'Poppins', sans-serif;
 }
 
-/* =================== GRÁFICOS =================== */
+/* ============ GRÁFICOS ============ */
+
 .graficos-section {
     margin-top: 40px;
 }
@@ -237,7 +195,6 @@
     color: #ffffff;
     padding-bottom: 15px;
     border-bottom: 2px solid rgba(255, 255, 255, 0.1);
-    font-family: 'Poppins', sans-serif;
 }
 
 .graficos-grid {
@@ -251,7 +208,6 @@
     border-radius: 12px;
     padding: 25px;
     transition: all 0.3s ease;
-    font-family: 'Poppins', sans-serif;
 }
 
 .grafico-container:hover {
@@ -265,14 +221,13 @@
     font-weight: 600;
     color: #ffffff;
     text-align: center;
-    font-family: 'Poppins', sans-serif;
 }
 
 .grafico-container canvas {
     max-height: 300px;
 }
 
-/* =================== LEGENDAS CUSTOMIZADAS =================== */
+/* Legendas customizadas */
 .custom-legend {
     margin-top: 20px;
     padding-top: 15px;
@@ -293,7 +248,6 @@
     border-radius: 6px;
     transition: all 0.2s ease;
     cursor: pointer;
-    font-family: 'Poppins', sans-serif;
 }
 
 .legend-item:hover {
@@ -311,31 +265,27 @@
     flex: 1;
     font-size: 14px;
     color: #e5e7eb;
-    font-family: 'Poppins', sans-serif;
 }
 
 .legend-value {
     font-size: 14px;
     font-weight: 600;
-    color: var(--primary-lighter-blue);
-    font-family: 'Poppins', sans-serif;
+    color: #9ca3af;
 }
 
-/* =================== MENSAGENS DE ESTADO =================== */
+/* Mensagens de estado */
 .no-data {
     text-align: center;
-    color: var(--neutral-medium);
+    color: #9ca3af;
     font-style: italic;
     padding: 20px;
-    font-family: 'Poppins', sans-serif;
 }
 
 .loading-message,
 .error-message {
     text-align: center;
     padding: 60px 20px;
-    color: var(--neutral-medium);
-    font-family: 'Poppins', sans-serif;
+    color: #9ca3af;
 }
 
 .spinner {
@@ -343,7 +293,7 @@
     height: 50px;
     margin: 0 auto 20px;
     border: 4px solid rgba(255, 255, 255, 0.1);
-    border-top-color: var(--primary-blue);
+    border-top-color: #3b82f6;
     border-radius: 50%;
     animation: spin 1s linear infinite;
 }
@@ -352,7 +302,7 @@
     to { transform: rotate(360deg); }
 }
 
-/* =================== RESPONSIVIDADE =================== */
+/* ============ RESPONSIVIDADE ============ */
 
 /* Tablet */
 @media (max-width: 1024px) {
@@ -392,11 +342,13 @@
     
     /* KPIs Mobile: Gauge sozinho, depois 2x2 */
     .kpis-grid {
-        grid-template-columns: 1fr 1fr;
+        grid-template-columns: 1fr;
         grid-template-areas:
-            "gauge gauge"
-            "box1 box2"
-            "box3 box4";
+            "gauge"
+            "box1"
+            "box2"
+            "box3"
+            "box4";
     }
     
     .kpi-gauge {
@@ -407,6 +359,17 @@
     .kpi-box:nth-child(3) { grid-area: box2; }
     .kpi-box:nth-child(4) { grid-area: box3; }
     .kpi-box:nth-child(5) { grid-area: box4; }
+    
+    /* Ou layout alternativo: Gauge + 2 linhas de 2 */
+    @supports (display: grid) {
+        .kpis-grid {
+            grid-template-columns: 1fr 1fr;
+            grid-template-areas:
+                "gauge gauge"
+                "box1 box2"
+                "box3 box4";
+        }
+    }
     
     .kpis-secondary {
         grid-template-columns: 1fr;
@@ -458,7 +421,8 @@
     }
 }
 
-/* =================== ANIMAÇÕES =================== */
+/* ============ ANIMAÇÕES ============ */
+
 @keyframes fadeIn {
     from {
         opacity: 0;
@@ -480,14 +444,16 @@
     animation: fadeIn 0.6s ease;
 }
 
-/* =================== ACESSIBILIDADE =================== */
+/* ============ ACESSIBILIDADE ============ */
+
 .kpi-box:focus,
 .legend-item:focus {
-    outline: 2px solid var(--primary-blue);
+    outline: 2px solid #3b82f6;
     outline-offset: 2px;
 }
 
-/* =================== IMPRESSÃO =================== */
+/* ============ IMPRESSÃO ============ */
+
 @media print {
     .dashboard-hospitalar-container {
         padding: 0;
@@ -504,5 +470,3 @@
         box-shadow: none;
     }
 }
-
-/* =================== FIM DO ARQUIVO =================== */
