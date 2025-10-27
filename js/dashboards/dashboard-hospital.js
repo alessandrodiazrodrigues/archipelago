@@ -5,6 +5,7 @@
 // ✅ Análise Preditiva: BARRAS HORIZONTAIS
 // ✅ Concessões/Linhas: LAYOUT 3 BOXES com GRÁFICOS DE ROSCA
 // ✅ Funciona SEM ChartDataLabels (números na legenda)
+// ✅ PATCH CRÍTICO: Força fundo azul escuro sobrescrevendo archipelago-cores-fontes.css
 
 /* ============================================
    CORES OFICIAIS ARCHIPELAGO
@@ -775,10 +776,12 @@ window.renderDashboardHospitalar = function() {
                 toggleBtn.classList.add('active');
                 icon.textContent = '☀️';
                 text.textContent = 'CLARO';
+                document.body.classList.add('fundo-branco');
             } else {
                 toggleBtn.classList.remove('active');
                 icon.textContent = '🌙';
                 text.textContent = 'ESCURO';
+                document.body.classList.remove('fundo-branco');
             }
             
             window.atualizarTodasAsCores();
@@ -1551,6 +1554,32 @@ function getHospitalConsolidadoCSS() {
                 font-family: 'Poppins', sans-serif;
             }
             
+            /* ================================================================
+               PATCH CRÍTICO - SOBRESCREVE archipelago-cores-fontes.css
+               Necessário porque o CSS externo usa !important
+               ================================================================ */
+            
+            /* MODO ESCURO (padrão) - FORÇADO */
+            html body,
+            body {
+                background: linear-gradient(135deg, #131b2e 0%, #172945 100%) !important;
+                background-image: linear-gradient(135deg, #131b2e 0%, #172945 100%) !important;
+                background-attachment: fixed !important;
+                color: #ffffff !important;
+            }
+            
+            /* MODO CLARO - FUNDO BRANCO SEM GRAFISMO */
+            html body.fundo-branco,
+            body.fundo-branco {
+                background: #ffffff !important;
+                background-image: none !important;
+                color: #3c3a3e !important;
+            }
+            
+            /* ================================================================
+               FIM DO PATCH CRÍTICO
+               ================================================================ */
+            
             @keyframes pulse {
                 0%, 100% { opacity: 1; }
                 50% { opacity: 0.5; }
@@ -2104,9 +2133,11 @@ function logError(message, error) {
     console.error(`❌ [DASHBOARD HOSPITALAR V3.5.0] ${message}`, error || '');
 }
 
-console.log('🎨 Dashboard Hospitalar V3.5.0 - CORES ARCHIPELAGO APLICADAS!');
+console.log('🎨 Dashboard Hospitalar V3.5.0 - CORES ARCHIPELAGO APLICADAS + PATCH CSS!');
 console.log('✅ Paleta oficial: 12 cores aplicadas');
 console.log('✅ Fonte Poppins em tudo');
 console.log('✅ KPIs com cores corretas');
 console.log('✅ Gráficos com paleta oficial');
-console.log('🚀 READY: Sistema V3.5.0 100% funcional com identidade visual Archipelago!');
+console.log('✅ PATCH CRÍTICO: Fundo azul escuro forçado com !important');
+console.log('✅ Sobrescreve archipelago-cores-fontes.css completamente');
+console.log('🚀 READY: Sistema V3.5.0 100% funcional com identidade visual Archipelago e fundo corrigido!');
