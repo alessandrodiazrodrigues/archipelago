@@ -1331,8 +1331,8 @@ function renderDoughnutConcessoes(hospitalId, timeline, dados) {
             datasets: [{
                 data: values,
                 backgroundColor: colors,
-                borderWidth: 2,
-                borderColor: window.fundoBranco ? '#ffffff' : '#1a1f2e'
+                borderWidth: 0,
+                borderColor: 'transparent'
             }]
         },
         options: chartOptions,
@@ -1494,8 +1494,8 @@ function renderDoughnutLinhas(hospitalId, timeline, dados) {
             datasets: [{
                 data: values,
                 backgroundColor: colors,
-                borderWidth: 2,
-                borderColor: window.fundoBranco ? '#ffffff' : '#1a1f2e'
+                borderWidth: 0,
+                borderColor: 'transparent'
             }]
         },
         options: chartOptions,
