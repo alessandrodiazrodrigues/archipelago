@@ -463,7 +463,11 @@ function processarDadosHospital(hospitalId) {
         const admData = new Date(l.admAt);
         const hoje = new Date();
         const dias = Math.floor((hoje - admData) / (1000 * 60 * 60 * 24));
-        return { ...l, dias };
+        return { 
+            leito: l.leito || '---',
+            matricula: l.matricula || '---',
+            dias 
+        };
     });
     
     const ppsValues = ocupados
@@ -472,14 +476,20 @@ function processarDadosHospital(hospitalId) {
     const ppsMedio = ppsValues.length > 0
         ? Math.round(ppsValues.reduce((a, b) => a + b, 0) / ppsValues.length)
         : 0;
-    const ppsMenor40 = ocupados.filter(l => parseInt(l.pps) < 40);
+    const ppsMenor40 = ocupados.filter(l => parseInt(l.pps) < 40).map(l => ({
+        leito: l.leito || '---',
+        matricula: l.matricula || '---'
+    }));
     
     const spictElegiveis = ocupados.filter(l => 
         l.spict && l.spict.toLowerCase() === 'elegivel'
     );
     const diretivasPendentes = ocupados.filter(l => 
         l.spict && l.spict.toLowerCase() === 'elegivel' && (!l.diretivas || l.diretivas.trim() === '' || l.diretivas === 'Não')
-    );
+    ).map(l => ({
+        leito: l.leito || '---',
+        matricula: l.matricula || '---'
+    }));
     
     const totalLeitos = leitos.length;
     const taxaOcupacao = totalLeitos > 0 ? (ocupados.length / totalLeitos * 100) : 0;
@@ -519,16 +529,16 @@ function processarDadosHospital(hospitalId) {
         },
         tph: {
             medio: tphMedio,
-            lista: leitosMais5Diarias
+            lista: leitosMais5Diarias || []
         },
         pps: {
             medio: ppsMedio,
-            menor40: ppsMenor40
+            menor40: ppsMenor40 || []
         },
         spict: {
             elegiveis: spictElegiveis.length,
             diretivas: diretivasPendentes.length,
-            listaDiretivas: diretivasPendentes
+            listaDiretivas: diretivasPendentes || []
         }
     };
 }
@@ -773,8 +783,13 @@ window.renderDashboardHospitalar = function() {
 // =================== RENDERIZAR SEÇÃO DE UM HOSPITAL ===================
 
 function renderHospitalSection(hospitalId, hoje) {
-    const hospital = CONFIG.HOSPITAIS[hospitalId];
     const dados = processarDadosHospital(hospitalId);
+    
+    // Proteger contra undefined
+    if (!dados || !dados.tph || !dados.pps || !dados.spict) {
+        console.error(`Dados inválidos para hospital ${hospitalId}`);
+        return '';
+    }
     
     return `
         <div class="hospital-card" data-hospital="${hospitalId}">
@@ -819,7 +834,7 @@ function renderHospitalSection(hospitalId, hoje) {
                     <div class="kpi-title">Leitos em Previsão de Alta</div>
                     
                     <div class="kpi-content">
-                        ${renderGaugeV5((dados.previsao.total / dados.ocupados.total * 100), '#f97316', dados.previsao.total)}
+                        ${renderGaugeV5((dados.previsao.total / dados.ocupados.total * 100) || 0, '#f97316', dados.previsao.total)}
                         
                         <div class="kpi-items-lista">
                             <div class="kpi-subtitle">Total de Leitos com alta na data de hoje</div>
@@ -849,7 +864,7 @@ function renderHospitalSection(hospitalId, hoje) {
                     <div class="kpi-title">Leitos Disponíveis</div>
                     
                     <div class="kpi-content">
-                        ${renderGaugeV5((dados.disponiveis.total / dados.totalLeitos * 100), '#3b82f6', dados.disponiveis.total)}
+                        ${renderGaugeV5((dados.disponiveis.total / dados.totalLeitos * 100) || 0, '#3b82f6', dados.disponiveis.total)}
                         
                         <div class="kpi-items-lista">
                             <div class="kpi-subtitle">Capacidade por tipo de leito (não simultâneo)</div>
@@ -886,7 +901,7 @@ function renderHospitalSection(hospitalId, hoje) {
                     
                     <div class="kpi-detalhes">
                         <div class="detalhe-titulo">Nº Diárias > 5</div>
-                        ${dados.tph.lista.length > 0 ? `
+                        ${dados.tph.lista && dados.tph.lista.length > 0 ? `
                             <table class="hospitais-table">
                                 <thead>
                                     <tr>
@@ -920,14 +935,14 @@ function renderHospitalSection(hospitalId, hoje) {
                         </div>
                         <div class="divisor-vertical"></div>
                         <div class="kpi-valor-metade">
-                            <div class="valor">${dados.pps.menor40.length.toString().padStart(2, '0')}</div>
+                            <div class="valor">${(dados.pps.menor40 && dados.pps.menor40.length || 0).toString().padStart(2, '0')}</div>
                             <div class="label">PPS < 40%</div>
                         </div>
                     </div>
                     
                     <div class="kpi-detalhes">
                         <div class="detalhe-titulo">PPS < 40%</div>
-                        ${dados.pps.menor40.length > 0 ? `
+                        ${dados.pps.menor40 && dados.pps.menor40.length > 0 ? `
                             <table class="hospitais-table">
                                 <thead>
                                     <tr>
@@ -966,7 +981,7 @@ function renderHospitalSection(hospitalId, hoje) {
                     
                     <div class="kpi-detalhes">
                         <div class="detalhe-titulo">Diretivas Pendentes</div>
-                        ${dados.spict.listaDiretivas.length > 0 ? `
+                        ${dados.spict.listaDiretivas && dados.spict.listaDiretivas.length > 0 ? `
                             <table class="hospitais-table">
                                 <thead>
                                     <tr>
