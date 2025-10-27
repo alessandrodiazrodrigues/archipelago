@@ -672,3 +672,84 @@ body {
 /* ============================================
    FIM DO ARQUIVO
    ============================================ */
+
+/* ============================================
+   CORREÇÃO URGENTE - ADICIONAR NO FINAL DO CSS
+   Data: 27/Out/2025
+   
+   INSTRUÇÕES:
+   1. Abrir: css/archipelago-cores-fontes.css
+   2. Ir até o FINAL do arquivo
+   3. COLAR todo este conteúdo
+   4. Salvar
+   5. Recarregar página (Ctrl+Shift+R)
+   ============================================ */
+
+/* FORÇAR MODO CLARO - Body */
+body:not(.dark-mode) {
+    background: white !important;
+    background-image: url('../imagens/Grafismo_Fundo.svg') !important;
+    background-repeat: no-repeat !important;
+    background-position: top left !important;
+    background-size: auto !important;
+    background-attachment: fixed !important;
+    color: #3c3a3e !important;
+}
+
+/* FORÇAR CARDS BRANCOS - Modo Claro */
+body:not(.dark-mode) .hospital-card,
+body:not(.dark-mode) .leito-card,
+body:not(.dark-mode) [class*="card-"] {
+    background: white !important;
+    background-color: white !important;
+    border: 1px solid #b2adaa !important;
+}
+
+/* FORÇAR TEXTOS ESCUROS - Modo Claro */
+body:not(.dark-mode) .hospital-card *,
+body:not(.dark-mode) .leito-card *,
+body:not(.dark-mode) [class*="card-"] * {
+    color: #3c3a3e !important;
+}
+
+/* EXCEÇÕES - Badges e elementos coloridos */
+body:not(.dark-mode) .badge-ocupado,
+body:not(.dark-mode) .badge-vago,
+body:not(.dark-mode) .badge-apto,
+body:not(.dark-mode) .badge-enf,
+body:not(.dark-mode) [class*="badge-"] {
+    color: white !important; /* Badges mantém texto branco */
+}
+
+/* FORÇAR MODO ESCURO - Body */
+body.dark-mode {
+    background: #131b2e !important;
+    background-image: none !important;
+    color: white !important;
+}
+
+/* FORÇAR CARDS ESCUROS - Modo Escuro */
+body.dark-mode .hospital-card,
+body.dark-mode .leito-card,
+body.dark-mode [class*="card-"] {
+    background: #172945 !important;
+    background-color: #172945 !important;
+    border: 1px solid #1c5083 !important;
+}
+
+/* FORÇAR TEXTOS CLAROS - Modo Escuro */
+body.dark-mode .hospital-card *,
+body.dark-mode .leito-card *,
+body.dark-mode [class*="card-"] * {
+    color: white !important;
+}
+
+/* EXCEÇÕES - Labels */
+body.dark-mode .label-campo,
+body.dark-mode .kpi-label {
+    color: #a9c0d2 !important;
+}
+
+/* ============================================
+   FIM DA CORREÇÃO
+   ============================================ */
