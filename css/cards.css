@@ -1,3 +1,11 @@
+/* ============================================
+   ARCHIPELAGO DASHBOARD - CARDS DE LEITOS
+   Versão: 3.4.0
+   Data: 27/Outubro/2025
+   
+   Paleta Oficial + Fonte Poppins aplicadas
+   ============================================ */
+
 /* =================== CARDS GRID =================== */
 .cards-grid {
     display: grid;
@@ -11,6 +19,7 @@
     padding: 20px;
     color: var(--text-white);
     box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    font-family: 'Poppins', sans-serif;
 }
 
 /* Layout 3x3 dos campos */
@@ -26,96 +35,428 @@
 }
 
 .field-label {
+    font-family: 'Poppins', sans-serif;
     font-size: 11px;
+    font-weight: 600;
     color: #ffffff;
-    background: #60a5fa;
+    background: #577a97; /* primaryLightBlue */
     padding: 4px 8px;
     border-radius: 4px;
     display: inline-block;
     margin-bottom: 5px;
     text-transform: uppercase;
-    font-weight: 600;
+    letter-spacing: 0.5px;
 }
 
 .field-value {
+    font-family: 'Poppins', sans-serif;
     font-size: 14px;
     font-weight: 600;
     color: var(--text-white);
 }
 
-/* Badge do Leito */
+/* =================== BADGE DO LEITO =================== */
 .leito-badge {
-    background: var(--status-vago);
+    font-family: 'Poppins', sans-serif;
+    background: #29ad8d; /* successGreen - Vago */
     color: white;
     padding: 10px;
     border-radius: 6px;
     text-align: center;
     font-weight: 700;
     text-transform: uppercase;
+    font-size: 14px;
+    letter-spacing: 0.5px;
 }
 
 .leito-badge.ocupado {
-    background: var(--status-uso);
-    color: black;
+    background: #c86420 !important; /* warningOrange - Ocupado */
+    color: white !important;
 }
 
-/* Previsão de Alta */
+/* =================== BADGES DE STATUS =================== */
+
+/* Status de Ocupação */
+.badge-ocupado {
+    background: #c86420 !important; /* warningOrange */
+    color: white !important;
+    font-family: 'Poppins', sans-serif;
+    font-weight: 600;
+    padding: 4px 10px;
+    border-radius: 4px;
+    font-size: 12px;
+    text-transform: uppercase;
+}
+
+.badge-vago {
+    background: #29ad8d !important; /* successGreen */
+    color: white !important;
+    font-family: 'Poppins', sans-serif;
+    font-weight: 600;
+    padding: 4px 10px;
+    border-radius: 4px;
+    font-size: 12px;
+    text-transform: uppercase;
+}
+
+/* Tipo de Leito */
+.badge-apto,
+.badge-apartamento {
+    background: #0676bb !important; /* primaryBlue */
+    color: white !important;
+    font-family: 'Poppins', sans-serif;
+    font-weight: 600;
+    padding: 4px 10px;
+    border-radius: 4px;
+    font-size: 12px;
+    text-transform: uppercase;
+}
+
+.badge-enf,
+.badge-enfermaria {
+    background: #1c5083 !important; /* primaryMediumBlue */
+    color: white !important;
+    font-family: 'Poppins', sans-serif;
+    font-weight: 600;
+    padding: 4px 10px;
+    border-radius: 4px;
+    font-size: 12px;
+    text-transform: uppercase;
+}
+
+/* Isolamento */
+.badge-isolamento-sim {
+    background: #c86420 !important; /* warningOrange */
+    color: white !important;
+    font-family: 'Poppins', sans-serif;
+    font-weight: 600;
+    padding: 4px 10px;
+    border-radius: 4px;
+    font-size: 12px;
+}
+
+.badge-isolamento-nao {
+    background: #a9c0d2 !important; /* primaryLighterBlue */
+    color: #131b2e !important; /* primaryNavy */
+    font-family: 'Poppins', sans-serif;
+    font-weight: 600;
+    padding: 4px 10px;
+    border-radius: 4px;
+    font-size: 12px;
+}
+
+/* =================== PREVISÃO DE ALTA - MEDALHAS =================== */
+.badge-hoje-ouro,
+.previsao-alta.hoje-ouro {
+    background: linear-gradient(135deg, #f59a1d 0%, #ffd700 100%) !important; /* alertYellow gradient */
+    color: #131b2e !important; /* primaryNavy */
+    font-family: 'Poppins', sans-serif;
+    padding: 8px 12px;
+    border-radius: 6px;
+    text-align: center;
+    font-weight: 700;
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.badge-hoje-prata,
+.previsao-alta.hoje-prata {
+    background: linear-gradient(135deg, #a9c0d2 0%, #e0e0e0 100%) !important; /* primaryLighterBlue gradient */
+    color: #131b2e !important; /* primaryNavy */
+    font-family: 'Poppins', sans-serif;
+    padding: 8px 12px;
+    border-radius: 6px;
+    text-align: center;
+    font-weight: 700;
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.badge-hoje-bronze,
+.previsao-alta.hoje-bronze {
+    background: linear-gradient(135deg, #c86420 0%, #cd7f32 100%) !important; /* warningOrange gradient */
+    color: white !important;
+    font-family: 'Poppins', sans-serif;
+    padding: 8px 12px;
+    border-radius: 6px;
+    text-align: center;
+    font-weight: 700;
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* =================== PREVISÃO DE ALTA - HORAS =================== */
+.badge-24h,
+.previsao-alta.h24 {
+    background: #0676bb !important; /* primaryBlue */
+    color: white !important;
+    font-family: 'Poppins', sans-serif;
+    padding: 6px 10px;
+    border-radius: 4px;
+    font-weight: 600;
+    font-size: 12px;
+}
+
+.badge-48h,
+.previsao-alta.h48 {
+    background: #1c5083 !important; /* primaryMediumBlue */
+    color: white !important;
+    font-family: 'Poppins', sans-serif;
+    padding: 6px 10px;
+    border-radius: 4px;
+    font-weight: 600;
+    font-size: 12px;
+}
+
+.badge-72h,
+.previsao-alta.h72 {
+    background: #172945 !important; /* primaryDarkBlue */
+    color: white !important;
+    font-family: 'Poppins', sans-serif;
+    padding: 6px 10px;
+    border-radius: 4px;
+    font-weight: 600;
+    font-size: 12px;
+}
+
+.badge-96h,
+.previsao-alta.h96 {
+    background: #131b2e !important; /* primaryNavy */
+    color: white !important;
+    font-family: 'Poppins', sans-serif;
+    padding: 6px 10px;
+    border-radius: 4px;
+    font-weight: 600;
+    font-size: 12px;
+}
+
+.badge-sp,
+.previsao-alta.sp {
+    background: #577a97 !important; /* primaryLightBlue */
+    color: white !important;
+    font-family: 'Poppins', sans-serif;
+    padding: 6px 10px;
+    border-radius: 4px;
+    font-weight: 600;
+    font-size: 12px;
+}
+
+/* Previsão genérica (fallback) */
 .previsao-alta {
-    background: var(--destaque);
-    color: black;
+    background: #f59a1d; /* alertYellow */
+    color: #131b2e; /* primaryNavy */
     padding: 8px;
     border-radius: 6px;
     text-align: center;
     font-weight: 700;
+    font-family: 'Poppins', sans-serif;
 }
 
-/* Seções de Concessões e Linhas */
+/* =================== SPICT-BR E DIRETIVAS =================== */
+.badge-elegivel {
+    background: rgba(200, 100, 32, 0.15) !important;
+    color: #c86420 !important; /* warningOrange */
+    border: 1px solid #c86420 !important;
+    font-family: 'Poppins', sans-serif;
+    font-weight: 600;
+    padding: 4px 10px;
+    border-radius: 4px;
+    font-size: 12px;
+}
+
+.badge-nao-elegivel {
+    background: rgba(41, 173, 141, 0.15) !important;
+    color: #29ad8d !important; /* successGreen */
+    border: 1px solid #29ad8d !important;
+    font-family: 'Poppins', sans-serif;
+    font-weight: 600;
+    padding: 4px 10px;
+    border-radius: 4px;
+    font-size: 12px;
+}
+
+.badge-diretivas-sim {
+    background: #29ad8d !important; /* successGreen */
+    color: white !important;
+    font-family: 'Poppins', sans-serif;
+    font-weight: 600;
+    padding: 4px 10px;
+    border-radius: 4px;
+    font-size: 12px;
+}
+
+.badge-diretivas-nao {
+    background: #c86420 !important; /* warningOrange */
+    color: white !important;
+    font-family: 'Poppins', sans-serif;
+    font-weight: 600;
+    padding: 4px 10px;
+    border-radius: 4px;
+    font-size: 12px;
+}
+
+/* =================== SEÇÕES DE CONCESSÕES E LINHAS =================== */
 .card-section {
     margin-bottom: 15px;
 }
 
-.section-title {
+.section-title,
+.secao-concessoes-titulo,
+.secao-linhas-titulo {
+    font-family: 'Poppins', sans-serif;
     font-size: 11px;
+    font-weight: 700;
     color: #ffffff;
-    background: #60a5fa;
+    background: #0676bb !important; /* primaryBlue */
     padding: 8px;
     border-radius: 4px;
     margin-bottom: 10px;
     text-transform: uppercase;
-    font-weight: 700;
+    letter-spacing: 1px;
 }
 
-.chips-container {
+.chips-container,
+.secao-conteudo {
     display: flex;
     flex-wrap: wrap;
     gap: 5px;
+    background: #a9c0d2; /* primaryLighterBlue */
+    padding: 10px;
+    border-radius: 4px;
 }
 
 .chip {
+    font-family: 'Poppins', sans-serif;
     font-size: 10px;
-    background: rgba(96, 165, 250, 0.1);
-    border: 1px solid rgba(96, 165, 250, 0.3);
-    color: #60a5fa;
+    background: rgba(6, 118, 187, 0.15); /* primaryBlue com transparência */
+    border: 1px solid rgba(6, 118, 187, 0.4);
+    color: #0676bb; /* primaryBlue */
     padding: 3px 8px;
     border-radius: 12px;
     font-weight: 600;
 }
 
-/* Botão Admitir/Atualizar */
+.texto-nenhuma {
+    font-family: 'Poppins', sans-serif;
+    font-size: 12px;
+    color: #577a97; /* primaryLightBlue */
+    font-style: italic;
+}
+
+/* =================== BOTÕES =================== */
 .card-actions {
     display: flex;
     justify-content: space-between;
     align-items: center;
     margin-top: 15px;
+    gap: 10px;
 }
 
 .btn-action {
+    font-family: 'Poppins', sans-serif;
     padding: 10px 20px;
-    background: #3b82f6;
+    background: #0676bb; /* primaryBlue */
     color: white;
     border: none;
     border-radius: 6px;
     cursor: pointer;
     font-weight: 600;
+    font-size: 14px;
     text-transform: uppercase;
+    letter-spacing: 0.5px;
+    transition: background 0.3s ease;
 }
+
+.btn-action:hover {
+    background: #1c5083; /* primaryMediumBlue */
+}
+
+/* Botão Admitir */
+.btn-admitir {
+    background: #29ad8d !important; /* successGreen */
+    color: white !important;
+    font-family: 'Poppins', sans-serif;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 6px;
+    font-weight: 600;
+    font-size: 14px;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: background 0.3s ease;
+}
+
+.btn-admitir:hover {
+    background: #22967a !important;
+}
+
+/* Botão Alta */
+.btn-alta {
+    background: #c86420 !important; /* warningOrange */
+    color: white !important;
+    font-family: 'Poppins', sans-serif;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 6px;
+    font-weight: 600;
+    font-size: 14px;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: background 0.3s ease;
+}
+
+.btn-alta:hover {
+    background: #b35818 !important;
+}
+
+/* Botão Atualizar */
+.btn-atualizar {
+    background: #0676bb !important; /* primaryBlue */
+    color: white !important;
+    font-family: 'Poppins', sans-serif;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 6px;
+    font-weight: 600;
+    font-size: 14px;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: background 0.3s ease;
+}
+
+.btn-atualizar:hover {
+    background: #1c5083 !important; /* primaryMediumBlue */
+}
+
+/* =================== MODO ESCURO =================== */
+.dark-mode .card {
+    background: #172945; /* primaryDarkBlue */
+    border-color: #1c5083; /* primaryMediumBlue */
+}
+
+.dark-mode .field-label,
+.dark-mode .section-title,
+.dark-mode .secao-concessoes-titulo,
+.dark-mode .secao-linhas-titulo {
+    background: #1c5083; /* primaryMediumBlue */
+}
+
+.dark-mode .chips-container,
+.dark-mode .secao-conteudo {
+    background: #1c5083; /* primaryMediumBlue */
+}
+
+.dark-mode .chip {
+    background: rgba(6, 118, 187, 0.2);
+    border-color: rgba(6, 118, 187, 0.5);
+    color: #a9c0d2; /* primaryLighterBlue */
+}
+
+.dark-mode .field-value {
+    color: white;
+}
+
+/* =================== FIM DO ARQUIVO =================== */
