@@ -5,11 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Archipelago Dashboard V3.3.2 CORRIGIDO</title>
     
-    <!-- FONTE POPPINS -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
-    
     <!-- CSS MODULAR -->
     <link rel="stylesheet" href="css/variables.css">
     <link rel="stylesheet" href="css/layout.css">
@@ -18,7 +13,6 @@
     <link rel="stylesheet" href="css/dashboards.css">
     <link rel="stylesheet" href="css/dashboard-hospitalar-styles.css">
     <link rel="stylesheet" href="css/dashboard-classico-styles.css">
-    <link rel="stylesheet" href="css/archipelago-cores-fontes.css">
     
     <!-- BIBLIOTECAS EXTERNAS -->
     <!-- Chart.js para gráficos -->
@@ -248,19 +242,18 @@
         }
     </script>
     
-    <!-- =================== ESTILOS INLINE COM PALETA OFICIAL =================== -->
+    <!-- =================== ESTILOS INLINE =================== -->
     <style>
         /* Reset e Base */
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'Poppins', sans-serif;
         }
         
         body {
-            font-family: 'Poppins', sans-serif;
-            background: linear-gradient(135deg, #131b2e 0%, #172945 100%);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
             color: #e2e8f0;
             min-height: 100vh;
         }
@@ -284,7 +277,7 @@
         }
         
         .auth-container {
-            background: #172945;
+            background: #1e293b;
             padding: 40px;
             border-radius: 16px;
             box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
@@ -294,67 +287,61 @@
         }
         
         .auth-container h1 {
-            color: #0676bb;
+            color: #60a5fa;
             margin-bottom: 10px;
             font-size: 28px;
-            font-family: 'Poppins', sans-serif;
-            font-weight: 700;
         }
         
         .auth-container p {
-            color: #577a97;
+            color: #9ca3af;
             margin-bottom: 25px;
             font-size: 14px;
-            font-family: 'Poppins', sans-serif;
         }
         
         .auth-container input {
             width: 100%;
             padding: 12px;
-            background: #131b2e;
-            border: 2px solid #1c5083;
+            background: #0f172a;
+            border: 2px solid #334155;
             border-radius: 8px;
             color: white;
             font-size: 16px;
-            font-family: 'Poppins', sans-serif;
             margin-bottom: 20px;
             transition: border-color 0.3s;
         }
         
         .auth-container input:focus {
             outline: none;
-            border-color: #0676bb;
+            border-color: #60a5fa;
         }
         
         .auth-container button {
             width: 100%;
             padding: 12px;
-            background: #0676bb;
+            background: #60a5fa;
             color: white;
             border: none;
             border-radius: 8px;
             font-size: 16px;
             font-weight: 600;
-            font-family: 'Poppins', sans-serif;
             cursor: pointer;
             transition: background 0.3s;
         }
         
         .auth-container button:hover {
-            background: #1c5083;
+            background: #3b82f6;
         }
         
         .error-msg {
-            color: #c86420;
+            color: #f87171;
             text-align: center;
             margin-top: 15px;
             font-size: 14px;
-            font-family: 'Poppins', sans-serif;
         }
         
         /* Header */
         .header {
-            background: #172945;
+            background: #1e293b;
             padding: 20px 30px;
             display: flex;
             justify-content: space-between;
@@ -380,15 +367,14 @@
         }
         
         .hamburger:hover {
-            background: rgba(96, 165, 250, 0.1);
+            background: rgba(255, 255, 255, 0.1);
         }
         
         .header-left h1 {
             margin: 0;
             font-size: 22px;
-            color: #0676bb;
+            color: #60a5fa;
             font-weight: 700;
-            font-family: 'Poppins', sans-serif;
         }
         
         .header-right {
@@ -398,25 +384,23 @@
         }
         
         #updateTimer {
-            color: #577a97;
+            color: #9ca3af;
             font-size: 14px;
-            font-family: 'Poppins', sans-serif;
         }
         
         .header-right button {
-            background: #0676bb;
+            background: #60a5fa;
             color: white;
             border: none;
             padding: 10px 20px;
             border-radius: 6px;
             cursor: pointer;
             font-weight: 600;
-            font-family: 'Poppins', sans-serif;
             transition: background 0.3s;
         }
         
         .header-right button:hover {
-            background: #1c5083;
+            background: #3b82f6;
         }
         
         /* Menu Lateral */
@@ -426,7 +410,7 @@
             top: 0;
             width: 280px;
             height: 100vh;
-            background: #172945;
+            background: #1e293b;
             box-shadow: 2px 0 8px rgba(0, 0, 0, 0.2);
             transition: left 0.3s ease;
             z-index: 2000;
@@ -447,10 +431,8 @@
         
         .menu-header h2 {
             margin: 0;
-            color: #0676bb;
+            color: #60a5fa;
             font-size: 20px;
-            font-family: 'Poppins', sans-serif;
-            font-weight: 600;
         }
         
         .menu-close {
@@ -458,7 +440,6 @@
             border: none;
             color: white;
             font-size: 28px;
-            font-family: 'Poppins', sans-serif;
             cursor: pointer;
             padding: 0;
             width: 32px;
@@ -483,20 +464,19 @@
             padding: 12px 20px;
             color: #e2e8f0;
             text-decoration: none;
-            font-family: 'Poppins', sans-serif;
             transition: all 0.3s;
             border-left: 3px solid transparent;
         }
         
         .side-menu-item:hover {
-            background: rgba(6, 118, 187, 0.1);
-            border-left-color: #0676bb;
+            background: rgba(255, 255, 255, 0.05);
+            border-left-color: #60a5fa;
         }
         
         .side-menu-item.active {
-            background: rgba(6, 118, 187, 0.15);
-            border-left-color: #0676bb;
-            color: #0676bb;
+            background: rgba(96, 165, 250, 0.1);
+            border-left-color: #60a5fa;
+            color: #60a5fa;
             font-weight: 600;
         }
         
@@ -505,7 +485,7 @@
             bottom: 0;
             width: 100%;
             padding: 20px;
-            background: #172945;
+            background: #1e293b;
         }
         
         .menu-divider {
@@ -521,15 +501,14 @@
             padding: 12px 20px;
             color: #e2e8f0;
             text-decoration: none;
-            font-family: 'Poppins', sans-serif;
             border-radius: 6px;
             transition: all 0.3s;
             margin: 0 -20px;
         }
         
         .menu-qr:hover {
-            background: rgba(6, 118, 187, 0.1);
-            color: #0676bb;
+            background: rgba(255, 255, 255, 0.05);
+            color: #60a5fa;
         }
         
         .menu-overlay {
@@ -555,12 +534,11 @@
         
         /* Footer */
         .footer {
-            background: #172945;
+            background: #1e293b;
             padding: 20px;
             text-align: center;
-            color: #577a97;
+            color: #9ca3af;
             font-size: 13px;
-            font-family: 'Poppins', sans-serif;
             border-top: 1px solid rgba(255, 255, 255, 0.1);
         }
         
