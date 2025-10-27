@@ -1,115 +1,151 @@
-/* =================== VARIÁVEIS CSS - 55 CORES PANTONE =================== */
+/* =================== VARIÁVEIS CSS - ARCHIPELAGO DASHBOARD V3.4.0 =================== */
+/* Data: 27/Outubro/2025
+   CORES: Paleta oficial extraída dos arquivos do cliente
+   FONTE: Poppins (substituindo fonte padrão do sistema)
+*/
+
+/* ----- IMPORTAÇÃO DA FONTE POPPINS ----- */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap');
+
 :root {
+    /* ========================================
+       PALETA DE CORES OFICIAL ARCHIPELAGO
+       ======================================== */
+    
+    /* === AZUIS - IDENTIDADE DA MARCA === */
+    --primary-navy: #131b2e;           /* Azul marinho escuro - Backgrounds principais */
+    --primary-dark-blue: #172945;      /* Azul escuro - Headers, cards modo escuro */
+    --primary-medium-blue: #1c5083;    /* Azul médio - Elementos de destaque */
+    --primary-blue: #0676bb;           /* Azul principal - Botões, CTAs, links ⭐ */
+    --primary-light-blue: #577a97;     /* Azul acinzentado - Textos secundários */
+    --primary-lighter-blue: #a9c0d2;   /* Azul claro - Backgrounds suaves */
+    
+    /* === NEUTROS - CINZAS === */
+    --neutral-dark: #3c3a3e;           /* Cinza escuro - Textos principais */
+    --neutral-medium: #b2adaa;         /* Cinza médio - Bordas, separadores */
+    --neutral-light: #e9e5e2;          /* Cinza claro - Backgrounds claros */
+    
+    /* === ALERTAS E STATUS === */
+    --warning-orange: #c86420;         /* Laranja - Avisos, alertas */
+    --alert-yellow: #f59a1d;           /* Amarelo - Destaques importantes */
+    --success-green: #29ad8d;          /* Verde - Confirmações, status positivo */
+    
+    /* ========================================
+       APLICAÇÃO DA PALETA NO SISTEMA
+       ======================================== */
+    
     /* === CORES PRINCIPAIS DO SISTEMA === */
-    --nav-header: #1a1f2e;
-    --nav-sidebar: #1a1f2e;
+    --nav-header: var(--primary-navy);
+    --nav-sidebar: var(--primary-dark-blue);
     --bg-primary: #ffffff;
-    --card: #1a1f2e;
+    --card: var(--primary-dark-blue);
     --text-white: #ffffff;
-    --text-dark: #1a1f2e;
-    --border: #334155;
-    --border-light: rgba(255, 255, 255, 0.1);
+    --text-dark: var(--primary-navy);
+    --border: var(--neutral-medium);
+    --border-light: var(--primary-lighter-blue);
     
     /* === STATUS DOS LEITOS === */
-    --status-vago: #16a34a;        /* Verde para vago */
-    --status-uso: #fbbf24;         /* Amarelo para ocupado */
-    --status-ocupado: #fbbf24;     /* Alias para ocupado */
-    --destaque: #8FD3F4;           /* Azul claro para destaque */
-    --destaque-alta: #8FD3F4;      /* Previsão de alta */
+    --status-vago: var(--success-green);        /* Verde para vago */
+    --status-uso: var(--warning-orange);        /* Laranja para ocupado */
+    --status-ocupado: var(--warning-orange);    /* Alias para ocupado */
+    --destaque: var(--primary-blue);            /* Azul principal para destaque */
+    --destaque-alta: var(--alert-yellow);       /* Amarelo para previsão de alta */
     
-    /* === CORES DE CONCESSÕES (13 cores Pantone) === */
+    /* === CORES DE CONCESSÕES (mantidas, mas com fallback na paleta) === */
     --conc-transicao: #007A53;
     --conc-aplicacao: #582C83;
     --conc-fisioterapia: #009639;
     --conc-fonoaudiologia: #FF671F;
     --conc-aspiracao: #2E1A47;
-    --conc-banho: #8FD3F4;
+    --conc-banho: var(--primary-lighter-blue);  /* Usando azul claro da paleta */
     --conc-curativos: #00BFB3;
     --conc-oxigenoterapia: #64A70B;
-    --conc-recarga: #00AEEF;
-    --conc-nutricional-com: #FFC72C;
+    --conc-recarga: var(--primary-blue);        /* Usando azul principal */
+    --conc-nutricional-com: var(--alert-yellow); /* Usando amarelo da paleta */
     --conc-nutricional-sem: #F4E285;
     --conc-clister: #E8927C;
     --conc-picc: #E03C31;
     
-    /* === CORES DAS LINHAS DE CUIDADO (19 cores Pantone) === */
+    /* === CORES DAS LINHAS DE CUIDADO (mantidas, mas com fallback na paleta) === */
     --linha-assiste: #ED0A72;
     --linha-aps: #007A33;
-    --linha-paliativos: #00B5A2;
+    --linha-paliativos: var(--success-green);   /* Usando verde da paleta */
     --linha-ico: #A6192E;
     --linha-oncologia: #6A1B9A;
-    --linha-pediatria: #5A646B;
+    --linha-pediatria: var(--primary-light-blue); /* Usando azul acinzentado */
     --linha-auto-gastro: #5C5EBE;
-    --linha-auto-neuro-desm: #00AEEF;
-    --linha-auto-neuro-musc: #00263A;
+    --linha-auto-neuro-desm: var(--primary-blue); /* Usando azul principal */
+    --linha-auto-neuro-musc: var(--primary-navy); /* Usando azul marinho */
     --linha-auto-reumato: #582D40;
-    --linha-vida-leve: #FFB81C;
+    --linha-vida-leve: var(--alert-yellow);      /* Usando amarelo da paleta */
     --linha-card: #C8102E;
     --linha-endocrino: #582C83;
     --linha-geriatria: #FF6F1D;
     --linha-melhor: #556F44;
-    --linha-neurologia: #0072CE;
-    --linha-pneumologia: #E35205;
-    --linha-pos-bariatrica: #003C57;
+    --linha-neurologia: var(--primary-blue);     /* Usando azul principal */
+    --linha-pneumologia: var(--warning-orange);  /* Usando laranja da paleta */
+    --linha-pos-bariatrica: var(--primary-medium-blue); /* Usando azul médio */
     --linha-reumatologia: #5A0020;
     
     /* === CORES DA TIMELINE/PREVISÃO DE ALTA === */
-    --timeline-ouro: #fbbf24;
-    --timeline-2r: #3b82f6;
-    --timeline-3r: #8b5cf6;
-    --timeline-48h: #10b981;
-    --timeline-72h: #f59e0b;
-    --timeline-96h: #ef4444;
-    --timeline-sp: #6b7280;
+    --timeline-ouro: var(--alert-yellow);        /* Amarelo da paleta */
+    --timeline-prata: var(--primary-lighter-blue); /* Azul claro */
+    --timeline-bronze: var(--warning-orange);    /* Laranja da paleta */
+    --timeline-24h: var(--primary-blue);         /* Azul principal */
+    --timeline-48h: var(--primary-medium-blue);  /* Azul médio */
+    --timeline-72h: var(--primary-dark-blue);    /* Azul escuro */
+    --timeline-96h: var(--primary-navy);         /* Azul marinho */
+    --timeline-sp: var(--primary-light-blue);    /* Azul acinzentado */
     
     /* === CORES DOS HOSPITAIS === */
-    --hospital-neomater: #ffffff;
-    --hospital-cruz-azul: #60a5fa;
-    --hospital-santa-marcelina: #8b5cf6;
-    --hospital-santa-clara: #f59e0b;
+    --hospital-neomater: var(--primary-blue);
+    --hospital-cruz-azul: var(--primary-medium-blue);
+    --hospital-santa-marcelina: var(--primary-dark-blue);
+    --hospital-santa-clara: var(--warning-orange);
+    --hospital-adventista: var(--success-green);
     
     /* === CORES AUXILIARES === */
-    --success: #16a34a;
-    --warning: #f59e0b;
-    --error: #ef4444;
-    --info: #3b82f6;
+    --success: var(--success-green);
+    --warning: var(--alert-yellow);
+    --error: var(--warning-orange);
+    --info: var(--primary-blue);
     
-    --success-light: #dcfce7;
-    --warning-light: #fef3c7;
-    --error-light: #fecaca;
-    --info-light: #dbeafe;
+    --success-light: rgba(41, 173, 141, 0.15);
+    --warning-light: rgba(245, 154, 29, 0.15);
+    --error-light: rgba(200, 100, 32, 0.15);
+    --info-light: rgba(6, 118, 187, 0.15);
     
     /* === CORES DE FUNDO === */
-    --bg-card: #1a1f2e;
-    --bg-overlay: rgba(0, 0, 0, 0.8);
-    --bg-modal: rgba(0, 0, 0, 0.5);
-    --bg-light: #f8fafc;
-    --bg-gray: #f1f5f9;
+    --bg-card: var(--primary-dark-blue);
+    --bg-overlay: rgba(19, 27, 46, 0.9);
+    --bg-modal: rgba(19, 27, 46, 0.7);
+    --bg-light: var(--neutral-light);
+    --bg-gray: var(--primary-lighter-blue);
     
     /* === CORES DE TEXTO === */
-    --text-primary: #0f172a;
-    --text-secondary: #475569;
-    --text-muted: #64748b;
-    --text-disabled: #94a3b8;
+    --text-primary: var(--neutral-dark);
+    --text-secondary: var(--primary-light-blue);
+    --text-muted: var(--neutral-medium);
+    --text-disabled: var(--primary-lighter-blue);
     
     /* === CORES DE BOTÕES === */
-    --btn-primary: #3b82f6;
-    --btn-primary-hover: #2563eb;
-    --btn-secondary: #6b7280;
-    --btn-secondary-hover: #4b5563;
-    --btn-success: #16a34a;
-    --btn-success-hover: #15803d;
-    --btn-warning: #f59e0b;
-    --btn-warning-hover: #d97706;
-    --btn-danger: #ef4444;
-    --btn-danger-hover: #dc2626;
+    --btn-primary: var(--primary-blue);
+    --btn-primary-hover: var(--primary-medium-blue);
+    --btn-secondary: var(--neutral-medium);
+    --btn-secondary-hover: var(--neutral-dark);
+    --btn-success: var(--success-green);
+    --btn-success-hover: #22967a;
+    --btn-warning: var(--warning-orange);
+    --btn-warning-hover: #b35818;
+    --btn-danger: var(--warning-orange);
+    --btn-danger-hover: #b35818;
     
-    /* === SOMBRAS === */
-    --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-    --shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
-    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-    --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    /* === SOMBRAS (atualizadas com cores da paleta) === */
+    --shadow-sm: 0 1px 2px 0 rgba(19, 27, 46, 0.05);
+    --shadow: 0 1px 3px 0 rgba(19, 27, 46, 0.1), 0 1px 2px 0 rgba(19, 27, 46, 0.06);
+    --shadow-md: 0 4px 6px -1px rgba(19, 27, 46, 0.1), 0 2px 4px -1px rgba(19, 27, 46, 0.06);
+    --shadow-lg: 0 10px 15px -3px rgba(19, 27, 46, 0.1), 0 4px 6px -2px rgba(19, 27, 46, 0.05);
+    --shadow-xl: 0 20px 25px -5px rgba(19, 27, 46, 0.1), 0 10px 10px -5px rgba(19, 27, 46, 0.04);
     
     /* === BORDAS ARREDONDADAS === */
     --rounded-sm: 0.125rem;
@@ -128,19 +164,26 @@
     --space-xl: 2rem;
     --space-2xl: 3rem;
     
-    /* === FONTES === */
-    --font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+    /* === FONTES - POPPINS === */
+    --font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
     --font-mono: 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas, monospace;
     
+    /* === PESOS DA FONTE POPPINS === */
+    --font-regular: 400;
+    --font-medium: 500;
+    --font-semibold: 600;
+    --font-bold: 700;
+    
     /* === TAMANHOS DE FONTE === */
-    --text-xs: 0.75rem;
-    --text-sm: 0.875rem;
-    --text-base: 1rem;
-    --text-lg: 1.125rem;
-    --text-xl: 1.25rem;
-    --text-2xl: 1.5rem;
-    --text-3xl: 1.875rem;
-    --text-4xl: 2.25rem;
+    --text-xs: 0.75rem;      /* 12px */
+    --text-sm: 0.875rem;     /* 14px */
+    --text-base: 1rem;       /* 16px */
+    --text-lg: 1.125rem;     /* 18px */
+    --text-xl: 1.25rem;      /* 20px */
+    --text-2xl: 1.5rem;      /* 24px */
+    --text-3xl: 1.875rem;    /* 30px */
+    --text-4xl: 2.25rem;     /* 36px */
+    --text-5xl: 3rem;        /* 48px */
     
     /* === ALTURAS === */
     --header-height: 64px;
@@ -161,33 +204,234 @@
     --z-popover: 1050;
     --z-tooltip: 1060;
     --z-toast: 1070;
+    
+    /* === BACKGROUND COM GRAFISMO === */
+    --bg-grafismo: url('../imagens/Grafismo_Fundo.svg');
 }
 
-/* === MODO ESCURO (Opcional) === */
+/* ========================================
+   MODO ESCURO
+   ======================================== */
+.dark-mode,
+[data-theme="dark"] {
+    --bg-primary: var(--primary-navy);
+    --text-primary: #ffffff;
+    --text-secondary: var(--primary-lighter-blue);
+    --bg-light: var(--primary-dark-blue);
+    --bg-gray: var(--primary-medium-blue);
+    --border: var(--primary-medium-blue);
+    --card: var(--primary-dark-blue);
+    --bg-grafismo: none; /* Remove grafismo no modo escuro */
+}
+
 @media (prefers-color-scheme: dark) {
     :root {
-        --bg-primary: #0f172a;
-        --text-primary: #f8fafc;
-        --text-secondary: #cbd5e1;
-        --bg-light: #1e293b;
-        --bg-gray: #334155;
-        --border: #475569;
+        --bg-primary: var(--primary-navy);
+        --text-primary: #ffffff;
+        --text-secondary: var(--primary-lighter-blue);
+        --bg-light: var(--primary-dark-blue);
+        --bg-gray: var(--primary-medium-blue);
+        --border: var(--primary-medium-blue);
     }
 }
 
-/* === CLASSES UTILITÁRIAS BASEADAS NAS VARIÁVEIS === */
+/* ========================================
+   APLICAÇÃO GLOBAL DA FONTE POPPINS
+   ======================================== */
+* {
+    font-family: var(--font-family);
+}
+
+body {
+    font-family: var(--font-family);
+    font-weight: var(--font-regular);
+    font-size: var(--text-base);
+    color: var(--text-primary);
+    background-image: var(--bg-grafismo);
+    background-repeat: no-repeat;
+    background-position: top left;
+    background-size: auto;
+    background-attachment: fixed;
+}
+
+/* === HIERARQUIA TIPOGRÁFICA === */
+h1, .h1 {
+    font-family: var(--font-family);
+    font-weight: var(--font-bold);
+    font-size: var(--text-4xl);
+    line-height: 1.2;
+    letter-spacing: -0.5px;
+    color: var(--text-primary);
+}
+
+h2, .h2 {
+    font-family: var(--font-family);
+    font-weight: var(--font-semibold);
+    font-size: var(--text-2xl);
+    line-height: 1.3;
+    color: var(--text-primary);
+}
+
+h3, .h3 {
+    font-family: var(--font-family);
+    font-weight: var(--font-semibold);
+    font-size: var(--text-xl);
+    line-height: 1.4;
+    color: var(--text-primary);
+}
+
+h4, .h4 {
+    font-family: var(--font-family);
+    font-weight: var(--font-medium);
+    font-size: var(--text-lg);
+    line-height: 1.4;
+    color: var(--text-primary);
+}
+
+p {
+    font-family: var(--font-family);
+    font-weight: var(--font-regular);
+    font-size: var(--text-base);
+    line-height: 1.6;
+}
+
+label {
+    font-family: var(--font-family);
+    font-weight: var(--font-medium);
+    font-size: var(--text-sm);
+    letter-spacing: 0.3px;
+}
+
+button, .btn {
+    font-family: var(--font-family);
+    font-weight: var(--font-medium);
+    font-size: var(--text-sm);
+    letter-spacing: 0.5px;
+}
+
+input, select, textarea {
+    font-family: var(--font-family);
+    font-weight: var(--font-regular);
+    font-size: var(--text-base);
+}
+
+/* ========================================
+   CLASSES UTILITÁRIAS BASEADAS NAS VARIÁVEIS
+   ======================================== */
+
+/* === Backgrounds === */
 .bg-primary { background-color: var(--bg-primary); }
 .bg-card { background-color: var(--bg-card); }
+.bg-light { background-color: var(--bg-light); }
+.bg-navy { background-color: var(--primary-navy); }
+.bg-blue { background-color: var(--primary-blue); }
+.bg-success { background-color: var(--success-green); }
+.bg-warning { background-color: var(--warning-orange); }
+
+/* === Textos === */
 .text-primary { color: var(--text-primary); }
+.text-secondary { color: var(--text-secondary); }
 .text-white { color: var(--text-white); }
+.text-blue { color: var(--primary-blue); }
+.text-muted { color: var(--text-muted); }
+
+/* === Bordas === */
+.border { border: 1px solid var(--border); }
 .border-light { border-color: var(--border-light); }
+.border-blue { border-color: var(--primary-blue); }
 
-/* Status Classes */
-.status-vago { background-color: var(--status-vago); }
-.status-ocupado { background-color: var(--status-uso); }
-.destaque-alta { background-color: var(--destaque-alta); }
+/* === Status Classes === */
+.status-vago { 
+    background-color: var(--status-vago);
+    color: white;
+}
+.status-ocupado { 
+    background-color: var(--status-ocupado);
+    color: white;
+}
+.destaque-alta { 
+    background-color: var(--destaque-alta);
+    color: var(--primary-navy);
+}
 
-/* Transition Classes */
+/* === Badges === */
+.badge {
+    font-family: var(--font-family);
+    font-weight: var(--font-medium);
+    font-size: var(--text-sm);
+    padding: 0.25rem 0.75rem;
+    border-radius: var(--rounded-lg);
+}
+
+.badge-ouro {
+    background: linear-gradient(135deg, var(--alert-yellow) 0%, #ffd700 100%);
+    color: var(--primary-navy);
+    font-weight: var(--font-semibold);
+}
+
+.badge-prata {
+    background: linear-gradient(135deg, var(--primary-lighter-blue) 0%, #e0e0e0 100%);
+    color: var(--primary-navy);
+    font-weight: var(--font-semibold);
+}
+
+.badge-bronze {
+    background: linear-gradient(135deg, var(--warning-orange) 0%, #cd7f32 100%);
+    color: white;
+    font-weight: var(--font-semibold);
+}
+
+/* === Botões === */
+.btn-primary {
+    background-color: var(--btn-primary);
+    color: white;
+    border: none;
+}
+
+.btn-primary:hover {
+    background-color: var(--btn-primary-hover);
+}
+
+.btn-success {
+    background-color: var(--btn-success);
+    color: white;
+    border: none;
+}
+
+.btn-success:hover {
+    background-color: var(--btn-success-hover);
+}
+
+.btn-warning {
+    background-color: var(--btn-warning);
+    color: white;
+    border: none;
+}
+
+.btn-warning:hover {
+    background-color: var(--btn-warning-hover);
+}
+
+/* === Transições === */
 .transition-fast { transition: all var(--transition-fast); }
 .transition-normal { transition: all var(--transition-normal); }
 .transition-slow { transition: all var(--transition-slow); }
+
+/* === Sombras === */
+.shadow-sm { box-shadow: var(--shadow-sm); }
+.shadow { box-shadow: var(--shadow); }
+.shadow-md { box-shadow: var(--shadow-md); }
+.shadow-lg { box-shadow: var(--shadow-lg); }
+.shadow-xl { box-shadow: var(--shadow-xl); }
+
+/* === Arredondamentos === */
+.rounded-sm { border-radius: var(--rounded-sm); }
+.rounded { border-radius: var(--rounded); }
+.rounded-md { border-radius: var(--rounded-md); }
+.rounded-lg { border-radius: var(--rounded-lg); }
+.rounded-xl { border-radius: var(--rounded-xl); }
+.rounded-full { border-radius: var(--rounded-full); }
+
+/* ========================================
+   FIM DO ARQUIVO
+   ======================================== */
