@@ -1,10 +1,15 @@
 /* =================== LAYOUT PRINCIPAL DO SISTEMA =================== */
+/* Versão: 3.4.0 - PALETA OFICIAL ARCHIPELAGO + POPPINS */
+
+/* =================== IMPORTAÇÃO DA FONTE POPPINS =================== */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap');
 
 /* === RESET E BASE === */
 * {
     box-sizing: border-box;
     margin: 0;
     padding: 0;
+    font-family: 'Poppins', sans-serif !important;
 }
 
 html {
@@ -12,7 +17,7 @@ html {
 }
 
 body {
-    font-family: var(--font-family);
+    font-family: 'Poppins', sans-serif !important;
     background: var(--bg-primary);
     color: var(--text-primary);
     line-height: 1.6;
@@ -69,6 +74,7 @@ body {
     width: 90%;
     box-shadow: var(--shadow-xl);
     animation: fadeInScale 0.3s ease-out;
+    font-family: 'Poppins', sans-serif;
 }
 
 @keyframes fadeInScale {
@@ -87,12 +93,14 @@ body {
     font-size: var(--text-2xl);
     font-weight: 700;
     color: var(--text-white);
+    font-family: 'Poppins', sans-serif;
 }
 
 .auth-container p {
     margin-bottom: var(--space-lg);
     opacity: 0.8;
     font-size: var(--text-base);
+    font-family: 'Poppins', sans-serif;
 }
 
 .auth-container input {
@@ -109,24 +117,26 @@ body {
     font-weight: 600;
     backdrop-filter: blur(10px);
     transition: var(--transition-normal);
+    font-family: 'Poppins', sans-serif;
 }
 
 .auth-container input:focus {
     outline: none;
-    border-color: var(--btn-primary);
+    border-color: #0676bb;
     background: rgba(255, 255, 255, 0.15);
-    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    box-shadow: 0 0 0 3px rgba(6, 118, 187, 0.1);
 }
 
 .auth-container input::placeholder {
     color: rgba(255, 255, 255, 0.5);
     letter-spacing: normal;
+    font-family: 'Poppins', sans-serif;
 }
 
 .auth-container button {
     width: 100%;
     padding: var(--space-lg);
-    background: var(--btn-primary);
+    background: #0676bb;
     color: white;
     border: none;
     border-radius: var(--rounded-lg);
@@ -136,10 +146,11 @@ body {
     text-transform: uppercase;
     letter-spacing: 0.5px;
     transition: var(--transition-normal);
+    font-family: 'Poppins', sans-serif;
 }
 
 .auth-container button:hover {
-    background: var(--btn-primary-hover);
+    background: #1c5083;
     transform: translateY(-1px);
     box-shadow: var(--shadow-lg);
 }
@@ -149,14 +160,15 @@ body {
 }
 
 .error-msg {
-    color: var(--error);
+    color: #c86420;
     margin-top: var(--space-sm);
     font-size: var(--text-sm);
     font-weight: 500;
     padding: var(--space-sm);
-    background: var(--error-light);
+    background: rgba(200, 100, 32, 0.1);
     border-radius: var(--rounded);
-    border: 1px solid var(--error);
+    border: 1px solid #c86420;
+    font-family: 'Poppins', sans-serif;
 }
 
 /* === HEADER === */
@@ -179,7 +191,7 @@ body {
     display: flex;
     align-items: center;
     gap: var(--space-lg);
-    justify-content: flex-start; /* CORREÇÃO: FORÇAR À ESQUERDA */
+    justify-content: flex-start;
 }
 
 .hamburger {
@@ -189,8 +201,9 @@ body {
     border-radius: var(--rounded);
     transition: var(--transition-fast);
     user-select: none;
-    text-align: left; /* CORREÇÃO: ALINHAMENTO À ESQUERDA */
-    margin-right: var(--space-md); /* CORREÇÃO: ESPAÇAMENTO ESPECÍFICO */
+    text-align: left;
+    margin-right: var(--space-md);
+    font-family: 'Poppins', sans-serif;
 }
 
 .hamburger:hover {
@@ -202,6 +215,7 @@ body {
     font-size: var(--text-xl);
     font-weight: 700;
     letter-spacing: -0.025em;
+    font-family: 'Poppins', sans-serif;
 }
 
 .header-right {
@@ -218,11 +232,12 @@ body {
     background: rgba(255, 255, 255, 0.1);
     border-radius: var(--rounded-full);
     font-weight: 500;
+    font-family: 'Poppins', sans-serif;
 }
 
 .header button {
     padding: var(--space-sm) var(--space-md);
-    background: var(--btn-primary);
+    background: #0676bb;
     color: white;
     border: none;
     border-radius: var(--rounded);
@@ -232,10 +247,11 @@ body {
     transition: var(--transition-normal);
     text-transform: uppercase;
     letter-spacing: 0.3px;
+    font-family: 'Poppins', sans-serif;
 }
 
 .header button:hover {
-    background: var(--btn-primary-hover);
+    background: #1c5083;
     transform: translateY(-1px);
     box-shadow: var(--shadow);
 }
@@ -272,6 +288,7 @@ body {
     color: var(--text-white);
     font-size: var(--text-lg);
     font-weight: 600;
+    font-family: 'Poppins', sans-serif;
 }
 
 .menu-close {
@@ -283,6 +300,7 @@ body {
     padding: var(--space-sm);
     border-radius: var(--rounded);
     transition: var(--transition-fast);
+    font-family: 'Poppins', sans-serif;
 }
 
 .menu-close:hover {
@@ -305,6 +323,7 @@ body {
     transition: var(--transition-fast);
     font-weight: 500;
     border-left: 3px solid transparent;
+    font-family: 'Poppins', sans-serif;
 }
 
 .side-menu-item:hover {
@@ -313,9 +332,9 @@ body {
 }
 
 .side-menu-item.active {
-    background: rgba(59, 130, 246, 0.1);
-    border-left-color: var(--btn-primary);
-    color: var(--btn-primary);
+    background: rgba(6, 118, 187, 0.1);
+    border-left-color: #0676bb;
+    color: #0676bb;
 }
 
 .side-menu-item span:first-child {
@@ -354,6 +373,7 @@ body {
     font-weight: 500;
     text-decoration: none;
     transition: var(--transition-normal);
+    font-family: 'Poppins', sans-serif;
 }
 
 .menu-footer button:hover,
@@ -412,6 +432,7 @@ body {
     color: var(--text-primary);
     margin-bottom: var(--space-lg);
     text-align: center;
+    font-family: 'Poppins', sans-serif;
 }
 
 .hospital-selector {
@@ -427,7 +448,7 @@ body {
 .hospital-btn {
     flex: 1;
     padding: var(--space-md) var(--space-lg);
-    background: var(--btn-primary);
+    background: #0676bb;
     color: white;
     border: none;
     border-radius: var(--rounded-lg);
@@ -439,6 +460,7 @@ body {
     transition: var(--transition-normal);
     position: relative;
     overflow: hidden;
+    font-family: 'Poppins', sans-serif;
 }
 
 .hospital-btn::before {
@@ -487,12 +509,13 @@ body {
     font-weight: 500;
     cursor: pointer;
     transition: var(--transition-normal);
+    font-family: 'Poppins', sans-serif;
 }
 
 .filter-controls select:focus {
     outline: none;
-    border-color: var(--btn-primary);
-    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    border-color: #0676bb;
+    box-shadow: 0 0 0 3px rgba(6, 118, 187, 0.1);
 }
 
 /* === FOOTER === */
@@ -504,11 +527,13 @@ body {
     color: var(--text-secondary);
     font-size: var(--text-sm);
     background: var(--bg-light);
+    font-family: 'Poppins', sans-serif;
 }
 
 .footer p {
     margin: var(--space-sm) 0;
     line-height: 1.6;
+    font-family: 'Poppins', sans-serif;
 }
 
 .footer p:last-child {
@@ -523,17 +548,15 @@ body.menu-open {
 
 /* =================== RESPONSIVIDADE MOBILE CORRIGIDA =================== */
 @media (max-width: 768px) {
-    /* HEADER MOBILE CORRIGIDO */
     .header {
         padding: var(--space-md) var(--space-lg);
-        flex-direction: row !important; /* CORREÇÃO: MANTER EM LINHA */
+        flex-direction: row !important;
         gap: var(--space-md);
         min-height: auto;
         align-items: center !important;
         justify-content: space-between !important;
     }
     
-    /* HEADER LEFT - HAMBÚRGUER À ESQUERDA */
     .header-left {
         display: flex !important;
         align-items: center !important;
@@ -543,7 +566,6 @@ body.menu-open {
         width: auto !important;
     }
     
-    /* HAMBÚRGUER ESPECÍFICO MOBILE */
     .hamburger {
         font-size: var(--text-xl) !important;
         padding: var(--space-xs) !important;
@@ -553,14 +575,12 @@ body.menu-open {
         order: 1 !important;
     }
     
-    /* TÍTULO MOBILE */
     .header h1 {
         font-size: var(--text-base) !important;
         order: 2 !important;
         margin-left: var(--space-sm) !important;
     }
     
-    /* HEADER RIGHT MOBILE */
     .header-right {
         display: flex !important;
         align-items: center !important;
@@ -581,7 +601,6 @@ body.menu-open {
         padding: var(--space-xs) var(--space-sm) !important;
     }
     
-    /* HOSPITAL SELECTOR MOBILE */
     .hospital-selector {
         flex-direction: column;
         padding: var(--space-lg);
@@ -594,7 +613,6 @@ body.menu-open {
         font-size: var(--text-sm);
     }
     
-    /* MENU LATERAL MOBILE */
     .side-menu {
         width: 100% !important;
         left: -100% !important;
@@ -613,7 +631,6 @@ body.menu-open {
         font-size: var(--text-sm);
     }
     
-    /* CONTEÚDO PRINCIPAL MOBILE */
     .main-content {
         margin: var(--space-lg) auto;
         padding: 0 var(--space-lg);
@@ -629,14 +646,12 @@ body.menu-open {
         gap: var(--space-sm);
     }
     
-    /* FOOTER MOBILE */
     .footer {
         padding: var(--space-xl) var(--space-lg);
         font-size: var(--text-xs);
     }
 }
 
-/* MOBILE PEQUENO */
 @media (max-width: 480px) {
     .auth-container {
         padding: var(--space-xl);
@@ -648,7 +663,6 @@ body.menu-open {
         padding: var(--space-md);
     }
     
-    /* HEADER AINDA MAIS COMPACTO */
     .header {
         padding: var(--space-sm) var(--space-md);
     }
@@ -664,7 +678,7 @@ body.menu-open {
     
     .header #timer,
     .header #updateTimer {
-        display: none; /* OCULTAR TIMER EM TELAS MUITO PEQUENAS */
+        display: none;
     }
     
     .header button {
@@ -717,12 +731,12 @@ body.menu-open {
 }
 
 ::-webkit-scrollbar-thumb {
-    background: var(--border);
+    background: #0676bb;
     border-radius: var(--rounded-full);
 }
 
 ::-webkit-scrollbar-thumb:hover {
-    background: var(--text-secondary);
+    background: #1c5083;
 }
 
 /* === ACESSIBILIDADE === */
