@@ -740,7 +740,7 @@ window.renderDashboardHospitalar = function() {
     const hoje = new Date().toLocaleDateString('pt-BR');
     
     container.innerHTML = `
-        <div style="background: linear-gradient(135deg, ${CORES_ARCHIPELAGO.azulMarinhoEscuro} 0%, ${CORES_ARCHIPELAGO.azulEscuro} 100%); min-height: 100vh; padding: 20px; color: white; font-family: 'Poppins', sans-serif;">
+        <div class="dashboard-hospitalar-wrapper" style="background: linear-gradient(135deg, ${CORES_ARCHIPELAGO.azulMarinhoEscuro} 0%, ${CORES_ARCHIPELAGO.azulEscuro} 100%); min-height: 100vh; padding: 20px; color: white; font-family: 'Poppins', sans-serif;">
             <div class="dashboard-header" style="margin-bottom: 30px; padding: 20px; background: rgba(255, 255, 255, 0.05); border-radius: 12px; border-left: 4px solid ${CORES_ARCHIPELAGO.azulPrincipal};">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; flex-wrap: wrap; gap: 15px;">
                     <h2 style="margin: 0; color: #ffffff; font-size: 24px; font-weight: 700; white-space: nowrap; font-family: 'Poppins', sans-serif;">Dashboard Hospitalar V3.5.0</h2>
@@ -1555,34 +1555,29 @@ function getHospitalConsolidadoCSS() {
             }
             
             /* ================================================================
-               PATCH CRÍTICO - SOBRESCREVE archipelago-cores-fontes.css
-               Necessário porque o CSS externo usa !important
+               PATCH - MANTÉM IMAGEM DE FUNDO DO BODY
+               Não mexe no body, apenas nos containers do dashboard
                ================================================================ */
             
-            /* MODO ESCURO (padrão) - FORÇADO */
-            html body,
-            body {
-                background: linear-gradient(135deg, #131b2e 0%, #172945 100%) !important;
-                background-image: linear-gradient(135deg, #131b2e 0%, #172945 100%) !important;
-                background-attachment: fixed !important;
-                color: #ffffff !important;
-            }
-            
-            /* MODO CLARO - FUNDO BRANCO SEM GRAFISMO */
-            html body.fundo-branco,
-            body.fundo-branco {
-                background: #ffffff !important;
-                background-image: none !important;
-                color: #3c3a3e !important;
+            /* Container principal do dashboard hospitalar com fundo escuro */
+            #dashHospitalarContent,
+            #dash1 {
+                background: transparent !important;
             }
             
             /* ================================================================
-               FIM DO PATCH CRÍTICO
+               FIM DO PATCH
                ================================================================ */
             
             @keyframes pulse {
                 0%, 100% { opacity: 1; }
                 50% { opacity: 0.5; }
+            }
+            
+            /* Wrapper do dashboard hospitalar com fundo azul escuro */
+            .dashboard-hospitalar-wrapper {
+                border-radius: 0;
+                box-shadow: none;
             }
             
             .btn-whatsapp:hover {
