@@ -1007,7 +1007,7 @@ function createAdmissaoForm(hospitalNome, leitoNumero, hospitalId) {
                         ${isCruzAzulEnfermaria 
                             ? `<input id="admIdentificacaoLeito" type="text" value="${identificacaoFixa}" readonly style="width: 100%; padding: 12px; background: #1f2937; color: #9ca3af; border: 1px solid rgba(255,255,255,0.2); border-radius: 6px; font-size: 14px; cursor: not-allowed;">
                                <div style="font-size: 10px; color: rgba(255,255,255,0.5); margin-top: 3px;">🔒 Numeração fixa (Cruz Azul - Enfermaria)</div>`
-                            : `<input id="admIdentificacaoLeito" type="text" placeholder="Ex: 21 ou 711.1 (máx. 10)" maxlength="10" required style="width: 100%; padding: 12px; background: #374151; color: #ffffff; border: 1px solid rgba(255,255,255,0.3); border-radius: 6px; font-size: 14px;">`
+                            : `<input id="admIdentificacaoLeito" type="text" placeholder="Ex: 21 ou 711.1" maxlength="6" required style="width: 100%; padding: 12px; background: #374151; color: #ffffff; border: 1px solid rgba(255,255,255,0.3); border-radius: 6px; font-size: 14px;">`
                         }
                     </div>
                     
@@ -1227,7 +1227,7 @@ function createAtualizacaoForm(hospitalNome, leitoNumero, dadosLeito) {
                         <label style="display: block; margin-bottom: 5px; color: #e2e8f0; font-weight: 600; white-space: nowrap;">IDENTIFICAÇÃO DO LEITO <span style="color: #ef4444;">*</span></label>
                         ${isCruzAzulEnfermaria 
                             ? `<input id="updIdentificacaoLeito" type="text" value="${identificacaoAtual}" readonly style="width: 100%; padding: 12px; background: #1f2937; color: #9ca3af; border: 1px solid rgba(255,255,255,0.2); border-radius: 6px; font-size: 14px; cursor: not-allowed;">`
-                            : `<input id="updIdentificacaoLeito" type="text" value="${identificacaoAtual}" placeholder="Ex: 21 ou 711.1 (máx. 10)" maxlength="10" required style="width: 100%; padding: 12px; background: #374151; color: #ffffff; border: 1px solid rgba(255,255,255,0.3); border-radius: 6px; font-size: 14px;">`
+                            : `<input id="updIdentificacaoLeito" type="text" value="${identificacaoAtual}" placeholder="Ex: 21 ou 711.1" maxlength="6" required style="width: 100%; padding: 12px; background: #374151; color: #ffffff; border: 1px solid rgba(255,255,255,0.3); border-radius: 6px; font-size: 14px;">`
                         }
                         ${isCruzAzulEnfermaria ? '<div style="font-size: 10px; color: rgba(255,255,255,0.5); margin-top: 3px;">🔒 Identificação fixa</div>' : ''}
                     </div>
@@ -2170,6 +2170,7 @@ document.addEventListener('DOMContentLoaded', function() {
     logInfo('🚀 CORREÇÕES APLICADAS V3.3.2:');
     logInfo('  • ✅ CORREÇÃO 19: Reorganização do modal (4 linhas)');
     logInfo('  • ✅ CORREÇÃO 20: Ordenação dos cards (ocupados → vagos)');
+    logInfo('  • ✅ CORREÇÃO 21: Campo identificação aceita 1-6 caracteres');
 });
 
 // =================== EXPORTS ===================
@@ -2187,4 +2188,5 @@ logSuccess('🎉 CARDS.JS V3.3.2 COMPLETO E CORRIGIDO!');
 logInfo('📋 RESUMO DAS CORREÇÕES V3.3.2:');
 logInfo('  • ✅ CORREÇÃO 19: Modal reorganizado (IDENTIFICAÇÃO | TIPO | ISOLAMENTO / GÊNERO | REGIÃO | PREV ALTA / INICIAIS | MATRÍCULA | IDADE / PPS | SPICT | DIRETIVAS)');
 logInfo('  • ✅ CORREÇÃO 20: Cards ordenados (primeiro ocupados crescente, depois vagos crescente)');
+logInfo('  • ✅ CORREÇÃO 21: Campo identificação aceita de 1 a 6 caracteres alfanuméricos');
 console.log('✅ CARDS.JS V3.3.2 FINAL CARREGADO COM TODAS AS CORREÇÕES!');
