@@ -1,5 +1,5 @@
-// =================== DASHBOARD EXECUTIVO V3.4.1 - MOBILE FIXED ===================
-// =================== CSS MOBILE CORRIGIDO ===================
+// =================== DASHBOARD EXECUTIVO V3.4.2 - MOBILE 100% CORRIGIDO ===================
+// =================== LAYOUT MOBILE: 1 BOX POR LINHA ===================
 
 // Estado global para fundo branco (compartilhado com dashboard hospitalar)
 if (typeof window.fundoBranco === 'undefined') {
@@ -1343,7 +1343,7 @@ function calcularDadosLinhasReais(hospitaisComDados) {
     return linhasPorItem;
 }
 
-// CSS COM CORREÇÕES MOBILE
+// CSS COM CORREÇÕES MOBILE 100% APLICADAS
 function getExecutiveCSS() {
     return `
         <style id="executiveCSS">
@@ -1908,7 +1908,7 @@ function getExecutiveCSS() {
                 box-shadow: 0 4px 12px rgba(37, 211, 102, 0.3);
             }
             
-            /* ========== MOBILE FIXES ========== */
+            /* ========== MOBILE FIXES - 100% CORRIGIDO ========== */
             @media (max-width: 1200px) {
                 .kpis-grid-executivo {
                     grid-template-columns: repeat(2, 1fr);
@@ -1917,24 +1917,271 @@ function getExecutiveCSS() {
             }
             
             @media (max-width: 768px) {
+                /* Container principal - força largura total */
                 .kpis-grid-executivo {
-                    grid-template-columns: 1fr !important;
+                    display: flex !important;
+                    flex-direction: column !important;
                     gap: 15px !important;
+                    width: 100% !important;
+                    padding: 0 !important;
                 }
                 
+                /* Cada box ocupa largura total */
                 .kpi-box {
                     min-height: auto !important;
-                    padding: 15px !important;
+                    padding: 20px 15px !important;
                     width: 100% !important;
-                    max-width: 100% !important;
+                    max-width: none !important;
+                    margin: 0 !important;
                     box-sizing: border-box !important;
                 }
                 
+                /* Header mobile */
+                .dashboard-header-exec {
+                    padding: 15px !important;
+                }
+                
+                .dashboard-header-exec h2 {
+                    font-size: 16px !important;
+                    margin-bottom: 15px !important;
+                }
+                
+                /* Botões em coluna no mobile */
+                .dashboard-header-exec > div:last-child {
+                    flex-direction: column !important;
+                    width: 100% !important;
+                    gap: 10px !important;
+                }
+                
+                #btnWhatsAppExec,
+                #toggleFundoBtnExec {
+                    width: 100% !important;
+                    justify-content: center !important;
+                }
+                
+                /* Gauge principal (ocupação geral) */
                 .gauge-largo-container {
                     width: 100% !important;
-                    max-width: 100% !important;
+                    height: 200px !important;
+                    padding: 10px !important;
+                }
+                
+                .gauge-largo-container svg {
+                    width: 100% !important;
                     height: auto !important;
-                    min-height: 200px !important;
+                    max-width: 300px !important;
+                    margin: 0 auto !important;
+                }
+                
+                .gauge-largo-info {
+                    position: absolute !important;
+                    top: 50% !important;
+                    left: 50% !important;
+                    transform: translate(-50%, -30%) !important;
+                    width: 100% !important;
+                    padding: 0 10px !important;
+                }
+                
+                .gauge-largo-number {
+                    font-size: 28px !important;
+                    margin-bottom: 8px !important;
+                    margin-top: 15px !important;
+                }
+                
+                .gauge-largo-label {
+                    font-size: 9px !important;
+                    margin-bottom: 5px !important;
+                }
+                
+                .gauge-largo-percentage {
+                    font-size: 40px !important;
+                    padding: 4px 12px !important;
+                }
+                
+                .gauge-largo-subtitle {
+                    font-size: 9px !important;
+                    margin-top: 5px !important;
+                    white-space: normal !important;
+                    line-height: 1.2 !important;
+                }
+                
+                /* Gauges menores */
+                .v5-gauge-container {
+                    margin: 15px 0 !important;
+                }
+                
+                .v5-gauge {
+                    width: 100px !important;
+                    height: 60px !important;
+                }
+                
+                .v5-number-inside {
+                    font-size: 28px !important;
+                    margin-top: 5px !important;
+                }
+                
+                .v5-badge-below {
+                    font-size: 12px !important;
+                    padding: 3px 10px !important;
+                }
+                
+                /* KPIs duplos */
+                .kpi-valores-duplos-divididos {
+                    gap: 15px !important;
+                }
+                
+                .kpi-valor-metade .valor {
+                    font-size: 28px !important;
+                }
+                
+                .kpi-valor-metade .label {
+                    font-size: 11px !important;
+                }
+                
+                .divisor-vertical {
+                    height: 60px !important;
+                }
+                
+                /* TPH container */
+                .kpi-tph-numero {
+                    font-size: 28px !important;
+                }
+                
+                .kpi-tph-label {
+                    font-size: 14px !important;
+                }
+                
+                /* Mini gauges */
+                .tph-gauge-block {
+                    width: 6px !important;
+                    height: 16px !important;
+                }
+                
+                .ocupacao-gauge-block {
+                    height: 6px !important;
+                }
+                
+                /* Tabelas */
+                .hospitais-table-ocupacao,
+                .hospitais-table {
+                    font-size: 11px !important;
+                }
+                
+                .hospitais-table-ocupacao th,
+                .hospitais-table-ocupacao td,
+                .hospitais-table th,
+                .hospitais-table td {
+                    padding: 6px 4px !important;
+                    font-size: 11px !important;
+                }
+                
+                /* Listas */
+                .kpi-items-lista {
+                    gap: 5px !important;
+                    padding-top: 10px !important;
+                }
+                
+                .item-lista {
+                    padding: 6px 10px !important;
+                }
+                
+                .item-lista .label {
+                    font-size: 12px !important;
+                }
+                
+                .item-lista .valor {
+                    font-size: 13px !important;
+                }
+                
+                .lista-simples-compacta {
+                    gap: 3px !important;
+                }
+                
+                .lista-item-compacto {
+                    padding: 3px 8px !important;
+                }
+                
+                .lista-item-compacto .label {
+                    font-size: 11px !important;
+                }
+                
+                .lista-item-compacto .valor {
+                    font-size: 11px !important;
+                }
+                
+                /* Detalhes */
+                .kpi-detalhes {
+                    padding-top: 10px !important;
+                }
+                
+                .detalhe-titulo {
+                    font-size: 10px !important;
+                    margin-bottom: 8px !important;
+                    line-height: 1.3 !important;
+                }
+                
+                /* Heatmaps */
+                .executivo-grafico-card {
+                    padding: 15px !important;
+                    margin-bottom: 15px !important;
+                }
+                
+                .chart-header h3 {
+                    font-size: 14px !important;
+                    line-height: 1.3 !important;
+                }
+                
+                .chart-header p {
+                    font-size: 12px !important;
+                }
+                
+                .heatmap-container {
+                    overflow-x: auto !important;
+                    -webkit-overflow-scrolling: touch !important;
+                }
+                
+                .heatmap-table {
+                    min-width: 600px !important;
+                    font-size: 10px !important;
+                }
+                
+                .heatmap-table th,
+                .heatmap-table td {
+                    padding: 8px 4px !important;
+                    font-size: 10px !important;
+                }
+                
+                .concessao-label {
+                    min-width: 120px !important;
+                    font-size: 10px !important;
+                }
+                
+                .heatmap-legenda {
+                    font-size: 10px !important;
+                    gap: 8px !important;
+                }
+                
+                .legenda-cor {
+                    width: 15px !important;
+                    height: 15px !important;
+                }
+                
+                /* Título dos boxes */
+                .kpi-title {
+                    font-size: 11px !important;
+                    margin-bottom: 15px !important;
+                }
+                
+                /* Container principal - padding mobile */
+                body > div[style*="background: linear-gradient"] {
+                    padding: 10px !important;
+                }
+            }
+            
+            @media (max-width: 480px) {
+                /* Ajustes extras para telas muito pequenas */
+                .gauge-largo-container {
+                    height: 180px !important;
                 }
                 
                 .gauge-largo-number {
@@ -1942,69 +2189,54 @@ function getExecutiveCSS() {
                 }
                 
                 .gauge-largo-percentage {
-                    font-size: 36px !important;
-                    padding: 4px 12px !important;
-                }
-                
-                .gauge-largo-subtitle {
-                    font-size: 10px !important;
+                    font-size: 32px !important;
                 }
                 
                 .v5-number-inside {
-                    font-size: 32px !important;
+                    font-size: 24px !important;
                 }
                 
                 .kpi-valor-metade .valor {
-                    font-size: 32px !important;
+                    font-size: 24px !important;
                 }
                 
                 .kpi-tph-numero {
-                    font-size: 32px !important;
+                    font-size: 24px !important;
                 }
                 
-                .dashboard-header-exec h2 {
-                    font-size: 18px !important;
-                }
-                
-                .dashboard-header-exec > div:last-child {
-                    width: 100% !important;
-                }
-                
-                .executivo-grafico-card {
-                    padding: 15px !important;
-                }
-                
-                .chart-header h3 {
-                    font-size: 16px !important;
-                }
-                
-                .hospitais-table-ocupacao {
-                    font-size: 11px !important;
+                /* Tabelas ainda menores */
+                .hospitais-table-ocupacao,
+                .hospitais-table {
+                    font-size: 10px !important;
                 }
                 
                 .hospitais-table-ocupacao th,
-                .hospitais-table-ocupacao td {
-                    padding: 6px 4px !important;
+                .hospitais-table-ocupacao td,
+                .hospitais-table th,
+                .hospitais-table td {
+                    padding: 4px 2px !important;
+                    font-size: 10px !important;
+                }
+                
+                /* Dashboard header título menor */
+                .dashboard-header-exec h2 {
+                    font-size: 14px !important;
+                }
+                
+                /* Ajuste do padding geral */
+                .kpi-box {
+                    padding: 15px 10px !important;
                 }
             }
             
-            @media (max-width: 480px) {
-                .gauge-largo-container {
-                    min-height: 180px !important;
+            /* Fix para scroll horizontal em mobile */
+            @media (max-width: 768px) {
+                body {
+                    overflow-x: hidden !important;
                 }
                 
-                .kpi-title {
-                    font-size: 11px !important;
-                }
-                
-                .item-lista .label,
-                .lista-item-compacto .label {
-                    font-size: 12px !important;
-                }
-                
-                .hospitais-table,
-                .hospitais-table-ocupacao {
-                    font-size: 10px !important;
+                * {
+                    max-width: 100vw !important;
                 }
             }
         </style>
@@ -2023,5 +2255,5 @@ function logError(message) {
     console.error('[DASHBOARD EXECUTIVO] ❌ ' + message);
 }
 
-console.log('Dashboard Executivo V3.4.1 - MOBILE FIXED - 6 BOXES + HEATMAPS carregado!');
+console.log('Dashboard Executivo V3.4.2 - MOBILE 100% CORRIGIDO - Layout Vertical Mobile');
 console.log('Hospitais em ordem alfabética: ADVENTISTA, CRUZ AZUL, NEOMATER, SANTA CLARA, STA MARCELINA');
