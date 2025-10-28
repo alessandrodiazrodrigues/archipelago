@@ -2133,3 +2133,71 @@ console.log('🎨 Dashboard Hospitalar V4.1.0 CARREGADO!');
 console.log('✅ PATCH INTEGRADO: identificacaoLeito prioritário em todas as tabelas');
 console.log('✅ Filtros corrigidos: TPH (>= 120h), PPS (> 0 e < 40), Diretivas (múltiplos valores)');
 console.log('🚀 READY: Sistema V4.1.0 100% funcional com patch aplicado!');
+
+
+
+// ============= PATCH V4.2 PERMANENTE =============
+// Adicionar no FINAL do arquivo dashboard-hospital.js
+
+// Guardar função original
+window.processarDadosHospital_ORIGINAL = window.processarDadosHospital;
+
+// Sobrescrever com versão corrigida
+window.processarDadosHospital = function(hospitalId) {
+    // Chamar função original para calcular tudo
+    const resultado = window.processarDadosHospital_ORIGINAL(hospitalId);
+    
+    // Pegar leitos do hospital
+    const hospitalObj = window.hospitalData[hospitalId] || {};
+    let leitos = hospitalObj.leitos || [];
+    if (!Array.isArray(leitos)) leitos = [];
+    
+    const ocupados = leitos.filter(l => {
+        if (!l || !l.status) return false;
+        const status = l.status.toLowerCase();
+        return status === 'ocupado' || status === 'em uso';
+    });
+    
+    // ✅ CORRIGIR TPH >= 5 dias
+    resultado.tph.lista = ocupados.filter(l => {
+        if (!l.admAt) return false;
+        const admData = new Date(l.admAt);
+        if (isNaN(admData.getTime())) return false;
+        const horas = (new Date() - admData) / (1000 * 60 * 60);
+        return horas >= 120;
+    }).map(l => {
+        const dias = Math.floor((new Date() - new Date(l.admAt)) / (1000 * 60 * 60 * 24));
+        return { 
+            leito: l.identificacaoLeito || l.leito || '---',
+            matricula: l.matricula || '---',
+            dias: dias
+        };
+    }).sort((a, b) => b.dias - a.dias);
+    
+    // ✅ CORRIGIR PPS < 40%
+    resultado.pps.menor40 = ocupados.filter(l => {
+        const pps = parseInt(l.pps) || 0;
+        return pps > 0 && pps < 40;
+    }).map(l => ({
+        leito: l.identificacaoLeito || l.leito || '---',
+        matricula: l.matricula || '---'
+    }));
+    
+    // ✅ CORRIGIR Diretivas Pendentes
+    resultado.spict.listaDiretivas = ocupados.filter(l => {
+        if (!l.spict) return false;
+        const spictNorm = l.spict.toLowerCase().trim();
+        if (spictNorm !== 'elegivel' && spictNorm !== 'elegível') return false;
+        
+        const dir = l.diretivas ? l.diretivas.toLowerCase().trim() : '';
+        const valoresPendentes = ['', 'não', 'nao', 'n/a', 'pendente', 'não se aplica'];
+        return valoresPendentes.includes(dir);
+    }).map(l => ({
+        leito: l.identificacaoLeito || l.leito || '---',
+        matricula: l.matricula || '---'
+    }));
+    
+    return resultado;
+};
+
+console.log('✅ PATCH V4.2 PERMANENTE APLICADO!');
