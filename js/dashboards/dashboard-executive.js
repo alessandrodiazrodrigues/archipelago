@@ -1,5 +1,5 @@
-// =================== DASHBOARD EXECUTIVO V3.4 - 6 BOXES + HEATMAPS ===================
-// =================== COM RÉGUA DE OCUPAÇÃO POR HOSPITAL ===================
+// =================== DASHBOARD EXECUTIVO V3.4.1 - MOBILE FIXED ===================
+// =================== CSS MOBILE CORRIGIDO ===================
 
 // Estado global para fundo branco (compartilhado com dashboard hospitalar)
 if (typeof window.fundoBranco === 'undefined') {
@@ -751,7 +751,7 @@ window.renderDashboardExecutivo = function() {
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
                     <h2 style="margin: 0; color: #ffffff; font-size: 24px; font-weight: 700;">Rede Hospitalar Externa - Dashboard Geral</h2>
                 </div>
-                <div style="display: flex; justify-content: flex-end; gap: 15px;">
+                <div style="display: flex; justify-content: flex-end; gap: 15px; flex-wrap: wrap;">
                     <button id="btnWhatsAppExec" style="padding: 8px 16px; background: #25D366; border: 1px solid #25D366; border-radius: 8px; color: white; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.3s ease; display: flex; align-items: center; gap: 8px;">
                         Copiar para WhatsApp
                     </button>
@@ -1343,7 +1343,7 @@ function calcularDadosLinhasReais(hospitaisComDados) {
     return linhasPorItem;
 }
 
-// CSS
+// CSS COM CORREÇÕES MOBILE
 function getExecutiveCSS() {
     return `
         <style id="executiveCSS">
@@ -1392,7 +1392,8 @@ function getExecutiveCSS() {
             
             .gauge-largo-container {
                 position: relative;
-                width: 500px;
+                width: 100%;
+                max-width: 500px;
                 height: 280px;
                 margin: 0 auto;
                 padding-top: 20px;
@@ -1441,7 +1442,6 @@ function getExecutiveCSS() {
                 color: #6b7280;
                 line-height: 1.4;
                 margin-top: 8px;
-                white-space: nowrap;
             }
             
             .v5-gauge-container {
@@ -1908,25 +1908,103 @@ function getExecutiveCSS() {
                 box-shadow: 0 4px 12px rgba(37, 211, 102, 0.3);
             }
             
+            /* ========== MOBILE FIXES ========== */
             @media (max-width: 1200px) {
                 .kpis-grid-executivo {
                     grid-template-columns: repeat(2, 1fr);
+                    gap: 15px;
                 }
             }
             
             @media (max-width: 768px) {
                 .kpis-grid-executivo {
-                    grid-template-columns: 1fr;
+                    grid-template-columns: 1fr !important;
+                    gap: 15px !important;
                 }
                 
                 .kpi-box {
                     min-height: auto !important;
                     padding: 15px !important;
+                    width: 100% !important;
+                    max-width: 100% !important;
+                    box-sizing: border-box !important;
                 }
                 
                 .gauge-largo-container {
-                    width: 100%;
-                    max-width: 400px;
+                    width: 100% !important;
+                    max-width: 100% !important;
+                    height: auto !important;
+                    min-height: 200px !important;
+                }
+                
+                .gauge-largo-number {
+                    font-size: 24px !important;
+                }
+                
+                .gauge-largo-percentage {
+                    font-size: 36px !important;
+                    padding: 4px 12px !important;
+                }
+                
+                .gauge-largo-subtitle {
+                    font-size: 10px !important;
+                }
+                
+                .v5-number-inside {
+                    font-size: 32px !important;
+                }
+                
+                .kpi-valor-metade .valor {
+                    font-size: 32px !important;
+                }
+                
+                .kpi-tph-numero {
+                    font-size: 32px !important;
+                }
+                
+                .dashboard-header-exec h2 {
+                    font-size: 18px !important;
+                }
+                
+                .dashboard-header-exec > div:last-child {
+                    width: 100% !important;
+                }
+                
+                .executivo-grafico-card {
+                    padding: 15px !important;
+                }
+                
+                .chart-header h3 {
+                    font-size: 16px !important;
+                }
+                
+                .hospitais-table-ocupacao {
+                    font-size: 11px !important;
+                }
+                
+                .hospitais-table-ocupacao th,
+                .hospitais-table-ocupacao td {
+                    padding: 6px 4px !important;
+                }
+            }
+            
+            @media (max-width: 480px) {
+                .gauge-largo-container {
+                    min-height: 180px !important;
+                }
+                
+                .kpi-title {
+                    font-size: 11px !important;
+                }
+                
+                .item-lista .label,
+                .lista-item-compacto .label {
+                    font-size: 12px !important;
+                }
+                
+                .hospitais-table,
+                .hospitais-table-ocupacao {
+                    font-size: 10px !important;
                 }
             }
         </style>
@@ -1945,5 +2023,5 @@ function logError(message) {
     console.error('[DASHBOARD EXECUTIVO] ❌ ' + message);
 }
 
-console.log('Dashboard Executivo V3.4 - CORRIGIDO - 6 BOXES + HEATMAPS COM RÉGUA carregado!');
+console.log('Dashboard Executivo V3.4.1 - MOBILE FIXED - 6 BOXES + HEATMAPS carregado!');
 console.log('Hospitais em ordem alfabética: ADVENTISTA, CRUZ AZUL, NEOMATER, SANTA CLARA, STA MARCELINA');
