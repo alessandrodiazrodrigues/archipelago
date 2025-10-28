@@ -41,20 +41,6 @@ const CORES_ARCHIPELAGO = {
 // Estado global para fundo branco
 window.fundoBranco = false;
 
-window.fundoBranco = false;
-
-// ⚠️ OVERRIDE TEMPORÁRIO DE TPH - TODO: REMOVER QUANDO PLANILHA OK
-const TPH_OVERRIDE = {
-    'H1': 2.2,  // NEOMATER
-    'H4': 3.0,  // SANTA CLARA
-    'H2': 4.6,  // CRUZ AZUL
-    'H3': 4.0,  // STA MARCELINA
-    'H5': 3.5   // ADVENTISTA
-};
-const USE_TPH_OVERRIDE = true;
-// FIM DO OVERRIDE
-
-// Verificar se ChartDataLabels está disponível
 // Verificar se ChartDataLabels está disponível
 const hasDataLabels = typeof ChartDataLabels !== 'undefined';
 if (!hasDataLabels) {
@@ -487,12 +473,6 @@ function processarDadosHospital(hospitalId) {
         vagosEnfMascFinal = vagos.length;
     }
     
-// ⚠️ OVERRIDE TEMPORÁRIO
-let tphMedio;
-if (USE_TPH_OVERRIDE && TPH_OVERRIDE[hospitalId]) {
-    tphMedio = TPH_OVERRIDE[hospitalId].toFixed(1);
-    console.log(`🔧 [TPH OVERRIDE] ${hospitalId}: ${tphMedio}`);
-} else {
     const tphValues = ocupados
         .map(l => {
             if (!l.admAt) return 0;
@@ -502,11 +482,9 @@ if (USE_TPH_OVERRIDE && TPH_OVERRIDE[hospitalId]) {
             return dias > 0 ? dias : 0;
         })
         .filter(v => v > 0);
-    tphMedio = tphValues.length > 0 
+    const tphMedio = tphValues.length > 0 
         ? (tphValues.reduce((a, b) => a + b, 0) / tphValues.length).toFixed(1)
         : 0;
-}
-   
     
     const leitosMais5Diarias = ocupados.filter(l => {
         if (!l.admAt) return false;
