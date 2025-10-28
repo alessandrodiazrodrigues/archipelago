@@ -490,18 +490,20 @@ function processarDadosHospital(hospitalId) {
         if (!l.admAt) return false;
         const admData = new Date(l.admAt);
         const hoje = new Date();
-        const dias = Math.floor((hoje - admData) / (1000 * 60 * 60 * 24));
-        return dias > 5;
+        const diffMs = hoje - admData;
+        const horas = diffMs / (1000 * 60 * 60);
+        return horas >= 120;
     }).map(l => {
         const admData = new Date(l.admAt);
         const hoje = new Date();
-        const dias = Math.floor((hoje - admData) / (1000 * 60 * 60 * 24));
+        const diffMs = hoje - admData;
+        const dias = Math.floor(diffMs / (1000 * 60 * 60 * 24));
         return { 
             leito: l.leito || '---',
             matricula: l.matricula || '---',
-            dias 
+            dias: dias
         };
-    });
+    }).sort((a, b) => b.dias - a.dias);
     
     const ppsValues = ocupados
         .map(l => parseInt(l.pps) || 0)
@@ -517,9 +519,21 @@ function processarDadosHospital(hospitalId) {
     const spictElegiveis = ocupados.filter(l => 
         l.spict && l.spict.toLowerCase() === 'elegivel'
     );
-    const diretivasPendentes = ocupados.filter(l => 
-        l.spict && l.spict.toLowerCase() === 'elegivel' && (!l.diretivas || l.diretivas.trim() === '' || l.diretivas === 'Não')
-    ).map(l => ({
+    const diretivasPendentes = ocupados.filter(l => {
+        const spictElegivel = l.spict && 
+            l.spict.toLowerCase().trim() === 'elegivel';
+        
+        if (!spictElegivel) return false;
+        
+        const diretivas = l.diretivas ? l.diretivas.toLowerCase().trim() : '';
+        
+        const diretivasPendente = 
+            diretivas === '' || 
+            diretivas === 'não' || 
+            diretivas === 'nao';
+        
+        return diretivasPendente;
+    }).map(l => ({
         leito: l.leito || '---',
         matricula: l.matricula || '---'
     }));
@@ -2135,4 +2149,6 @@ console.log('✅ KPIs com cores corretas');
 console.log('✅ Gráficos com paleta oficial');
 console.log('✅ PATCH CRÍTICO: Fundo azul escuro forçado com !important');
 console.log('✅ Sobrescreve archipelago-cores-fontes.css completamente');
+console.log('✅ CORREÇÃO TPH: >= 120 horas com ordenação decrescente');
+console.log('✅ CORREÇÃO DIRETIVAS: Normalização completa (não/nao)');
 console.log('🚀 READY: Sistema V3.5.0 100% funcional com identidade visual Archipelago e fundo corrigido!');
