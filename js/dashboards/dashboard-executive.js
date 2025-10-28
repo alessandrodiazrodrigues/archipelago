@@ -629,7 +629,7 @@ function copiarParaWhatsAppExecutivo() {
 
 // =================== FUNÇÃO PRINCIPAL: RENDER DASHBOARD ===================
 window.renderDashboardExecutivo = function() {
-    logInfo('Renderizando Dashboard Executivo V3.4: REDE HOSPITALAR EXTERNA (5 HOSPITAIS)');
+    logInfo('Renderizando Dashboard Executivo: REDE HOSPITALAR EXTERNA (5 HOSPITAIS)');
     
     let container = document.getElementById('dashExecutivoContent');
     if (!container) {
@@ -645,7 +645,7 @@ window.renderDashboardExecutivo = function() {
     if (!container) {
         container = document.getElementById('dashboardContainer');
         if (!container) {
-            logError('Nenhum container encontrado para Dashboard Executivo V3.4');
+            logError('Nenhum container encontrado para Dashboard Executivo');
             return;
         }
     }
@@ -654,7 +654,7 @@ window.renderDashboardExecutivo = function() {
         container.innerHTML = `
             <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 400px; text-align: center; color: white; background: linear-gradient(135deg, #1a1f2e 0%, #2d3748 100%); border-radius: 12px; margin: 20px; padding: 40px;">
                 <div style="width: 60px; height: 60px; border: 3px solid #ef4444; border-top-color: transparent; border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 20px;"></div>
-                <h2 style="color: #ef4444; margin-bottom: 10px; font-size: 20px;">Dados V3.4 não disponíveis</h2>
+                <h2 style="color: #ef4444; margin-bottom: 10px; font-size: 20px;">Dados não disponíveis</h2>
                 <p style="color: #9ca3af; font-size: 14px;">Aguardando sincronização com a planilha</p>
                 <button onclick="window.location.reload()" style="margin-top: 20px; padding: 12px 24px; background: #3b82f6; color: white; border: none; border-radius: 8px; cursor: pointer;">Recarregar</button>
                 <style>
@@ -678,7 +678,7 @@ window.renderDashboardExecutivo = function() {
         container.innerHTML = `
             <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 400px; text-align: center; color: white; background: linear-gradient(135deg, #1a1f2e 0%, #2d3748 100%); border-radius: 12px; margin: 20px; padding: 40px;">
                 <div style="width: 60px; height: 60px; border: 3px solid #f59e0b; border-top-color: transparent; border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 20px;"></div>
-                <h2 style="color: #f59e0b; margin-bottom: 10px; font-size: 20px;">Nenhum hospital V3.4 com dados</h2>
+                <h2 style="color: #f59e0b; margin-bottom: 10px; font-size: 20px;">Nenhum hospital com dados</h2>
                 <p style="color: #9ca3af; font-size: 14px;">Verifique a conexão com a planilha</p>
                 <button onclick="window.location.reload()" style="margin-top: 20px; padding: 12px 24px; background: #3b82f6; color: white; border: none; border-radius: 8px; cursor: pointer;">Tentar novamente</button>
                 <style>
@@ -747,7 +747,7 @@ window.renderDashboardExecutivo = function() {
             
             <div class="dashboard-header-exec" style="margin-bottom: 30px; padding: 20px; background: rgba(255, 255, 255, 0.05); border-radius: 12px; border-left: 4px solid #22c55e;">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-                    <h2 style="margin: 0; color: #ffffff; font-size: 24px; font-weight: 700;">Rede Hospitalar Externa - Dashboard Geral V3.4</h2>
+                    <h2 style="margin: 0; color: #ffffff; font-size: 24px; font-weight: 700;">Rede Hospitalar Externa - Dashboard Geral</h2>
                 </div>
                 <div style="display: flex; justify-content: flex-end; gap: 15px;">
                     <button id="btnWhatsAppExec" style="padding: 8px 16px; background: #25D366; border: 1px solid #25D366; border-radius: 8px; color: white; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.3s ease; display: flex; align-items: center; gap: 8px;">
@@ -1025,7 +1025,7 @@ window.renderDashboardExecutivo = function() {
             renderHeatmapConcessoes();
             renderHeatmapLinhas();
             
-            logInfo('Fundo executivo V3.4 alterado para: ' + (window.fundoBranco ? 'claro' : 'escuro'));
+            logInfo('Fundo executivo alterado para: ' + (window.fundoBranco ? 'claro' : 'escuro'));
         });
     }
     
@@ -1039,7 +1039,7 @@ window.renderDashboardExecutivo = function() {
             renderHeatmapConcessoes();
             renderHeatmapLinhas();
             
-            logSuccess('Dashboard Executivo V3.4 renderizado com dados atualizados (5 hospitais)');
+            logSuccess('Dashboard Executivo renderizado com dados atualizados (5 hospitais)');
         }, 200);
     };
     
@@ -1401,11 +1401,12 @@ function getExecutiveCSS() {
             }
             
             .gauge-largo-number {
-                font-size: 58px;
+                font-size: 35px;
                 font-weight: 700;
                 color: white;
                 line-height: 1;
-                margin-bottom: 12px;
+                margin-bottom: 18px;
+                margin-top: 25px;
             }
             
             .gauge-largo-label {
@@ -1937,16 +1938,16 @@ function getExecutiveCSS() {
 }
 
 function logInfo(message) {
-    console.log('[DASHBOARD EXECUTIVO V3.4] ' + message);
+    console.log('[DASHBOARD EXECUTIVO] ' + message);
 }
 
 function logSuccess(message) {
-    console.log('[DASHBOARD EXECUTIVO V3.4] ✅ ' + message);
+    console.log('[DASHBOARD EXECUTIVO] ✅ ' + message);
 }
 
 function logError(message) {
-    console.error('[DASHBOARD EXECUTIVO V3.4] ❌ ' + message);
+    console.error('[DASHBOARD EXECUTIVO] ❌ ' + message);
 }
 
-console.log('Dashboard Executivo V3.4 - 6 BOXES + HEATMAPS COM RÉGUA carregado!');
+console.log('Dashboard Executivo - 6 BOXES + HEATMAPS COM RÉGUA carregado!');
 console.log('Hospitais em ordem alfabética: ADVENTISTA, CRUZ AZUL, NEOMATER, SANTA CLARA, STA MARCELINA');
