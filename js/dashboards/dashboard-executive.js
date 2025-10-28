@@ -6,6 +6,17 @@ if (typeof window.fundoBranco === 'undefined') {
     window.fundoBranco = false;
 }
 
+// =================== FUNÇÃO PARSE DATE CORRIGIDA ===================
+function parseAdmDate(admAt) {
+    if (!admAt) return null;
+    const d = new Date(admAt);
+    if (!isNaN(d)) {
+        const dias = Math.floor((new Date() - d) / (1000 * 60 * 60 * 24));
+        if (dias >= 0 && dias <= 365) return d;
+    }
+    return null;
+}
+
 // =================== ORDEM ALFABÉTICA DOS HOSPITAIS ===================
 const ORDEM_ALFABETICA_HOSPITAIS = ['H5', 'H2', 'H1', 'H4', 'H3'];
 
@@ -483,18 +494,20 @@ function processarDadosHospitalExecutivo(hospitalId) {
         vagosEnfMascFinal = vagos.length;
     }
     
+    // =================== TPH CORRIGIDO ===================
+    const hoje = new Date();
     const tphValues = ocupados
         .map(l => {
             if (!l.admAt) return 0;
-            const admData = new Date(l.admAt);
-            const hoje = new Date();
+            const admData = parseAdmDate(l.admAt);
+            if (!admData) return 0;
             const dias = Math.floor((hoje - admData) / (1000 * 60 * 60 * 24));
-            return dias > 0 ? dias : 0;
+            return (dias >= 0 && dias <= 365) ? dias : 0;
         })
-        .filter(v => v > 0);
+        .filter(v => v >= 0);
     const tphMedio = tphValues.length > 0 
-        ? (tphValues.reduce((a, b) => a + b, 0) / tphValues.length).toFixed(1)
-        : 0;
+        ? (tphValues.reduce((a, b) => a + b, 0) / tphValues.length).toFixed(2)
+        : '0.00';
     
     const ppsValues = ocupados
         .map(l => parseInt(l.pps) || 0)
@@ -716,10 +729,31 @@ window.renderDashboardExecutivo = function() {
         exclusivo_enf_masc: hospitais.reduce((sum, h) => sum + h.disponiveis.modalidade.exclusivo_enf_masc, 0)
     };
     
-    const tphTodos = hospitais.map(h => parseFloat(h.tph.medio)).filter(v => v > 0);
-    const tphMedioGeral = tphTodos.length > 0 
-        ? (tphTodos.reduce((a, b) => a + b, 0) / tphTodos.length).toFixed(1)
-        : 0;
+    // =================== TPH MÉDIO GERAL CORRIGIDO (MÉDIA PONDERADA) ===================
+    let totalDiasPonderado = 0;
+    let totalPacientesPonderado = 0;
+    
+    hospitaisComDados.forEach(hospitalId => {
+        const hospital = window.hospitalData[hospitalId];
+        if (hospital && hospital.leitos) {
+            hospital.leitos.forEach(l => {
+                if (isOcupadoExecutivo(l) && l.admAt) {
+                    const admData = parseAdmDate(l.admAt);
+                    if (admData) {
+                        const dias = Math.floor((new Date() - admData) / (1000 * 60 * 60 * 24));
+                        if (dias >= 0 && dias <= 365) {
+                            totalDiasPonderado += dias;
+                            totalPacientesPonderado++;
+                        }
+                    }
+                }
+            });
+        }
+    });
+    
+    const tphMedioGeral = totalPacientesPonderado > 0 
+        ? (totalDiasPonderado / totalPacientesPonderado).toFixed(2)
+        : '0.00';
     
     const ppsTodos = hospitais.map(h => h.pps.medio).filter(v => v > 0);
     const ppsMedioGeral = ppsTodos.length > 0
@@ -2255,5 +2289,5 @@ function logError(message) {
     console.error('[DASHBOARD EXECUTIVO] ❌ ' + message);
 }
 
-console.log('Dashboard Executivo V3.4.2 - MOBILE 100% CORRIGIDO - Layout Vertical Mobile');
+console.log('Dashboard Executivo V3.4.2 - TPH CORRIGIDO - Média Ponderada + 2 Casas Decimais');
 console.log('Hospitais em ordem alfabética: ADVENTISTA, CRUZ AZUL, NEOMATER, SANTA CLARA, STA MARCELINA');
