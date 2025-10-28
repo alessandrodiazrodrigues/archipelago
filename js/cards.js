@@ -1,4 +1,5 @@
-// =================== CARDS.JS V3.4.3 FINAL - INICIAIS SEM FORMATAÇÃO ===================
+// =================== CARDS.JS V3.4.1 FINAL - CORREÇÃO IDENTIFICAÇÃO LEITO ===================
+// =================== ACEITA NÚMEROS E LETRAS (1-6 CARACTERES) ===================
 
 // =================== VARIÁVEIS GLOBAIS ===================  
 window.selectedLeito = null;
@@ -111,15 +112,6 @@ for (let i = 14; i <= 115; i++) {
     window.IDADE_OPTIONS.push(i);
 }
 
-// =================== ✅ FUNÇÃO: FORMATAR MATRÍCULA COM HÍFEN ===================
-function formatarMatriculaComHifen(matricula) {
-    if (!matricula || matricula === '—') return '—';
-    const limpa = matricula.replace(/\D/g, '');
-    if (limpa.length === 0) return '—';
-    if (limpa.length === 1) return limpa;
-    return limpa.slice(0, -1) + '-' + limpa.slice(-1);
-}
-
 // =================== FUNÇÃO: SELECT HOSPITAL ===================
 window.selectHospital = function(hospitalId) {
     logInfo(`Selecionando hospital: ${hospitalId} (${window.HOSPITAL_MAPPING[hospitalId]})`);
@@ -139,7 +131,7 @@ window.selectHospital = function(hospitalId) {
 
 // =================== FUNÇÃO PRINCIPAL DE RENDERIZAÇÃO ===================
 window.renderCards = function() {
-    logInfo('Renderizando cards V3.4.3 - INICIAIS SEM FORMATAÇÃO');
+    logInfo('Renderizando cards V3.4.1 - IDENTIFICAÇÃO NUMÉRICA/ALFANUMÉRICA');
     
     const container = document.getElementById('cardsContainer');
     if (!container) {
@@ -352,7 +344,7 @@ function validarLimiteSantaClara(tipoQuarto) {
     return { permitido: true };
 }
 
-// =================== CRIAR CARD INDIVIDUAL V3.4.3 ===================
+// =================== CRIAR CARD INDIVIDUAL V3.4.1 ===================
 function createCard(leito, hospitalNome) {
     const card = document.createElement('div');
     card.className = 'card';
@@ -409,10 +401,8 @@ function createCard(leito, hospitalNome) {
         }
     }
     
-    // Dados do paciente - ✅ INICIAIS SEM FORMATAÇÃO
+    // Dados do paciente
     const nome = leito.nome || '';
-    const iniciais = isVago ? '—' : (nome ? nome.trim() : '—'); // ✅ PEGA EXATAMENTE O QUE ESTÁ NO CAMPO
-    
     const matricula = leito.matricula || '';
     const idade = leito.idade || null;
     const admissao = leito.admAt || '';
@@ -432,7 +422,7 @@ function createCard(leito, hospitalNome) {
         isolamento = 'Não Isolamento';
     }
     
-    // ✅ Identificação do leito
+    // ✅ CORREÇÃO: Identificação do leito - ACEITA NÚMEROS E LETRAS
     let identificacaoLeito = '';
     if (isCruzAzulEnfermaria && window.CRUZ_AZUL_NUMERACAO[numeroLeito]) {
         identificacaoLeito = window.CRUZ_AZUL_NUMERACAO[numeroLeito];
@@ -459,6 +449,8 @@ function createCard(leito, hospitalNome) {
         tempoInternacao = calcularTempoInternacao(admissao);
     }
     
+    const iniciais = isVago ? '—' : getIniciais(nome);
+    
     let ppsFormatado = pps ? `${pps}%` : '—';
     if (ppsFormatado !== '—' && !ppsFormatado.includes('%')) {
         ppsFormatado = `${pps}%`;
@@ -476,9 +468,6 @@ function createCard(leito, hospitalNome) {
     if (isCruzAzulEnfermaria && identificacaoLeito) {
         leitoDisplay = identificacaoLeito;
     }
-    
-    // ✅ MATRÍCULA COM HÍFEN
-    const matriculaFormatada = formatarMatriculaComHifen(matricula);
     
     // COR DO CÍRCULO PESSOA (paleta oficial)
     let circuloCor = '#29ad8d';
@@ -502,7 +491,7 @@ function createCard(leito, hospitalNome) {
         }
     }
     
-    // HTML do Card V3.4.3
+    // HTML do Card V3.4.1
     card.innerHTML = `
         <!-- HEADER: HOSPITAL FORA DOS BOXES -->
         <div class="card-header" style="text-align: center; margin-bottom: 12px; padding-bottom: 8px; font-family: 'Poppins', sans-serif;">
@@ -567,7 +556,7 @@ function createCard(leito, hospitalNome) {
 
             <div class="small-cell" style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; padding: 6px; display: flex; flex-direction: column; justify-content: center; min-height: 46px;">
                 <div class="box-label" style="font-size: 8px; color: rgba(255,255,255,0.8); font-weight: 700; text-transform: uppercase; margin-bottom: 2px; letter-spacing: 0.5px;">MATRÍCULA</div>
-                <div class="box-value" style="color: #ffffff; font-weight: 700; font-size: 10px; line-height: 1.2;">${matriculaFormatada}</div>
+                <div class="box-value" style="color: #ffffff; font-weight: 700; font-size: 10px; line-height: 1.2;">${matricula || '—'}</div>
             </div>
 
             <div class="small-cell" style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; padding: 6px; display: flex; flex-direction: column; justify-content: center; min-height: 46px;">
@@ -642,13 +631,6 @@ function createCard(leito, hospitalNome) {
                 </div>
                 ` : ''}
                 
-                ${!isVago ? `
-                <div class="info-item" style="display: flex; flex-direction: column; opacity: 0.5;">
-                    <div class="info-label" style="font-size: 8px; color: rgba(255,255,255,0.5); font-weight: 600; text-transform: uppercase; margin-bottom: 1px;">ID</div>
-                    <div class="info-value" style="color: rgba(255,255,255,0.6); font-weight: 600; font-size: 9px;">${idSequencial}</div>
-                </div>
-                ` : ''}
-                
                 ${isVago ? `
                 <div class="info-item" style="display: flex; flex-direction: column;">
                     <div class="info-label" style="font-size: 8px; color: rgba(255,255,255,0.5); font-weight: 600; text-transform: uppercase; margin-bottom: 1px;">STATUS</div>
@@ -711,7 +693,7 @@ function openAdmissaoFlow(leitoNumero) {
     setTimeout(() => {
         hideButtonLoading(button, originalText);
         openAdmissaoModal(leitoNumero);
-        logInfo(`Modal de admissão V3.4.3 aberto: ${window.currentHospital} - Leito ${leitoNumero}`);
+        logInfo(`Modal de admissão V3.4.1 aberto: ${window.currentHospital} - Leito ${leitoNumero}`);
     }, 800);
 }
 
@@ -724,11 +706,11 @@ function openAtualizacaoFlow(leitoNumero, dadosLeito) {
     setTimeout(() => {
         hideButtonLoading(button, originalText);
         openAtualizacaoModal(leitoNumero, dadosLeito);
-        logInfo(`Modal de atualização V3.4.3 aberto: ${window.currentHospital} - Leito ${leitoNumero}`);
+        logInfo(`Modal de atualização V3.4.1 aberto: ${window.currentHospital} - Leito ${leitoNumero}`);
     }, 800);
 }
 
-// =================== MODAIS V3.4.3 ===================
+// =================== MODAIS V3.4.1 ===================
 function openAdmissaoModal(leitoNumero) {
     const hospitalId = window.currentHospital;
     const hospitalNome = window.HOSPITAL_MAPPING[hospitalId] || 'Hospital';
@@ -767,12 +749,11 @@ function createModalOverlay() {
         background: rgba(0,0,0,0.8); display: flex; align-items: center;
         justify-content: center; z-index: 9999; backdrop-filter: blur(5px);
         animation: fadeIn 0.3s ease; font-family: 'Poppins', sans-serif;
-        overflow-y: auto;
     `;
     return modal;
 }
 
-// =================== FORMULÁRIO DE ADMISSÃO V3.4.3 ===================
+// =================== FORMULÁRIO DE ADMISSÃO V3.4.1 ===================
 function createAdmissaoForm(hospitalNome, leitoNumero, hospitalId) {
     const idSequencial = String(leitoNumero).padStart(2, '0');
     const isHibrido = window.HOSPITAIS_HIBRIDOS.includes(hospitalId);
@@ -805,13 +786,14 @@ function createAdmissaoForm(hospitalNome, leitoNumero, hospitalId) {
     const isCruzAzulApartamento = (hospitalId === 'H2' && leitoNumero >= 1 && leitoNumero <= 20);
     const isApartamentoFixo = isCruzAzulApartamento;
     
+    // ✅ CORREÇÃO: Buscar identificação atual da planilha
     let identificacaoFixa = '';
     if (isCruzAzulEnfermaria) {
         identificacaoFixa = window.CRUZ_AZUL_NUMERACAO[leitoNumero] || '';
     }
     
     return `
-        <div class="modal-content" style="background: #1a1f2e; border-radius: 12px; padding: 30px; max-width: 700px; width: 95%; max-height: 90vh; overflow-y: auto; color: #ffffff; font-family: 'Poppins', sans-serif; margin: 20px;">
+        <div class="modal-content" style="background: #1a1f2e; border-radius: 12px; padding: 30px; max-width: 700px; width: 95%; max-height: 90vh; overflow-y: auto; color: #ffffff; font-family: 'Poppins', sans-serif;">
             <h2 style="margin: 0 0 20px 0; text-align: center; color: #0676bb; font-size: 24px; font-weight: 700; text-transform: uppercase;">
                 ADMITIR PACIENTE
             </h2>
@@ -900,13 +882,11 @@ function createAdmissaoForm(hospitalNome, leitoNumero, hospitalId) {
             <div class="form-grid-3-cols" style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; margin-bottom: 20px;">
                 <div>
                     <label style="display: block; margin-bottom: 5px; color: #e2e8f0; font-weight: 600;">INICIAIS</label>
-                    <input id="admNome" type="text" placeholder="Ex: J S M ou A.D.R" maxlength="20" style="width: 100%; padding: 12px; background: #374151; color: #ffffff; border: 1px solid rgba(255,255,255,0.3); border-radius: 6px; font-size: 14px; font-family: 'Poppins', sans-serif;">
-                    <div style="font-size: 10px; color: rgba(255,255,255,0.5); margin-top: 3px;">✅ Exatamente como digitado</div>
+                    <input id="admNome" type="text" placeholder="Ex: J S M" maxlength="10" style="width: 100%; padding: 12px; background: #374151; color: #ffffff; border: 1px solid rgba(255,255,255,0.3); border-radius: 6px; font-size: 14px; font-family: 'Poppins', sans-serif;">
                 </div>
                 <div>
                     <label style="display: block; margin-bottom: 5px; color: #e2e8f0; font-weight: 600;">MATRÍCULA</label>
-                    <input id="admMatricula" type="text" placeholder="Ex: 000000000-0" maxlength="11" style="width: 100%; padding: 12px; background: #374151; color: #ffffff; border: 1px solid rgba(255,255,255,0.3); border-radius: 6px; font-size: 14px; font-family: 'Poppins', sans-serif;" oninput="formatarMatriculaInput(this)">
-                    <div style="font-size: 10px; color: rgba(255,255,255,0.5); margin-top: 3px;">✅ Último dígito separado com hífen</div>
+                    <input id="admMatricula" type="text" placeholder="Ex: 0000000000" maxlength="10" style="width: 100%; padding: 12px; background: #374151; color: #ffffff; border: 1px solid rgba(255,255,255,0.3); border-radius: 6px; font-size: 14px; font-family: 'Poppins', sans-serif;" oninput="formatarMatricula(this)">
                 </div>
                 <div>
                     <label style="display: block; margin-bottom: 5px; color: #e2e8f0; font-weight: 600;">IDADE</label>
@@ -975,8 +955,8 @@ function createAdmissaoForm(hospitalNome, leitoNumero, hospitalId) {
                 </div>
             </div>
             
-            <!-- BOTÕES MOBILE FRIENDLY -->
-            <div class="modal-buttons" style="display: flex; justify-content: flex-end; gap: 12px; padding: 20px; border-top: 1px solid rgba(255,255,255,0.1); position: sticky; bottom: 0; background: #1a1f2e; margin: 0 -30px -30px -30px; padding: 20px 30px;">
+            <!-- BOTÕES -->
+            <div style="display: flex; justify-content: flex-end; gap: 12px; padding: 20px; border-top: 1px solid rgba(255,255,255,0.1);">
                 <button class="btn-cancelar" style="padding: 12px 30px; background: rgba(255,255,255,0.1); color: #ffffff; border: 1px solid rgba(255,255,255,0.2); border-radius: 8px; font-weight: 600; text-transform: uppercase; cursor: pointer; font-family: 'Poppins', sans-serif;">CANCELAR</button>
                 <button class="btn-salvar" style="padding: 12px 30px; background: #0676bb; color: #ffffff; border: none; border-radius: 8px; font-weight: 600; text-transform: uppercase; cursor: pointer; font-family: 'Poppins', sans-serif;">SALVAR</button>
             </div>
@@ -984,10 +964,10 @@ function createAdmissaoForm(hospitalNome, leitoNumero, hospitalId) {
     `;
 }
 
-// =================== FORMULÁRIO DE ATUALIZAÇÃO V3.4.3 ===================
+// =================== FORMULÁRIO DE ATUALIZAÇÃO V3.4.1 ===================
 function createAtualizacaoForm(hospitalNome, leitoNumero, dadosLeito) {
     const tempoInternacao = dadosLeito?.admAt ? calcularTempoInternacao(dadosLeito.admAt) : '';
-    const iniciais = dadosLeito?.nome ? dadosLeito.nome.trim() : '—'; // ✅ PEGA EXATAMENTE O QUE ESTÁ NO CAMPO
+    const iniciais = dadosLeito?.nome ? getIniciais(dadosLeito.nome) : '';
     const idSequencial = String(leitoNumero).padStart(2, '0');
     
     const concessoesAtuais = Array.isArray(dadosLeito?.concessoes) ? dadosLeito.concessoes : [];
@@ -1009,6 +989,7 @@ function createAtualizacaoForm(hospitalNome, leitoNumero, dadosLeito) {
     const isCruzAzulApartamento = (hospitalId === 'H2' && leitoNumero >= 1 && leitoNumero <= 20);
     const isApartamentoFixo = isCruzAzulApartamento;
     
+    // ✅ CORREÇÃO: Buscar identificação REAL da planilha
     let identificacaoAtual = '';
     if (isCruzAzulEnfermaria) {
         identificacaoAtual = window.CRUZ_AZUL_NUMERACAO[leitoNumero] || '';
@@ -1028,12 +1009,8 @@ function createAtualizacaoForm(hospitalNome, leitoNumero, dadosLeito) {
     const isHibrido = window.HOSPITAIS_HIBRIDOS.includes(hospitalId);
     const tipoAtual = dadosLeito?.categoriaEscolhida || '';
     
-    // ✅ MATRÍCULA COM HÍFEN
-    const matriculaAtual = dadosLeito?.matricula || '';
-    const matriculaFormatada = formatarMatriculaComHifen(matriculaAtual);
-    
     return `
-        <div class="modal-content" style="background: #1a1f2e; border-radius: 12px; padding: 30px; max-width: 700px; width: 95%; max-height: 90vh; overflow-y: auto; color: #ffffff; font-family: 'Poppins', sans-serif; margin: 20px;">
+        <div class="modal-content" style="background: #1a1f2e; border-radius: 12px; padding: 30px; max-width: 700px; width: 95%; max-height: 90vh; overflow-y: auto; color: #ffffff; font-family: 'Poppins', sans-serif;">
             <h2 style="margin: 0 0 20px 0; text-align: center; color: #0676bb; font-size: 24px; font-weight: 700; text-transform: uppercase;">
                 ATUALIZAR PACIENTE
             </h2>
@@ -1121,11 +1098,10 @@ function createAtualizacaoForm(hospitalNome, leitoNumero, dadosLeito) {
                 <div>
                     <label style="display: block; margin-bottom: 5px; color: #e2e8f0; font-weight: 600;">INICIAIS</label>
                     <input value="${iniciais}" readonly style="width: 100%; padding: 12px; background: #1f2937; color: #9ca3af; border: 1px solid rgba(255,255,255,0.2); border-radius: 6px; font-size: 14px; font-family: 'Poppins', sans-serif;">
-                    <div style="font-size: 10px; color: rgba(255,255,255,0.5); margin-top: 3px;">🔒 Exatamente como digitado</div>
                 </div>
                 <div>
                     <label style="display: block; margin-bottom: 5px; color: #e2e8f0; font-weight: 600;">MATRÍCULA</label>
-                    <input value="${matriculaFormatada}" readonly style="width: 100%; padding: 12px; background: #1f2937; color: #9ca3af; border: 1px solid rgba(255,255,255,0.2); border-radius: 6px; font-size: 14px; font-family: 'Poppins', sans-serif;">
+                    <input value="${dadosLeito?.matricula || ''}" readonly style="width: 100%; padding: 12px; background: #1f2937; color: #9ca3af; border: 1px solid rgba(255,255,255,0.2); border-radius: 6px; font-size: 14px; font-family: 'Poppins', sans-serif;">
                 </div>
                 <div>
                     <label style="display: block; margin-bottom: 5px; color: #e2e8f0; font-weight: 600;">IDADE</label>
@@ -1202,19 +1178,18 @@ function createAtualizacaoForm(hospitalNome, leitoNumero, dadosLeito) {
                 </div>
             </div>
             
-            <!-- BOTÕES MOBILE FRIENDLY -->
-            <div class="modal-buttons" style="display: flex; flex-direction: column; gap: 12px; padding: 20px; border-top: 1px solid rgba(255,255,255,0.1); position: sticky; bottom: 0; background: #1a1f2e; margin: 0 -30px -30px -30px; padding: 20px 30px;">
-                <button class="btn-alta" style="width: 100%; padding: 14px 30px; background: #c86420; color: #ffffff; border: none; border-radius: 8px; font-weight: 600; text-transform: uppercase; cursor: pointer; font-family: 'Poppins', sans-serif;">ALTA</button>
+            <!-- BOTÕES -->
+            <div style="display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 20px; border-top: 1px solid rgba(255,255,255,0.1);">
+                <button class="btn-alta" style="padding: 12px 30px; background: #c86420; color: #ffffff; border: none; border-radius: 8px; font-weight: 600; text-transform: uppercase; cursor: pointer; font-family: 'Poppins', sans-serif;">ALTA</button>
                 
-                <div style="text-align: center; font-size: 10px; color: rgba(255,255,255,0.5); padding: 8px 0;">
+                <div style="text-align: center; font-size: 10px; color: rgba(255,255,255,0.5);">
                     ${admissaoData ? `<div>ADMISSÃO: ${formatarDataHora(admissaoData)}</div>` : ''}
                     ${tempoInternacao ? `<div>INTERNADO: ${tempoInternacao}</div>` : ''}
-                    <div style="margin-top: 4px;">ID: ${idSequencial}</div>
                 </div>
                 
                 <div style="display: flex; gap: 12px;">
-                    <button class="btn-cancelar" style="flex: 1; padding: 14px 30px; background: rgba(255,255,255,0.1); color: #ffffff; border: 1px solid rgba(255,255,255,0.2); border-radius: 8px; font-weight: 600; text-transform: uppercase; cursor: pointer; font-family: 'Poppins', sans-serif;">CANCELAR</button>
-                    <button class="btn-salvar" style="flex: 1; padding: 14px 30px; background: #0676bb; color: #ffffff; border: none; border-radius: 8px; font-weight: 600; text-transform: uppercase; cursor: pointer; font-family: 'Poppins', sans-serif;">SALVAR</button>
+                    <button class="btn-cancelar" style="padding: 12px 30px; background: rgba(255,255,255,0.1); color: #ffffff; border: 1px solid rgba(255,255,255,0.2); border-radius: 8px; font-weight: 600; text-transform: uppercase; cursor: pointer; font-family: 'Poppins', sans-serif;">CANCELAR</button>
+                    <button class="btn-salvar" style="padding: 12px 30px; background: #0676bb; color: #ffffff; border: none; border-radius: 8px; font-weight: 600; text-transform: uppercase; cursor: pointer; font-family: 'Poppins', sans-serif;">SALVAR</button>
                 </div>
             </div>
         </div>
@@ -1312,6 +1287,7 @@ function setupModalEventListeners(modal, tipo) {
                 return;
             }
             
+            // ✅ VALIDAÇÃO: Aceita números e letras (1-6 caracteres)
             const identificacao = identificacaoField.value.trim();
             if (identificacao.length < 1 || identificacao.length > 6) {
                 showErrorMessage('❌ Identificação deve ter de 1 a 6 caracteres!');
@@ -1473,7 +1449,7 @@ function closeModal(modal) {
     }
 }
 
-// =================== COLETAR DADOS DO FORMULÁRIO V3.4.3 ===================
+// =================== COLETAR DADOS DO FORMULÁRIO V3.4.1 ===================
 function coletarDadosFormulario(modal, tipo) {
     const dados = {
         hospital: window.currentHospital,
@@ -1481,13 +1457,8 @@ function coletarDadosFormulario(modal, tipo) {
     };
     
     if (tipo === 'admissao') {
-        // ✅ INICIAIS: Pega exatamente o que foi digitado (SEM FORMATAÇÃO)
         dados.nome = modal.querySelector('#admNome')?.value?.trim() || '';
-        
-        // ✅ MATRÍCULA: Remover hífen antes de salvar
-        const matriculaInput = modal.querySelector('#admMatricula')?.value?.trim() || '';
-        dados.matricula = matriculaInput.replace(/-/g, '');
-        
+        dados.matricula = modal.querySelector('#admMatricula')?.value?.trim() || '';
         dados.idade = parseInt(modal.querySelector('#admIdade')?.value) || null;
         dados.pps = modal.querySelector('#admPPS')?.value?.replace('%', '') || null;
         dados.spict = modal.querySelector('#admSPICT')?.value || 'nao_elegivel';
@@ -1543,19 +1514,14 @@ function coletarCheckboxesSelecionados(modal, seletor) {
     return selecionados;
 }
 
-// ✅ FORMATAÇÃO AUTOMÁTICA MATRÍCULA COM HÍFEN NO INPUT
-function formatarMatriculaInput(input) {
+// ✅ FORMATAÇÃO AUTOMÁTICA MATRÍCULA
+function formatarMatricula(input) {
     let valor = input.value.replace(/\D/g, '');
     if (valor.length > 10) {
         valor = valor.substring(0, 10);
     }
-    if (valor.length > 1) {
-        input.value = valor.slice(0, -1) + '-' + valor.slice(-1);
-    } else {
-        input.value = valor;
-    }
+    input.value = valor;
 }
-window.formatarMatriculaInput = formatarMatriculaInput;
 
 // =================== FUNÇÕES AUXILIARES ===================
 function showButtonLoading(button, loadingText) {
@@ -1596,6 +1562,15 @@ function showErrorMessage(message) {
     `;
     document.body.appendChild(toast);
     setTimeout(() => toast.remove(), 5000);
+}
+
+function getIniciais(nomeCompleto) {
+    if (!nomeCompleto) return '—';
+    return nomeCompleto.split(' ')
+        .filter(part => part.length > 0)
+        .map(part => part.charAt(0).toUpperCase())
+        .slice(0, 3)
+        .join(' ');
 }
 
 function calcularTempoInternacao(admissao) {
@@ -1673,22 +1648,22 @@ function formatarDataHora(dataISO) {
 
 // =================== FUNÇÕES DE LOG ===================
 function logInfo(message, data = null) {
-    console.log(`🔵 [CARDS V3.4.3] ${message}`, data || '');
+    console.log(`🔵 [CARDS V3.4.1] ${message}`, data || '');
 }
 
 function logError(message, error = null) {
-    console.error(`🔴 [CARDS V3.4.3 ERROR] ${message}`, error || '');
+    console.error(`🔴 [CARDS V3.4.1 ERROR] ${message}`, error || '');
 }
 
 function logSuccess(message) {
-    console.log(`🟢 [CARDS V3.4.3 SUCCESS] ${message}`);
+    console.log(`🟢 [CARDS V3.4.1 SUCCESS] ${message}`);
 }
 
 function logDebug(message, data = null) {
-    console.log(`🟡 [CARDS V3.4.3 DEBUG] ${message}`, data || '');
+    console.log(`🟡 [CARDS V3.4.1 DEBUG] ${message}`, data || '');
 }
 
-// =================== CSS CONSOLIDADO V3.4.3 ===================
+// =================== CSS CONSOLIDADO V3.4.1 ===================
 if (!document.getElementById('cardsConsolidadoCSS')) {
     const style = document.createElement('style');
     style.id = 'cardsConsolidadoCSS';
@@ -1815,26 +1790,12 @@ if (!document.getElementById('cardsConsolidadoCSS')) {
                 height: 100px !important;
             }
             
-            .modal-overlay {
-                padding: 10px !important;
-                align-items: flex-start !important;
-            }
-            
             .modal-overlay .modal-content {
-                width: 100% !important;
+                width: 95% !important;
                 max-width: none !important;
                 margin: 10px !important;
-                max-height: calc(100vh - 20px) !important;
+                max-height: 95vh !important;
                 padding: 20px !important;
-            }
-            
-            .modal-buttons {
-                position: sticky !important;
-                bottom: 0 !important;
-                background: #1a1f2e !important;
-                z-index: 10 !important;
-                border-top: 2px solid rgba(255,255,255,0.1) !important;
-                box-shadow: 0 -4px 6px rgba(0,0,0,0.1) !important;
             }
             
             .form-grid-3-cols {
@@ -1845,12 +1806,12 @@ if (!document.getElementById('cardsConsolidadoCSS')) {
             
             .form-grid-3-cols input,
             .form-grid-3-cols select {
-                padding: 10px 8px !important;
-                font-size: 13px !important;
+                padding: 8px 6px !important;
+                font-size: 12px !important;
             }
             
             .form-grid-3-cols label {
-                font-size: 11px !important;
+                font-size: 10px !important;
                 margin-bottom: 3px !important;
             }
             
@@ -1869,13 +1830,6 @@ if (!document.getElementById('cardsConsolidadoCSS')) {
             label:has(input[type="checkbox"]) {
                 padding: 8px !important;
                 font-size: 12px !important;
-            }
-            
-            .btn-alta,
-            .btn-salvar,
-            .btn-cancelar {
-                font-size: 13px !important;
-                padding: 14px 24px !important;
             }
         }
         
@@ -1908,9 +1862,9 @@ if (!document.getElementById('cardsConsolidadoCSS')) {
     document.head.appendChild(style);
 }
 
-// =================== INICIALIZAÇÃO V3.4.3 ===================
+// =================== INICIALIZAÇÃO V3.4.1 ===================
 document.addEventListener('DOMContentLoaded', function() {
-    logSuccess('✅ CARDS.JS V3.4.3 CARREGADO - INICIAIS SEM FORMATAÇÃO');
+    logSuccess('✅ CARDS.JS V3.4.1 CARREGADO - IDENTIFICAÇÃO NUMÉRICA/ALFANUMÉRICA');
     
     if (window.CONCESSOES_LIST.length !== 12) {
         logError(`ERRO: Esperadas 12 concessões, encontradas ${window.CONCESSOES_LIST.length}`);
@@ -1924,11 +1878,10 @@ document.addEventListener('DOMContentLoaded', function() {
         logSuccess(`✅ ${window.LINHAS_CUIDADO_LIST.length} linhas de cuidado confirmadas`);
     }
     
-    logInfo('🎨 CORREÇÕES APLICADAS V3.4.3:');
-    logInfo('  • ✅ Iniciais preservadas exatamente como digitadas');
-    logInfo('  • ✅ Matrícula com hífen (último dígito separado)');
-    logInfo('  • ✅ ID visível nos cards');
-    logInfo('  • ✅ Não interfere em gráficos (dashboard separado)');
+    logInfo('🎨 CORREÇÕES APLICADAS V3.4.1:');
+    logInfo('  • ✅ Campo Identificação: ACEITA NÚMEROS E LETRAS (1-6 chars)');
+    logInfo('  • ✅ Validação alfanumérica implementada');
+    logInfo('  • ✅ Sincronização correta com planilha');
 });
 
 // =================== EXPORTS ===================
@@ -1940,7 +1893,7 @@ window.coletarDadosFormulario = coletarDadosFormulario;
 window.getBadgeIsolamento = getBadgeIsolamento;
 window.getBadgeGenero = getBadgeGenero;
 window.getBadgeDiretivas = getBadgeDiretivas;
-window.formatarMatriculaComHifen = formatarMatriculaComHifen;
+window.formatarMatricula = formatarMatricula;
 
-logSuccess('🎉 CARDS.JS V3.4.3 COMPLETO - INICIAIS SEM FORMATAÇÃO!');
-console.log('✅ CARDS.JS V3.4.3 - INICIAIS EXATAMENTE COMO DIGITADO + MATRÍCULA COM HÍFEN!');
+logSuccess('🎉 CARDS.JS V3.4.1 COMPLETO - IDENTIFICAÇÃO NUMÉRICA/ALFANUMÉRICA!');
+console.log('✅ CARDS.JS V3.4.1 - ACEITA NÚMEROS E LETRAS (1-6 CARACTERES)!');
