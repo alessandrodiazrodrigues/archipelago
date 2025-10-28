@@ -541,7 +541,7 @@ function createCard(leito, hospitalNome) {
                 <div class="box-value" style="color: ${badgeIsolamento.textoCor}; font-weight: 700; font-size: 11px; line-height: 1.2;">${badgeIsolamento.texto}</div>
             </div>
             
-            <div class="card-box prev-alta" style="background: #577a97; border: 1px solid rgba(87,122,151,0.5); border-radius: 6px; padding: 8px; min-height: 45px; display: flex; flex-direction: column; justify-content: center;">
+            <div class="card-box prev-alta" style="background: #0676bb; border: 1px solid rgba(6,118,187,0.5); border-radius: 6px; padding: 8px; min-height: 45px; display: flex; flex-direction: column; justify-content: center;">
                 <div class="box-label" style="font-size: 9px; color: #ffffff; font-weight: 700; text-transform: uppercase; margin-bottom: 3px; letter-spacing: 0.5px;">PREVISÃO ALTA</div>
                 <div class="box-value" style="color: #ffffff; font-weight: 700; font-size: 11px; line-height: 1.2;">${previsaoAlta || '—'}</div>
             </div>
@@ -899,7 +899,7 @@ function createAdmissaoForm(hospitalNome, leitoNumero, hospitalId) {
                     <input id="admNome" type="text" placeholder="Ex: ADR, A D R, A.D.R" maxlength="10" style="width: 100%; padding: 12px; background: #374151; color: #ffffff; border: 1px solid rgba(255,255,255,0.3); border-radius: 6px; font-size: 14px; font-family: 'Poppins', sans-serif;">
                 </div>
                 <div>
-                    <label style="display: block; margin-bottom: 5px; color: #e2e8f0; font-weight: 600;">MATRÍCULA <span style="font-size: 10px; opacity: 0.7;">(último dígito separado)</span></label>
+                    <label style="display: block; margin-bottom: 5px; color: #e2e8f0; font-weight: 600;">MATRÍCULA</label>
                     <input id="admMatricula" type="text" placeholder="Ex: 123456789-0" maxlength="11" style="width: 100%; padding: 12px; background: #374151; color: #ffffff; border: 1px solid rgba(255,255,255,0.3); border-radius: 6px; font-size: 14px; font-family: 'Poppins', sans-serif;" oninput="formatarMatriculaInput(this)">
                 </div>
                 <div>
@@ -1116,7 +1116,7 @@ function createAtualizacaoForm(hospitalNome, leitoNumero, dadosLeito) {
                     <input value="${iniciais}" readonly style="width: 100%; padding: 12px; background: #1f2937; color: #9ca3af; border: 1px solid rgba(255,255,255,0.2); border-radius: 6px; font-size: 14px; font-family: 'Poppins', sans-serif;">
                 </div>
                 <div>
-                    <label style="display: block; margin-bottom: 5px; color: #e2e8f0; font-weight: 600;">MATRÍCULA <span style="font-size: 10px; opacity: 0.7;">(último dígito separado)</span></label>
+                    <label style="display: block; margin-bottom: 5px; color: #e2e8f0; font-weight: 600;">MATRÍCULA</label>
                     <input value="${matriculaFormatada}" readonly style="width: 100%; padding: 12px; background: #1f2937; color: #9ca3af; border: 1px solid rgba(255,255,255,0.2); border-radius: 6px; font-size: 14px; font-family: 'Poppins', sans-serif;">
                 </div>
                 <div>
@@ -1922,6 +1922,8 @@ document.addEventListener('DOMContentLoaded', function() {
     logInfo('  • ✅ ID do leito no footer dos cards');
     logInfo('  • ✅ Iniciais SEM transformação (pega exatamente o que foi digitado)');
     logInfo('  • ✅ Botões mobile corrigidos (sticky bottom com melhor layout)');
+    logInfo('  • ✅ COR BOX PREVISÃO ALTA: #0676bb (azul principal)');
+    logInfo('  • ✅ TEXTO MATRÍCULA: removido "(último dígito separado)"');
 });
 
 // =================== EXPORTS ===================
@@ -1937,4 +1939,4 @@ window.formatarMatriculaInput = formatarMatriculaInput;
 window.formatarMatriculaExibicao = formatarMatriculaExibicao;
 
 logSuccess('🎉 CARDS.JS V3.4.2 COMPLETO!');
-console.log('✅ CARDS.JS V3.4.2 - MATRÍCULA COM HÍFEN + ID NO FOOTER + INICIAIS EXATAS + MOBILE CORRIGIDO!');
+console.log('✅ CARDS.JS V3.4.2 - CORREÇÕES APLICADAS: COR PREVISÃO ALTA + TEXTO MATRÍCULA REMOVIDO!');
