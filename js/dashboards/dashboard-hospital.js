@@ -1,9 +1,9 @@
 // js/dashboards/dashboard-hospital.js
-// =================== DASHBOARD HOSPITALAR V1.1.0 DEFINITIVO ===================
-// ✅ VERSÃO CORRIGIDA - SEM PATCH - CORREÇÕES APLICADAS
+// =================== DASHBOARD HOSPITALAR V1.2.0 TPH CORRIGIDO ===================
+// ✅ CORREÇÃO DO BUG TPH - VALORES CORRETOS COM 2 CASAS DECIMAIS
 // Data: 28/Outubro/2025
 
-console.log('🚀 [DASHBOARD HOSPITALAR V1.1.0] Inicializando...');
+console.log('🚀 [DASHBOARD HOSPITALAR V1.2.0 TPH CORRIGIDO] Inicializando...');
 
 /* ============================================
    CORES OFICIAIS ARCHIPELAGO
@@ -46,21 +46,23 @@ function normStr(s) {
         .trim().toLowerCase();
 }
 
+// ✅ CORREÇÃO PRINCIPAL - FUNÇÃO parseAdmDate CORRIGIDA
 function parseAdmDate(admAt) {
     if (!admAt) return null;
-    if (admAt instanceof Date && !isNaN(admAt)) return admAt;
-    if (typeof admAt === 'number') return new Date(admAt);
     
-    const str = String(admAt);
-    const m = str.match(/(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{2,4})(?:[ T](\d{1,2}):(\d{1,2})(?::(\d{1,2}))?)?/);
-    if (m) {
-        let [, d, mo, y, hh = '00', mm = '00', ss = '00'] = m;
-        if (y.length === 2) y = '20' + y;
-        return new Date(`${y.padStart(4, '0')}-${mo.padStart(2, '0')}-${d.padStart(2, '0')}T${hh.padStart(2, '0')}:${mm.padStart(2, '0')}:${ss.padStart(2, '0')}`);
+    // Parse direto - funciona com formato ISO do Google Sheets
+    const d = new Date(admAt);
+    if (!isNaN(d)) {
+        const hoje = new Date();
+        const dias = Math.floor((hoje - d) / (1000 * 60 * 60 * 24));
+        
+        // Validar range razoável (0-365 dias)
+        if (dias >= 0 && dias <= 365) {
+            return d;
+        }
     }
     
-    const d2 = new Date(str);
-    return isNaN(d2) ? null : d2;
+    return null;
 }
 
 function getLeitoNumero(val) {
@@ -503,7 +505,7 @@ window.processarDadosHospital = function(hospitalId) {
         vagosEnfMascFinal = vagos.length;
     }
     
-    // TPH Médio
+    // ✅ TPH Médio CORRIGIDO - COM 2 CASAS DECIMAIS
     const tphValues = ocupados
         .map(l => {
             const admAt = l.admAt;
@@ -514,12 +516,13 @@ window.processarDadosHospital = function(hospitalId) {
             
             const hoje = new Date();
             const dias = Math.floor((hoje - admData) / (1000 * 60 * 60 * 24));
-            return dias > 0 ? dias : 0;
+            return (dias > 0 && dias <= 365) ? dias : 0;
         })
         .filter(v => v > 0);
+    
     const tphMedio = tphValues.length > 0 
-        ? (tphValues.reduce((a, b) => a + b, 0) / tphValues.length).toFixed(1)
-        : 0;
+        ? (tphValues.reduce((a, b) => a + b, 0) / tphValues.length).toFixed(2)  // ✅ 2 CASAS DECIMAIS
+        : '0.00';  // ✅ 2 CASAS DECIMAIS
     
     // ✅ CORREÇÃO 3: TPH >= 5 dias (120 horas) com identificacaoLeito
     const leitosMais5Diarias = ocupados.filter(l => {
@@ -718,14 +721,15 @@ function renderModalidadeContratual(modalidade) {
 
 function renderMiniGaugeTPH(dias) {
     const maxDias = 30;
-    const porcentagem = (dias / maxDias) * 100;
+    const diasFloat = parseFloat(dias);
+    const porcentagem = (diasFloat / maxDias) * 100;
     
     let corClass = 'green';
     if (porcentagem >= 67) corClass = 'red';
     else if (porcentagem >= 47) corClass = 'yellow';
     
     const totalBlocos = 20;
-    const blocosCheios = Math.round((dias / maxDias) * totalBlocos);
+    const blocosCheios = Math.round((diasFloat / maxDias) * totalBlocos);
     
     let blocos = '';
     for (let i = 0; i < totalBlocos; i++) {
@@ -747,7 +751,7 @@ function renderMiniGaugeTPH(dias) {
    ============================================ */
 
 window.renderDashboardHospitalar = function() {
-    console.log('📊 Renderizando Dashboard Hospitalar V1.1.0');
+    console.log('📊 Renderizando Dashboard Hospitalar V1.2.0 TPH CORRIGIDO');
     
     let container = document.getElementById('dashHospitalarContent');
     if (!container) {
@@ -999,7 +1003,7 @@ function renderHospitalSection(hospitalId, hoje) {
                     <div class="kpi-tph-container">
                         <div class="kpi-tph-numero">${dados.tph.medio}</div>
                         <div class="kpi-tph-label">dias</div>
-                        ${renderMiniGaugeTPH(parseFloat(dados.tph.medio))}
+                        ${renderMiniGaugeTPH(dados.tph.medio)}
                     </div>
                     
                     <div class="kpi-detalhes">
@@ -2242,12 +2246,13 @@ window.forceDataRefresh = function() {
    LOG FINAL
    ============================================ */
 
-console.log('✅ [DASHBOARD HOSPITALAR V1.1.0] Carregado com sucesso!');
+console.log('✅ [DASHBOARD HOSPITALAR V1.2.0 TPH CORRIGIDO] Carregado com sucesso!');
 console.log('📦 Funções disponíveis:');
 console.log('   - window.renderDashboardHospitalar()');
 console.log('   - window.processarDadosHospital(hospitalId)');
 console.log('🔧 Correções aplicadas:');
 console.log('   ✅ Status normalizado (lowercase)');
 console.log('   ✅ Campo identificacaoLeito');
-console.log('   ✅ TPH >= 120 horas (5 dias)');
-console.log('   ✅ Patch automático removido');
+console.log('   ✅ TPH com 2 casas decimais');
+console.log('   ✅ Parse de datas corrigido para formato ISO');
+console.log('   ✅ Validação de range 0-365 dias');
