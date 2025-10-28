@@ -18,6 +18,9 @@
     <!-- Chart.js para gráficos -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     
+    <!-- ✅ CORREÇÃO CRÍTICA: Plugin ChartDataLabels (OBRIGATÓRIO para números nas pizzas!) -->
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2"></script>
+    
     <!-- QRCode.js OBRIGATÓRIA - Necessária para gerar QR Codes -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 </head>
@@ -163,22 +166,25 @@
         console.log('🚀 Archipelago Dashboard V3.3.2 CORRIGIDO - Inicializando...');
         console.log('📅 Outubro/2025 - Versão V3.3.2 CORRIGIDA');
         console.log('');
-        console.log('✅ CORREÇÃO APLICADA:');
+        console.log('✅ CORREÇÕES APLICADAS:');
+        console.log('   • ✅ Plugin ChartDataLabels ADICIONADO');
         console.log('   • ✅ Dashboards carregados ESTATICAMENTE');
         console.log('   • ✅ Scripts na ordem correta (antes de cards.js)');
         console.log('   • ✅ Race Condition RESOLVIDA');
-        console.log('   • ✅ Baseado nos 3 pareceres técnicos');
         console.log('');
         console.log('📊 Ordem de carregamento:');
-        console.log('   1️⃣ app.js');
-        console.log('   2️⃣ api.js');
-        console.log('   3️⃣ dashboard-hospital.js ⭐ NOVO');
-        console.log('   4️⃣ dashboard-executive.js ⭐ NOVO');
-        console.log('   5️⃣ cards.js');
-        console.log('   6️⃣ qrcode.js');
-        console.log('   7️⃣ main.js');
+        console.log('   1️⃣ Chart.js');
+        console.log('   2️⃣ ChartDataLabels ⭐ CORRIGIDO');
+        console.log('   3️⃣ QRCode.js');
+        console.log('   4️⃣ app.js');
+        console.log('   5️⃣ api.js');
+        console.log('   6️⃣ dashboard-hospital.js');
+        console.log('   7️⃣ dashboard-executive.js');
+        console.log('   8️⃣ cards.js');
+        console.log('   9️⃣ qrcode.js');
+        console.log('   🔟 main.js');
         console.log('');
-        console.log('🎯 Dashboard Hospitalar deve funcionar na 1ª tentativa agora!');
+        console.log('🎯 Dashboard Hospitalar deve funcionar 100% agora!');
         
         /**
          * Função que combina mudança de aba + fechamento do menu
