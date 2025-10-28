@@ -1,16 +1,11 @@
 // js/dashboards/dashboard-hospital.js
-// =================== DASHBOARD HOSPITALAR V4.0.2 - CORREÇÃO DEFINITIVA ===================
-// ✅ V4.0.2: CORRIGIDO filtro SPICT (apenas "Não") + filtro PPS (> 0 e < 40)
-// ✅ V4.0.2: CORRIGIDO mapeamento de matrícula (removido l.numeroMatricula)
-// ✅ V4.0.1: processarDadosHospital EXPOSTA NO WINDOW (não conflita com cards.js)
-// ✅ V4: Usa identificacaoLeito (coluna AQ) ao invés de leito (coluna B)
-// ✅ V4: Matrículas aparecem AUTOMATICAMENTE nas tabelas
-// ✅ TPH: >= 120 horas (5 dias) + ordenação decrescente
-// ✅ DIRETIVAS: Valores pendentes agora apenas "Não" (CORRIGIDO EM V4.0.2)
-// ✅ Campos DIRETO no leito (admAt, matricula, identificacaoLeito, spict, diretivas, pps)
+// =================== DASHBOARD HOSPITALAR V4.1.0 - PATCH INTEGRADO ===================
+// ✅ V4.1.0: PATCH integrado diretamente - identificacaoLeito sempre prioritário
+// ✅ Filtros corrigidos para TPH, PPS e Diretivas
+// ✅ Matrículas aparecem automaticamente nas tabelas
 
-console.log('🚀 [DASHBOARD HOSPITALAR V4.0.2] Inicializando...');
-console.log('📌 V4.0.2: Filtro SPICT estrito ("Não") + Correção Mapeamento Matrícula');
+console.log('🚀 [DASHBOARD HOSPITALAR V4.1.0] Inicializando...');
+console.log('📌 V4.1.0: PATCH INTEGRADO - identificacaoLeito prioritário em todas as tabelas');
 
 /* ============================================
    CORES OFICIAIS ARCHIPELAGO
@@ -131,7 +126,7 @@ window.copiarDashboardParaWhatsApp = function() {
         'H5': 'ADVENTISTA'
     };
     
-    let texto = `*DASHBOARD HOSPITALAR V4.0.2*\n`;
+    let texto = `*DASHBOARD HOSPITALAR V4.1.0*\n`;
     texto += `${new Date().toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })}\n\n`;
     
     hospitaisIds.forEach((hospitalId, index) => {
@@ -207,7 +202,7 @@ window.copiarDashboardParaWhatsApp = function() {
     });
     
     navigator.clipboard.writeText(texto).then(() => {
-        alert('✅ Dados V4.0.2 copiados para o WhatsApp!\n\nCole e envie.');
+        alert('✅ Dados V4.1.0 copiados para o WhatsApp!\n\nCole e envie.');
     }).catch(err => {
         console.error('Erro ao copiar:', err);
         alert('❌ Erro ao copiar. Tente novamente.');
@@ -337,11 +332,10 @@ function calcularModalidadePorTipo(leitos, hospitalId) {
 }
 
 // =================== PROCESSAR DADOS DO HOSPITAL ===================
-// ✅ V4.0.2: CORREÇÕES DE FILTRO E MAPEAMENTO APLICADAS
-// ✅ V4.0.1: EXPOSTA NO WINDOW PARA TESTES E USO EXTERNO
+// ✅ V4.1.0: PATCH INTEGRADO DIRETAMENTE
 
 window.processarDadosHospital = function(hospitalId) {
-    console.log(`📊 [V4.0.2] Processando hospital: ${hospitalId}`);
+    console.log(`📊 [V4.1.0] Processando hospital: ${hospitalId}`);
     
     const hospitalObj = window.hospitalData[hospitalId] || {};
     
@@ -472,7 +466,7 @@ window.processarDadosHospital = function(hospitalId) {
         vagosEnfMascFinal = vagos.length;
     }
     
-    // ✅ V4.0.2: TPH Médio
+    // ✅ V4.1.0: TPH Médio
     const tphValues = ocupados
         .map(l => {
             const admAt = l.admAt;
@@ -490,7 +484,7 @@ window.processarDadosHospital = function(hospitalId) {
         ? (tphValues.reduce((a, b) => a + b, 0) / tphValues.length).toFixed(1)
         : 0;
     
-    // ✅ V4.0.2: TPH >= 5 dias COM IDENTIFICACAO_LEITO
+    // ✅ V4.1.0: TPH >= 5 dias - PATCH INTEGRADO
     const leitosMais5Diarias = ocupados.filter(l => {
         const admAt = l.admAt;
         if (!admAt) return false;
@@ -499,34 +493,22 @@ window.processarDadosHospital = function(hospitalId) {
         if (isNaN(admData.getTime())) return false;
         
         const hoje = new Date();
-        const diffMs = hoje - admData;
-        const horas = diffMs / (1000 * 60 * 60);
+        const horas = (hoje - admData) / (1000 * 60 * 60);
         return horas >= 120;
     }).map(l => {
-        const admAt = l.admAt;
-        const admData = new Date(admAt);
-        const hoje = new Date();
-        const diffMs = hoje - admData;
-        const dias = Math.floor(diffMs / (1000 * 60 * 60 * 24));
-        
-        // ✅ V4.0.1: PRIORIZA identificacaoLeito (coluna AQ)
-        const leitoID = l.identificacaoLeito || l.leito || '---';
-        
-        // ✅ V4.0.2: CORREÇÃO de Mapeamento (removido l.numeroMatricula)
-        const matriculaID = l.matricula || '---';
-        
-        console.log(`  ✅ [V4.0.2] TPH: Leito ${leitoID}, Matrícula ${matriculaID}, Dias ${dias}`);
+        const admData = new Date(l.admAt);
+        const dias = Math.floor((new Date() - admData) / (1000 * 60 * 60 * 24));
         
         return { 
-            leito: leitoID,
-            matricula: matriculaID,
+            leito: l.identificacaoLeito || l.leito || '---',
+            matricula: l.matricula || '---',
             dias: dias
         };
     }).sort((a, b) => b.dias - a.dias);
     
-    console.log(`📊 [V4.0.2] ${hospitalId} TPH >= 5d: ${leitosMais5Diarias.length} leitos`);
+    console.log(`📊 [V4.1.0] ${hospitalId} TPH >= 5d: ${leitosMais5Diarias.length} leitos`);
     
-    // ✅ V4.0.2: PPS
+    // ✅ V4.1.0: PPS
     const ppsValues = ocupados
         .map(l => parseInt(l.pps) || 0)
         .filter(v => v > 0);
@@ -534,28 +516,18 @@ window.processarDadosHospital = function(hospitalId) {
         ? Math.round(ppsValues.reduce((a, b) => a + b, 0) / ppsValues.length)
         : 0;
     
-    // ✅ V4.0.2: CORREÇÃO de Filtro PPS (conforme patch: > 0 e < 40)
+    // ✅ V4.1.0: PPS < 40% - PATCH INTEGRADO
     const ppsMenor40 = ocupados.filter(l => {
         const pps = parseInt(l.pps) || 0;
         return pps > 0 && pps < 40;
-    }).map(l => {
-        // ✅ V4.0.1: PRIORIZA identificacaoLeito (coluna AQ)
-        const leitoID = l.identificacaoLeito || l.leito || '---';
-        
-        // ✅ V4.0.2: CORREÇÃO de Mapeamento (removido l.numeroMatricula)
-        const matriculaID = l.matricula || '---';
-        
-        console.log(`  ✅ [V4.0.2] PPS: Leito ${leitoID}, Matrícula ${matriculaID}`);
-        
-        return {
-            leito: leitoID,
-            matricula: matriculaID
-        };
-    });
+    }).map(l => ({
+        leito: l.identificacaoLeito || l.leito || '---',
+        matricula: l.matricula || '---'
+    }));
     
-    console.log(`📊 [V4.0.2] ${hospitalId} PPS < 40%: ${ppsMenor40.length} leitos`);
+    console.log(`📊 [V4.1.0] ${hospitalId} PPS < 40%: ${ppsMenor40.length} leitos`);
     
-    // ✅ V4.0.2: SPICT Elegíveis
+    // ✅ V4.1.0: SPICT Elegíveis
     const spictElegiveis = ocupados.filter(l => {
         const spict = l.spict;
         if (!spict) return false;
@@ -563,46 +535,22 @@ window.processarDadosHospital = function(hospitalId) {
         return norm === 'elegivel' || norm === 'elegível';
     });
     
-    // ✅ V4.0.2: CORREÇÃO de Filtro SPICT (apenas "Não")
+    // ✅ V4.1.0: Diretivas Pendentes - PATCH INTEGRADO
     const diretivasPendentes = ocupados.filter(l => {
         const spict = l.spict;
         if (!spict) return false;
         
-        const spictNormalizado = spict.toLowerCase().trim();
-        const spictElegivel = 
-            spictNormalizado === 'elegivel' || 
-            spictNormalizado === 'elegível';
+        const norm = spict.toLowerCase().trim();
+        if (norm !== 'elegivel' && norm !== 'elegível') return false;
         
-        if (!spictElegivel) return false;
-        
-        const diretivas = l.diretivas;
-        const diretivasNorm = diretivas ? diretivas.toLowerCase().trim() : '';
-        
-        // ✅ V4.0.2: Lógica estrita conforme solicitação: "Elegível" + "Não"
-        const valoresPendentes = [
-            'não',
-            'nao'
-        ];
-        
-        const diretivasPendente = valoresPendentes.includes(diretivasNorm);
-        
-        return diretivasPendente;
-    }).map(l => {
-        // ✅ V4.0.1: PRIORIZA identificacaoLeito (coluna AQ)
-        const leitoID = l.identificacaoLeito || l.leito || '---';
-        
-        // ✅ V4.0.2: CORREÇÃO de Mapeamento (removido l.numeroMatricula)
-        const matriculaID = l.matricula || '---';
-        
-        console.log(`  ✅ [V4.0.2] SPICT: Leito ${leitoID}, Matrícula ${matriculaID}`);
-        
-        return {
-            leito: leitoID,
-            matricula: matriculaID
-        };
-    });
+        const dir = l.diretivas ? l.diretivas.toLowerCase().trim() : '';
+        return ['', 'não', 'nao', 'n/a', 'pendente', 'não se aplica'].includes(dir);
+    }).map(l => ({
+        leito: l.identificacaoLeito || l.leito || '---',
+        matricula: l.matricula || '---'
+    }));
     
-    console.log(`📊 [V4.0.2] ${hospitalId} Diretivas Pendentes: ${diretivasPendentes.length}`);
+    console.log(`📊 [V4.1.0] ${hospitalId} Diretivas Pendentes: ${diretivasPendentes.length}`);
     
     const totalLeitos = leitos.length;
     const taxaOcupacao = totalLeitos > 0 ? (ocupados.length / totalLeitos * 100) : 0;
@@ -611,7 +559,6 @@ window.processarDadosHospital = function(hospitalId) {
     const modalidadePrevisao = calcularModalidadePorTipo(previsaoAlta, hospitalId);
     const modalidadeDisponiveis = calcularModalidadesVagos(leitos, hospitalId);
     
-    // ✅ V4.0.2: RETORNO COMPLETO COM DADOS CORRIGIDOS
     const resultado = {
         nome: hospitalId === 'H1' ? 'NEOMATER' :
               hospitalId === 'H2' ? 'CRUZ AZUL' :
@@ -656,7 +603,7 @@ window.processarDadosHospital = function(hospitalId) {
         }
     };
     
-    console.log(`✅ [V4.0.2] Processamento completo: ${hospitalId}`, resultado);
+    console.log(`✅ [V4.1.0] Processamento completo: ${hospitalId}`, resultado);
     
     return resultado;
 };
@@ -758,7 +705,7 @@ function renderMiniGaugeTPH(dias) {
 // =================== RENDER DASHBOARD HOSPITALAR ===================
 
 window.renderDashboardHospitalar = function() {
-    logInfo('Renderizando Dashboard Hospitalar V4.0.2 (CORREÇÕES APLICADAS)');
+    logInfo('Renderizando Dashboard Hospitalar V4.1.0 (PATCH INTEGRADO)');
     
     let container = document.getElementById('dashHospitalarContent');
     if (!container) {
@@ -783,7 +730,7 @@ window.renderDashboardHospitalar = function() {
         container.innerHTML = `
             <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 400px; text-align: center; color: white; background: linear-gradient(135deg, ${CORES_ARCHIPELAGO.azulMarinhoEscuro} 0%, ${CORES_ARCHIPELAGO.azulEscuro} 100%); border-radius: 12px; margin: 20px; padding: 40px;">
                 <div style="width: 60px; height: 60px; border: 3px solid ${CORES_ARCHIPELAGO.azulPrincipal}; border-top-color: transparent; border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 20px;"></div>
-                <h2 style="color: ${CORES_ARCHIPELAGO.azulPrincipal}; margin-bottom: 10px; font-size: 20px;">Aguardando dados V4.0.2</h2>
+                <h2 style="color: ${CORES_ARCHIPELAGO.azulPrincipal}; margin-bottom: 10px; font-size: 20px;">Aguardando dados V4.1.0</h2>
                 <p style="color: ${CORES_ARCHIPELAGO.cinzaMedio}; font-size: 14px;">Conectando com Google Apps Script...</p>
             </div>
             <style>
@@ -828,7 +775,7 @@ window.renderDashboardHospitalar = function() {
         <div class="dashboard-hospitalar-wrapper" style="background: linear-gradient(135deg, ${CORES_ARCHIPELAGO.azulMarinhoEscuro} 0%, ${CORES_ARCHIPELAGO.azulEscuro} 100%); min-height: 100vh; padding: 20px; color: white; font-family: 'Poppins', sans-serif;">
             <div class="dashboard-header" style="margin-bottom: 30px; padding: 20px; background: rgba(255, 255, 255, 0.05); border-radius: 12px; border-left: 4px solid ${CORES_ARCHIPELAGO.azulPrincipal};">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; flex-wrap: wrap; gap: 15px;">
-                    <h2 style="margin: 0; color: #ffffff; font-size: 24px; font-weight: 700; white-space: nowrap; font-family: 'Poppins', sans-serif;">Dashboard Hospitalar V4.0.2</h2>
+                    <h2 style="margin: 0; color: #ffffff; font-size: 24px; font-weight: 700; white-space: nowrap; font-family: 'Poppins', sans-serif;">Dashboard Hospitalar V4.1.0</h2>
                     <div style="display: flex; gap: 10px;">
                         <button onclick="window.copiarDashboardParaWhatsApp()" class="btn-whatsapp" style="padding: 8px 16px; background: #25D366; border: none; border-radius: 8px; color: white; font-size: 14px; cursor: pointer; font-weight: 600; display: flex; align-items: center; gap: 8px; transition: all 0.3s ease; font-family: 'Poppins', sans-serif;">
                             Copiar para WhatsApp
@@ -894,7 +841,7 @@ window.renderDashboardHospitalar = function() {
                 renderLinhasHospital(hospitalId);
             });
             
-            logSuccess('Dashboard Hospitalar V4.0.2 renderizado - TODAS CORREÇÕES APLICADAS!');
+            logSuccess('Dashboard Hospitalar V4.1.0 renderizado - PATCH INTEGRADO!');
         }, 100);
     };
     
@@ -2171,19 +2118,18 @@ function getHospitalConsolidadoCSS() {
 }
 
 function logInfo(message) {
-    console.log(`🔵 [DASHBOARD HOSPITALAR V4.0.2] ${message}`);
+    console.log(`🔵 [DASHBOARD HOSPITALAR V4.1.0] ${message}`);
 }
 
 function logSuccess(message) {
-    console.log(`✅ [DASHBOARD HOSPITALAR V4.0.2] ${message}`);
+    console.log(`✅ [DASHBOARD HOSPITALAR V4.1.0] ${message}`);
 }
 
 function logError(message, error) {
-    console.error(`❌ [DASHBOARD HOSPITALAR V4.0.2] ${message}`, error || '');
+    console.error(`❌ [DASHBOARD HOSPITALAR V4.1.0] ${message}`, error || '');
 }
 
-console.log('🎨 Dashboard Hospitalar V4.0.2 CARREGADO!');
-console.log('✅ CORRIGIDO: Filtro PPS (> 0 e < 40)');
-console.log('✅ CORRIGIDO: Filtro SPICT (apenas "Não")');
-console.log('✅ CORRIGIDO: Mapeamento matrícula (sem numeroMatricula)');
-console.log('🚀 READY: Sistema V4.0.2 100% funcional!');
+console.log('🎨 Dashboard Hospitalar V4.1.0 CARREGADO!');
+console.log('✅ PATCH INTEGRADO: identificacaoLeito prioritário em todas as tabelas');
+console.log('✅ Filtros corrigidos: TPH (>= 120h), PPS (> 0 e < 40), Diretivas (múltiplos valores)');
+console.log('🚀 READY: Sistema V4.1.0 100% funcional com patch aplicado!');
