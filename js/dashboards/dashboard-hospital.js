@@ -1,14 +1,16 @@
 // js/dashboards/dashboard-hospital.js
-// =================== DASHBOARD HOSPITALAR V4.0.1 - CORREÇÃO DEFINITIVA ===================
+// =================== DASHBOARD HOSPITALAR V4.0.2 - CORREÇÃO DEFINITIVA ===================
+// ✅ V4.0.2: CORRIGIDO filtro SPICT (apenas "Não") + filtro PPS (> 0 e < 40)
+// ✅ V4.0.2: CORRIGIDO mapeamento de matrícula (removido l.numeroMatricula)
 // ✅ V4.0.1: processarDadosHospital EXPOSTA NO WINDOW (não conflita com cards.js)
 // ✅ V4: Usa identificacaoLeito (coluna AQ) ao invés de leito (coluna B)
 // ✅ V4: Matrículas aparecem AUTOMATICAMENTE nas tabelas
 // ✅ TPH: >= 120 horas (5 dias) + ordenação decrescente
-// ✅ DIRETIVAS: Valores pendentes incluem "Não se aplica"
+// ✅ DIRETIVAS: Valores pendentes agora apenas "Não" (CORRIGIDO EM V4.0.2)
 // ✅ Campos DIRETO no leito (admAt, matricula, identificacaoLeito, spict, diretivas, pps)
 
-console.log('🚀 [DASHBOARD HOSPITALAR V4.0.1] Inicializando...');
-console.log('📌 V4.0.1: processarDadosHospital NO WINDOW + identificacaoLeito');
+console.log('🚀 [DASHBOARD HOSPITALAR V4.0.2] Inicializando...');
+console.log('📌 V4.0.2: Filtro SPICT estrito ("Não") + Correção Mapeamento Matrícula');
 
 /* ============================================
    CORES OFICIAIS ARCHIPELAGO
@@ -129,7 +131,7 @@ window.copiarDashboardParaWhatsApp = function() {
         'H5': 'ADVENTISTA'
     };
     
-    let texto = `*DASHBOARD HOSPITALAR V4.0.1*\n`;
+    let texto = `*DASHBOARD HOSPITALAR V4.0.2*\n`;
     texto += `${new Date().toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })}\n\n`;
     
     hospitaisIds.forEach((hospitalId, index) => {
@@ -205,7 +207,7 @@ window.copiarDashboardParaWhatsApp = function() {
     });
     
     navigator.clipboard.writeText(texto).then(() => {
-        alert('✅ Dados V4.0.1 copiados para o WhatsApp!\n\nCole e envie.');
+        alert('✅ Dados V4.0.2 copiados para o WhatsApp!\n\nCole e envie.');
     }).catch(err => {
         console.error('Erro ao copiar:', err);
         alert('❌ Erro ao copiar. Tente novamente.');
@@ -335,10 +337,11 @@ function calcularModalidadePorTipo(leitos, hospitalId) {
 }
 
 // =================== PROCESSAR DADOS DO HOSPITAL ===================
+// ✅ V4.0.2: CORREÇÕES DE FILTRO E MAPEAMENTO APLICADAS
 // ✅ V4.0.1: EXPOSTA NO WINDOW PARA TESTES E USO EXTERNO
 
 window.processarDadosHospital = function(hospitalId) {
-    console.log(`📊 [V4.0.1] Processando hospital: ${hospitalId}`);
+    console.log(`📊 [V4.0.2] Processando hospital: ${hospitalId}`);
     
     const hospitalObj = window.hospitalData[hospitalId] || {};
     
@@ -469,7 +472,7 @@ window.processarDadosHospital = function(hospitalId) {
         vagosEnfMascFinal = vagos.length;
     }
     
-    // ✅ V4.0.1: TPH Médio
+    // ✅ V4.0.2: TPH Médio
     const tphValues = ocupados
         .map(l => {
             const admAt = l.admAt;
@@ -487,7 +490,7 @@ window.processarDadosHospital = function(hospitalId) {
         ? (tphValues.reduce((a, b) => a + b, 0) / tphValues.length).toFixed(1)
         : 0;
     
-    // ✅ V4.0.1: TPH >= 5 dias COM IDENTIFICACAO_LEITO
+    // ✅ V4.0.2: TPH >= 5 dias COM IDENTIFICACAO_LEITO
     const leitosMais5Diarias = ocupados.filter(l => {
         const admAt = l.admAt;
         if (!admAt) return false;
@@ -508,9 +511,11 @@ window.processarDadosHospital = function(hospitalId) {
         
         // ✅ V4.0.1: PRIORIZA identificacaoLeito (coluna AQ)
         const leitoID = l.identificacaoLeito || l.leito || '---';
-        const matriculaID = l.matricula || l.numeroMatricula || '---';
         
-        console.log(`  ✅ [V4.0.1] TPH: Leito ${leitoID}, Matrícula ${matriculaID}, Dias ${dias}`);
+        // ✅ V4.0.2: CORREÇÃO de Mapeamento (removido l.numeroMatricula)
+        const matriculaID = l.matricula || '---';
+        
+        console.log(`  ✅ [V4.0.2] TPH: Leito ${leitoID}, Matrícula ${matriculaID}, Dias ${dias}`);
         
         return { 
             leito: leitoID,
@@ -519,21 +524,28 @@ window.processarDadosHospital = function(hospitalId) {
         };
     }).sort((a, b) => b.dias - a.dias);
     
-    console.log(`📊 [V4.0.1] ${hospitalId} TPH >= 5d: ${leitosMais5Diarias.length} leitos`);
+    console.log(`📊 [V4.0.2] ${hospitalId} TPH >= 5d: ${leitosMais5Diarias.length} leitos`);
     
-    // ✅ V4.0.1: PPS COM IDENTIFICACAO_LEITO
+    // ✅ V4.0.2: PPS
     const ppsValues = ocupados
         .map(l => parseInt(l.pps) || 0)
         .filter(v => v > 0);
     const ppsMedio = ppsValues.length > 0
         ? Math.round(ppsValues.reduce((a, b) => a + b, 0) / ppsValues.length)
         : 0;
-    const ppsMenor40 = ocupados.filter(l => parseInt(l.pps) < 40).map(l => {
+    
+    // ✅ V4.0.2: CORREÇÃO de Filtro PPS (conforme patch: > 0 e < 40)
+    const ppsMenor40 = ocupados.filter(l => {
+        const pps = parseInt(l.pps) || 0;
+        return pps > 0 && pps < 40;
+    }).map(l => {
         // ✅ V4.0.1: PRIORIZA identificacaoLeito (coluna AQ)
         const leitoID = l.identificacaoLeito || l.leito || '---';
-        const matriculaID = l.matricula || l.numeroMatricula || '---';
         
-        console.log(`  ✅ [V4.0.1] PPS: Leito ${leitoID}, Matrícula ${matriculaID}`);
+        // ✅ V4.0.2: CORREÇÃO de Mapeamento (removido l.numeroMatricula)
+        const matriculaID = l.matricula || '---';
+        
+        console.log(`  ✅ [V4.0.2] PPS: Leito ${leitoID}, Matrícula ${matriculaID}`);
         
         return {
             leito: leitoID,
@@ -541,9 +553,9 @@ window.processarDadosHospital = function(hospitalId) {
         };
     });
     
-    console.log(`📊 [V4.0.1] ${hospitalId} PPS < 40%: ${ppsMenor40.length} leitos`);
+    console.log(`📊 [V4.0.2] ${hospitalId} PPS < 40%: ${ppsMenor40.length} leitos`);
     
-    // ✅ V4.0.1: SPICT Elegíveis
+    // ✅ V4.0.2: SPICT Elegíveis
     const spictElegiveis = ocupados.filter(l => {
         const spict = l.spict;
         if (!spict) return false;
@@ -551,7 +563,7 @@ window.processarDadosHospital = function(hospitalId) {
         return norm === 'elegivel' || norm === 'elegível';
     });
     
-    // ✅ V4.0.1: Diretivas Pendentes COM IDENTIFICACAO_LEITO
+    // ✅ V4.0.2: CORREÇÃO de Filtro SPICT (apenas "Não")
     const diretivasPendentes = ocupados.filter(l => {
         const spict = l.spict;
         if (!spict) return false;
@@ -566,14 +578,10 @@ window.processarDadosHospital = function(hospitalId) {
         const diretivas = l.diretivas;
         const diretivasNorm = diretivas ? diretivas.toLowerCase().trim() : '';
         
+        // ✅ V4.0.2: Lógica estrita conforme solicitação: "Elegível" + "Não"
         const valoresPendentes = [
-            '',
             'não',
-            'nao',
-            'não',
-            'n/a',
-            'pendente',
-            'não se aplica'
+            'nao'
         ];
         
         const diretivasPendente = valoresPendentes.includes(diretivasNorm);
@@ -582,9 +590,11 @@ window.processarDadosHospital = function(hospitalId) {
     }).map(l => {
         // ✅ V4.0.1: PRIORIZA identificacaoLeito (coluna AQ)
         const leitoID = l.identificacaoLeito || l.leito || '---';
-        const matriculaID = l.matricula || l.numeroMatricula || '---';
         
-        console.log(`  ✅ [V4.0.1] SPICT: Leito ${leitoID}, Matrícula ${matriculaID}`);
+        // ✅ V4.0.2: CORREÇÃO de Mapeamento (removido l.numeroMatricula)
+        const matriculaID = l.matricula || '---';
+        
+        console.log(`  ✅ [V4.0.2] SPICT: Leito ${leitoID}, Matrícula ${matriculaID}`);
         
         return {
             leito: leitoID,
@@ -592,7 +602,7 @@ window.processarDadosHospital = function(hospitalId) {
         };
     });
     
-    console.log(`📊 [V4.0.1] ${hospitalId} Diretivas Pendentes: ${diretivasPendentes.length}`);
+    console.log(`📊 [V4.0.2] ${hospitalId} Diretivas Pendentes: ${diretivasPendentes.length}`);
     
     const totalLeitos = leitos.length;
     const taxaOcupacao = totalLeitos > 0 ? (ocupados.length / totalLeitos * 100) : 0;
@@ -601,7 +611,7 @@ window.processarDadosHospital = function(hospitalId) {
     const modalidadePrevisao = calcularModalidadePorTipo(previsaoAlta, hospitalId);
     const modalidadeDisponiveis = calcularModalidadesVagos(leitos, hospitalId);
     
-    // ✅ V4.0.1: RETORNO COMPLETO COM identificacaoLeito
+    // ✅ V4.0.2: RETORNO COMPLETO COM DADOS CORRIGIDOS
     const resultado = {
         nome: hospitalId === 'H1' ? 'NEOMATER' :
               hospitalId === 'H2' ? 'CRUZ AZUL' :
@@ -646,7 +656,7 @@ window.processarDadosHospital = function(hospitalId) {
         }
     };
     
-    console.log(`✅ [V4.0.1] Processamento completo: ${hospitalId}`, resultado);
+    console.log(`✅ [V4.0.2] Processamento completo: ${hospitalId}`, resultado);
     
     return resultado;
 };
@@ -748,7 +758,7 @@ function renderMiniGaugeTPH(dias) {
 // =================== RENDER DASHBOARD HOSPITALAR ===================
 
 window.renderDashboardHospitalar = function() {
-    logInfo('Renderizando Dashboard Hospitalar V4.0.1 (IDENTIFICACAO_LEITO + MATRICULAS NO WINDOW)');
+    logInfo('Renderizando Dashboard Hospitalar V4.0.2 (CORREÇÕES APLICADAS)');
     
     let container = document.getElementById('dashHospitalarContent');
     if (!container) {
@@ -773,7 +783,7 @@ window.renderDashboardHospitalar = function() {
         container.innerHTML = `
             <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 400px; text-align: center; color: white; background: linear-gradient(135deg, ${CORES_ARCHIPELAGO.azulMarinhoEscuro} 0%, ${CORES_ARCHIPELAGO.azulEscuro} 100%); border-radius: 12px; margin: 20px; padding: 40px;">
                 <div style="width: 60px; height: 60px; border: 3px solid ${CORES_ARCHIPELAGO.azulPrincipal}; border-top-color: transparent; border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 20px;"></div>
-                <h2 style="color: ${CORES_ARCHIPELAGO.azulPrincipal}; margin-bottom: 10px; font-size: 20px;">Aguardando dados V4.0.1</h2>
+                <h2 style="color: ${CORES_ARCHIPELAGO.azulPrincipal}; margin-bottom: 10px; font-size: 20px;">Aguardando dados V4.0.2</h2>
                 <p style="color: ${CORES_ARCHIPELAGO.cinzaMedio}; font-size: 14px;">Conectando com Google Apps Script...</p>
             </div>
             <style>
@@ -818,7 +828,7 @@ window.renderDashboardHospitalar = function() {
         <div class="dashboard-hospitalar-wrapper" style="background: linear-gradient(135deg, ${CORES_ARCHIPELAGO.azulMarinhoEscuro} 0%, ${CORES_ARCHIPELAGO.azulEscuro} 100%); min-height: 100vh; padding: 20px; color: white; font-family: 'Poppins', sans-serif;">
             <div class="dashboard-header" style="margin-bottom: 30px; padding: 20px; background: rgba(255, 255, 255, 0.05); border-radius: 12px; border-left: 4px solid ${CORES_ARCHIPELAGO.azulPrincipal};">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; flex-wrap: wrap; gap: 15px;">
-                    <h2 style="margin: 0; color: #ffffff; font-size: 24px; font-weight: 700; white-space: nowrap; font-family: 'Poppins', sans-serif;">Dashboard Hospitalar V4.0.1</h2>
+                    <h2 style="margin: 0; color: #ffffff; font-size: 24px; font-weight: 700; white-space: nowrap; font-family: 'Poppins', sans-serif;">Dashboard Hospitalar V4.0.2</h2>
                     <div style="display: flex; gap: 10px;">
                         <button onclick="window.copiarDashboardParaWhatsApp()" class="btn-whatsapp" style="padding: 8px 16px; background: #25D366; border: none; border-radius: 8px; color: white; font-size: 14px; cursor: pointer; font-weight: 600; display: flex; align-items: center; gap: 8px; transition: all 0.3s ease; font-family: 'Poppins', sans-serif;">
                             Copiar para WhatsApp
@@ -884,7 +894,7 @@ window.renderDashboardHospitalar = function() {
                 renderLinhasHospital(hospitalId);
             });
             
-            logSuccess('Dashboard Hospitalar V4.0.1 renderizado - IDENTIFICACAO_LEITO + MATRICULAS + WINDOW!');
+            logSuccess('Dashboard Hospitalar V4.0.2 renderizado - TODAS CORREÇÕES APLICADAS!');
         }, 100);
     };
     
@@ -2161,21 +2171,19 @@ function getHospitalConsolidadoCSS() {
 }
 
 function logInfo(message) {
-    console.log(`🔵 [DASHBOARD HOSPITALAR V4.0.1] ${message}`);
+    console.log(`🔵 [DASHBOARD HOSPITALAR V4.0.2] ${message}`);
 }
 
 function logSuccess(message) {
-    console.log(`✅ [DASHBOARD HOSPITALAR V4.0.1] ${message}`);
+    console.log(`✅ [DASHBOARD HOSPITALAR V4.0.2] ${message}`);
 }
 
 function logError(message, error) {
-    console.error(`❌ [DASHBOARD HOSPITALAR V4.0.1] ${message}`, error || '');
+    console.error(`❌ [DASHBOARD HOSPITALAR V4.0.2] ${message}`, error || '');
 }
 
-console.log('🎨 Dashboard Hospitalar V4.0.1 CARREGADO!');
-console.log('✅ CORRIGIDO: processarDadosHospital NO WINDOW');
-console.log('✅ CORRIGIDO: identificacaoLeito (coluna AQ)');
-console.log('✅ CORRIGIDO: Matrículas automáticas');
-console.log('✅ TPH: >= 120 horas (5 dias)');
-console.log('✅ DIRETIVAS: Valores pendentes completos');
-console.log('🚀 READY: Sistema V4.0.1 100% funcional!');
+console.log('🎨 Dashboard Hospitalar V4.0.2 CARREGADO!');
+console.log('✅ CORRIGIDO: Filtro PPS (> 0 e < 40)');
+console.log('✅ CORRIGIDO: Filtro SPICT (apenas "Não")');
+console.log('✅ CORRIGIDO: Mapeamento matrícula (sem numeroMatricula)');
+console.log('🚀 READY: Sistema V4.0.2 100% funcional!');
