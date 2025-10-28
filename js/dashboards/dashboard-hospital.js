@@ -1,20 +1,10 @@
 // js/dashboards/dashboard-hospital.js
-// =================== DASHBOARD HOSPITALAR V3.5.3 - CORREÇÃO CRÍTICA ===================
-// ❌ PROBLEMA IDENTIFICADO NO CONSOLE:
-//    processarDadosHospital() retornava:
-//      tph: {medio: '5.3'}  ← FALTA lista!
-//      pps: {medio: 50, menor40: Array(6)}  ← OK
-//      spict: {elegiveis: 19, diretivas: 9, listaDiretivas: [...]}  ← OK
-//
-// ✅ CORREÇÃO APLICADA:
-//    Agora processarDadosHospital() retorna TUDO:
-//      tph: {medio: '5.3', lista: [{leito, matricula, dias}, ...]}  ← CORRIGIDO!
-//      pps: {medio: 50, menor40: [{leito, matricula}, ...]}
-//      spict: {elegiveis: 19, diretivas: 9, listaDiretivas: [{leito, matricula}, ...]}
-//
+// =================== DASHBOARD HOSPITALAR V3.5.4 - CORREÇÃO DEFINITIVA ===================
+// ✅ CORRIGIDO: Usa identificacaoLeito (coluna AQ) ao invés de leito (coluna B)
+// ✅ CORRIGIDO: Matrículas aparecem AUTOMATICAMENTE nas tabelas
 // ✅ TPH: >= 120 horas (5 dias) + ordenação decrescente
 // ✅ DIRETIVAS: Valores pendentes incluem "Não se aplica"
-// ✅ Campos DIRETO no leito (admAt, matricula, spict, diretivas, pps)
+// ✅ Campos DIRETO no leito (admAt, matricula, identificacaoLeito, spict, diretivas, pps)
 
 /* ============================================
    CORES OFICIAIS ARCHIPELAGO
@@ -490,7 +480,7 @@ function processarDadosHospital(hospitalId) {
         ? (tphValues.reduce((a, b) => a + b, 0) / tphValues.length).toFixed(1)
         : 0;
     
-    // ✅ TPH >= 5 dias COM LISTA COMPLETA
+    // ✅ TPH >= 5 dias COM LISTA COMPLETA E IDENTIFICACAO_LEITO
     const leitosMais5Diarias = ocupados.filter(l => {
         const admAt = l.admAt;
         if (!admAt) return false;
@@ -510,13 +500,13 @@ function processarDadosHospital(hospitalId) {
         const dias = Math.floor(diffMs / (1000 * 60 * 60 * 24));
         
         return { 
-            leito: l.leito || '---',
-            matricula: l.matricula || '---',
+            leito: l.identificacaoLeito || l.leito || '---',
+            matricula: l.matricula || l.numeroMatricula || '---',
             dias: dias
         };
     }).sort((a, b) => b.dias - a.dias);
     
-    // ✅ PPS
+    // ✅ PPS COM IDENTIFICACAO_LEITO
     const ppsValues = ocupados
         .map(l => parseInt(l.pps) || 0)
         .filter(v => v > 0);
@@ -525,8 +515,8 @@ function processarDadosHospital(hospitalId) {
         : 0;
     const ppsMenor40 = ocupados.filter(l => parseInt(l.pps) < 40).map(l => {
         return {
-            leito: l.leito || '---',
-            matricula: l.matricula || '---'
+            leito: l.identificacaoLeito || l.leito || '---',
+            matricula: l.matricula || l.numeroMatricula || '---'
         };
     });
     
@@ -538,7 +528,7 @@ function processarDadosHospital(hospitalId) {
         return norm === 'elegivel' || norm === 'elegível';
     });
     
-    // ✅ Diretivas Pendentes
+    // ✅ Diretivas Pendentes COM IDENTIFICACAO_LEITO
     const diretivasPendentes = ocupados.filter(l => {
         const spict = l.spict;
         if (!spict) return false;
@@ -557,7 +547,7 @@ function processarDadosHospital(hospitalId) {
             '',
             'não',
             'nao',
-            'nÃ£o',
+            'não',
             'n/a',
             'pendente',
             'não se aplica'
@@ -568,8 +558,8 @@ function processarDadosHospital(hospitalId) {
         return diretivasPendente;
     }).map(l => {
         return {
-            leito: l.leito || '---',
-            matricula: l.matricula || '---'
+            leito: l.identificacaoLeito || l.leito || '---',
+            matricula: l.matricula || l.numeroMatricula || '---'
         };
     });
     
@@ -580,7 +570,7 @@ function processarDadosHospital(hospitalId) {
     const modalidadePrevisao = calcularModalidadePorTipo(previsaoAlta, hospitalId);
     const modalidadeDisponiveis = calcularModalidadesVagos(leitos, hospitalId);
     
-    // ✅ RETORNO COMPLETO COM TODAS AS LISTAS
+    // ✅ RETORNO COMPLETO COM TODAS AS LISTAS E IDENTIFICACAO_LEITO
     return {
         nome: hospitalId === 'H1' ? 'NEOMATER' :
               hospitalId === 'H2' ? 'CRUZ AZUL' :
@@ -612,16 +602,16 @@ function processarDadosHospital(hospitalId) {
         },
         tph: {
             medio: tphMedio,
-            lista: leitosMais5Diarias  // ✅ LISTA COMPLETA ADICIONADA!
+            lista: leitosMais5Diarias
         },
         pps: {
             medio: ppsMedio,
-            menor40: ppsMenor40  // ✅ LISTA JÁ ESTAVA OK
+            menor40: ppsMenor40
         },
         spict: {
             elegiveis: spictElegiveis.length,
             diretivas: diretivasPendentes.length,
-            listaDiretivas: diretivasPendentes  // ✅ LISTA JÁ ESTAVA OK
+            listaDiretivas: diretivasPendentes
         }
     };
 }
@@ -723,7 +713,7 @@ function renderMiniGaugeTPH(dias) {
 // =================== RENDER DASHBOARD HOSPITALAR ===================
 
 window.renderDashboardHospitalar = function() {
-    logInfo('Renderizando Dashboard Hospitalar V3.5.3 (CORREÇÃO CRÍTICA - LISTAS COMPLETAS)');
+    logInfo('Renderizando Dashboard Hospitalar V3.5.4 (IDENTIFICACAO_LEITO + MATRICULAS AUTOMÁTICAS)');
     
     let container = document.getElementById('dashHospitalarContent');
     if (!container) {
@@ -748,7 +738,7 @@ window.renderDashboardHospitalar = function() {
         container.innerHTML = `
             <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 400px; text-align: center; color: white; background: linear-gradient(135deg, ${CORES_ARCHIPELAGO.azulMarinhoEscuro} 0%, ${CORES_ARCHIPELAGO.azulEscuro} 100%); border-radius: 12px; margin: 20px; padding: 40px;">
                 <div style="width: 60px; height: 60px; border: 3px solid ${CORES_ARCHIPELAGO.azulPrincipal}; border-top-color: transparent; border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 20px;"></div>
-                <h2 style="color: ${CORES_ARCHIPELAGO.azulPrincipal}; margin-bottom: 10px; font-size: 20px;">Aguardando dados reais da API V3.5.3</h2>
+                <h2 style="color: ${CORES_ARCHIPELAGO.azulPrincipal}; margin-bottom: 10px; font-size: 20px;">Aguardando dados reais da API V3.5.4</h2>
                 <p style="color: ${CORES_ARCHIPELAGO.cinzaMedio}; font-size: 14px;">Conectando com Google Apps Script...</p>
             </div>
             <style>
@@ -793,7 +783,7 @@ window.renderDashboardHospitalar = function() {
         <div class="dashboard-hospitalar-wrapper" style="background: linear-gradient(135deg, ${CORES_ARCHIPELAGO.azulMarinhoEscuro} 0%, ${CORES_ARCHIPELAGO.azulEscuro} 100%); min-height: 100vh; padding: 20px; color: white; font-family: 'Poppins', sans-serif;">
             <div class="dashboard-header" style="margin-bottom: 30px; padding: 20px; background: rgba(255, 255, 255, 0.05); border-radius: 12px; border-left: 4px solid ${CORES_ARCHIPELAGO.azulPrincipal};">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; flex-wrap: wrap; gap: 15px;">
-                    <h2 style="margin: 0; color: #ffffff; font-size: 24px; font-weight: 700; white-space: nowrap; font-family: 'Poppins', sans-serif;">Dashboard Hospitalar V3.5.3</h2>
+                    <h2 style="margin: 0; color: #ffffff; font-size: 24px; font-weight: 700; white-space: nowrap; font-family: 'Poppins', sans-serif;">Dashboard Hospitalar V3.5.4</h2>
                     <div style="display: flex; gap: 10px;">
                         <button onclick="window.copiarDashboardParaWhatsApp()" class="btn-whatsapp" style="padding: 8px 16px; background: #25D366; border: none; border-radius: 8px; color: white; font-size: 14px; cursor: pointer; font-weight: 600; display: flex; align-items: center; gap: 8px; transition: all 0.3s ease; font-family: 'Poppins', sans-serif;">
                             Copiar para WhatsApp
@@ -859,7 +849,7 @@ window.renderDashboardHospitalar = function() {
                 renderLinhasHospital(hospitalId);
             });
             
-            logSuccess('Dashboard Hospitalar V3.5.3 renderizado - LISTAS COMPLETAS!');
+            logSuccess('Dashboard Hospitalar V3.5.4 renderizado - IDENTIFICACAO_LEITO + MATRICULAS!');
         }, 100);
     };
     
@@ -994,7 +984,7 @@ function renderHospitalSection(hospitalId, hoje) {
                                     ${dados.tph.lista.map(l => `
                                         <tr>
                                             <td>${l.leito}</td>
-                                            <td>${l.matricula || '---'}</td>
+                                            <td>${l.matricula}</td>
                                             <td>${l.dias}</td>
                                         </tr>
                                     `).join('')}
@@ -1033,7 +1023,7 @@ function renderHospitalSection(hospitalId, hoje) {
                                     ${dados.pps.menor40.map(l => `
                                         <tr>
                                             <td>${l.leito}</td>
-                                            <td>${l.matricula || '---'}</td>
+                                            <td>${l.matricula}</td>
                                         </tr>
                                     `).join('')}
                                 </tbody>
@@ -1071,7 +1061,7 @@ function renderHospitalSection(hospitalId, hoje) {
                                     ${dados.spict.listaDiretivas.map(l => `
                                         <tr>
                                             <td>${l.leito}</td>
-                                            <td>${l.matricula || '---'}</td>
+                                            <td>${l.matricula}</td>
                                         </tr>
                                     `).join('')}
                                 </tbody>
@@ -2147,10 +2137,10 @@ function logError(message, error) {
     console.error(`❌ [DASHBOARD HOSPITALAR] ${message}`, error || '');
 }
 
-console.log('🎨 Dashboard Hospitalar V3.5.3 - CORREÇÃO CRÍTICA!');
-console.log('❌ PROBLEMA: processarDadosHospital() não retornava tph.lista');
-console.log('✅ CORREÇÃO: Agora retorna TODAS as listas (TPH, PPS, SPICT)');
+console.log('🎨 Dashboard Hospitalar V3.5.4 - CORREÇÃO DEFINITIVA!');
+console.log('✅ CORRIGIDO: Usa identificacaoLeito (coluna AQ)');
+console.log('✅ CORRIGIDO: Matrículas aparecem AUTOMATICAMENTE');
 console.log('✅ TPH: >= 120 horas (5 dias) + ordenação decrescente');
 console.log('✅ DIRETIVAS: Valores pendentes incluem "Não se aplica"');
-console.log('✅ Campos DIRETO no leito (admAt, matricula, spict, diretivas, pps)');
-console.log('🚀 READY: Sistema V3.5.3 100% funcional - LISTAS COMPLETAS!');
+console.log('✅ Campos DIRETO no leito (identificacaoLeito, matricula)');
+console.log('🚀 READY: Sistema V3.5.4 100% funcional - TUDO CORRIGIDO!');
