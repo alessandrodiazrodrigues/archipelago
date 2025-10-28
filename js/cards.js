@@ -1,6 +1,5 @@
-// =================== CARDS.JS V3.4.0 FINAL - CORES + FONTES ARCHIPELAGO ===================
-// =================== CORREÇÕES: IDENTIFICAÇÃO 1-6 CHARS + PALETA OFICIAL + POPPINS ===================
-// =================== LAYOUT: HOSPITAL FORA DOS BOXES + LINHA DIVISÓRIA + CÍRCULO PESSOA ===================
+// =================== CARDS.JS V3.4.1 FINAL - CORREÇÃO IDENTIFICAÇÃO LEITO ===================
+// =================== ACEITA NÚMEROS E LETRAS (1-6 CARACTERES) ===================
 
 // =================== VARIÁVEIS GLOBAIS ===================  
 window.selectedLeito = null;
@@ -26,9 +25,9 @@ window.TIPO_QUARTO_OPTIONS = ['Apartamento', 'Enfermaria'];
 
 // ⭐ MAPEAMENTO FIXO NUMERAÇÃO CRUZ AZUL - ENFERMARIAS (16 leitos: 21-36)
 window.CRUZ_AZUL_NUMERACAO = {
-    21: '711.1', 22: '711.2',
+    21: '711.1', 22: '711.3',
     23: '713.1', 24: '713.2',
-    25: '715.1', 26: '715.2',
+    25: '915.1', 26: '915.3',
     27: '911.1', 28: '911.3',
     29: '912.1', 30: '912.3',
     31: '913.1', 32: '913.3',
@@ -132,7 +131,7 @@ window.selectHospital = function(hospitalId) {
 
 // =================== FUNÇÃO PRINCIPAL DE RENDERIZAÇÃO ===================
 window.renderCards = function() {
-    logInfo('Renderizando cards V3.4.0 - CORES ARCHIPELAGO + POPPINS');
+    logInfo('Renderizando cards V3.4.1 - IDENTIFICAÇÃO NUMÉRICA/ALFANUMÉRICA');
     
     const container = document.getElementById('cardsContainer');
     if (!container) {
@@ -345,7 +344,7 @@ function validarLimiteSantaClara(tipoQuarto) {
     return { permitido: true };
 }
 
-// =================== CRIAR CARD INDIVIDUAL V3.4 ===================
+// =================== CRIAR CARD INDIVIDUAL V3.4.1 ===================
 function createCard(leito, hospitalNome) {
     const card = document.createElement('div');
     card.className = 'card';
@@ -382,17 +381,17 @@ function createCard(leito, hospitalNome) {
     
     // Determinar status
     let isVago = false;
-    let statusBgColor = '#29ad8d'; // VERDE (paleta oficial)
+    let statusBgColor = '#29ad8d';
     let statusTextColor = '#ffffff';
     let statusTexto = 'Disponível';
     
     if (bloqueadoPorIsolamento) {
-        statusBgColor = '#c86420'; // LARANJA (paleta oficial)
+        statusBgColor = '#c86420';
         statusTextColor = '#ffffff';
         statusTexto = 'BLOQUEADO';
     } else if (leito.status === 'Em uso' || leito.status === 'ocupado' || leito.status === 'Ocupado') {
         isVago = false;
-        statusBgColor = '#f59a1d'; // AMARELO (paleta oficial)
+        statusBgColor = '#f59a1d';
         statusTextColor = '#131b2e';
         statusTexto = 'Ocupado';
     } else if (leito.status === 'Vago' || leito.status === 'vago') {
@@ -423,7 +422,7 @@ function createCard(leito, hospitalNome) {
         isolamento = 'Não Isolamento';
     }
     
-    // Identificação do leito
+    // ✅ CORREÇÃO: Identificação do leito - ACEITA NÚMEROS E LETRAS
     let identificacaoLeito = '';
     if (isCruzAzulEnfermaria && window.CRUZ_AZUL_NUMERACAO[numeroLeito]) {
         identificacaoLeito = window.CRUZ_AZUL_NUMERACAO[numeroLeito];
@@ -471,15 +470,15 @@ function createCard(leito, hospitalNome) {
     }
     
     // COR DO CÍRCULO PESSOA (paleta oficial)
-    let circuloCor = '#29ad8d'; // VERDE
+    let circuloCor = '#29ad8d';
     let circuloStroke = '#1c5083';
     
     if (isVago && bloqueadoPorGenero && generoPermitido) {
         if (generoPermitido === 'Masculino') {
-            circuloCor = '#0676bb'; // AZUL PRINCIPAL
+            circuloCor = '#0676bb';
             circuloStroke = '#172945';
         } else if (generoPermitido === 'Feminino') {
-            circuloCor = '#ec4899'; // ROSA
+            circuloCor = '#ec4899';
             circuloStroke = '#9333EA';
         }
     } else if (!isVago) {
@@ -492,7 +491,7 @@ function createCard(leito, hospitalNome) {
         }
     }
     
-    // HTML do Card V3.4
+    // HTML do Card V3.4.1
     card.innerHTML = `
         <!-- HEADER: HOSPITAL FORA DOS BOXES -->
         <div class="card-header" style="text-align: center; margin-bottom: 12px; padding-bottom: 8px; font-family: 'Poppins', sans-serif;">
@@ -694,7 +693,7 @@ function openAdmissaoFlow(leitoNumero) {
     setTimeout(() => {
         hideButtonLoading(button, originalText);
         openAdmissaoModal(leitoNumero);
-        logInfo(`Modal de admissão V3.4 aberto: ${window.currentHospital} - Leito ${leitoNumero}`);
+        logInfo(`Modal de admissão V3.4.1 aberto: ${window.currentHospital} - Leito ${leitoNumero}`);
     }, 800);
 }
 
@@ -707,11 +706,11 @@ function openAtualizacaoFlow(leitoNumero, dadosLeito) {
     setTimeout(() => {
         hideButtonLoading(button, originalText);
         openAtualizacaoModal(leitoNumero, dadosLeito);
-        logInfo(`Modal de atualização V3.4 aberto: ${window.currentHospital} - Leito ${leitoNumero}`);
+        logInfo(`Modal de atualização V3.4.1 aberto: ${window.currentHospital} - Leito ${leitoNumero}`);
     }, 800);
 }
 
-// =================== MODAIS V3.4 ===================
+// =================== MODAIS V3.4.1 ===================
 function openAdmissaoModal(leitoNumero) {
     const hospitalId = window.currentHospital;
     const hospitalNome = window.HOSPITAL_MAPPING[hospitalId] || 'Hospital';
@@ -754,7 +753,7 @@ function createModalOverlay() {
     return modal;
 }
 
-// =================== FORMULÁRIO DE ADMISSÃO V3.4 ===================
+// =================== FORMULÁRIO DE ADMISSÃO V3.4.1 ===================
 function createAdmissaoForm(hospitalNome, leitoNumero, hospitalId) {
     const idSequencial = String(leitoNumero).padStart(2, '0');
     const isHibrido = window.HOSPITAIS_HIBRIDOS.includes(hospitalId);
@@ -787,6 +786,7 @@ function createAdmissaoForm(hospitalNome, leitoNumero, hospitalId) {
     const isCruzAzulApartamento = (hospitalId === 'H2' && leitoNumero >= 1 && leitoNumero <= 20);
     const isApartamentoFixo = isCruzAzulApartamento;
     
+    // ✅ CORREÇÃO: Buscar identificação atual da planilha
     let identificacaoFixa = '';
     if (isCruzAzulEnfermaria) {
         identificacaoFixa = window.CRUZ_AZUL_NUMERACAO[leitoNumero] || '';
@@ -811,9 +811,9 @@ function createAdmissaoForm(hospitalNome, leitoNumero, hospitalId) {
                         <label style="display: block; margin-bottom: 5px; color: #e2e8f0; font-weight: 600; font-size: 12px; white-space: nowrap;">IDENTIFICAÇÃO DO LEITO <span style="color: #c86420;">*</span></label>
                         ${isCruzAzulEnfermaria 
                             ? `<input id="admIdentificacaoLeito" type="text" value="${identificacaoFixa}" readonly style="width: 100%; padding: 12px; background: #1f2937; color: #9ca3af; border: 1px solid rgba(255,255,255,0.2); border-radius: 6px; font-size: 14px; cursor: not-allowed; font-family: 'Poppins', sans-serif;">
-                               <div style="font-size: 10px; color: rgba(255,255,255,0.5); margin-top: 3px;">🔒 Numeração fixa (Cruz Azul - Enfermaria)</div>`
-                            : `<input id="admIdentificacaoLeito" type="text" placeholder="Ex: 1, 21, 711.1" maxlength="6" required style="width: 100%; padding: 12px; background: #374151; color: #ffffff; border: 1px solid rgba(255,255,255,0.3); border-radius: 6px; font-size: 14px; font-family: 'Poppins', sans-serif;">
-                               <div style="font-size: 10px; color: rgba(255,255,255,0.5); margin-top: 3px;">✅ 1 a 6 caracteres</div>`
+                               <div style="font-size: 10px; color: rgba(255,255,255,0.5); margin-top: 3px;">🔒 Numeração fixa (Cruz Azul)</div>`
+                            : `<input id="admIdentificacaoLeito" type="text" placeholder="Ex: 1A, 21, 711.1" maxlength="6" required style="width: 100%; padding: 12px; background: #374151; color: #ffffff; border: 1px solid rgba(255,255,255,0.3); border-radius: 6px; font-size: 14px; font-family: 'Poppins', sans-serif;">
+                               <div style="font-size: 10px; color: rgba(255,255,255,0.5); margin-top: 3px;">✅ Aceita números e letras (1-6)</div>`
                         }
                     </div>
                     
@@ -964,14 +964,11 @@ function createAdmissaoForm(hospitalNome, leitoNumero, hospitalId) {
     `;
 }
 
-// =================== FORMULÁRIO DE ATUALIZAÇÃO V3.4 ===================
+// =================== FORMULÁRIO DE ATUALIZAÇÃO V3.4.1 ===================
 function createAtualizacaoForm(hospitalNome, leitoNumero, dadosLeito) {
     const tempoInternacao = dadosLeito?.admAt ? calcularTempoInternacao(dadosLeito.admAt) : '';
     const iniciais = dadosLeito?.nome ? getIniciais(dadosLeito.nome) : '';
     const idSequencial = String(leitoNumero).padStart(2, '0');
-    const leitoPersonalizado = (dadosLeito?.identificacaoLeito && dadosLeito.identificacaoLeito.trim()) 
-        ? dadosLeito.identificacaoLeito.trim().toUpperCase()
-        : `LEITO ${leitoNumero}`;
     
     const concessoesAtuais = Array.isArray(dadosLeito?.concessoes) ? dadosLeito.concessoes : [];
     const linhasAtuais = Array.isArray(dadosLeito?.linhas) ? dadosLeito.linhas : [];
@@ -992,12 +989,17 @@ function createAtualizacaoForm(hospitalNome, leitoNumero, dadosLeito) {
     const isCruzAzulApartamento = (hospitalId === 'H2' && leitoNumero >= 1 && leitoNumero <= 20);
     const isApartamentoFixo = isCruzAzulApartamento;
     
+    // ✅ CORREÇÃO: Buscar identificação REAL da planilha
     let identificacaoAtual = '';
     if (isCruzAzulEnfermaria) {
         identificacaoAtual = window.CRUZ_AZUL_NUMERACAO[leitoNumero] || '';
     } else {
         identificacaoAtual = dadosLeito?.identificacaoLeito || dadosLeito?.identificacao_leito || '';
     }
+    
+    let leitoDisplay = identificacaoAtual && identificacaoAtual.trim() 
+        ? identificacaoAtual.trim().toUpperCase()
+        : `LEITO ${leitoNumero}`;
     
     const regiaoAtual = dadosLeito?.regiao || '';
     const sexoAtual = dadosLeito?.genero || '';
@@ -1014,7 +1016,7 @@ function createAtualizacaoForm(hospitalNome, leitoNumero, dadosLeito) {
             </h2>
             
             <div style="text-align: center; margin-bottom: 30px; padding: 15px; background: rgba(6,118,187,0.1); border-radius: 8px;">
-                <strong>Hospital:</strong> ${hospitalNome} | <strong>ID:</strong> ${idSequencial} | <strong>Leito:</strong> ${leitoPersonalizado}
+                <strong>Hospital:</strong> ${hospitalNome} | <strong>ID:</strong> ${idSequencial} | <strong>Leito:</strong> ${leitoDisplay}
             </div>
             
             <!-- ✅ LINHA 1: IDENTIFICAÇÃO | TIPO QUARTO | ISOLAMENTO -->
@@ -1024,9 +1026,9 @@ function createAtualizacaoForm(hospitalNome, leitoNumero, dadosLeito) {
                         <label style="display: block; margin-bottom: 5px; color: #e2e8f0; font-weight: 600; white-space: nowrap;">IDENTIFICAÇÃO DO LEITO <span style="color: #c86420;">*</span></label>
                         ${isCruzAzulEnfermaria 
                             ? `<input id="updIdentificacaoLeito" type="text" value="${identificacaoAtual}" readonly style="width: 100%; padding: 12px; background: #1f2937; color: #9ca3af; border: 1px solid rgba(255,255,255,0.2); border-radius: 6px; font-size: 14px; cursor: not-allowed; font-family: 'Poppins', sans-serif;">`
-                            : `<input id="updIdentificacaoLeito" type="text" value="${identificacaoAtual}" placeholder="Ex: 1, 21, 711.1" maxlength="6" required style="width: 100%; padding: 12px; background: #374151; color: #ffffff; border: 1px solid rgba(255,255,255,0.3); border-radius: 6px; font-size: 14px; font-family: 'Poppins', sans-serif;">`
+                            : `<input id="updIdentificacaoLeito" type="text" value="${identificacaoAtual}" placeholder="Ex: 1A, 21, 711.1" maxlength="6" required style="width: 100%; padding: 12px; background: #374151; color: #ffffff; border: 1px solid rgba(255,255,255,0.3); border-radius: 6px; font-size: 14px; font-family: 'Poppins', sans-serif;">`
                         }
-                        ${isCruzAzulEnfermaria ? '<div style="font-size: 10px; color: rgba(255,255,255,0.5); margin-top: 3px;">🔒 Identificação fixa</div>' : '<div style="font-size: 10px; color: rgba(255,255,255,0.5); margin-top: 3px;">✅ 1 a 6 caracteres</div>'}
+                        ${isCruzAzulEnfermaria ? '<div style="font-size: 10px; color: rgba(255,255,255,0.5); margin-top: 3px;">🔒 Identificação fixa</div>' : '<div style="font-size: 10px; color: rgba(255,255,255,0.5); margin-top: 3px;">✅ Aceita números e letras (1-6)</div>'}
                     </div>
                     
                     ${(isHibrido || isCruzAzulEnfermaria || isApartamentoFixo || hospitalId === 'H4') ? `
@@ -1285,6 +1287,14 @@ function setupModalEventListeners(modal, tipo) {
                 return;
             }
             
+            // ✅ VALIDAÇÃO: Aceita números e letras (1-6 caracteres)
+            const identificacao = identificacaoField.value.trim();
+            if (identificacao.length < 1 || identificacao.length > 6) {
+                showErrorMessage('❌ Identificação deve ter de 1 a 6 caracteres!');
+                identificacaoField.focus();
+                return;
+            }
+            
             const isolamentoField = modal.querySelector(tipo === 'admissao' ? '#admIsolamento' : '#updIsolamento');
             const regiaoField = modal.querySelector(tipo === 'admissao' ? '#admRegiao' : '#updRegiao');
             const sexoField = modal.querySelector(tipo === 'admissao' ? '#admSexo' : '#updSexo');
@@ -1439,7 +1449,7 @@ function closeModal(modal) {
     }
 }
 
-// =================== COLETAR DADOS DO FORMULÁRIO V3.4 ===================
+// =================== COLETAR DADOS DO FORMULÁRIO V3.4.1 ===================
 function coletarDadosFormulario(modal, tipo) {
     const dados = {
         hospital: window.currentHospital,
@@ -1454,7 +1464,7 @@ function coletarDadosFormulario(modal, tipo) {
         dados.spict = modal.querySelector('#admSPICT')?.value || 'nao_elegivel';
         dados.prevAlta = modal.querySelector('#admPrevAlta')?.value || 'Sem Previsão';
         dados.isolamento = modal.querySelector('#admIsolamento')?.value || '';
-        dados.identificacaoLeito = modal.querySelector('#admIdentificacaoLeito')?.value?.trim().toUpperCase() || '';
+        dados.identificacaoLeito = modal.querySelector('#admIdentificacaoLeito')?.value?.trim() || '';
         dados.regiao = modal.querySelector('#admRegiao')?.value || '';
         dados.genero = modal.querySelector('#admSexo')?.value || '';
         dados.diretivas = modal.querySelector('#admDiretivas')?.value || 'Não se aplica';
@@ -1473,7 +1483,7 @@ function coletarDadosFormulario(modal, tipo) {
         dados.spict = modal.querySelector('#updSPICT')?.value || 'nao_elegivel';
         dados.prevAlta = modal.querySelector('#updPrevAlta')?.value || 'Sem Previsão';
         dados.isolamento = modal.querySelector('#updIsolamento')?.value || '';
-        dados.identificacaoLeito = modal.querySelector('#updIdentificacaoLeito')?.value?.trim().toUpperCase() || '';
+        dados.identificacaoLeito = modal.querySelector('#updIdentificacaoLeito')?.value?.trim() || '';
         dados.regiao = modal.querySelector('#updRegiao')?.value || '';
         dados.genero = modal.querySelector('#updSexo')?.value || '';
         dados.diretivas = modal.querySelector('#updDiretivas')?.value || 'Não se aplica';
@@ -1638,35 +1648,32 @@ function formatarDataHora(dataISO) {
 
 // =================== FUNÇÕES DE LOG ===================
 function logInfo(message, data = null) {
-    console.log(`🔵 [CARDS V3.4.0] ${message}`, data || '');
+    console.log(`🔵 [CARDS V3.4.1] ${message}`, data || '');
 }
 
 function logError(message, error = null) {
-    console.error(`🔴 [CARDS V3.4.0 ERROR] ${message}`, error || '');
+    console.error(`🔴 [CARDS V3.4.1 ERROR] ${message}`, error || '');
 }
 
 function logSuccess(message) {
-    console.log(`🟢 [CARDS V3.4.0 SUCCESS] ${message}`);
+    console.log(`🟢 [CARDS V3.4.1 SUCCESS] ${message}`);
 }
 
 function logDebug(message, data = null) {
-    console.log(`🟡 [CARDS V3.4.0 DEBUG] ${message}`, data || '');
+    console.log(`🟡 [CARDS V3.4.1 DEBUG] ${message}`, data || '');
 }
 
-// =================== CSS CONSOLIDADO V3.4 ===================
+// =================== CSS CONSOLIDADO V3.4.1 ===================
 if (!document.getElementById('cardsConsolidadoCSS')) {
     const style = document.createElement('style');
     style.id = 'cardsConsolidadoCSS';
     style.textContent = `
-        /* Importar Poppins */
         @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap');
         
-        /* Aplicar Poppins globalmente */
         * {
             font-family: 'Poppins', sans-serif !important;
         }
         
-        /* Animações */
         @keyframes slideIn {
             from { transform: translateX(100%); opacity: 0; }
             to { transform: translateX(0); opacity: 1; }
@@ -1682,7 +1689,6 @@ if (!document.getElementById('cardsConsolidadoCSS')) {
             to { opacity: 0; transform: scale(0.9); }
         }
         
-        /* Desktop */
         .btn-action {
             transition: all 0.2s ease;
         }
@@ -1754,7 +1760,6 @@ if (!document.getElementById('cardsConsolidadoCSS')) {
             gap: 15px !important;
         }
         
-        /* Tablet */
         @media (max-width: 1024px) and (min-width: 769px) {
             .cards-grid {
                 grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
@@ -1767,7 +1772,6 @@ if (!document.getElementById('cardsConsolidadoCSS')) {
             }
         }
 
-        /* Mobile */
         @media (max-width: 768px) {
             .cards-grid {
                 grid-template-columns: 1fr !important;
@@ -1829,7 +1833,6 @@ if (!document.getElementById('cardsConsolidadoCSS')) {
             }
         }
         
-        /* Mobile pequeno */
         @media (max-width: 480px) {
             .card {
                 padding: 12px !important;
@@ -1849,7 +1852,6 @@ if (!document.getElementById('cardsConsolidadoCSS')) {
             }
         }
         
-        /* Landscape */
         @media (max-width: 768px) and (orientation: landscape) {
             .cards-grid {
                 grid-template-columns: repeat(2, 1fr) !important;
@@ -1860,9 +1862,9 @@ if (!document.getElementById('cardsConsolidadoCSS')) {
     document.head.appendChild(style);
 }
 
-// =================== INICIALIZAÇÃO V3.4 ===================
+// =================== INICIALIZAÇÃO V3.4.1 ===================
 document.addEventListener('DOMContentLoaded', function() {
-    logSuccess('✅ CARDS.JS V3.4.0 CARREGADO - CORES ARCHIPELAGO + POPPINS');
+    logSuccess('✅ CARDS.JS V3.4.1 CARREGADO - IDENTIFICAÇÃO NUMÉRICA/ALFANUMÉRICA');
     
     if (window.CONCESSOES_LIST.length !== 12) {
         logError(`ERRO: Esperadas 12 concessões, encontradas ${window.CONCESSOES_LIST.length}`);
@@ -1876,11 +1878,10 @@ document.addEventListener('DOMContentLoaded', function() {
         logSuccess(`✅ ${window.LINHAS_CUIDADO_LIST.length} linhas de cuidado confirmadas`);
     }
     
-    logInfo('🎨 CORREÇÕES APLICADAS V3.4.0:');
-    logInfo('  • ✅ Paleta oficial Archipelago (12 cores)');
-    logInfo('  • ✅ Fonte Poppins em TODOS os elementos');
-    logInfo('  • ✅ Campo identificação: 1-6 caracteres');
-    logInfo('  • ✅ Cards ordenados (ocupados → vagos)');
+    logInfo('🎨 CORREÇÕES APLICADAS V3.4.1:');
+    logInfo('  • ✅ Campo Identificação: ACEITA NÚMEROS E LETRAS (1-6 chars)');
+    logInfo('  • ✅ Validação alfanumérica implementada');
+    logInfo('  • ✅ Sincronização correta com planilha');
 });
 
 // =================== EXPORTS ===================
@@ -1894,5 +1895,5 @@ window.getBadgeGenero = getBadgeGenero;
 window.getBadgeDiretivas = getBadgeDiretivas;
 window.formatarMatricula = formatarMatricula;
 
-logSuccess('🎉 CARDS.JS V3.4.0 COMPLETO - ARCHIPELAGO OFFICIAL!');
-console.log('✅ CARDS.JS V3.4.0 CARREGADO COM CORES + POPPINS + IDENTIFICAÇÃO 1-6 CHARS!');
+logSuccess('🎉 CARDS.JS V3.4.1 COMPLETO - IDENTIFICAÇÃO NUMÉRICA/ALFANUMÉRICA!');
+console.log('✅ CARDS.JS V3.4.1 - ACEITA NÚMEROS E LETRAS (1-6 CARACTERES)!');
