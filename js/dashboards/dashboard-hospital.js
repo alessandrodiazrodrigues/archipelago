@@ -673,7 +673,7 @@ function renderMiniGaugeTPH(dias) {
 // =================== RENDER DASHBOARD HOSPITALAR ===================
 
 window.renderDashboardHospitalar = function() {
-    logInfo('Renderizando Dashboard Hospitalar V3.5.0 (COM CORES ARCHIPELAGO)');
+    logInfo('Renderizando Dashboard Hospitalar (COM CORES ARCHIPELAGO)');
     
     let container = document.getElementById('dashHospitalarContent');
     if (!container) {
@@ -743,7 +743,7 @@ window.renderDashboardHospitalar = function() {
         <div class="dashboard-hospitalar-wrapper" style="background: linear-gradient(135deg, ${CORES_ARCHIPELAGO.azulMarinhoEscuro} 0%, ${CORES_ARCHIPELAGO.azulEscuro} 100%); min-height: 100vh; padding: 20px; color: white; font-family: 'Poppins', sans-serif;">
             <div class="dashboard-header" style="margin-bottom: 30px; padding: 20px; background: rgba(255, 255, 255, 0.05); border-radius: 12px; border-left: 4px solid ${CORES_ARCHIPELAGO.azulPrincipal};">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; flex-wrap: wrap; gap: 15px;">
-                    <h2 style="margin: 0; color: #ffffff; font-size: 24px; font-weight: 700; white-space: nowrap; font-family: 'Poppins', sans-serif;">Dashboard Hospitalar V3.5.0</h2>
+                    <h2 style="margin: 0; color: #ffffff; font-size: 24px; font-weight: 700; white-space: nowrap; font-family: 'Poppins', sans-serif;">Dashboard Hospitalar </h2>
                     <div style="display: flex; gap: 10px;">
                         <button onclick="window.copiarDashboardParaWhatsApp()" class="btn-whatsapp" style="padding: 8px 16px; background: #25D366; border: none; border-radius: 8px; color: white; font-size: 14px; cursor: pointer; font-weight: 600; display: flex; align-items: center; gap: 8px; transition: all 0.3s ease; font-family: 'Poppins', sans-serif;">
                             Copiar para WhatsApp
@@ -809,7 +809,7 @@ window.renderDashboardHospitalar = function() {
                 renderLinhasHospital(hospitalId);
             });
             
-            logSuccess('Dashboard Hospitalar V3.5.0 renderizado com cores Archipelago!');
+            logSuccess('Dashboard Hospitalar renderizado com cores Archipelago!');
         }, 100);
     };
     
@@ -2117,15 +2117,15 @@ function getHospitalConsolidadoCSS() {
 
 // Funções de log
 function logInfo(message) {
-    console.log(`🔵 [DASHBOARD HOSPITALAR V3.5.0] ${message}`);
+    console.log(`🔵 [DASHBOARD HOSPITALAR] ${message}`);
 }
 
 function logSuccess(message) {
-    console.log(`✅ [DASHBOARD HOSPITALAR V3.5.0] ${message}`);
+    console.log(`✅ [DASHBOARD HOSPITALAR] ${message}`);
 }
 
 function logError(message, error) {
-    console.error(`❌ [DASHBOARD HOSPITALAR V3.5.0] ${message}`, error || '');
+    console.error(`❌ [DASHBOARD HOSPITALAR] ${message}`, error || '');
 }
 
 console.log('🎨 Dashboard Hospitalar V3.5.0 - CORES ARCHIPELAGO APLICADAS + PATCH CSS!');
