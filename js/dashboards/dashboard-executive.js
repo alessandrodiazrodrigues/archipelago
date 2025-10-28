@@ -65,24 +65,24 @@ const backgroundPluginExec = {
     }
 };
 
-// =================== FUNÇÕES AUXILIARES DE STATUS ===================
-function isOcupado(leito) {
+// =================== FUNÇÕES AUXILIARES DE STATUS (EXECUTIVO) ===================
+function isOcupadoExecutivo(leito) {
     if (!leito || !leito.status) return false;
-    const status = leito.status.toLowerCase();
-    return status === 'ocupado' || status === 'em uso';
+    const s = (leito.status || '').toString().toLowerCase().trim();
+    return s === 'ocupado' || s === 'em uso' || s === 'ocupada';
 }
 
-function isVago(leito) {
+function isVagoExecutivo(leito) {
     if (!leito || !leito.status) return false;
-    return leito.status.toLowerCase() === 'vago';
+    const s = (leito.status || '').toString().toLowerCase().trim();
+    return s === 'vago' || s === 'disponivel' || s === 'disponível' || s === 'livre';
 }
 
 // =================== FUNÇÃO: RENDER BARRA DE OCUPAÇÃO ===================
 function renderBarraOcupacao(porcentagem) {
-    // Determinar cor baseada na porcentagem
-    let cor = '#22c55e'; // verde
-    if (porcentagem >= 85) cor = '#ef4444'; // vermelho
-    else if (porcentagem >= 50) cor = '#f59e0b'; // amarelo
+    let cor = '#22c55e';
+    if (porcentagem >= 85) cor = '#ef4444';
+    else if (porcentagem >= 50) cor = '#f59e0b';
     
     const totalBlocos = 20;
     const blocosCheios = Math.round((porcentagem / 100) * totalBlocos);
@@ -115,15 +115,12 @@ function renderGaugeLargo(porcentagem, numeroTotal) {
     return `
         <div style="display: flex; justify-content: center; margin: 20px 0 30px 0;">
             <div class="gauge-largo-container">
-                <!-- SVG Gauge Largo -->
                 <svg viewBox="0 0 500 280" style="width: 100%; height: 100%;">
-                    <!-- Fundo cinza -->
                     <path d="M 50 220 A 200 200 0 0 1 450 220" 
                           fill="none" 
                           stroke="rgba(255,255,255,0.1)" 
                           stroke-width="30" 
                           stroke-linecap="round"/>
-                    <!-- Progresso verde -->
                     <path d="M 50 220 A 200 200 0 0 1 450 220" 
                           fill="none" 
                           stroke="#22c55e" 
@@ -133,7 +130,6 @@ function renderGaugeLargo(porcentagem, numeroTotal) {
                           stroke-dashoffset="${offset}"/>
                 </svg>
                 
-                <!-- Informações dentro do gauge -->
                 <div class="gauge-largo-info">
                     <div class="gauge-largo-number">${numeroTotal}</div>
                     <div class="gauge-largo-label">LEITOS OCUPADOS</div>
@@ -154,19 +150,17 @@ function calcularGaugeOffset(porcentagem) {
 
 function renderGaugeV5(porcentagem, cor, numero) {
     const offset = calcularGaugeOffset(porcentagem);
-    const badgeClass = cor === '#22c55e' ? 'green' : (cor === '#f97316' ? 'orange' : 'blue');
+    const badgeClass = cor === '#22c55e' ? 'green' : (cor === '#0676bb' ? 'blue' : 'orange');
     
     return `
         <div class="v5-gauge-container">
             <div style="position: relative;">
                 <svg class="v5-gauge" viewBox="0 0 140 80">
-                    <!-- Fundo cinza -->
                     <path d="M 15 70 A 55 55 0 0 1 125 70" 
                           fill="none" 
                           stroke="rgba(255,255,255,0.1)" 
                           stroke-width="14" 
                           stroke-linecap="round"/>
-                    <!-- Progresso -->
                     <path d="M 15 70 A 55 55 0 0 1 125 70" 
                           fill="none" 
                           stroke="${cor}" 
@@ -238,7 +232,7 @@ function renderMiniGaugeTPH(dias) {
 }
 
 // =================== FUNÇÃO: CALCULAR MODALIDADES ===================
-function calcularModalidadesVagos(leitos, hospitalId) {
+function calcularModalidadesVagosExecutivo(leitos, hospitalId) {
     const modalidade = {
         flexiveis: 0,
         exclusivo_apto: 0,
@@ -247,7 +241,7 @@ function calcularModalidadesVagos(leitos, hospitalId) {
         exclusivo_enf_masc: 0
     };
 
-    const vagos = leitos.filter(l => isVago(l));
+    const vagos = leitos.filter(l => isVagoExecutivo(l));
 
     if (hospitalId === 'H1' || hospitalId === 'H3' || hospitalId === 'H5') {
         modalidade.flexiveis = vagos.length;
@@ -255,7 +249,7 @@ function calcularModalidadesVagos(leitos, hospitalId) {
     }
 
     if (hospitalId === 'H4') {
-        const ocupados = leitos.filter(l => isOcupado(l));
+        const ocupados = leitos.filter(l => isOcupadoExecutivo(l));
         
         const aptosOcupados = ocupados.filter(l => 
             l.categoriaEscolhida === 'Apartamento'
@@ -297,7 +291,7 @@ function calcularModalidadesVagos(leitos, hospitalId) {
                 
                 const irmao = leitos.find(l => l.leito === numeroIrmao);
                 
-                if (!irmao || isVago(irmao)) {
+                if (!irmao || isVagoExecutivo(irmao)) {
                     modalidade.exclusivo_enf_sem_restricao++;
                 } else if (irmao.isolamento && irmao.isolamento !== 'Não Isolamento') {
                 } else {
@@ -318,7 +312,7 @@ function calcularModalidadesVagos(leitos, hospitalId) {
     return modalidade;
 }
 
-function calcularModalidadePorTipo(leitos, hospitalId) {
+function calcularModalidadePorTipoExecutivo(leitos, hospitalId) {
     const modalidade = {
         flexiveis: 0,
         exclusivo_apto: 0,
@@ -358,8 +352,8 @@ function calcularModalidadePorTipo(leitos, hospitalId) {
     return modalidade;
 }
 
-// =================== FUNÇÃO: PROCESSAR DADOS DO HOSPITAL ===================
-function processarDadosHospital(hospitalId) {
+// =================== FUNÇÃO: PROCESSAR DADOS DO HOSPITAL (EXECUTIVO) ===================
+function processarDadosHospitalExecutivo(hospitalId) {
     const hospitalObj = window.hospitalData[hospitalId] || {};
     
     let leitos = hospitalObj.leitos || hospitalObj || [];
@@ -367,7 +361,7 @@ function processarDadosHospital(hospitalId) {
         leitos = [];
     }
     
-    const ocupados = leitos.filter(l => isOcupado(l));
+    const ocupados = leitos.filter(l => isOcupadoExecutivo(l));
     
     let ocupadosApto, ocupadosEnfFem, ocupadosEnfMasc;
     
@@ -423,7 +417,7 @@ function processarDadosHospital(hospitalId) {
         ).length;
     }
     
-    const vagos = leitos.filter(l => isVago(l));
+    const vagos = leitos.filter(l => isVagoExecutivo(l));
     
     let vagosApto, vagosEnfFem, vagosEnfMasc;
     
@@ -453,7 +447,7 @@ function processarDadosHospital(hospitalId) {
                 
                 const irmao = leitos.find(l => l.leito === numeroIrmao);
                 
-                if (!irmao || isVago(irmao)) {
+                if (!irmao || isVagoExecutivo(irmao)) {
                     vagosEnfSemRestricao++;
                 } else if (irmao.isolamento && irmao.isolamento !== 'Não Isolamento') {
                 } else {
@@ -520,16 +514,19 @@ function processarDadosHospital(hospitalId) {
     const totalLeitos = leitos.length;
     const taxaOcupacao = totalLeitos > 0 ? (ocupados.length / totalLeitos * 100) : 0;
     
-    const modalidadeOcupados = calcularModalidadePorTipo(ocupados, hospitalId);
-    const modalidadePrevisao = calcularModalidadePorTipo(previsaoAlta, hospitalId);
-    const modalidadeDisponiveis = calcularModalidadesVagos(leitos, hospitalId);
+    const modalidadeOcupados = calcularModalidadePorTipoExecutivo(ocupados, hospitalId);
+    const modalidadePrevisao = calcularModalidadePorTipoExecutivo(previsaoAlta, hospitalId);
+    const modalidadeDisponiveis = calcularModalidadesVagosExecutivo(leitos, hospitalId);
+    
+    const nomeHospital = window.HOSPITAL_MAPPING?.[hospitalId] || 
+                        (hospitalId === 'H1' ? 'NEOMATER' :
+                         hospitalId === 'H2' ? 'CRUZ AZUL' :
+                         hospitalId === 'H3' ? 'STA MARCELINA' :
+                         hospitalId === 'H4' ? 'SANTA CLARA' :
+                         'ADVENTISTA');
     
     return {
-        nome: hospitalId === 'H1' ? 'NEOMATER' :
-              hospitalId === 'H2' ? 'CRUZ AZUL' :
-              hospitalId === 'H3' ? 'STA MARCELINA' :
-              hospitalId === 'H4' ? 'SANTA CLARA' :
-              'ADVENTISTA',
+        nome: nomeHospital,
         totalLeitos,
         taxaOcupacao,
         ocupados: {
@@ -569,14 +566,12 @@ function processarDadosHospital(hospitalId) {
 
 // =================== FUNÇÃO: COPIAR PARA WHATSAPP ===================
 function copiarParaWhatsAppExecutivo() {
-    const hospitais = ORDEM_ALFABETICA_HOSPITAIS.map(processarDadosHospital);
+    const hospitais = ORDEM_ALFABETICA_HOSPITAIS.map(processarDadosHospitalExecutivo);
     
-    // Calcular totais
     const totalLeitos = hospitais.reduce((sum, h) => sum + h.totalLeitos, 0);
     const totalOcupados = hospitais.reduce((sum, h) => sum + h.ocupados.total, 0);
     const taxaOcupacao = ((totalOcupados / totalLeitos) * 100).toFixed(1);
     
-    // Data formatada
     const agora = new Date();
     const dataFormatada = agora.toLocaleDateString('pt-BR', {
         year: 'numeric',
@@ -586,7 +581,6 @@ function copiarParaWhatsAppExecutivo() {
         minute: '2-digit'
     });
     
-    // Montar texto
     let texto = `*KPIs ARCHIPELAGO*\n`;
     texto += `${dataFormatada}\n`;
     texto += `━━━━━━━━━━━━━━━━━\n`;
@@ -595,7 +589,6 @@ function copiarParaWhatsAppExecutivo() {
     texto += `Taxa de Ocupacao: *${taxaOcupacao}%*\n`;
     texto += `Leitos Ocupados: *${totalOcupados}/${totalLeitos}*\n\n`;
     
-    // Dados por hospital
     hospitais.forEach((h, index) => {
         texto += `*${index + 1}. ${h.nome}*\n`;
         texto += `━━━━━━━━━━━━━━━━━\n`;
@@ -618,7 +611,6 @@ function copiarParaWhatsAppExecutivo() {
         }
     });
     
-    // Copiar para clipboard
     navigator.clipboard.writeText(texto).then(() => {
         alert('Texto copiado para a area de transferencia!\n\nCole no WhatsApp e envie.');
     }).catch(err => {
@@ -692,10 +684,8 @@ window.renderDashboardExecutivo = function() {
         return;
     }
     
-    // Processar todos os hospitais
-    const hospitais = hospitaisComDados.map(processarDadosHospital);
+    const hospitais = hospitaisComDados.map(processarDadosHospitalExecutivo);
     
-    // Calcular totais consolidados
     const totalLeitos = hospitais.reduce((sum, h) => sum + h.totalLeitos, 0);
     const totalOcupados = hospitais.reduce((sum, h) => sum + h.ocupados.total, 0);
     const totalPrevisao = hospitais.reduce((sum, h) => sum + h.previsao.total, 0);
@@ -742,6 +732,18 @@ window.renderDashboardExecutivo = function() {
     
     const hoje = new Date().toLocaleDateString('pt-BR');
     
+    const CORES_ARCHIPELAGO = window.CORES_ARCHIPELAGO || { azulPrincipal: '#0676bb' };
+    
+    const CONFIG = {
+        HOSPITAIS: {
+            H1: { nome: 'NEOMATER', cor: '#10b981' },
+            H2: { nome: 'CRUZ AZUL', cor: '#3b82f6' },
+            H3: { nome: 'STA MARCELINA', cor: '#8b5cf6' },
+            H4: { nome: 'SANTA CLARA', cor: '#ec4899' },
+            H5: { nome: 'ADVENTISTA', cor: '#f59e0b' }
+        }
+    };
+    
     container.innerHTML = `
         <div style="background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); min-height: 100vh; padding: 20px; color: white;">
             
@@ -759,10 +761,8 @@ window.renderDashboardExecutivo = function() {
                 </div>
             </div>
             
-            <!-- 6 BOXES DO HTML KPIs -->
             <div class="kpis-grid-executivo">
                 
-                <!-- BOX 1: Ocupação Geral com Tabela e Régua -->
                 <div class="kpi-box box-ocupacao-geral">
                     <div class="kpi-title">Ocupação Geral - Rede Externa</div>
                     
@@ -770,7 +770,6 @@ window.renderDashboardExecutivo = function() {
                         ${renderGaugeLargo(taxaOcupacao, totalOcupados)}
                     </div>
                     
-                    <!-- TABELA COM RÉGUA POR HOSPITAL -->
                     <div class="kpi-detalhes">
                         <table class="hospitais-table-ocupacao">
                             <thead>
@@ -800,12 +799,11 @@ window.renderDashboardExecutivo = function() {
                     </div>
                 </div>
 
-                <!-- BOX 2: Previsão de Alta -->
                 <div class="kpi-box box-previsao">
                     <div class="kpi-title">Leitos em Previsão de Alta</div>
                     
                     <div class="kpi-content">
-                        ${renderGaugeV5((totalPrevisao / totalOcupados * 100), '#f97316', totalPrevisao)}
+                        ${renderGaugeV5((totalPrevisao / totalOcupados * 100), CORES_ARCHIPELAGO.azulPrincipal, totalPrevisao)}
                         
                         <div class="kpi-items-lista">
                             <div class="kpi-subtitle">Total de Leitos com alta na data de hoje</div>
@@ -830,7 +828,6 @@ window.renderDashboardExecutivo = function() {
                     </div>
                 </div>
 
-                <!-- BOX 3: Disponíveis -->
                 <div class="kpi-box box-disponiveis">
                     <div class="kpi-title">Leitos Disponíveis</div>
                     
@@ -860,7 +857,6 @@ window.renderDashboardExecutivo = function() {
                     </div>
                 </div>
 
-                <!-- BOX 4: TPH -->
                 <div class="kpi-box box-tph">
                     <div class="kpi-title">TPH Médio</div>
                     
@@ -891,7 +887,6 @@ window.renderDashboardExecutivo = function() {
                     </div>
                 </div>
 
-                <!-- BOX 5: PPS -->
                 <div class="kpi-box box-pps">
                     <div class="kpi-title">PPS</div>
                     
@@ -928,7 +923,6 @@ window.renderDashboardExecutivo = function() {
                     </div>
                 </div>
 
-                <!-- BOX 6: SPICT -->
                 <div class="kpi-box box-spict">
                     <div class="kpi-title">SPICT-BR | Diretivas</div>
                     
@@ -967,7 +961,6 @@ window.renderDashboardExecutivo = function() {
                 
             </div>
             
-            <!-- HEATMAPS -->
             <div class="executivo-graficos">
                 
                 <div class="executivo-grafico-card">
@@ -996,7 +989,6 @@ window.renderDashboardExecutivo = function() {
         ${getExecutiveCSS()}
     `;
     
-    // Event listener para botão WhatsApp
     const btnWhatsApp = document.getElementById('btnWhatsAppExec');
     if (btnWhatsApp) {
         btnWhatsApp.addEventListener('click', copiarParaWhatsAppExecutivo);
@@ -1049,16 +1041,16 @@ window.renderDashboardExecutivo = function() {
 // =================== FUNÇÃO PARA OBTER COR POR VALOR ===================
 function getCorPorValor(valor) {
     if (valor === 0) return window.fundoBranco ? '#f8f9fa' : '#2d3748';
-    if (valor <= 2) return '#E5E5E5';  // Cinza claro
-    if (valor <= 4) return '#C6A664';  // Dourado suave
-    if (valor <= 6) return '#0055A4';  // Azul-claro
-    return '#003366';                  // Azul-escuro
+    if (valor <= 2) return '#E5E5E5';
+    if (valor <= 4) return '#C6A664';
+    if (valor <= 6) return '#0055A4';
+    return '#003366';
 }
 
 function getCorTexto(valor) {
     if (valor === 0) return window.fundoBranco ? '#6b7280' : '#9ca3af';
-    if (valor <= 4) return '#1e293b';  // Texto escuro para cinza e dourado
-    return '#ffffff';  // Texto branco para azul-claro e azul-escuro
+    if (valor <= 4) return '#1e293b';
+    return '#ffffff';
 }
 
 // =================== HEATMAP CONCESSÕES ===================
@@ -1079,6 +1071,16 @@ function renderHeatmapConcessoes() {
     
     const periodos = ['HOJE', '24H', '48H', '72H'];
     const dadosConcessoes = calcularDadosConcessoesReais(hospitaisComDados);
+    
+    const CONFIG = {
+        HOSPITAIS: {
+            H1: { nome: 'NEOMATER', cor: '#10b981' },
+            H2: { nome: 'CRUZ AZUL', cor: '#3b82f6' },
+            H3: { nome: 'STA MARCELINA', cor: '#8b5cf6' },
+            H4: { nome: 'SANTA CLARA', cor: '#ec4899' },
+            H5: { nome: 'ADVENTISTA', cor: '#f59e0b' }
+        }
+    };
     
     let html = `
         <div class="heatmap-legenda">
@@ -1164,6 +1166,16 @@ function renderHeatmapLinhas() {
     const periodos = ['HOJE', '24H', '48H', '72H'];
     const dadosLinhas = calcularDadosLinhasReais(hospitaisComDados);
     
+    const CONFIG = {
+        HOSPITAIS: {
+            H1: { nome: 'NEOMATER', cor: '#10b981' },
+            H2: { nome: 'CRUZ AZUL', cor: '#3b82f6' },
+            H3: { nome: 'STA MARCELINA', cor: '#8b5cf6' },
+            H4: { nome: 'SANTA CLARA', cor: '#ec4899' },
+            H5: { nome: 'ADVENTISTA', cor: '#f59e0b' }
+        }
+    };
+    
     let html = `
         <div class="heatmap-legenda">
             <strong>Escala:</strong>
@@ -1238,7 +1250,7 @@ function calcularDadosConcessoesReais(hospitaisComDados) {
         if (!hospital || !hospital.leitos) return;
         
         hospital.leitos.forEach(leito => {
-            if (leito.status !== 'ocupado' && leito.status !== 'Em uso') return;
+            if (!isOcupadoExecutivo(leito)) return;
             
             const concessoes = leito.concessoes || (leito.paciente && leito.paciente.concessoes);
             const prevAlta = leito.prevAlta || (leito.paciente && leito.paciente.prevAlta);
@@ -1289,7 +1301,7 @@ function calcularDadosLinhasReais(hospitaisComDados) {
         if (!hospital || !hospital.leitos) return;
         
         hospital.leitos.forEach(leito => {
-            if (leito.status !== 'ocupado' && leito.status !== 'Em uso') return;
+            if (!isOcupadoExecutivo(leito)) return;
             
             const linhas = leito.linhas || (leito.paciente && leito.paciente.linhas);
             const prevAlta = leito.prevAlta || (leito.paciente && leito.paciente.prevAlta);
@@ -1335,7 +1347,6 @@ function calcularDadosLinhasReais(hospitaisComDados) {
 function getExecutiveCSS() {
     return `
         <style id="executiveCSS">
-            /* GRID DOS 6 BOXES */
             .kpis-grid-executivo {
                 display: grid;
                 grid-template-columns: repeat(3, 1fr);
@@ -1343,7 +1354,6 @@ function getExecutiveCSS() {
                 margin-bottom: 30px;
             }
             
-            /* KPI BOX */
             .kpi-box {
                 background: rgba(255, 255, 255, 0.03);
                 border-radius: 12px;
@@ -1363,15 +1373,13 @@ function getExecutiveCSS() {
                 box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
             }
             
-            /* Cores da borda superior */
             .box-ocupacao-geral { border-top: 3px solid #22c55e; }
-            .box-previsao { border-top: 3px solid #f97316; }
+            .box-previsao { border-top: 3px solid #0676bb; }
             .box-disponiveis { border-top: 3px solid #3b82f6; }
             .box-tph { border-top: 3px solid #8b5cf6; }
             .box-pps { border-top: 3px solid #ec4899; }
             .box-spict { border-top: 3px solid #14b8a6; }
             
-            /* Título do Box */
             .kpi-title {
                 font-size: 12px;
                 font-weight: 600;
@@ -1382,7 +1390,6 @@ function getExecutiveCSS() {
                 text-align: center;
             }
             
-            /* GAUGE LARGO (EXECUTIVO) */
             .gauge-largo-container {
                 position: relative;
                 width: 500px;
@@ -1437,7 +1444,6 @@ function getExecutiveCSS() {
                 white-space: nowrap;
             }
             
-            /* GAUGE V5 (MEIA ROSCA) */
             .v5-gauge-container {
                 display: flex;
                 flex-direction: column;
@@ -1484,12 +1490,11 @@ function getExecutiveCSS() {
             }
             
             .v5-badge-below.blue {
-                background: rgba(59, 130, 246, 0.2);
-                color: #3b82f6;
-                border-color: #3b82f6;
+                background: rgba(6, 118, 187, 0.2);
+                color: #0676bb;
+                border-color: #0676bb;
             }
             
-            /* CONTEÚDO DO BOX */
             .kpi-content {
                 display: flex;
                 flex-direction: column;
@@ -1499,7 +1504,6 @@ function getExecutiveCSS() {
                 flex: 1;
             }
             
-            /* Lista de Tipos */
             .kpi-items-lista {
                 width: 100%;
                 display: flex;
@@ -1542,7 +1546,6 @@ function getExecutiveCSS() {
                 margin-bottom: 10px;
             }
             
-            /* DETALHES */
             .kpi-detalhes {
                 border-top: 1px solid rgba(255, 255, 255, 0.1);
                 padding-top: 15px;
@@ -1557,7 +1560,6 @@ function getExecutiveCSS() {
                 margin-bottom: 10px;
             }
             
-            /* Lista Compacta */
             .lista-simples-compacta {
                 display: flex;
                 flex-direction: column;
@@ -1589,7 +1591,6 @@ function getExecutiveCSS() {
                 color: #ffffff;
             }
             
-            /* VALORES DUPLOS */
             .kpi-valores-duplos-divididos {
                 display: flex;
                 align-items: center;
@@ -1623,7 +1624,6 @@ function getExecutiveCSS() {
                 background: rgba(255, 255, 255, 0.2);
             }
             
-            /* TPH */
             .kpi-tph-container {
                 text-align: center;
                 margin-bottom: 20px;
@@ -1642,7 +1642,6 @@ function getExecutiveCSS() {
                 margin-top: 8px;
             }
             
-            /* TPH MINI GAUGE */
             .tph-mini-gauge {
                 display: flex;
                 align-items: center;
@@ -1683,7 +1682,6 @@ function getExecutiveCSS() {
             .tph-gauge-bar.yellow { color: #f59e0b; }
             .tph-gauge-bar.red { color: #ef4444; }
             
-            /* TABELAS */
             .hospitais-table {
                 width: 100%;
                 border-collapse: collapse;
@@ -1718,7 +1716,6 @@ function getExecutiveCSS() {
                 background: rgba(255, 255, 255, 0.03);
             }
             
-            /* TABELA DE OCUPAÇÃO COM RÉGUA */
             .hospitais-table-ocupacao {
                 width: 100%;
                 border-collapse: collapse;
@@ -1766,7 +1763,6 @@ function getExecutiveCSS() {
                 background: rgba(255, 255, 255, 0.03);
             }
             
-            /* RÉGUA DE OCUPAÇÃO */
             .ocupacao-mini-gauge {
                 width: 100%;
             }
@@ -1793,7 +1789,6 @@ function getExecutiveCSS() {
                 background: rgba(255, 255, 255, 0.1);
             }
             
-            /* GRÁFICOS */
             .executivo-graficos {
                 display: flex;
                 flex-direction: column;
@@ -1831,7 +1826,6 @@ function getExecutiveCSS() {
                 font-size: 14px;
             }
             
-            /* HEATMAP */
             .heatmap-container {
                 overflow-x: auto;
                 margin: 20px 0;
@@ -1897,7 +1891,6 @@ function getExecutiveCSS() {
                 border: 1px solid rgba(0, 0, 0, 0.2);
             }
             
-            /* BOTÃO TEMA */
             .toggle-fundo-btn:hover {
                 background: rgba(255, 255, 255, 0.2) !important;
                 transform: translateY(-1px);
@@ -1909,14 +1902,12 @@ function getExecutiveCSS() {
                 color: #000000 !important;
             }
 
-            /* BOTÃO WHATSAPP */
             #btnWhatsAppExec:hover {
                 background: #1da851 !important;
                 transform: translateY(-1px);
                 box-shadow: 0 4px 12px rgba(37, 211, 102, 0.3);
             }
             
-            /* RESPONSIVE */
             @media (max-width: 1200px) {
                 .kpis-grid-executivo {
                     grid-template-columns: repeat(2, 1fr);
@@ -1926,6 +1917,11 @@ function getExecutiveCSS() {
             @media (max-width: 768px) {
                 .kpis-grid-executivo {
                     grid-template-columns: 1fr;
+                }
+                
+                .kpi-box {
+                    min-height: auto !important;
+                    padding: 15px !important;
                 }
                 
                 .gauge-largo-container {
@@ -1949,5 +1945,5 @@ function logError(message) {
     console.error('[DASHBOARD EXECUTIVO] ❌ ' + message);
 }
 
-console.log('Dashboard Executivo - 6 BOXES + HEATMAPS COM RÉGUA carregado!');
+console.log('Dashboard Executivo V3.4 - CORRIGIDO - 6 BOXES + HEATMAPS COM RÉGUA carregado!');
 console.log('Hospitais em ordem alfabética: ADVENTISTA, CRUZ AZUL, NEOMATER, SANTA CLARA, STA MARCELINA');
