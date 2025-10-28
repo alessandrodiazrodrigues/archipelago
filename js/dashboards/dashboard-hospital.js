@@ -1,9 +1,9 @@
 // js/dashboards/dashboard-hospital.js
-// =================== DASHBOARD HOSPITALAR V1.0.0 ===================
-// ✅ VERSÃO DEFINITIVA - TODAS AS CORREÇÕES INTEGRADAS
+// =================== DASHBOARD HOSPITALAR V1.0.1 COM AUTO-PATCH ===================
+// ✅ VERSÃO COM CORREÇÃO AUTOMÁTICA APÓS CARREGAMENTO
 // Data: 28/Outubro/2025
 
-console.log('🚀 [DASHBOARD HOSPITALAR] Inicializando...');
+console.log('🚀 [DASHBOARD HOSPITALAR COM PATCH] Inicializando...');
 
 /* ============================================
    CORES OFICIAIS ARCHIPELAGO
@@ -21,8 +21,8 @@ const CORES_ARCHIPELAGO = {
     laranja: '#c86420',
     amarelo: '#f59a1d',
     verde: '#29ad8d',
-    ocupados: '#0676bb', // Mudado para azul
-    previsao: '#0676bb', // Mudado para azul
+    ocupados: '#0676bb',
+    previsao: '#0676bb',
     disponiveis: '#0676bb',
     tph: '#577a97',
     pps: '#1c5083',
@@ -367,7 +367,7 @@ function calcularModalidadePorTipo(leitos, hospitalId) {
 }
 
 /* ============================================
-   PROCESSAR DADOS DO HOSPITAL
+   PROCESSAR DADOS DO HOSPITAL COM CORREÇÃO
    ============================================ */
 
 window.processarDadosHospital = function(hospitalId) {
@@ -519,7 +519,7 @@ window.processarDadosHospital = function(hospitalId) {
         ? (tphValues.reduce((a, b) => a + b, 0) / tphValues.length).toFixed(1)
         : 0;
     
-    // TPH >= 5 dias (120 horas) COM identificacaoLeito
+    // TPH >= 5 dias - VERSÃO CORRIGIDA
     const leitosMais5Diarias = ocupados.filter(l => {
         const admAt = l.admAt;
         if (!admAt) return false;
@@ -534,8 +534,9 @@ window.processarDadosHospital = function(hospitalId) {
         const admData = parseAdmDate(l.admAt);
         const dias = Math.floor((new Date() - admData) / (1000 * 60 * 60 * 24));
         
+        // Usar o campo leito direto, não identificacaoLeito
         return { 
-            leito: l.identificacaoLeito || l.leito || '---',
+            leito: l.leito || '---',
             matricula: l.matricula || '---',
             dias: dias
         };
@@ -549,12 +550,12 @@ window.processarDadosHospital = function(hospitalId) {
         ? Math.round(ppsValues.reduce((a, b) => a + b, 0) / ppsValues.length)
         : 0;
     
-    // PPS < 40% (e > 0) COM identificacaoLeito
+    // PPS < 40% - VERSÃO CORRIGIDA
     const ppsMenor40 = ocupados.filter(l => {
         const pps = parseInt(l.pps) || 0;
         return pps > 0 && pps < 40;
     }).map(l => ({
-        leito: l.identificacaoLeito || l.leito || '---',
+        leito: l.leito || '---', // Usar campo leito direto
         matricula: l.matricula || '---'
     }));
     
@@ -566,7 +567,7 @@ window.processarDadosHospital = function(hospitalId) {
         return norm === 'elegivel' || norm === 'elegível';
     });
     
-    // Diretivas Pendentes COM identificacaoLeito
+    // Diretivas Pendentes - VERSÃO CORRIGIDA
     const diretivasPendentes = ocupados.filter(l => {
         const spict = l.spict;
         if (!spict) return false;
@@ -583,7 +584,7 @@ window.processarDadosHospital = function(hospitalId) {
         
         return valoresPendentes.includes(dirNorm);
     }).map(l => ({
-        leito: l.identificacaoLeito || l.leito || '---',
+        leito: l.leito || '---', // Usar campo leito direto
         matricula: l.matricula || '---'
     }));
     
@@ -637,6 +638,105 @@ window.processarDadosHospital = function(hospitalId) {
             listaDiretivas: diretivasPendentes
         }
     };
+};
+
+/* ============================================
+   PATCH AUTOMÁTICO PARA CORRIGIR DADOS
+   ============================================ */
+
+window.aplicarPatchAutomatico = function() {
+    console.log('🔧 [PATCH] Aplicando correções automáticas...');
+    
+    const hospitaisIds = ['H5', 'H2', 'H1', 'H4', 'H3'];
+    
+    hospitaisIds.forEach(hospitalId => {
+        const hospital = window.hospitalData[hospitalId];
+        if (!hospital || !hospital.leitos) return;
+        
+        const dados = window.processarDadosHospital(hospitalId);
+        
+        // Corrigir TPH > 5 dias
+        const tphBox = document.querySelector(`[data-hospital="${hospitalId}"] .box-tph .kpi-detalhes`);
+        if (tphBox && dados.tph.lista && dados.tph.lista.length > 0) {
+            const html = `
+                <div class="detalhe-titulo">Nº Diárias > 5</div>
+                <table class="hospitais-table">
+                    <thead>
+                        <tr>
+                            <th style="text-align: left !important;">Leito</th>
+                            <th style="text-align: center !important;">Matrícula</th>
+                            <th style="text-align: right !important;">Dias</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${dados.tph.lista.map(l => `
+                            <tr>
+                                <td style="text-align: left !important;">${l.leito}</td>
+                                <td style="text-align: center !important;">${l.matricula}</td>
+                                <td style="text-align: right !important;">${l.dias}</td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            `;
+            tphBox.innerHTML = html;
+            console.log(`✅ [PATCH] TPH corrigido para ${hospitalId}`);
+        }
+        
+        // Corrigir PPS < 40%
+        const ppsBox = document.querySelector(`[data-hospital="${hospitalId}"] .box-pps .kpi-detalhes`);
+        if (ppsBox && dados.pps.menor40 && dados.pps.menor40.length > 0) {
+            const html = `
+                <div class="detalhe-titulo">PPS < 40%</div>
+                <table class="hospitais-table">
+                    <thead>
+                        <tr>
+                            <th style="text-align: left !important;">Leito</th>
+                            <th style="text-align: right !important;">Matrícula</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${dados.pps.menor40.map(l => `
+                            <tr>
+                                <td style="text-align: left !important;">${l.leito}</td>
+                                <td style="text-align: right !important;">${l.matricula}</td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            `;
+            ppsBox.innerHTML = html;
+            console.log(`✅ [PATCH] PPS corrigido para ${hospitalId}`);
+        }
+        
+        // Corrigir Diretivas Pendentes
+        const spictBox = document.querySelector(`[data-hospital="${hospitalId}"] .box-spict .kpi-detalhes`);
+        if (spictBox && dados.spict.listaDiretivas && dados.spict.listaDiretivas.length > 0) {
+            const html = `
+                <div class="detalhe-titulo">Diretivas Pendentes</div>
+                <table class="hospitais-table">
+                    <thead>
+                        <tr>
+                            <th style="text-align: left !important;">Leito</th>
+                            <th style="text-align: right !important;">Matrícula</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${dados.spict.listaDiretivas.map(l => `
+                            <tr>
+                                <td style="text-align: left !important;">${l.leito}</td>
+                                <td style="text-align: right !important;">${l.matricula}</td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            `;
+            spictBox.innerHTML = html;
+            console.log(`✅ [PATCH] Diretivas corrigido para ${hospitalId}`);
+        }
+    });
+    
+    console.log('✅ [PATCH] Correções aplicadas com sucesso!');
 };
 
 /* ============================================
@@ -741,11 +841,11 @@ function renderMiniGaugeTPH(dias) {
 }
 
 /* ============================================
-   RENDER DASHBOARD HOSPITALAR
+   RENDER DASHBOARD HOSPITALAR COM AUTO-PATCH
    ============================================ */
 
 window.renderDashboardHospitalar = function() {
-    console.log('📊 Renderizando Dashboard Hospitalar');
+    console.log('📊 Renderizando Dashboard Hospitalar com Auto-Patch');
     
     let container = document.getElementById('dashHospitalarContent');
     if (!container) {
@@ -878,7 +978,14 @@ window.renderDashboardHospitalar = function() {
                 renderLinhasHospital(hospitalId);
             });
             
-            console.log('✅ Dashboard renderizado com sucesso!');
+            console.log('✅ Dashboard renderizado');
+            
+            // APLICAR PATCH AUTOMÁTICO APÓS 2 SEGUNDOS
+            setTimeout(() => {
+                console.log('⏱️ Aguardando 2 segundos para aplicar patch...');
+                window.aplicarPatchAutomatico();
+            }, 2000);
+            
         }, 100);
     };
     
@@ -1131,9 +1238,13 @@ function renderHospitalSection(hospitalId, hoje) {
 }
 
 /* ============================================
-   PLUGIN FUNDO BRANCO/ESCURO
+   GRÁFICOS E CSS (RESTO DO CÓDIGO CONTINUA IGUAL)
    ============================================ */
 
+// [Todo o resto do código dos gráficos e CSS permanece igual...]
+
+// Incluir todo o código dos gráficos (renderAltasHospital, renderConcessoesHospital, etc.)
+// Incluir o plugin de background
 const backgroundPlugin = {
     id: 'customBackground',
     beforeDraw: (chart) => {
@@ -1145,10 +1256,7 @@ const backgroundPlugin = {
     }
 };
 
-/* ============================================
-   ANÁLISE PREDITIVA DE ALTAS
-   ============================================ */
-
+// Função renderAltasHospital
 function renderAltasHospital(hospitalId) {
     const canvas = document.getElementById(`graficoAltas${hospitalId}`);
     if (!canvas || typeof Chart === 'undefined') return;
@@ -1285,10 +1393,7 @@ function renderAltasHospital(hospitalId) {
     });
 }
 
-/* ============================================
-   CONCESSÕES - 3 BOXES TIMELINE
-   ============================================ */
-
+// Funções renderConcessoesHospital e renderLinhasHospital
 function renderConcessoesHospital(hospitalId) {
     const container = document.getElementById(`concessoesBoxes${hospitalId}`);
     if (!container) return;
@@ -1454,10 +1559,6 @@ function renderDoughnutConcessoes(hospitalId, timeline, dados) {
         plugins: chartPlugins
     });
 }
-
-/* ============================================
-   LINHAS DE CUIDADO - 3 BOXES TIMELINE
-   ============================================ */
 
 function renderLinhasHospital(hospitalId) {
     const container = document.getElementById(`linhasBoxes${hospitalId}`);
@@ -1625,10 +1726,7 @@ function renderDoughnutLinhas(hospitalId, timeline, dados) {
     });
 }
 
-/* ============================================
-   CSS CONSOLIDADO COM CORREÇÕES
-   ============================================ */
-
+// Função getHospitalConsolidadoCSS completa
 function getHospitalConsolidadoCSS() {
     return `
         <style id="hospitalConsolidadoCSS">
@@ -2252,11 +2350,10 @@ window.forceDataRefresh = function() {
    LOG FINAL
    ============================================ */
 
-console.log('✅ [DASHBOARD HOSPITALAR] Carregado com sucesso!');
+console.log('✅ [DASHBOARD HOSPITALAR COM PATCH] Carregado com sucesso!');
 console.log('📦 Funções disponíveis:');
 console.log('   - window.renderDashboardHospitalar()');
-console.log('   - window.renderizarDashboard() [alias]');
+console.log('   - window.aplicarPatchAutomatico()');
 console.log('   - window.processarDadosHospital(hospitalId)');
-console.log('   - window.copiarDashboardParaWhatsApp()');
-console.log('   - window.forceDataRefresh()');
-console.log('🎨 Sistema pronto para uso!');
+console.log('🎨 Sistema com AUTO-PATCH pronto para uso!');
+console.log('⏱️ Patch será aplicado automaticamente 2 segundos após renderização');
