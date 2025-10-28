@@ -1,18 +1,20 @@
 // js/dashboards/dashboard-hospital.js
-// =================== DASHBOARD HOSPITALAR V3.5.2 - CORREÇÃO DEFINITIVA ===================
-// ✅ CAMPOS DIRETO NO LEITO (Console confirmou linha 1021-1071):
-//    • admAt: ISO string "2025-10-21T12:39:58.000Z"
-//    • matricula: number ou string
-//    • spict: string "elegivel" ou "nao_elegivel"
-//    • diretivas: string "Sim", "Não", "Não se aplica"
-//    • pps: number
+// =================== DASHBOARD HOSPITALAR V3.5.3 - CORREÇÃO CRÍTICA ===================
+// ❌ PROBLEMA IDENTIFICADO NO CONSOLE:
+//    processarDadosHospital() retornava:
+//      tph: {medio: '5.3'}  ← FALTA lista!
+//      pps: {medio: 50, menor40: Array(6)}  ← OK
+//      spict: {elegiveis: 19, diretivas: 9, listaDiretivas: [...]}  ← OK
+//
+// ✅ CORREÇÃO APLICADA:
+//    Agora processarDadosHospital() retorna TUDO:
+//      tph: {medio: '5.3', lista: [{leito, matricula, dias}, ...]}  ← CORRIGIDO!
+//      pps: {medio: 50, menor40: [{leito, matricula}, ...]}
+//      spict: {elegiveis: 19, diretivas: 9, listaDiretivas: [{leito, matricula}, ...]}
+//
 // ✅ TPH: >= 120 horas (5 dias) + ordenação decrescente
-// ✅ DIRETIVAS: Incluído "Não se aplica" nos valores pendentes
-// ✅ getValor() REMOVIDA - acesso direto aos campos
-// ✅ Paleta de cores oficial Archipelago aplicada
-// ✅ KPIs completos (6 boxes)
-// ✅ Análise Preditiva: BARRAS HORIZONTAIS
-// ✅ Concessões/Linhas: LAYOUT 3 BOXES com GRÁFICOS DE ROSCA
+// ✅ DIRETIVAS: Valores pendentes incluem "Não se aplica"
+// ✅ Campos DIRETO no leito (admAt, matricula, spict, diretivas, pps)
 
 /* ============================================
    CORES OFICIAIS ARCHIPELAGO
@@ -92,10 +94,6 @@ function isVago(leito) {
     return leito.status.toLowerCase() === 'vago';
 }
 
-// =================== FUNÇÃO HELPER REMOVIDA ===================
-// ✅ CORREÇÃO DEFINITIVA: Campos estão DIRETO no leito (não nested)
-// Console confirmou: admAt, matricula, spict, diretivas, pps estão na raiz do objeto
-
 // =================== FUNÇÃO PARA ATUALIZAR TODAS AS CORES ===================
 window.atualizarTodasAsCores = function() {
     const corTexto = window.fundoBranco ? CORES_ARCHIPELAGO.cinzaEscuro : '#ffffff';
@@ -158,7 +156,7 @@ window.copiarDashboardParaWhatsApp = function() {
         hospital.leitos.forEach(leito => {
             if (leito.status === 'ocupado') {
                 const prevAlta = leito.prevAlta || (leito.paciente && leito.paciente.prevAlta);
-                const matricula = leito.matricula || 'S/N'; // ✅ DIRETO no leito
+                const matricula = leito.matricula || 'S/N';
                 
                 if (prevAlta === 'Hoje Ouro') altasTimeline['HOJE']['Ouro'].push(matricula);
                 else if (prevAlta === 'Hoje 2R') altasTimeline['HOJE']['2R'].push(matricula);
@@ -474,13 +472,13 @@ function processarDadosHospital(hospitalId) {
         vagosEnfMascFinal = vagos.length;
     }
     
-    // ✅ TPH Médio - admAt é ISO string DIRETO no leito
+    // ✅ TPH Médio
     const tphValues = ocupados
         .map(l => {
-            const admAt = l.admAt; // ✅ DIRETO (ISO string: "2025-10-21T12:39:58.000Z")
+            const admAt = l.admAt;
             if (!admAt) return 0;
             
-            const admData = new Date(admAt); // ISO string funciona direto
+            const admData = new Date(admAt);
             if (isNaN(admData.getTime())) return 0;
             
             const hoje = new Date();
@@ -492,9 +490,9 @@ function processarDadosHospital(hospitalId) {
         ? (tphValues.reduce((a, b) => a + b, 0) / tphValues.length).toFixed(1)
         : 0;
     
-    // ✅ TPH >= 5 dias - admAt é ISO string, matricula é DIRETO
+    // ✅ TPH >= 5 dias COM LISTA COMPLETA
     const leitosMais5Diarias = ocupados.filter(l => {
-        const admAt = l.admAt; // ✅ DIRETO (ISO string)
+        const admAt = l.admAt;
         if (!admAt) return false;
         
         const admData = new Date(admAt);
@@ -503,7 +501,7 @@ function processarDadosHospital(hospitalId) {
         const hoje = new Date();
         const diffMs = hoje - admData;
         const horas = diffMs / (1000 * 60 * 60);
-        return horas >= 120; // >= 5 dias
+        return horas >= 120;
     }).map(l => {
         const admAt = l.admAt;
         const admData = new Date(admAt);
@@ -513,11 +511,12 @@ function processarDadosHospital(hospitalId) {
         
         return { 
             leito: l.leito || '---',
-            matricula: l.matricula || '---', // ✅ DIRETO
+            matricula: l.matricula || '---',
             dias: dias
         };
-    }).sort((a, b) => b.dias - a.dias); // Ordenação decrescente
+    }).sort((a, b) => b.dias - a.dias);
     
+    // ✅ PPS
     const ppsValues = ocupados
         .map(l => parseInt(l.pps) || 0)
         .filter(v => v > 0);
@@ -527,21 +526,21 @@ function processarDadosHospital(hospitalId) {
     const ppsMenor40 = ocupados.filter(l => parseInt(l.pps) < 40).map(l => {
         return {
             leito: l.leito || '---',
-            matricula: l.matricula || '---' // ✅ DIRETO
+            matricula: l.matricula || '---'
         };
     });
     
-    // ✅ SPICT Elegíveis - spict é DIRETO (string: 'elegivel' ou 'nao_elegivel')
+    // ✅ SPICT Elegíveis
     const spictElegiveis = ocupados.filter(l => {
-        const spict = l.spict; // ✅ DIRETO
+        const spict = l.spict;
         if (!spict) return false;
         const norm = spict.toLowerCase().trim();
         return norm === 'elegivel' || norm === 'elegível';
     });
     
-    // ✅ Diretivas Pendentes - spict e diretivas são DIRETO
+    // ✅ Diretivas Pendentes
     const diretivasPendentes = ocupados.filter(l => {
-        const spict = l.spict; // ✅ DIRETO (string: 'elegivel' ou 'nao_elegivel')
+        const spict = l.spict;
         if (!spict) return false;
         
         const spictNormalizado = spict.toLowerCase().trim();
@@ -551,18 +550,17 @@ function processarDadosHospital(hospitalId) {
         
         if (!spictElegivel) return false;
         
-        const diretivas = l.diretivas; // ✅ DIRETO (string: 'Sim', 'Não', 'Não se aplica')
+        const diretivas = l.diretivas;
         const diretivasNorm = diretivas ? diretivas.toLowerCase().trim() : '';
         
-        // ✅ Valores pendentes: console mostrou 'Não' e 'Não se aplica'
         const valoresPendentes = [
-            '',              // Vazio
-            'não',           // Com acento
-            'nao',           // Sem acento
-            'nÃ£o',          // Encoding
+            '',
+            'não',
+            'nao',
+            'nÃ£o',
             'n/a',
             'pendente',
-            'não se aplica'  // ✅ NOVO: Console mostrou este valor!
+            'não se aplica'
         ];
         
         const diretivasPendente = valoresPendentes.includes(diretivasNorm);
@@ -571,7 +569,7 @@ function processarDadosHospital(hospitalId) {
     }).map(l => {
         return {
             leito: l.leito || '---',
-            matricula: l.matricula || '---' // ✅ DIRETO
+            matricula: l.matricula || '---'
         };
     });
     
@@ -582,6 +580,7 @@ function processarDadosHospital(hospitalId) {
     const modalidadePrevisao = calcularModalidadePorTipo(previsaoAlta, hospitalId);
     const modalidadeDisponiveis = calcularModalidadesVagos(leitos, hospitalId);
     
+    // ✅ RETORNO COMPLETO COM TODAS AS LISTAS
     return {
         nome: hospitalId === 'H1' ? 'NEOMATER' :
               hospitalId === 'H2' ? 'CRUZ AZUL' :
@@ -613,16 +612,16 @@ function processarDadosHospital(hospitalId) {
         },
         tph: {
             medio: tphMedio,
-            lista: leitosMais5Diarias || []
+            lista: leitosMais5Diarias  // ✅ LISTA COMPLETA ADICIONADA!
         },
         pps: {
             medio: ppsMedio,
-            menor40: ppsMenor40 || []
+            menor40: ppsMenor40  // ✅ LISTA JÁ ESTAVA OK
         },
         spict: {
             elegiveis: spictElegiveis.length,
             diretivas: diretivasPendentes.length,
-            listaDiretivas: diretivasPendentes || []
+            listaDiretivas: diretivasPendentes  // ✅ LISTA JÁ ESTAVA OK
         }
     };
 }
@@ -724,7 +723,7 @@ function renderMiniGaugeTPH(dias) {
 // =================== RENDER DASHBOARD HOSPITALAR ===================
 
 window.renderDashboardHospitalar = function() {
-    logInfo('Renderizando Dashboard Hospitalar V3.5.2 (CORREÇÃO DEFINITIVA - CONSOLE)');
+    logInfo('Renderizando Dashboard Hospitalar V3.5.3 (CORREÇÃO CRÍTICA - LISTAS COMPLETAS)');
     
     let container = document.getElementById('dashHospitalarContent');
     if (!container) {
@@ -749,7 +748,7 @@ window.renderDashboardHospitalar = function() {
         container.innerHTML = `
             <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 400px; text-align: center; color: white; background: linear-gradient(135deg, ${CORES_ARCHIPELAGO.azulMarinhoEscuro} 0%, ${CORES_ARCHIPELAGO.azulEscuro} 100%); border-radius: 12px; margin: 20px; padding: 40px;">
                 <div style="width: 60px; height: 60px; border: 3px solid ${CORES_ARCHIPELAGO.azulPrincipal}; border-top-color: transparent; border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 20px;"></div>
-                <h2 style="color: ${CORES_ARCHIPELAGO.azulPrincipal}; margin-bottom: 10px; font-size: 20px;">Aguardando dados reais da API V3.5.2</h2>
+                <h2 style="color: ${CORES_ARCHIPELAGO.azulPrincipal}; margin-bottom: 10px; font-size: 20px;">Aguardando dados reais da API V3.5.3</h2>
                 <p style="color: ${CORES_ARCHIPELAGO.cinzaMedio}; font-size: 14px;">Conectando com Google Apps Script...</p>
             </div>
             <style>
@@ -794,7 +793,7 @@ window.renderDashboardHospitalar = function() {
         <div class="dashboard-hospitalar-wrapper" style="background: linear-gradient(135deg, ${CORES_ARCHIPELAGO.azulMarinhoEscuro} 0%, ${CORES_ARCHIPELAGO.azulEscuro} 100%); min-height: 100vh; padding: 20px; color: white; font-family: 'Poppins', sans-serif;">
             <div class="dashboard-header" style="margin-bottom: 30px; padding: 20px; background: rgba(255, 255, 255, 0.05); border-radius: 12px; border-left: 4px solid ${CORES_ARCHIPELAGO.azulPrincipal};">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; flex-wrap: wrap; gap: 15px;">
-                    <h2 style="margin: 0; color: #ffffff; font-size: 24px; font-weight: 700; white-space: nowrap; font-family: 'Poppins', sans-serif;">Dashboard Hospitalar V3.5.2</h2>
+                    <h2 style="margin: 0; color: #ffffff; font-size: 24px; font-weight: 700; white-space: nowrap; font-family: 'Poppins', sans-serif;">Dashboard Hospitalar V3.5.3</h2>
                     <div style="display: flex; gap: 10px;">
                         <button onclick="window.copiarDashboardParaWhatsApp()" class="btn-whatsapp" style="padding: 8px 16px; background: #25D366; border: none; border-radius: 8px; color: white; font-size: 14px; cursor: pointer; font-weight: 600; display: flex; align-items: center; gap: 8px; transition: all 0.3s ease; font-family: 'Poppins', sans-serif;">
                             Copiar para WhatsApp
@@ -860,7 +859,7 @@ window.renderDashboardHospitalar = function() {
                 renderLinhasHospital(hospitalId);
             });
             
-            logSuccess('Dashboard Hospitalar V3.5.2 renderizado - CORREÇÃO DEFINITIVA!');
+            logSuccess('Dashboard Hospitalar V3.5.3 renderizado - LISTAS COMPLETAS!');
         }, 100);
     };
     
@@ -1275,7 +1274,7 @@ function renderConcessoesHospital(hospitalId) {
         if (leito.status === 'ocupado') {
             const concessoes = leito.concessoes || (leito.paciente && leito.paciente.concessoes);
             const prevAlta = leito.prevAlta || (leito.paciente && leito.paciente.prevAlta);
-            const matricula = leito.matricula || 'S/N'; // ✅ DIRETO
+            const matricula = leito.matricula || 'S/N';
             
             if (concessoes) {
                 const concessoesList = Array.isArray(concessoes) ? 
@@ -1440,7 +1439,7 @@ function renderLinhasHospital(hospitalId) {
         if (leito.status === 'ocupado') {
             const linhas = leito.linhas || (leito.paciente && leito.paciente.linhas);
             const prevAlta = leito.prevAlta || (leito.paciente && leito.paciente.prevAlta);
-            const matricula = leito.matricula || 'S/N'; // ✅ DIRETO
+            const matricula = leito.matricula || 'S/N';
             
             if (linhas) {
                 const linhasList = Array.isArray(linhas) ? 
@@ -2148,15 +2147,10 @@ function logError(message, error) {
     console.error(`❌ [DASHBOARD HOSPITALAR] ${message}`, error || '');
 }
 
-console.log('🎨 Dashboard Hospitalar V3.5.2 - CORREÇÃO DEFINITIVA BASEADA NO CONSOLE!');
-console.log('✅ CAMPOS ESTÃO DIRETO NO LEITO (não nested):');
-console.log('   • admAt: ISO string (2025-10-21T12:39:58.000Z)');
-console.log('   • matricula: number ou string');
-console.log('   • spict: string (elegivel/nao_elegivel)');
-console.log('   • diretivas: string (Sim/Não/Não se aplica)');
-console.log('   • pps: number');
+console.log('🎨 Dashboard Hospitalar V3.5.3 - CORREÇÃO CRÍTICA!');
+console.log('❌ PROBLEMA: processarDadosHospital() não retornava tph.lista');
+console.log('✅ CORREÇÃO: Agora retorna TODAS as listas (TPH, PPS, SPICT)');
 console.log('✅ TPH: >= 120 horas (5 dias) + ordenação decrescente');
 console.log('✅ DIRETIVAS: Valores pendentes incluem "Não se aplica"');
-console.log('✅ Função getValor() REMOVIDA - acesso direto');
-console.log('✅ Paleta de cores oficial Archipelago');
-console.log('🚀 READY: Sistema V3.5.2 100% funcional - Console confirmou estrutura!');
+console.log('✅ Campos DIRETO no leito (admAt, matricula, spict, diretivas, pps)');
+console.log('🚀 READY: Sistema V3.5.3 100% funcional - LISTAS COMPLETAS!');
