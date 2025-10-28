@@ -1166,15 +1166,15 @@ function renderHeatmapLinhas() {
     const periodos = ['HOJE', '24H', '48H', '72H'];
     const dadosLinhas = calcularDadosLinhasReais(hospitaisComDados);
     
-    const CONFIG = {
-        HOSPITAIS: {
-            H1: { nome: 'NEOMATER', cor: '#10b981' },
-            H2: { nome: 'CRUZ AZUL', cor: '#3b82f6' },
-            H3: { nome: 'STA MARCELINA', cor: '#8b5cf6' },
-            H4: { nome: 'SANTA CLARA', cor: '#ec4899' },
-            H5: { nome: 'ADVENTISTA', cor: '#f59e0b' }
-        }
-    };
+const CONFIG = {
+    HOSPITAIS: {
+        H1: { nome: 'NEOMATER', cor: '#2d3748' },
+        H2: { nome: 'CRUZ AZUL', cor: '#2d3748' },
+        H3: { nome: 'STA MARCELINA', cor: '#2d3748' },
+        H4: { nome: 'SANTA CLARA', cor: '#2d3748' },
+        H5: { nome: 'ADVENTISTA', cor: '#2d3748' }
+    }
+};
     
     let html = `
         <div class="heatmap-legenda">
