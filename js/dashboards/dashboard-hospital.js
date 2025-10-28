@@ -3,7 +3,7 @@
 // ✅ VERSÃO DEFINITIVA - TODAS AS CORREÇÕES INTEGRADAS
 // Data: 28/Outubro/2025
 
-console.log('🚀 [DASHBOARD HOSPITALAR V1.0.0] Inicializando...');
+console.log('🚀 [DASHBOARD HOSPITALAR] Inicializando...');
 
 /* ============================================
    CORES OFICIAIS ARCHIPELAGO
@@ -21,8 +21,8 @@ const CORES_ARCHIPELAGO = {
     laranja: '#c86420',
     amarelo: '#f59a1d',
     verde: '#29ad8d',
-    ocupados: '#29ad8d',
-    previsao: '#c86420',
+    ocupados: '#0676bb', // Mudado para azul
+    previsao: '#0676bb', // Mudado para azul
     disponiveis: '#0676bb',
     tph: '#577a97',
     pps: '#1c5083',
@@ -640,7 +640,7 @@ window.processarDadosHospital = function(hospitalId) {
 };
 
 /* ============================================
-   RENDER GAUGE V5
+   RENDER GAUGE V5 - SEMPRE AZUL
    ============================================ */
 
 function calcularGaugeOffset(porcentagem) {
@@ -651,8 +651,9 @@ function calcularGaugeOffset(porcentagem) {
 
 function renderGaugeV5(porcentagem, cor, numero) {
     const offset = calcularGaugeOffset(porcentagem);
-    const badgeClass = cor === CORES_ARCHIPELAGO.ocupados ? 'green' : 
-                       (cor === CORES_ARCHIPELAGO.previsao ? 'orange' : 'blue');
+    // Sempre usar azul e badge azul
+    const badgeClass = 'blue';
+    cor = CORES_ARCHIPELAGO.azulPrincipal; 
     
     return `
         <div class="v5-gauge-container">
@@ -744,7 +745,7 @@ function renderMiniGaugeTPH(dias) {
    ============================================ */
 
 window.renderDashboardHospitalar = function() {
-    console.log('📊 [V1.0.0] Renderizando Dashboard Hospitalar');
+    console.log('📊 Renderizando Dashboard Hospitalar');
     
     let container = document.getElementById('dashHospitalarContent');
     if (!container) {
@@ -813,8 +814,8 @@ window.renderDashboardHospitalar = function() {
         <div class="dashboard-hospitalar-wrapper" style="background: linear-gradient(135deg, ${CORES_ARCHIPELAGO.azulMarinhoEscuro} 0%, ${CORES_ARCHIPELAGO.azulEscuro} 100%); min-height: 100vh; padding: 20px; color: white; font-family: 'Poppins', sans-serif;">
             <div class="dashboard-header" style="margin-bottom: 30px; padding: 20px; background: rgba(255, 255, 255, 0.05); border-radius: 12px; border-left: 4px solid ${CORES_ARCHIPELAGO.azulPrincipal};">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; flex-wrap: wrap; gap: 15px;">
-                    <h2 style="margin: 0; color: #ffffff; font-size: 24px; font-weight: 700; white-space: nowrap; font-family: 'Poppins', sans-serif;">Dashboard Hospitalar</h2>
-                    <div style="display: flex; gap: 10px;">
+                    <h2 style="margin: 0; color: #ffffff; font-size: 24px; font-weight: 700; text-align: center; width: 100%; font-family: 'Poppins', sans-serif;">Dashboard Hospitalar</h2>
+                    <div style="display: flex; gap: 10px; margin: 0 auto;">
                         <button onclick="window.copiarDashboardParaWhatsApp()" class="btn-whatsapp" style="padding: 8px 16px; background: #25D366; border: none; border-radius: 8px; color: white; font-size: 14px; cursor: pointer; font-weight: 600; display: flex; align-items: center; gap: 8px; transition: all 0.3s ease; font-family: 'Poppins', sans-serif;">
                             Copiar para WhatsApp
                         </button>
@@ -877,7 +878,7 @@ window.renderDashboardHospitalar = function() {
                 renderLinhasHospital(hospitalId);
             });
             
-            console.log('✅ [V1.0.0] Dashboard renderizado com sucesso!');
+            console.log('✅ Dashboard renderizado com sucesso!');
         }, 100);
     };
     
@@ -1005,17 +1006,17 @@ function renderHospitalSection(hospitalId, hoje) {
                             <table class="hospitais-table">
                                 <thead>
                                     <tr>
-                                        <th>Leito</th>
-                                        <th>Matrícula</th>
-                                        <th>Dias</th>
+                                        <th style="text-align: left !important;">Leito</th>
+                                        <th style="text-align: center !important;">Matrícula</th>
+                                        <th style="text-align: right !important;">Dias</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     ${dados.tph.lista.map(l => `
                                         <tr>
-                                            <td>${l.leito}</td>
-                                            <td>${l.matricula}</td>
-                                            <td>${l.dias}</td>
+                                            <td style="text-align: left !important;">${l.leito}</td>
+                                            <td style="text-align: center !important;">${l.matricula}</td>
+                                            <td style="text-align: right !important;">${l.dias}</td>
                                         </tr>
                                     `).join('')}
                                 </tbody>
@@ -1045,15 +1046,15 @@ function renderHospitalSection(hospitalId, hoje) {
                             <table class="hospitais-table">
                                 <thead>
                                     <tr>
-                                        <th>Leito</th>
-                                        <th>Matrícula</th>
+                                        <th style="text-align: left !important;">Leito</th>
+                                        <th style="text-align: right !important;">Matrícula</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     ${dados.pps.menor40.map(l => `
                                         <tr>
-                                            <td>${l.leito}</td>
-                                            <td>${l.matricula}</td>
+                                            <td style="text-align: left !important;">${l.leito}</td>
+                                            <td style="text-align: right !important;">${l.matricula}</td>
                                         </tr>
                                     `).join('')}
                                 </tbody>
@@ -1083,15 +1084,15 @@ function renderHospitalSection(hospitalId, hoje) {
                             <table class="hospitais-table">
                                 <thead>
                                     <tr>
-                                        <th>Leito</th>
-                                        <th>Matrícula</th>
+                                        <th style="text-align: left !important;">Leito</th>
+                                        <th style="text-align: right !important;">Matrícula</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     ${dados.spict.listaDiretivas.map(l => `
                                         <tr>
-                                            <td>${l.leito}</td>
-                                            <td>${l.matricula}</td>
+                                            <td style="text-align: left !important;">${l.leito}</td>
+                                            <td style="text-align: right !important;">${l.matricula}</td>
                                         </tr>
                                     `).join('')}
                                 </tbody>
@@ -1625,7 +1626,7 @@ function renderDoughnutLinhas(hospitalId, timeline, dados) {
 }
 
 /* ============================================
-   CSS CONSOLIDADO
+   CSS CONSOLIDADO COM CORREÇÕES
    ============================================ */
 
 function getHospitalConsolidadoCSS() {
@@ -1645,6 +1646,13 @@ function getHospitalConsolidadoCSS() {
             .dashboard-hospitalar-wrapper {
                 border-radius: 0;
                 box-shadow: none;
+            }
+            
+            /* Título centralizado */
+            .dashboard-header h2 {
+                text-align: center !important;
+                width: 100% !important;
+                margin: 0 auto !important;
             }
             
             .btn-whatsapp:hover {
@@ -1710,6 +1718,7 @@ function getHospitalConsolidadoCSS() {
                 padding: 20px;
                 transition: all 0.3s ease;
                 border: 1px solid rgba(255, 255, 255, 0.1);
+                border-top: 3px solid #ffffff !important;
                 min-height: 350px;
                 display: flex;
                 flex-direction: column;
@@ -1718,14 +1727,18 @@ function getHospitalConsolidadoCSS() {
             .kpi-box:hover {
                 background: rgba(255, 255, 255, 0.05);
                 border-color: rgba(255, 255, 255, 0.2);
+                border-top-color: #ffffff !important;
             }
             
-            .box-ocupados { border-top: 3px solid ${CORES_ARCHIPELAGO.ocupados}; }
-            .box-previsao { border-top: 3px solid ${CORES_ARCHIPELAGO.previsao}; }
-            .box-disponiveis { border-top: 3px solid ${CORES_ARCHIPELAGO.disponiveis}; }
-            .box-tph { border-top: 3px solid ${CORES_ARCHIPELAGO.tph}; }
-            .box-pps { border-top: 3px solid ${CORES_ARCHIPELAGO.pps}; }
-            .box-spict { border-top: 3px solid ${CORES_ARCHIPELAGO.spict}; }
+            /* Remover classes específicas de cor - linha sempre branca */
+            .box-ocupados,
+            .box-previsao,
+            .box-disponiveis,
+            .box-tph,
+            .box-pps,
+            .box-spict {
+                border-top-color: #ffffff !important;
+            }
             
             .kpi-title {
                 font-size: 11px;
@@ -1770,22 +1783,14 @@ function getHospitalConsolidadoCSS() {
                 border: 1px solid;
             }
             
-            .v5-badge-below.green {
-                background: rgba(41, 173, 141, 0.2);
-                color: ${CORES_ARCHIPELAGO.verde};
-                border-color: ${CORES_ARCHIPELAGO.verde};
-            }
-            
-            .v5-badge-below.orange {
-                background: rgba(200, 100, 32, 0.2);
-                color: ${CORES_ARCHIPELAGO.laranja};
-                border-color: ${CORES_ARCHIPELAGO.laranja};
-            }
-            
+            /* Badges sempre azuis */
+            .v5-badge-below,
+            .v5-badge-below.green,
+            .v5-badge-below.orange,
             .v5-badge-below.blue {
-                background: rgba(6, 118, 187, 0.2);
-                color: ${CORES_ARCHIPELAGO.azulPrincipal};
-                border-color: ${CORES_ARCHIPELAGO.azulPrincipal};
+                background: rgba(6, 118, 187, 0.2) !important;
+                color: ${CORES_ARCHIPELAGO.azulPrincipal} !important;
+                border-color: ${CORES_ARCHIPELAGO.azulPrincipal} !important;
             }
             
             .kpi-content {
@@ -1986,7 +1991,6 @@ function getHospitalConsolidadoCSS() {
             }
             
             .hospitais-table th {
-                text-align: left;
                 padding: 6px;
                 color: ${CORES_ARCHIPELAGO.azulPrincipal};
                 font-weight: 600;
@@ -1999,6 +2003,34 @@ function getHospitalConsolidadoCSS() {
                 padding: 6px;
                 color: #e5e7eb;
                 border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            }
+            
+            /* Alinhamento Tabela TPH */
+            .box-tph .hospitais-table thead th:nth-child(1),
+            .box-tph .hospitais-table tbody td:nth-child(1) {
+                text-align: left !important;
+            }
+            .box-tph .hospitais-table thead th:nth-child(2),
+            .box-tph .hospitais-table tbody td:nth-child(2) {
+                text-align: center !important;
+            }
+            .box-tph .hospitais-table thead th:nth-child(3),
+            .box-tph .hospitais-table tbody td:nth-child(3) {
+                text-align: right !important;
+            }
+            
+            /* Alinhamento Tabelas PPS e SPICT */
+            .box-pps .hospitais-table thead th:nth-child(1),
+            .box-pps .hospitais-table tbody td:nth-child(1),
+            .box-spict .hospitais-table thead th:nth-child(1),
+            .box-spict .hospitais-table tbody td:nth-child(1) {
+                text-align: left !important;
+            }
+            .box-pps .hospitais-table thead th:nth-child(2),
+            .box-pps .hospitais-table tbody td:nth-child(2),
+            .box-spict .hospitais-table thead th:nth-child(2),
+            .box-spict .hospitais-table tbody td:nth-child(2) {
+                text-align: right !important;
             }
             
             .hospitais-table tbody tr:last-child td {
@@ -2152,6 +2184,7 @@ function getHospitalConsolidadoCSS() {
                 line-height: 1.4;
             }
             
+            /* Responsividade */
             @media (max-width: 1200px) {
                 .kpis-grid {
                     grid-template-columns: repeat(2, 1fr);
@@ -2159,12 +2192,45 @@ function getHospitalConsolidadoCSS() {
             }
             
             @media (max-width: 768px) {
+                .dashboard-header > div {
+                    flex-direction: column !important;
+                    align-items: center !important;
+                    gap: 15px !important;
+                }
+                
+                .dashboard-header h2 {
+                    order: -1 !important;
+                    margin-bottom: 10px !important;
+                }
+                
                 .kpis-grid {
                     grid-template-columns: 1fr;
+                    padding: 0 10px !important;
+                    margin: 0 auto !important;
+                }
+                
+                .kpi-box {
+                    margin-left: auto !important;
+                    margin-right: auto !important;
+                    max-width: 100% !important;
+                }
+                
+                .hospital-card {
+                    padding: 15px !important;
+                    margin: 0 auto 20px auto !important;
+                    max-width: calc(100vw - 20px) !important;
                 }
                 
                 .timeline-boxes-grid {
                     grid-template-columns: 1fr;
+                }
+                
+                .dashboard-hospitalar-wrapper {
+                    padding: 10px !important;
+                }
+                
+                .hospitais-container {
+                    padding: 0 !important;
                 }
             }
         </style>
@@ -2186,11 +2252,11 @@ window.forceDataRefresh = function() {
    LOG FINAL
    ============================================ */
 
-console.log('✅ [DASHBOARD HOSPITALAR V1.0.0] Carregado com sucesso!');
+console.log('✅ [DASHBOARD HOSPITALAR] Carregado com sucesso!');
 console.log('📦 Funções disponíveis:');
 console.log('   - window.renderDashboardHospitalar()');
 console.log('   - window.renderizarDashboard() [alias]');
 console.log('   - window.processarDadosHospital(hospitalId)');
 console.log('   - window.copiarDashboardParaWhatsApp()');
 console.log('   - window.forceDataRefresh()');
-console.log('🎨 Sistema V1.0.0 pronto para uso!');
+console.log('🎨 Sistema pronto para uso!');
