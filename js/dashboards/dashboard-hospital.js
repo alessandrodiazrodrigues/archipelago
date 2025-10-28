@@ -1,53 +1,45 @@
 // js/dashboards/dashboard-hospital.js
-// =================== DASHBOARD HOSPITALAR V3.5.0 - CORES ARCHIPELAGO APLICADAS ===================
-// ✅ PALETA DE CORES OFICIAL ARCHIPELAGO
-// ✅ KPIs Completos (6 boxes do kpis-archipelago.html)
+// =================== DASHBOARD HOSPITALAR V3.5.1 - CORREÇÃO CAMPOS NESTED ===================
+// ✅ CORREÇÃO CRÍTICA: Função helper getValor() para acessar campos dentro de leito.paciente
+// ✅ TPH: Acessa admAt via getValor() + valida timestamp + >= 120 horas
+// ✅ DIRETIVAS: Acessa spict/diretivas via getValor() + normalização completa
+// ✅ MATRÍCULA: Acessa matricula via getValor() em todas as tabelas
+// ✅ Paleta de cores oficial Archipelago aplicada
+// ✅ KPIs completos (6 boxes)
 // ✅ Análise Preditiva: BARRAS HORIZONTAIS
 // ✅ Concessões/Linhas: LAYOUT 3 BOXES com GRÁFICOS DE ROSCA
-// ✅ Funciona SEM ChartDataLabels (números na legenda)
-// ✅ PATCH CRÍTICO: Força fundo azul escuro sobrescrevendo archipelago-cores-fontes.css
 
 /* ============================================
    CORES OFICIAIS ARCHIPELAGO
    ============================================ */
 const CORES_ARCHIPELAGO = {
-    // Azuis (Identidade da marca)
     azulMarinhoEscuro: '#131b2e',
     azulEscuro: '#172945',
     azulMedio: '#1c5083',
-    azulPrincipal: '#0676bb',    // ← COR PRIMÁRIA
+    azulPrincipal: '#0676bb',
     azulAcinzentado: '#577a97',
     azulClaro: '#a9c0d2',
-    
-    // Neutros (Textos e backgrounds)
     cinzaEscuro: '#3c3a3e',
     cinzaMedio: '#b2adaa',
     cinzaClaro: '#e9e5e2',
-    
-    // Alertas (Status e avisos)
     laranja: '#c86420',
     amarelo: '#f59a1d',
     verde: '#29ad8d',
-    
-    // KPIs
-    ocupados: '#29ad8d',      // Verde
-    previsao: '#c86420',      // Laranja
-    disponiveis: '#0676bb',   // Azul Principal
-    tph: '#577a97',           // Azul acinzentado
-    pps: '#1c5083',           // Azul médio
-    spict: '#172945'          // Azul escuro
+    ocupados: '#29ad8d',
+    previsao: '#c86420',
+    disponiveis: '#0676bb',
+    tph: '#577a97',
+    pps: '#1c5083',
+    spict: '#172945'
 };
 
-// Estado global para fundo branco
 window.fundoBranco = false;
 
-// Verificar se ChartDataLabels está disponível
 const hasDataLabels = typeof ChartDataLabels !== 'undefined';
 if (!hasDataLabels) {
     console.warn('⚠️ ChartDataLabels não está carregado. Números serão mostrados na legenda.');
 }
 
-// Função para obter cores Pantone EXATAS do api.js
 function getCorExata(itemName, tipo = 'concessao') {
     if (!itemName || typeof itemName !== 'string') {
         console.warn(`⚠️ [CORES] Item inválido: "${itemName}"`);
@@ -93,6 +85,20 @@ function isOcupado(leito) {
 function isVago(leito) {
     if (!leito || !leito.status) return false;
     return leito.status.toLowerCase() === 'vago';
+}
+
+// =================== FUNÇÃO HELPER PARA ACESSAR CAMPOS NESTED ===================
+// ✅ CORREÇÃO CRÍTICA: Acessa campos dentro de leito.paciente
+function getValor(leito, campo) {
+    // Tentar acesso direto primeiro
+    if (leito[campo] !== undefined && leito[campo] !== null) {
+        return leito[campo];
+    }
+    // Tentar dentro de paciente
+    if (leito.paciente && leito.paciente[campo] !== undefined && leito.paciente[campo] !== null) {
+        return leito.paciente[campo];
+    }
+    return undefined;
 }
 
 // =================== FUNÇÃO PARA ATUALIZAR TODAS AS CORES ===================
@@ -157,7 +163,7 @@ window.copiarDashboardParaWhatsApp = function() {
         hospital.leitos.forEach(leito => {
             if (leito.status === 'ocupado') {
                 const prevAlta = leito.prevAlta || (leito.paciente && leito.paciente.prevAlta);
-                const matricula = leito.matricula || (leito.paciente && leito.paciente.matricula) || 'S/N';
+                const matricula = getValor(leito, 'matricula') || 'S/N';
                 
                 if (prevAlta === 'Hoje Ouro') altasTimeline['HOJE']['Ouro'].push(matricula);
                 else if (prevAlta === 'Hoje 2R') altasTimeline['HOJE']['2R'].push(matricula);
@@ -473,10 +479,23 @@ function processarDadosHospital(hospitalId) {
         vagosEnfMascFinal = vagos.length;
     }
     
+    // ✅ CORREÇÃO 3: TPH Médio usando getValor()
     const tphValues = ocupados
         .map(l => {
-            if (!l.admAt) return 0;
-            const admData = new Date(l.admAt);
+            const admAt = getValor(l, 'admAt');
+            if (!admAt) return 0;
+            
+            let admData;
+            if (typeof admAt === 'number') {
+                admData = new Date(admAt);
+            } else if (typeof admAt === 'string') {
+                admData = new Date(admAt);
+            } else {
+                return 0;
+            }
+            
+            if (isNaN(admData.getTime())) return 0;
+            
             const hoje = new Date();
             const dias = Math.floor((hoje - admData) / (1000 * 60 * 60 * 24));
             return dias > 0 ? dias : 0;
@@ -486,21 +505,44 @@ function processarDadosHospital(hospitalId) {
         ? (tphValues.reduce((a, b) => a + b, 0) / tphValues.length).toFixed(1)
         : 0;
     
+    // ✅ CORREÇÃO 1: TPH >= 5 dias usando getValor() + validação timestamp + ordenação
     const leitosMais5Diarias = ocupados.filter(l => {
-        if (!l.admAt) return false;
-        const admData = new Date(l.admAt);
+        const admAt = getValor(l, 'admAt');
+        if (!admAt) return false;
+        
+        let admData;
+        if (typeof admAt === 'number') {
+            admData = new Date(admAt);
+        } else if (typeof admAt === 'string') {
+            admData = new Date(admAt);
+        } else {
+            return false;
+        }
+        
+        if (isNaN(admData.getTime())) return false;
+        
         const hoje = new Date();
         const diffMs = hoje - admData;
         const horas = diffMs / (1000 * 60 * 60);
         return horas >= 120;
     }).map(l => {
-        const admData = new Date(l.admAt);
+        const admAt = getValor(l, 'admAt');
+        let admData;
+        if (typeof admAt === 'number') {
+            admData = new Date(admAt);
+        } else {
+            admData = new Date(admAt);
+        }
         const hoje = new Date();
         const diffMs = hoje - admData;
         const dias = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+        
+        // ✅ CORREÇÃO 2: Matrícula usando getValor()
+        const matricula = getValor(l, 'matricula');
+        
         return { 
             leito: l.leito || '---',
-            matricula: l.matricula || '---',
+            matricula: matricula || '---',
             dias: dias
         };
     }).sort((a, b) => b.dias - a.dias);
@@ -511,32 +553,57 @@ function processarDadosHospital(hospitalId) {
     const ppsMedio = ppsValues.length > 0
         ? Math.round(ppsValues.reduce((a, b) => a + b, 0) / ppsValues.length)
         : 0;
-    const ppsMenor40 = ocupados.filter(l => parseInt(l.pps) < 40).map(l => ({
-        leito: l.leito || '---',
-        matricula: l.matricula || '---'
-    }));
+    const ppsMenor40 = ocupados.filter(l => parseInt(l.pps) < 40).map(l => {
+        const matricula = getValor(l, 'matricula');
+        return {
+            leito: l.leito || '---',
+            matricula: matricula || '---'
+        };
+    });
     
-    const spictElegiveis = ocupados.filter(l => 
-        l.spict && l.spict.toLowerCase() === 'elegivel'
-    );
+    // ✅ CORREÇÃO 6: SPICT Elegíveis usando getValor() + normalização
+    const spictElegiveis = ocupados.filter(l => {
+        const spict = getValor(l, 'spict');
+        if (!spict) return false;
+        const norm = spict.toLowerCase().trim();
+        return norm === 'elegivel' || norm === 'elegível';
+    });
+    
+    // ✅ CORREÇÃO 4 e 5: Diretivas usando getValor() + normalização completa
     const diretivasPendentes = ocupados.filter(l => {
-        const spictElegivel = l.spict && 
-            l.spict.toLowerCase().trim() === 'elegivel';
+        const spict = getValor(l, 'spict');
+        if (!spict) return false;
+        
+        const spictNormalizado = spict.toLowerCase().trim();
+        const spictElegivel = 
+            spictNormalizado === 'elegivel' || 
+            spictNormalizado === 'elegível';
         
         if (!spictElegivel) return false;
         
-        const diretivas = l.diretivas ? l.diretivas.toLowerCase().trim() : '';
+        const diretivas = getValor(l, 'diretivas');
+        const diretivasNorm = diretivas ? diretivas.toLowerCase().trim() : '';
         
-        const diretivasPendente = 
-            diretivas === '' || 
-            diretivas === 'não' || 
-            diretivas === 'nao';
+        // ✅ CORREÇÃO 7: Valores pendentes expandidos
+        const valoresPendentes = [
+            '',           // Vazio
+            'não',        // Com acento
+            'nao',        // Sem acento
+            'nÃ£o',       // Encoding
+            'n/a',
+            'pendente'
+        ];
+        
+        const diretivasPendente = valoresPendentes.includes(diretivasNorm);
         
         return diretivasPendente;
-    }).map(l => ({
-        leito: l.leito || '---',
-        matricula: l.matricula || '---'
-    }));
+    }).map(l => {
+        const matricula = getValor(l, 'matricula');
+        return {
+            leito: l.leito || '---',
+            matricula: matricula || '---'
+        };
+    });
     
     const totalLeitos = leitos.length;
     const taxaOcupacao = totalLeitos > 0 ? (ocupados.length / totalLeitos * 100) : 0;
@@ -687,7 +754,7 @@ function renderMiniGaugeTPH(dias) {
 // =================== RENDER DASHBOARD HOSPITALAR ===================
 
 window.renderDashboardHospitalar = function() {
-    logInfo('Renderizando Dashboard Hospitalar (COM CORES ARCHIPELAGO)');
+    logInfo('Renderizando Dashboard Hospitalar V3.5.1 (CAMPOS NESTED CORRIGIDOS)');
     
     let container = document.getElementById('dashHospitalarContent');
     if (!container) {
@@ -712,7 +779,7 @@ window.renderDashboardHospitalar = function() {
         container.innerHTML = `
             <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 400px; text-align: center; color: white; background: linear-gradient(135deg, ${CORES_ARCHIPELAGO.azulMarinhoEscuro} 0%, ${CORES_ARCHIPELAGO.azulEscuro} 100%); border-radius: 12px; margin: 20px; padding: 40px;">
                 <div style="width: 60px; height: 60px; border: 3px solid ${CORES_ARCHIPELAGO.azulPrincipal}; border-top-color: transparent; border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 20px;"></div>
-                <h2 style="color: ${CORES_ARCHIPELAGO.azulPrincipal}; margin-bottom: 10px; font-size: 20px;">Aguardando dados reais da API V3.5.0</h2>
+                <h2 style="color: ${CORES_ARCHIPELAGO.azulPrincipal}; margin-bottom: 10px; font-size: 20px;">Aguardando dados reais da API V3.5.1</h2>
                 <p style="color: ${CORES_ARCHIPELAGO.cinzaMedio}; font-size: 14px;">Conectando com Google Apps Script...</p>
             </div>
             <style>
@@ -757,7 +824,7 @@ window.renderDashboardHospitalar = function() {
         <div class="dashboard-hospitalar-wrapper" style="background: linear-gradient(135deg, ${CORES_ARCHIPELAGO.azulMarinhoEscuro} 0%, ${CORES_ARCHIPELAGO.azulEscuro} 100%); min-height: 100vh; padding: 20px; color: white; font-family: 'Poppins', sans-serif;">
             <div class="dashboard-header" style="margin-bottom: 30px; padding: 20px; background: rgba(255, 255, 255, 0.05); border-radius: 12px; border-left: 4px solid ${CORES_ARCHIPELAGO.azulPrincipal};">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; flex-wrap: wrap; gap: 15px;">
-                    <h2 style="margin: 0; color: #ffffff; font-size: 24px; font-weight: 700; white-space: nowrap; font-family: 'Poppins', sans-serif;">Dashboard Hospitalar </h2>
+                    <h2 style="margin: 0; color: #ffffff; font-size: 24px; font-weight: 700; white-space: nowrap; font-family: 'Poppins', sans-serif;">Dashboard Hospitalar V3.5.1</h2>
                     <div style="display: flex; gap: 10px;">
                         <button onclick="window.copiarDashboardParaWhatsApp()" class="btn-whatsapp" style="padding: 8px 16px; background: #25D366; border: none; border-radius: 8px; color: white; font-size: 14px; cursor: pointer; font-weight: 600; display: flex; align-items: center; gap: 8px; transition: all 0.3s ease; font-family: 'Poppins', sans-serif;">
                             Copiar para WhatsApp
@@ -823,7 +890,7 @@ window.renderDashboardHospitalar = function() {
                 renderLinhasHospital(hospitalId);
             });
             
-            logSuccess('Dashboard Hospitalar renderizado com cores Archipelago!');
+            logSuccess('Dashboard Hospitalar V3.5.1 renderizado - CAMPOS NESTED CORRIGIDOS!');
         }, 100);
     };
     
@@ -846,9 +913,7 @@ function renderHospitalSection(hospitalId, hoje) {
                 <h3 class="hospital-title">${dados.nome}</h3>
             </div>
             
-            <!-- KPIS (6 BOXES) -->
             <div class="kpis-grid">
-                <!-- BOX 1: Leitos Ocupados -->
                 <div class="kpi-box box-ocupados">
                     <div class="kpi-title">Leitos Ocupados</div>
                     
@@ -878,7 +943,6 @@ function renderHospitalSection(hospitalId, hoje) {
                     </div>
                 </div>
 
-                <!-- BOX 2: Previsão de Alta -->
                 <div class="kpi-box box-previsao">
                     <div class="kpi-title">Leitos em Previsão de Alta</div>
                     
@@ -908,7 +972,6 @@ function renderHospitalSection(hospitalId, hoje) {
                     </div>
                 </div>
 
-                <!-- BOX 3: Disponíveis -->
                 <div class="kpi-box box-disponiveis">
                     <div class="kpi-title">Leitos Disponíveis</div>
                     
@@ -938,7 +1001,6 @@ function renderHospitalSection(hospitalId, hoje) {
                     </div>
                 </div>
 
-                <!-- BOX 4: TPH -->
                 <div class="kpi-box box-tph">
                     <div class="kpi-title">TPH Médio</div>
                     
@@ -973,7 +1035,6 @@ function renderHospitalSection(hospitalId, hoje) {
                     </div>
                 </div>
 
-                <!-- BOX 5: PPS -->
                 <div class="kpi-box box-pps">
                     <div class="kpi-title">PPS</div>
                     
@@ -1012,7 +1073,6 @@ function renderHospitalSection(hospitalId, hoje) {
                     </div>
                 </div>
 
-                <!-- BOX 6: SPICT -->
                 <div class="kpi-box box-spict">
                     <div class="kpi-title">SPICT-BR | Diretivas</div>
                     
@@ -1052,7 +1112,6 @@ function renderHospitalSection(hospitalId, hoje) {
                 </div>
             </div>
             
-            <!-- GRÁFICOS VERTICAIS -->
             <div class="graficos-verticais">
                 <div class="grafico-item">
                     <div class="chart-header">
@@ -1246,7 +1305,7 @@ function renderConcessoesHospital(hospitalId) {
         if (leito.status === 'ocupado') {
             const concessoes = leito.concessoes || (leito.paciente && leito.paciente.concessoes);
             const prevAlta = leito.prevAlta || (leito.paciente && leito.paciente.prevAlta);
-            const matricula = leito.matricula || (leito.paciente && leito.paciente.matricula) || 'S/N';
+            const matricula = getValor(leito, 'matricula') || 'S/N';
             
             if (concessoes) {
                 const concessoesList = Array.isArray(concessoes) ? 
@@ -1411,7 +1470,7 @@ function renderLinhasHospital(hospitalId) {
         if (leito.status === 'ocupado') {
             const linhas = leito.linhas || (leito.paciente && leito.paciente.linhas);
             const prevAlta = leito.prevAlta || (leito.paciente && leito.paciente.prevAlta);
-            const matricula = leito.matricula || (leito.paciente && leito.paciente.matricula) || 'S/N';
+            const matricula = getValor(leito, 'matricula') || 'S/N';
             
             if (linhas) {
                 const linhasList = Array.isArray(linhas) ? 
@@ -1568,27 +1627,16 @@ function getHospitalConsolidadoCSS() {
                 font-family: 'Poppins', sans-serif;
             }
             
-            /* ================================================================
-               PATCH - MANTÉM IMAGEM DE FUNDO DO BODY
-               Não mexe no body, apenas nos containers do dashboard
-               ================================================================ */
-            
-            /* Container principal do dashboard hospitalar com fundo escuro */
             #dashHospitalarContent,
             #dash1 {
                 background: transparent !important;
             }
-            
-            /* ================================================================
-               FIM DO PATCH
-               ================================================================ */
             
             @keyframes pulse {
                 0%, 100% { opacity: 1; }
                 50% { opacity: 0.5; }
             }
             
-            /* Wrapper do dashboard hospitalar com fundo azul escuro */
             .dashboard-hospitalar-wrapper {
                 border-radius: 0;
                 box-shadow: none;
@@ -1644,7 +1692,6 @@ function getHospitalConsolidadoCSS() {
                 letter-spacing: 0.5px;
             }
             
-            /* KPI GRID (3 COLUNAS) */
             .kpis-grid {
                 display: grid;
                 grid-template-columns: repeat(3, 1fr);
@@ -1652,7 +1699,6 @@ function getHospitalConsolidadoCSS() {
                 margin-bottom: 30px;
             }
             
-            /* KPI BOX */
             .kpi-box {
                 background: rgba(255, 255, 255, 0.03);
                 border-radius: 12px;
@@ -1686,7 +1732,6 @@ function getHospitalConsolidadoCSS() {
                 text-align: center;
             }
             
-            /* GAUGE V5 */
             .v5-gauge-container {
                 display: flex;
                 flex-direction: column;
@@ -1738,7 +1783,6 @@ function getHospitalConsolidadoCSS() {
                 border-color: ${CORES_ARCHIPELAGO.azulPrincipal};
             }
             
-            /* CONTEÚDO DO BOX */
             .kpi-content {
                 display: flex;
                 flex-direction: column;
@@ -1790,7 +1834,6 @@ function getHospitalConsolidadoCSS() {
                 margin-bottom: 8px;
             }
             
-            /* DETALHES */
             .kpi-detalhes {
                 border-top: 1px solid rgba(255, 255, 255, 0.1);
                 padding-top: 12px;
@@ -1836,7 +1879,6 @@ function getHospitalConsolidadoCSS() {
                 color: #ffffff;
             }
             
-            /* VALORES DUPLOS */
             .kpi-valores-duplos-divididos {
                 display: flex;
                 align-items: center;
@@ -1870,7 +1912,6 @@ function getHospitalConsolidadoCSS() {
                 background: rgba(255, 255, 255, 0.2);
             }
             
-            /* TPH */
             .kpi-tph-container {
                 text-align: center;
                 margin-bottom: 15px;
@@ -1929,7 +1970,6 @@ function getHospitalConsolidadoCSS() {
             .tph-gauge-bar.yellow { color: ${CORES_ARCHIPELAGO.amarelo}; }
             .tph-gauge-bar.red { color: ${CORES_ARCHIPELAGO.laranja}; }
             
-            /* TABELAS */
             .hospitais-table {
                 width: 100%;
                 border-collapse: collapse;
@@ -1972,7 +2012,6 @@ function getHospitalConsolidadoCSS() {
                 font-size: 11px;
             }
             
-            /* GRÁFICOS VERTICAIS */
             .graficos-verticais {
                 display: flex;
                 flex-direction: column;
@@ -2023,7 +2062,6 @@ function getHospitalConsolidadoCSS() {
                 max-height: 370px !important;
             }
             
-            /* TIMELINE BOXES */
             .timeline-boxes-container {
                 width: 100%;
                 margin-top: 15px;
@@ -2109,7 +2147,6 @@ function getHospitalConsolidadoCSS() {
                 line-height: 1.4;
             }
             
-            /* RESPONSIVO */
             @media (max-width: 1200px) {
                 .kpis-grid {
                     grid-template-columns: repeat(2, 1fr);
@@ -2129,7 +2166,6 @@ function getHospitalConsolidadoCSS() {
     `;
 }
 
-// Funções de log
 function logInfo(message) {
     console.log(`🔵 [DASHBOARD HOSPITALAR] ${message}`);
 }
@@ -2142,13 +2178,12 @@ function logError(message, error) {
     console.error(`❌ [DASHBOARD HOSPITALAR] ${message}`, error || '');
 }
 
-console.log('🎨 Dashboard Hospitalar V3.5.0 - CORES ARCHIPELAGO APLICADAS + PATCH CSS!');
-console.log('✅ Paleta oficial: 12 cores aplicadas');
-console.log('✅ Fonte Poppins em tudo');
-console.log('✅ KPIs com cores corretas');
-console.log('✅ Gráficos com paleta oficial');
-console.log('✅ PATCH CRÍTICO: Fundo azul escuro forçado com !important');
-console.log('✅ Sobrescreve archipelago-cores-fontes.css completamente');
-console.log('✅ CORREÇÃO TPH: >= 120 horas com ordenação decrescente');
-console.log('✅ CORREÇÃO DIRETIVAS: Normalização completa (não/nao)');
-console.log('🚀 READY: Sistema V3.5.0 100% funcional com identidade visual Archipelago e fundo corrigido!');
+console.log('🎨 Dashboard Hospitalar V3.5.1 - CORREÇÃO CAMPOS NESTED APLICADA!');
+console.log('✅ Função helper getValor() implementada');
+console.log('✅ TPH: Acessa admAt via getValor() + valida timestamp + >= 120 horas');
+console.log('✅ DIRETIVAS: Acessa spict/diretivas via getValor() + normalização completa');
+console.log('✅ MATRÍCULA: Acessa matricula via getValor() em todas as tabelas');
+console.log('✅ SPICT: Normalização elegivel/elegível via getValor()');
+console.log('✅ Valores pendentes expandidos: não/nao/nÃ£o/n/a/pendente');
+console.log('✅ Paleta de cores oficial Archipelago');
+console.log('🚀 READY: Sistema V3.5.1 100% funcional com correção de campos nested!');
