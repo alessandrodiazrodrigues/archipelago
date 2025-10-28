@@ -349,7 +349,7 @@ function validarIsolamento(isolamento) {
 
 function validarIdentificacaoLeito(identificacao) {
     if (!identificacao || typeof identificacao !== 'string') return '';
-    const regex = /^[A-Za-z0-9]{1,6}$/;
+    const regex = /^.{1,6}$/;  // ✅ ACEITA QUALQUER CARACTERE (1-6)
     if (!regex.test(identificacao)) {
         throw new Error('Identificação do leito deve ter até 6 caracteres alfanuméricos');
     }
