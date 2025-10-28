@@ -335,7 +335,7 @@ function calcularModalidadePorTipo(leitos, hospitalId) {
 // ✅ V4.1.0: PATCH INTEGRADO DIRETAMENTE
 
 window.processarDadosHospital = function(hospitalId) {
-    console.log(`📊 [V4.1.0] Processando hospital: ${hospitalId}`);
+    console.log(`📊 [V4.2 DEFINITIVO] Processando hospital: ${hospitalId}`);
     
     const hospitalObj = window.hospitalData[hospitalId] || {};
     
@@ -466,7 +466,7 @@ window.processarDadosHospital = function(hospitalId) {
         vagosEnfMascFinal = vagos.length;
     }
     
-    // ✅ V4.1.0: TPH Médio
+    // TPH Médio
     const tphValues = ocupados
         .map(l => {
             const admAt = l.admAt;
@@ -484,7 +484,7 @@ window.processarDadosHospital = function(hospitalId) {
         ? (tphValues.reduce((a, b) => a + b, 0) / tphValues.length).toFixed(1)
         : 0;
     
-    // ✅ V4.1.0: TPH >= 5 dias - PATCH INTEGRADO
+    // ✅ TPH >= 5 dias COM identificacaoLeito
     const leitosMais5Diarias = ocupados.filter(l => {
         const admAt = l.admAt;
         if (!admAt) return false;
@@ -506,9 +506,7 @@ window.processarDadosHospital = function(hospitalId) {
         };
     }).sort((a, b) => b.dias - a.dias);
     
-    console.log(`📊 [V4.1.0] ${hospitalId} TPH >= 5d: ${leitosMais5Diarias.length} leitos`);
-    
-    // ✅ V4.1.0: PPS
+    // PPS
     const ppsValues = ocupados
         .map(l => parseInt(l.pps) || 0)
         .filter(v => v > 0);
@@ -516,7 +514,7 @@ window.processarDadosHospital = function(hospitalId) {
         ? Math.round(ppsValues.reduce((a, b) => a + b, 0) / ppsValues.length)
         : 0;
     
-    // ✅ V4.1.0: PPS < 40% - PATCH INTEGRADO
+    // ✅ PPS < 40% COM identificacaoLeito
     const ppsMenor40 = ocupados.filter(l => {
         const pps = parseInt(l.pps) || 0;
         return pps > 0 && pps < 40;
@@ -525,9 +523,7 @@ window.processarDadosHospital = function(hospitalId) {
         matricula: l.matricula || '---'
     }));
     
-    console.log(`📊 [V4.1.0] ${hospitalId} PPS < 40%: ${ppsMenor40.length} leitos`);
-    
-    // ✅ V4.1.0: SPICT Elegíveis
+    // SPICT Elegíveis
     const spictElegiveis = ocupados.filter(l => {
         const spict = l.spict;
         if (!spict) return false;
@@ -535,22 +531,28 @@ window.processarDadosHospital = function(hospitalId) {
         return norm === 'elegivel' || norm === 'elegível';
     });
     
-    // ✅ V4.1.0: Diretivas Pendentes - PATCH INTEGRADO
+    // ✅ Diretivas Pendentes COM identificacaoLeito
     const diretivasPendentes = ocupados.filter(l => {
         const spict = l.spict;
         if (!spict) return false;
         
-        const norm = spict.toLowerCase().trim();
-        if (norm !== 'elegivel' && norm !== 'elegível') return false;
+        const spictNormalizado = spict.toLowerCase().trim();
+        const spictElegivel = 
+            spictNormalizado === 'elegivel' || 
+            spictNormalizado === 'elegível';
         
-        const dir = l.diretivas ? l.diretivas.toLowerCase().trim() : '';
-        return ['', 'não', 'nao', 'n/a', 'pendente', 'não se aplica'].includes(dir);
+        if (!spictElegivel) return false;
+        
+        const diretivas = l.diretivas;
+        const diretivasNorm = diretivas ? diretivas.toLowerCase().trim() : '';
+        
+        const valoresPendentes = ['', 'não', 'nao', 'n/a', 'pendente', 'não se aplica'];
+        
+        return valoresPendentes.includes(diretivasNorm);
     }).map(l => ({
         leito: l.identificacaoLeito || l.leito || '---',
         matricula: l.matricula || '---'
     }));
-    
-    console.log(`📊 [V4.1.0] ${hospitalId} Diretivas Pendentes: ${diretivasPendentes.length}`);
     
     const totalLeitos = leitos.length;
     const taxaOcupacao = totalLeitos > 0 ? (ocupados.length / totalLeitos * 100) : 0;
@@ -603,7 +605,7 @@ window.processarDadosHospital = function(hospitalId) {
         }
     };
     
-    console.log(`✅ [V4.1.0] Processamento completo: ${hospitalId}`, resultado);
+    console.log(`✅ [V4.2 DEFINITIVO] ${hospitalId}: TPH=${leitosMais5Diarias.length}, PPS=${ppsMenor40.length}, DIR=${diretivasPendentes.length}`);
     
     return resultado;
 };
