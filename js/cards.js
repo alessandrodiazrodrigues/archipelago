@@ -1,4 +1,4 @@
-// =================== CARDS.JS V3.4.2 FINAL - MATRÍCULA COM HÍFEN + ID VISÍVEL ===================
+// =================== CARDS.JS V3.4.3 FINAL - INICIAIS SEM FORMATAÇÃO ===================
 
 // =================== VARIÁVEIS GLOBAIS ===================  
 window.selectedLeito = null;
@@ -139,7 +139,7 @@ window.selectHospital = function(hospitalId) {
 
 // =================== FUNÇÃO PRINCIPAL DE RENDERIZAÇÃO ===================
 window.renderCards = function() {
-    logInfo('Renderizando cards V3.4.2 - MATRÍCULA COM HÍFEN + ID VISÍVEL');
+    logInfo('Renderizando cards V3.4.3 - INICIAIS SEM FORMATAÇÃO');
     
     const container = document.getElementById('cardsContainer');
     if (!container) {
@@ -352,7 +352,7 @@ function validarLimiteSantaClara(tipoQuarto) {
     return { permitido: true };
 }
 
-// =================== CRIAR CARD INDIVIDUAL V3.4.2 ===================
+// =================== CRIAR CARD INDIVIDUAL V3.4.3 ===================
 function createCard(leito, hospitalNome) {
     const card = document.createElement('div');
     card.className = 'card';
@@ -409,8 +409,10 @@ function createCard(leito, hospitalNome) {
         }
     }
     
-    // Dados do paciente
+    // Dados do paciente - ✅ INICIAIS SEM FORMATAÇÃO
     const nome = leito.nome || '';
+    const iniciais = isVago ? '—' : (nome ? nome.trim() : '—'); // ✅ PEGA EXATAMENTE O QUE ESTÁ NO CAMPO
+    
     const matricula = leito.matricula || '';
     const idade = leito.idade || null;
     const admissao = leito.admAt || '';
@@ -457,8 +459,6 @@ function createCard(leito, hospitalNome) {
         tempoInternacao = calcularTempoInternacao(admissao);
     }
     
-    const iniciais = isVago ? '—' : getIniciais(nome);
-    
     let ppsFormatado = pps ? `${pps}%` : '—';
     if (ppsFormatado !== '—' && !ppsFormatado.includes('%')) {
         ppsFormatado = `${pps}%`;
@@ -502,7 +502,7 @@ function createCard(leito, hospitalNome) {
         }
     }
     
-    // HTML do Card V3.4.2
+    // HTML do Card V3.4.3
     card.innerHTML = `
         <!-- HEADER: HOSPITAL FORA DOS BOXES -->
         <div class="card-header" style="text-align: center; margin-bottom: 12px; padding-bottom: 8px; font-family: 'Poppins', sans-serif;">
@@ -711,7 +711,7 @@ function openAdmissaoFlow(leitoNumero) {
     setTimeout(() => {
         hideButtonLoading(button, originalText);
         openAdmissaoModal(leitoNumero);
-        logInfo(`Modal de admissão V3.4.2 aberto: ${window.currentHospital} - Leito ${leitoNumero}`);
+        logInfo(`Modal de admissão V3.4.3 aberto: ${window.currentHospital} - Leito ${leitoNumero}`);
     }, 800);
 }
 
@@ -724,11 +724,11 @@ function openAtualizacaoFlow(leitoNumero, dadosLeito) {
     setTimeout(() => {
         hideButtonLoading(button, originalText);
         openAtualizacaoModal(leitoNumero, dadosLeito);
-        logInfo(`Modal de atualização V3.4.2 aberto: ${window.currentHospital} - Leito ${leitoNumero}`);
+        logInfo(`Modal de atualização V3.4.3 aberto: ${window.currentHospital} - Leito ${leitoNumero}`);
     }, 800);
 }
 
-// =================== MODAIS V3.4.2 ===================
+// =================== MODAIS V3.4.3 ===================
 function openAdmissaoModal(leitoNumero) {
     const hospitalId = window.currentHospital;
     const hospitalNome = window.HOSPITAL_MAPPING[hospitalId] || 'Hospital';
@@ -772,7 +772,7 @@ function createModalOverlay() {
     return modal;
 }
 
-// =================== FORMULÁRIO DE ADMISSÃO V3.4.2 ===================
+// =================== FORMULÁRIO DE ADMISSÃO V3.4.3 ===================
 function createAdmissaoForm(hospitalNome, leitoNumero, hospitalId) {
     const idSequencial = String(leitoNumero).padStart(2, '0');
     const isHibrido = window.HOSPITAIS_HIBRIDOS.includes(hospitalId);
@@ -900,7 +900,8 @@ function createAdmissaoForm(hospitalNome, leitoNumero, hospitalId) {
             <div class="form-grid-3-cols" style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; margin-bottom: 20px;">
                 <div>
                     <label style="display: block; margin-bottom: 5px; color: #e2e8f0; font-weight: 600;">INICIAIS</label>
-                    <input id="admNome" type="text" placeholder="Ex: J S M" maxlength="10" style="width: 100%; padding: 12px; background: #374151; color: #ffffff; border: 1px solid rgba(255,255,255,0.3); border-radius: 6px; font-size: 14px; font-family: 'Poppins', sans-serif;">
+                    <input id="admNome" type="text" placeholder="Ex: J S M ou A.D.R" maxlength="20" style="width: 100%; padding: 12px; background: #374151; color: #ffffff; border: 1px solid rgba(255,255,255,0.3); border-radius: 6px; font-size: 14px; font-family: 'Poppins', sans-serif;">
+                    <div style="font-size: 10px; color: rgba(255,255,255,0.5); margin-top: 3px;">✅ Exatamente como digitado</div>
                 </div>
                 <div>
                     <label style="display: block; margin-bottom: 5px; color: #e2e8f0; font-weight: 600;">MATRÍCULA</label>
@@ -983,10 +984,10 @@ function createAdmissaoForm(hospitalNome, leitoNumero, hospitalId) {
     `;
 }
 
-// =================== FORMULÁRIO DE ATUALIZAÇÃO V3.4.2 ===================
+// =================== FORMULÁRIO DE ATUALIZAÇÃO V3.4.3 ===================
 function createAtualizacaoForm(hospitalNome, leitoNumero, dadosLeito) {
     const tempoInternacao = dadosLeito?.admAt ? calcularTempoInternacao(dadosLeito.admAt) : '';
-    const iniciais = dadosLeito?.nome ? getIniciais(dadosLeito.nome) : '';
+    const iniciais = dadosLeito?.nome ? dadosLeito.nome.trim() : '—'; // ✅ PEGA EXATAMENTE O QUE ESTÁ NO CAMPO
     const idSequencial = String(leitoNumero).padStart(2, '0');
     
     const concessoesAtuais = Array.isArray(dadosLeito?.concessoes) ? dadosLeito.concessoes : [];
@@ -1120,6 +1121,7 @@ function createAtualizacaoForm(hospitalNome, leitoNumero, dadosLeito) {
                 <div>
                     <label style="display: block; margin-bottom: 5px; color: #e2e8f0; font-weight: 600;">INICIAIS</label>
                     <input value="${iniciais}" readonly style="width: 100%; padding: 12px; background: #1f2937; color: #9ca3af; border: 1px solid rgba(255,255,255,0.2); border-radius: 6px; font-size: 14px; font-family: 'Poppins', sans-serif;">
+                    <div style="font-size: 10px; color: rgba(255,255,255,0.5); margin-top: 3px;">🔒 Exatamente como digitado</div>
                 </div>
                 <div>
                     <label style="display: block; margin-bottom: 5px; color: #e2e8f0; font-weight: 600;">MATRÍCULA</label>
@@ -1471,7 +1473,7 @@ function closeModal(modal) {
     }
 }
 
-// =================== COLETAR DADOS DO FORMULÁRIO V3.4.2 ===================
+// =================== COLETAR DADOS DO FORMULÁRIO V3.4.3 ===================
 function coletarDadosFormulario(modal, tipo) {
     const dados = {
         hospital: window.currentHospital,
@@ -1479,6 +1481,7 @@ function coletarDadosFormulario(modal, tipo) {
     };
     
     if (tipo === 'admissao') {
+        // ✅ INICIAIS: Pega exatamente o que foi digitado (SEM FORMATAÇÃO)
         dados.nome = modal.querySelector('#admNome')?.value?.trim() || '';
         
         // ✅ MATRÍCULA: Remover hífen antes de salvar
@@ -1595,15 +1598,6 @@ function showErrorMessage(message) {
     setTimeout(() => toast.remove(), 5000);
 }
 
-function getIniciais(nomeCompleto) {
-    if (!nomeCompleto) return '—';
-    return nomeCompleto.split(' ')
-        .filter(part => part.length > 0)
-        .map(part => part.charAt(0).toUpperCase())
-        .slice(0, 3)
-        .join(' ');
-}
-
 function calcularTempoInternacao(admissao) {
     if (!admissao) return '';
     
@@ -1679,22 +1673,22 @@ function formatarDataHora(dataISO) {
 
 // =================== FUNÇÕES DE LOG ===================
 function logInfo(message, data = null) {
-    console.log(`🔵 [CARDS V3.4.2] ${message}`, data || '');
+    console.log(`🔵 [CARDS V3.4.3] ${message}`, data || '');
 }
 
 function logError(message, error = null) {
-    console.error(`🔴 [CARDS V3.4.2 ERROR] ${message}`, error || '');
+    console.error(`🔴 [CARDS V3.4.3 ERROR] ${message}`, error || '');
 }
 
 function logSuccess(message) {
-    console.log(`🟢 [CARDS V3.4.2 SUCCESS] ${message}`);
+    console.log(`🟢 [CARDS V3.4.3 SUCCESS] ${message}`);
 }
 
 function logDebug(message, data = null) {
-    console.log(`🟡 [CARDS V3.4.2 DEBUG] ${message}`, data || '');
+    console.log(`🟡 [CARDS V3.4.3 DEBUG] ${message}`, data || '');
 }
 
-// =================== CSS CONSOLIDADO V3.4.2 ===================
+// =================== CSS CONSOLIDADO V3.4.3 ===================
 if (!document.getElementById('cardsConsolidadoCSS')) {
     const style = document.createElement('style');
     style.id = 'cardsConsolidadoCSS';
@@ -1914,9 +1908,9 @@ if (!document.getElementById('cardsConsolidadoCSS')) {
     document.head.appendChild(style);
 }
 
-// =================== INICIALIZAÇÃO V3.4.2 ===================
+// =================== INICIALIZAÇÃO V3.4.3 ===================
 document.addEventListener('DOMContentLoaded', function() {
-    logSuccess('✅ CARDS.JS V3.4.2 CARREGADO - MATRÍCULA COM HÍFEN + ID VISÍVEL');
+    logSuccess('✅ CARDS.JS V3.4.3 CARREGADO - INICIAIS SEM FORMATAÇÃO');
     
     if (window.CONCESSOES_LIST.length !== 12) {
         logError(`ERRO: Esperadas 12 concessões, encontradas ${window.CONCESSOES_LIST.length}`);
@@ -1930,10 +1924,11 @@ document.addEventListener('DOMContentLoaded', function() {
         logSuccess(`✅ ${window.LINHAS_CUIDADO_LIST.length} linhas de cuidado confirmadas`);
     }
     
-    logInfo('🎨 CORREÇÕES APLICADAS V3.4.2:');
+    logInfo('🎨 CORREÇÕES APLICADAS V3.4.3:');
+    logInfo('  • ✅ Iniciais preservadas exatamente como digitadas');
     logInfo('  • ✅ Matrícula com hífen (último dígito separado)');
-    logInfo('  • ✅ ID visível nos cards (footer)');
-    logInfo('  • ✅ Botões mobile otimizados (sticky footer)');
+    logInfo('  • ✅ ID visível nos cards');
+    logInfo('  • ✅ Não interfere em gráficos (dashboard separado)');
 });
 
 // =================== EXPORTS ===================
@@ -1947,5 +1942,5 @@ window.getBadgeGenero = getBadgeGenero;
 window.getBadgeDiretivas = getBadgeDiretivas;
 window.formatarMatriculaComHifen = formatarMatriculaComHifen;
 
-logSuccess('🎉 CARDS.JS V3.4.2 COMPLETO - MATRÍCULA COM HÍFEN + ID + MOBILE!');
-console.log('✅ CARDS.JS V3.4.2 - MATRÍCULA COM HÍFEN (ÚLTIMO DÍGITO) + ID VISÍVEL!');
+logSuccess('🎉 CARDS.JS V3.4.3 COMPLETO - INICIAIS SEM FORMATAÇÃO!');
+console.log('✅ CARDS.JS V3.4.3 - INICIAIS EXATAMENTE COMO DIGITADO + MATRÍCULA COM HÍFEN!');
