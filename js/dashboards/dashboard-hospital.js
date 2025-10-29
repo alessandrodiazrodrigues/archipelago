@@ -1,9 +1,9 @@
 // js/dashboards/dashboard-hospital.js
-// =================== DASHBOARD HOSPITALAR V1.2.0 TPH CORRIGIDO ===================
-// ✅ CORREÇÃO DO BUG TPH - VALORES CORRETOS COM 2 CASAS DECIMAIS
-// Data: 28/Outubro/2025
+// =================== DASHBOARD HOSPITALAR V1.2.1 CORRIGIDO ===================
+// ✅ CORREÇÕES APLICADAS: Títulos, Cores, Ocultar Linhas, Remover 96H
+// Data: 29/Outubro/2025
 
-console.log('🚀 [DASHBOARD HOSPITALAR V1.2.0 TPH CORRIGIDO] Inicializando...');
+console.log('🚀 [DASHBOARD HOSPITALAR V1.2.1 CORRIGIDO] Inicializando...');
 
 /* ============================================
    CORES OFICIAIS ARCHIPELAGO
@@ -27,6 +27,12 @@ const CORES_ARCHIPELAGO = {
     tph: '#577a97',
     pps: '#1c5083',
     spict: '#172945'
+};
+
+// CONFIGURAÇÕES DO SISTEMA
+const CONFIG_DASHBOARD = {
+    MOSTRAR_LINHAS_CUIDADO: false,  // false = ocultar | true = mostrar
+    MOSTRAR_96H: false,              // false = ocultar categoria 96H
 };
 
 window.fundoBranco = false;
@@ -751,7 +757,7 @@ function renderMiniGaugeTPH(dias) {
    ============================================ */
 
 window.renderDashboardHospitalar = function() {
-    console.log('📊 Renderizando Dashboard Hospitalar V1.2.0 TPH CORRIGIDO');
+    console.log('📊 Renderizando Dashboard Hospitalar V1.2.1 CORRIGIDO');
     
     let container = document.getElementById('dashHospitalarContent');
     if (!container) {
@@ -820,14 +826,10 @@ window.renderDashboardHospitalar = function() {
         <div class="dashboard-hospitalar-wrapper" style="background: linear-gradient(135deg, ${CORES_ARCHIPELAGO.azulMarinhoEscuro} 0%, ${CORES_ARCHIPELAGO.azulEscuro} 100%); min-height: 100vh; padding: 20px; color: white; font-family: 'Poppins', sans-serif;">
             <div class="dashboard-header" style="margin-bottom: 30px; padding: 20px; background: rgba(255, 255, 255, 0.05); border-radius: 12px; border-left: 4px solid ${CORES_ARCHIPELAGO.azulPrincipal};">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; flex-wrap: wrap; gap: 15px;">
-                    <h2 style="margin: 0; color: #ffffff; font-size: 24px; font-weight: 700; text-align: center; width: 100%; font-family: 'Poppins', sans-serif;">Dashboard Hospitalar</h2>
+                    <h2 style="margin: 0; color: #0676bb; font-size: 24px; font-weight: 700; text-align: center; width: 100%; font-family: 'Poppins', sans-serif;">Dashboard Hospitalar</h2>
                     <div style="display: flex; gap: 10px; margin: 0 auto;">
                         <button onclick="window.copiarDashboardParaWhatsApp()" class="btn-whatsapp" style="padding: 8px 16px; background: #25D366; border: none; border-radius: 8px; color: white; font-size: 14px; cursor: pointer; font-weight: 600; display: flex; align-items: center; gap: 8px; transition: all 0.3s ease; font-family: 'Poppins', sans-serif;">
-                            Copiar para WhatsApp
-                        </button>
-                        <button id="toggleFundoBtn" class="toggle-fundo-btn" style="padding: 8px 16px; background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 8px; color: #e2e8f0; font-size: 14px; cursor: pointer; transition: all 0.3s ease; display: flex; align-items: center; gap: 8px; font-family: 'Poppins', sans-serif;">
-                            <span id="toggleIcon">🌙</span>
-                            <span id="toggleText">ESCURO</span>
+                            Relatório Via WhatsApp
                         </button>
                     </div>
                 </div>
@@ -841,36 +843,6 @@ window.renderDashboardHospitalar = function() {
         ${getHospitalConsolidadoCSS()}
     `;
     
-    const toggleBtn = document.getElementById('toggleFundoBtn');
-    if (toggleBtn) {
-        toggleBtn.addEventListener('click', () => {
-            window.fundoBranco = !window.fundoBranco;
-            
-            const icon = document.getElementById('toggleIcon');
-            const text = document.getElementById('toggleText');
-            
-            if (window.fundoBranco) {
-                toggleBtn.classList.add('active');
-                icon.textContent = '☀️';
-                text.textContent = 'CLARO';
-                document.body.classList.add('fundo-branco');
-            } else {
-                toggleBtn.classList.remove('active');
-                icon.textContent = '🌙';
-                text.textContent = 'ESCURO';
-                document.body.classList.remove('fundo-branco');
-            }
-            
-            window.atualizarTodasAsCores();
-            
-            hospitaisComDados.forEach(hospitalId => {
-                renderAltasHospital(hospitalId);
-                renderConcessoesHospital(hospitalId);
-                renderLinhasHospital(hospitalId);
-            });
-        });
-    }
-    
     const aguardarChartJS = () => {
         if (typeof Chart === 'undefined') {
             setTimeout(aguardarChartJS, 100);
@@ -881,7 +853,9 @@ window.renderDashboardHospitalar = function() {
             hospitaisComDados.forEach(hospitalId => {
                 renderAltasHospital(hospitalId);
                 renderConcessoesHospital(hospitalId);
-                renderLinhasHospital(hospitalId);
+                if (CONFIG_DASHBOARD.MOSTRAR_LINHAS_CUIDADO) {
+                    renderLinhasHospital(hospitalId);
+                }
             });
             
             console.log('✅ Dashboard renderizado com sucesso!');
@@ -917,7 +891,7 @@ function renderHospitalSection(hospitalId, hoje) {
                         ${renderGaugeV5(dados.taxaOcupacao, CORES_ARCHIPELAGO.ocupados, dados.ocupados.total)}
                         
                         <div class="kpi-items-lista">
-                            <div class="kpi-subtitle">Total de Leitos Ocupados</div>
+                            <div class="kpi-subtitle">Total por Tipo de Leito</div>
                             <div class="item-lista">
                                 <span class="label">Apartamento</span>
                                 <span class="valor">${dados.ocupados.apartamento}</span>
@@ -934,7 +908,7 @@ function renderHospitalSection(hospitalId, hoje) {
                     </div>
                     
                     <div class="kpi-detalhes">
-                        <div class="detalhe-titulo">Modalidade Contratual</div>
+                        <div class="detalhe-titulo">Total por Modalidade Contratual</div>
                         ${renderModalidadeContratual(dados.ocupados.modalidade)}
                     </div>
                 </div>
@@ -946,7 +920,7 @@ function renderHospitalSection(hospitalId, hoje) {
                         ${renderGaugeV5((dados.previsao.total / dados.ocupados.total * 100) || 0, CORES_ARCHIPELAGO.previsao, dados.previsao.total)}
                         
                         <div class="kpi-items-lista">
-                            <div class="kpi-subtitle">Total de Leitos com alta na data de hoje</div>
+                            <div class="kpi-subtitle">Total por Tipo de Leito</div>
                             <div class="item-lista">
                                 <span class="label">Apartamento</span>
                                 <span class="valor">${dados.previsao.apartamento}</span>
@@ -963,7 +937,7 @@ function renderHospitalSection(hospitalId, hoje) {
                     </div>
                     
                     <div class="kpi-detalhes">
-                        <div class="detalhe-titulo">Modalidade Contratual</div>
+                        <div class="detalhe-titulo">Total por Modalidade Contratual</div>
                         ${renderModalidadeContratual(dados.previsao.modalidade)}
                     </div>
                 </div>
@@ -975,7 +949,7 @@ function renderHospitalSection(hospitalId, hoje) {
                         ${renderGaugeV5((dados.disponiveis.total / dados.totalLeitos * 100) || 0, CORES_ARCHIPELAGO.disponiveis, dados.disponiveis.total)}
                         
                         <div class="kpi-items-lista">
-                            <div class="kpi-subtitle">Capacidade por tipo de leito (não simultâneo)</div>
+                            <div class="kpi-subtitle">Capacidade Total por Tipo de Leito (não simultâneo)</div>
                             <div class="item-lista">
                                 <span class="label">Apartamento</span>
                                 <span class="valor">até ${dados.disponiveis.apartamento}</span>
@@ -992,7 +966,7 @@ function renderHospitalSection(hospitalId, hoje) {
                     </div>
                     
                     <div class="kpi-detalhes">
-                        <div class="detalhe-titulo">Modalidade Contratual</div>
+                        <div class="detalhe-titulo">Total por Modalidade Contratual</div>
                         ${renderModalidadeContratual(dados.disponiveis.modalidade)}
                     </div>
                 </div>
@@ -1125,12 +1099,14 @@ function renderHospitalSection(hospitalId, hoje) {
                     <div id="concessoesBoxes${hospitalId}" class="timeline-boxes-container"></div>
                 </div>
                 
+                ${CONFIG_DASHBOARD.MOSTRAR_LINHAS_CUIDADO ? `
                 <div class="grafico-item">
                     <div class="chart-header">
                         <h4>Linhas de Cuidado Previstas em ${hoje}</h4>
                     </div>
                     <div id="linhasBoxes${hospitalId}" class="timeline-boxes-container"></div>
                 </div>
+                ` : ''}
             </div>
         </div>
     `;
@@ -1167,15 +1143,17 @@ function renderAltasHospital(hospitalId) {
     
     if (!window.chartInstances) window.chartInstances = {};
     
-    const categorias = ['HOJE', '24H', '48H', '72H', '96H'];
+    const categorias = CONFIG_DASHBOARD.MOSTRAR_96H ? 
+        ['HOJE', '24H', '48H', '72H', '96H'] : 
+        ['HOJE', '24H', '48H', '72H'];
     
     const dados = {
-        'Ouro': [0, 0, 0, 0, 0],
-        '2R': [0, 0, 0, 0, 0],
-        '3R': [0, 0, 0, 0, 0],
-        '48H': [0, 0, 0, 0, 0],
-        '72H': [0, 0, 0, 0, 0],
-        '96H': [0, 0, 0, 0, 0]
+        'Ouro': CONFIG_DASHBOARD.MOSTRAR_96H ? [0, 0, 0, 0, 0] : [0, 0, 0, 0],
+        '2R': CONFIG_DASHBOARD.MOSTRAR_96H ? [0, 0, 0, 0, 0] : [0, 0, 0, 0],
+        '3R': CONFIG_DASHBOARD.MOSTRAR_96H ? [0, 0, 0, 0, 0] : [0, 0, 0, 0],
+        '48H': CONFIG_DASHBOARD.MOSTRAR_96H ? [0, 0, 0, 0, 0] : [0, 0, 0, 0],
+        '72H': CONFIG_DASHBOARD.MOSTRAR_96H ? [0, 0, 0, 0, 0] : [0, 0, 0, 0],
+        '96H': CONFIG_DASHBOARD.MOSTRAR_96H ? [0, 0, 0, 0, 0] : []
     };
     
     hospital.leitos.forEach(leito => {
@@ -1196,7 +1174,7 @@ function renderAltasHospital(hospitalId) {
                 else if ((prev.includes('24h') || prev.includes('24 h')) && prev.includes('3r')) { index = 1; tipo = '3R'; }
                 else if (prev.includes('48h')) { index = 2; tipo = '48H'; }
                 else if (prev.includes('72h')) { index = 3; tipo = '72H'; }
-                else if (prev.includes('96h')) { index = 4; tipo = '96H'; }
+                else if (CONFIG_DASHBOARD.MOSTRAR_96H && prev.includes('96h')) { index = 4; tipo = '96H'; }
                 
                 if (index >= 0 && tipo && dados[tipo]) {
                     dados[tipo][index]++;
@@ -1210,12 +1188,17 @@ function renderAltasHospital(hospitalId) {
     
     const ctx = canvas.getContext('2d');
     
-    const dadosSimplificados = [
+    const dadosSimplificados = CONFIG_DASHBOARD.MOSTRAR_96H ? [
         dados['Ouro'][0] + dados['2R'][0] + dados['3R'][0],
         dados['Ouro'][1] + dados['2R'][1] + dados['3R'][1],
         dados['48H'][2],
         dados['72H'][3],
         dados['96H'][4]
+    ] : [
+        dados['Ouro'][0] + dados['2R'][0] + dados['3R'][0],
+        dados['Ouro'][1] + dados['2R'][1] + dados['3R'][1],
+        dados['48H'][2],
+        dados['72H'][3]
     ];
     
     const valorMaximo = Math.max(...dadosSimplificados, 0);
@@ -1642,28 +1625,18 @@ function getHospitalConsolidadoCSS() {
                 box-shadow: none;
             }
             
-            /* Título centralizado */
+            /* Título centralizado cor azul */
             .dashboard-header h2 {
                 text-align: center !important;
                 width: 100% !important;
                 margin: 0 auto !important;
+                color: #0676bb !important;
             }
             
             .btn-whatsapp:hover {
                 background: #128C7E !important;
                 transform: translateY(-1px);
                 box-shadow: 0 4px 12px rgba(37, 211, 102, 0.4);
-            }
-            
-            .toggle-fundo-btn:hover {
-                background: rgba(255, 255, 255, 0.2) !important;
-                transform: translateY(-1px);
-            }
-            
-            .toggle-fundo-btn.active {
-                background: ${CORES_ARCHIPELAGO.amarelo} !important;
-                border-color: ${CORES_ARCHIPELAGO.amarelo} !important;
-                color: #000000 !important;
             }
             
             .hospitais-container {
@@ -1691,7 +1664,7 @@ function getHospitalConsolidadoCSS() {
             }
             
             .hospital-title {
-                color: ${CORES_ARCHIPELAGO.azulPrincipal};
+                color: #0676bb;
                 font-size: 20px;
                 font-weight: 700;
                 margin: 0 0 20px 0;
@@ -1735,9 +1708,9 @@ function getHospitalConsolidadoCSS() {
             }
             
             .kpi-title {
-                font-size: 11px;
-                font-weight: 600;
-                color: ${CORES_ARCHIPELAGO.cinzaMedio};
+                font-size: 14px;
+                font-weight: 700;
+                color: #ffffff;
                 text-transform: uppercase;
                 letter-spacing: 0.5px;
                 margin-bottom: 15px;
@@ -1832,7 +1805,7 @@ function getHospitalConsolidadoCSS() {
             
             .kpi-subtitle {
                 font-size: 10px;
-                color: ${CORES_ARCHIPELAGO.azulAcinzentado};
+                color: #0676bb;
                 font-style: italic;
                 text-align: center;
                 margin-bottom: 8px;
@@ -1846,7 +1819,7 @@ function getHospitalConsolidadoCSS() {
             .detalhe-titulo {
                 font-size: 10px;
                 font-weight: 600;
-                color: ${CORES_ARCHIPELAGO.azulPrincipal};
+                color: #0676bb;
                 text-transform: uppercase;
                 letter-spacing: 0.5px;
                 margin-bottom: 8px;
@@ -2246,13 +2219,17 @@ window.forceDataRefresh = function() {
    LOG FINAL
    ============================================ */
 
-console.log('✅ [DASHBOARD HOSPITALAR V1.2.0 TPH CORRIGIDO] Carregado com sucesso!');
+console.log('✅ [DASHBOARD HOSPITALAR V1.2.1 CORRIGIDO] Carregado com sucesso!');
 console.log('📦 Funções disponíveis:');
 console.log('   - window.renderDashboardHospitalar()');
 console.log('   - window.processarDadosHospital(hospitalId)');
 console.log('🔧 Correções aplicadas:');
-console.log('   ✅ Status normalizado (lowercase)');
-console.log('   ✅ Campo identificacaoLeito');
-console.log('   ✅ TPH com 2 casas decimais');
-console.log('   ✅ Parse de datas corrigido para formato ISO');
-console.log('   ✅ Validação de range 0-365 dias');
+console.log('   ✅ Título azul #0676bb centralizado');
+console.log('   ✅ Botão WhatsApp renomeado para "Relatório Via WhatsApp"');
+console.log('   ✅ Botão tema removido');
+console.log('   ✅ Títulos dos hospitais em azul #0676bb');
+console.log('   ✅ Títulos dos cards KPIs em branco, 14px, bold');
+console.log('   ✅ Gauge sempre azul #0676bb');
+console.log('   ✅ Subtítulos renomeados e em azul #0676bb');
+console.log('   ✅ Linhas de cuidado ocultas (CONFIG_DASHBOARD)');
+console.log('   ✅ 96H removido (CONFIG_DASHBOARD)');
