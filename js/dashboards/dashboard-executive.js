@@ -1,10 +1,5 @@
-// =================== DASHBOARD EXECUTIVO V3.4.3 - CORREÇÕES FINAIS APLICADAS ===================
+// =================== DASHBOARD EXECUTIVO V3.4.2 - MOBILE 100% CORRIGIDO ===================
 // =================== LAYOUT MOBILE: 1 BOX POR LINHA ===================
-
-// CONFIGURAÇÕES DO SISTEMA
-const CONFIG_DASHBOARD = {
-    MOSTRAR_LINHAS_CUIDADO: false,  // false = ocultar | true = mostrar
-};
 
 // Estado global para fundo branco (compartilhado com dashboard hospitalar)
 if (typeof window.fundoBranco === 'undefined') {
@@ -1012,7 +1007,6 @@ window.renderDashboardExecutivo = function() {
                     <div id="heatmapConcessoesContainer"></div>
                 </div>
                 
-                ${CONFIG_DASHBOARD.MOSTRAR_LINHAS_CUIDADO ? `
                 <div class="executivo-grafico-card">
                     <div class="chart-header">
                         <div>
@@ -1022,7 +1016,6 @@ window.renderDashboardExecutivo = function() {
                     </div>
                     <div id="heatmapLinhasContainer"></div>
                 </div>
-                ` : ''}
                 
             </div>
         </div>
@@ -1056,9 +1049,7 @@ window.renderDashboardExecutivo = function() {
             }
             
             renderHeatmapConcessoes();
-            if (CONFIG_DASHBOARD.MOSTRAR_LINHAS_CUIDADO) {
-                renderHeatmapLinhas();
-            }
+            renderHeatmapLinhas();
             
             logInfo('Fundo executivo alterado para: ' + (window.fundoBranco ? 'claro' : 'escuro'));
         });
@@ -1072,9 +1063,7 @@ window.renderDashboardExecutivo = function() {
         
         setTimeout(() => {
             renderHeatmapConcessoes();
-            if (CONFIG_DASHBOARD.MOSTRAR_LINHAS_CUIDADO) {
-                renderHeatmapLinhas();
-            }
+            renderHeatmapLinhas();
             
             logSuccess('Dashboard Executivo renderizado com dados atualizados (5 hospitais)');
         }, 200);
@@ -1117,15 +1106,15 @@ function renderHeatmapConcessoes() {
     const periodos = ['HOJE', '24H', '48H', '72H'];
     const dadosConcessoes = calcularDadosConcessoesReais(hospitaisComDados);
     
-    const CONFIG = {
-        HOSPITAIS: {
-            H1: { nome: 'NEOMATER', cor: '#2d3748' },
-            H2: { nome: 'CRUZ AZUL', cor: '#2d3748' },
-            H3: { nome: 'STA MARCELINA', cor: '#2d3748' },
-            H4: { nome: 'SANTA CLARA', cor: '#2d3748' },
-            H5: { nome: 'ADVENTISTA', cor: '#2d3748' }
-        }
-    };
+const CONFIG = {
+    HOSPITAIS: {
+        H1: { nome: 'NEOMATER', cor: '#2d3748' },
+        H2: { nome: 'CRUZ AZUL', cor: '#2d3748' },
+        H3: { nome: 'STA MARCELINA', cor: '#2d3748' },
+        H4: { nome: 'SANTA CLARA', cor: '#2d3748' },
+        H5: { nome: 'ADVENTISTA', cor: '#2d3748' }
+    }
+};
     
     let html = `
         <div class="heatmap-legenda">
@@ -1211,15 +1200,15 @@ function renderHeatmapLinhas() {
     const periodos = ['HOJE', '24H', '48H', '72H'];
     const dadosLinhas = calcularDadosLinhasReais(hospitaisComDados);
     
-    const CONFIG = {
-        HOSPITAIS: {
-            H1: { nome: 'NEOMATER', cor: '#2d3748' },
-            H2: { nome: 'CRUZ AZUL', cor: '#2d3748' },
-            H3: { nome: 'STA MARCELINA', cor: '#2d3748' },
-            H4: { nome: 'SANTA CLARA', cor: '#2d3748' },
-            H5: { nome: 'ADVENTISTA', cor: '#2d3748' }
-        }
-    };
+const CONFIG = {
+    HOSPITAIS: {
+        H1: { nome: 'NEOMATER', cor: '#2d3748' },
+        H2: { nome: 'CRUZ AZUL', cor: '#2d3748' },
+        H3: { nome: 'STA MARCELINA', cor: '#2d3748' },
+        H4: { nome: 'SANTA CLARA', cor: '#2d3748' },
+        H5: { nome: 'ADVENTISTA', cor: '#2d3748' }
+    }
+};
     
     let html = `
         <div class="heatmap-legenda">
@@ -1451,7 +1440,6 @@ function getExecutiveCSS() {
                 transform: translate(-50%, -40%);
                 text-align: center;
                 width: 100%;
-                z-index: 10;
             }
             
             .gauge-largo-number {
@@ -1967,7 +1955,7 @@ function getExecutiveCSS() {
                 .kpis-grid-executivo {
                     display: flex !important;
                     flex-direction: column !important;
-                    gap: 20px !important;
+                    gap: 15px !important;
                     width: 100% !important;
                     padding: 0 !important;
                 }
@@ -1978,14 +1966,8 @@ function getExecutiveCSS() {
                     padding: 20px 15px !important;
                     width: 100% !important;
                     max-width: none !important;
-                    margin: 0 0 20px 0 !important;
+                    margin: 0 !important;
                     box-sizing: border-box !important;
-                }
-                
-                /* ESPAÇAMENTO ESPECÍFICO PARA ANÁLISE PREDITIVA */
-                .box-analise-preditiva {
-                    margin-top: 20px !important;
-                    margin-bottom: 30px !important;
                 }
                 
                 /* Header mobile */
@@ -2011,12 +1993,10 @@ function getExecutiveCSS() {
                     justify-content: center !important;
                 }
                 
-                /* Gauge principal (ocupação geral) - CORREÇÃO SOBREPOSIÇÃO */
+                /* Gauge principal (ocupação geral) */
                 .gauge-largo-container {
-                    position: relative !important;
                     width: 100% !important;
-                    height: 220px !important;
-                    min-height: 220px !important;
+                    height: 200px !important;
                     padding: 10px !important;
                 }
                 
@@ -2029,12 +2009,11 @@ function getExecutiveCSS() {
                 
                 .gauge-largo-info {
                     position: absolute !important;
-                    top: 45% !important;
+                    top: 50% !important;
                     left: 50% !important;
-                    transform: translate(-50%, -50%) !important;
+                    transform: translate(-50%, -30%) !important;
                     width: 100% !important;
                     padding: 0 10px !important;
-                    z-index: 10 !important;
                 }
                 
                 .gauge-largo-number {
@@ -2236,8 +2215,7 @@ function getExecutiveCSS() {
             @media (max-width: 480px) {
                 /* Ajustes extras para telas muito pequenas */
                 .gauge-largo-container {
-                    height: 200px !important;
-                    min-height: 200px !important;
+                    height: 180px !important;
                 }
                 
                 .gauge-largo-number {
@@ -2311,9 +2289,5 @@ function logError(message) {
     console.error('[DASHBOARD EXECUTIVO] ❌ ' + message);
 }
 
-console.log('Dashboard Executivo V3.4.3 - CORREÇÕES FINAIS APLICADAS');
-console.log('✅ Configuração CONFIG_DASHBOARD adicionada');
-console.log('✅ Linhas de cuidado condicionadas');
-console.log('✅ Espaçamento mobile corrigido');
-console.log('✅ Gauge de ocupação geral sem sobreposição');
+console.log('Dashboard Executivo V3.4.2 - TPH CORRIGIDO - Média Ponderada + 2 Casas Decimais');
 console.log('Hospitais em ordem alfabética: ADVENTISTA, CRUZ AZUL, NEOMATER, SANTA CLARA, STA MARCELINA');
