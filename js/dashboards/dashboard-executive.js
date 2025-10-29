@@ -1,6 +1,11 @@
 // =================== DASHBOARD EXECUTIVO V3.4.2 - MOBILE 100% CORRIGIDO ===================
 // =================== LAYOUT MOBILE: 1 BOX POR LINHA ===================
 
+// CONFIGURAÇÕES DO SISTEMA
+const CONFIG_DASHBOARD = {
+    MOSTRAR_LINHAS_CUIDADO: false,  // false = ocultar | true = mostrar
+};
+
 // Estado global para fundo branco (compartilhado com dashboard hospitalar)
 if (typeof window.fundoBranco === 'undefined') {
     window.fundoBranco = false;
@@ -995,6 +1000,7 @@ window.renderDashboardExecutivo = function() {
                 
             </div>
             
+            ${CONFIG_DASHBOARD.MOSTRAR_LINHAS_CUIDADO ? `
             <div class="executivo-graficos">
                 
                 <div class="executivo-grafico-card">
@@ -1018,6 +1024,7 @@ window.renderDashboardExecutivo = function() {
                 </div>
                 
             </div>
+            ` : ''}
         </div>
         
         ${getExecutiveCSS()}
@@ -1048,28 +1055,34 @@ window.renderDashboardExecutivo = function() {
                 text.textContent = 'Tema Escuro';
             }
             
-            renderHeatmapConcessoes();
-            renderHeatmapLinhas();
+            if (CONFIG_DASHBOARD.MOSTRAR_LINHAS_CUIDADO) {
+                renderHeatmapConcessoes();
+                renderHeatmapLinhas();
+            }
             
             logInfo('Fundo executivo alterado para: ' + (window.fundoBranco ? 'claro' : 'escuro'));
         });
     }
     
-    const aguardarChartJS = () => {
-        if (typeof Chart === 'undefined') {
-            setTimeout(aguardarChartJS, 100);
-            return;
-        }
-        
-        setTimeout(() => {
-            renderHeatmapConcessoes();
-            renderHeatmapLinhas();
+    if (CONFIG_DASHBOARD.MOSTRAR_LINHAS_CUIDADO) {
+        const aguardarChartJS = () => {
+            if (typeof Chart === 'undefined') {
+                setTimeout(aguardarChartJS, 100);
+                return;
+            }
             
-            logSuccess('Dashboard Executivo renderizado com dados atualizados (5 hospitais)');
-        }, 200);
-    };
-    
-    aguardarChartJS();
+            setTimeout(() => {
+                renderHeatmapConcessoes();
+                renderHeatmapLinhas();
+                
+                logSuccess('Dashboard Executivo renderizado com dados atualizados (5 hospitais)');
+            }, 200);
+        };
+        
+        aguardarChartJS();
+    } else {
+        logSuccess('Dashboard Executivo renderizado com dados atualizados (5 hospitais) - Linhas de cuidado ocultas');
+    }
 };
 
 // =================== FUNÇÃO PARA OBTER COR POR VALOR ===================
@@ -1440,6 +1453,8 @@ function getExecutiveCSS() {
                 transform: translate(-50%, -40%);
                 text-align: center;
                 width: 100%;
+                pointer-events: none;
+                z-index: 10;
             }
             
             .gauge-largo-number {
@@ -1955,24 +1970,25 @@ function getExecutiveCSS() {
                 .kpis-grid-executivo {
                     display: flex !important;
                     flex-direction: column !important;
-                    gap: 15px !important;
+                    gap: 20px !important;
                     width: 100% !important;
                     padding: 0 !important;
                 }
                 
-                /* Cada box ocupa largura total */
+                /* Cada box ocupa largura total COM ESPAÇAMENTO */
                 .kpi-box {
                     min-height: auto !important;
                     padding: 20px 15px !important;
                     width: 100% !important;
                     max-width: none !important;
-                    margin: 0 !important;
+                    margin: 0 0 20px 0 !important;
                     box-sizing: border-box !important;
                 }
                 
                 /* Header mobile */
                 .dashboard-header-exec {
                     padding: 15px !important;
+                    margin-bottom: 20px !important;
                 }
                 
                 .dashboard-header-exec h2 {
@@ -1993,11 +2009,13 @@ function getExecutiveCSS() {
                     justify-content: center !important;
                 }
                 
-                /* Gauge principal (ocupação geral) */
+                /* Gauge principal (ocupação geral) COM CORREÇÃO DE SOBREPOSIÇÃO */
                 .gauge-largo-container {
                     width: 100% !important;
-                    height: 200px !important;
+                    height: 250px !important;
                     padding: 10px !important;
+                    position: relative !important;
+                    min-height: 250px !important;
                 }
                 
                 .gauge-largo-container svg {
@@ -2009,17 +2027,19 @@ function getExecutiveCSS() {
                 
                 .gauge-largo-info {
                     position: absolute !important;
-                    top: 50% !important;
+                    top: 45% !important;
                     left: 50% !important;
-                    transform: translate(-50%, -30%) !important;
+                    transform: translate(-50%, -50%) !important;
                     width: 100% !important;
                     padding: 0 10px !important;
+                    pointer-events: none !important;
+                    z-index: 10 !important;
                 }
                 
                 .gauge-largo-number {
                     font-size: 28px !important;
                     margin-bottom: 8px !important;
-                    margin-top: 15px !important;
+                    margin-top: 20px !important;
                 }
                 
                 .gauge-largo-label {
@@ -2030,6 +2050,7 @@ function getExecutiveCSS() {
                 .gauge-largo-percentage {
                     font-size: 40px !important;
                     padding: 4px 12px !important;
+                    margin-top: 5px !important;
                 }
                 
                 .gauge-largo-subtitle {
@@ -2157,7 +2178,7 @@ function getExecutiveCSS() {
                 /* Heatmaps */
                 .executivo-grafico-card {
                     padding: 15px !important;
-                    margin-bottom: 15px !important;
+                    margin-bottom: 20px !important;
                 }
                 
                 .chart-header h3 {
@@ -2215,7 +2236,8 @@ function getExecutiveCSS() {
             @media (max-width: 480px) {
                 /* Ajustes extras para telas muito pequenas */
                 .gauge-largo-container {
-                    height: 180px !important;
+                    height: 220px !important;
+                    min-height: 220px !important;
                 }
                 
                 .gauge-largo-number {
@@ -2260,6 +2282,7 @@ function getExecutiveCSS() {
                 /* Ajuste do padding geral */
                 .kpi-box {
                     padding: 15px 10px !important;
+                    margin-bottom: 20px !important;
                 }
             }
             
@@ -2289,5 +2312,5 @@ function logError(message) {
     console.error('[DASHBOARD EXECUTIVO] ❌ ' + message);
 }
 
-console.log('Dashboard Executivo V3.4.2 - TPH CORRIGIDO - Média Ponderada + 2 Casas Decimais');
+console.log('Dashboard Executivo V3.4.2 - CORRIGIDO COM CONFIG_DASHBOARD');
 console.log('Hospitais em ordem alfabética: ADVENTISTA, CRUZ AZUL, NEOMATER, SANTA CLARA, STA MARCELINA');
