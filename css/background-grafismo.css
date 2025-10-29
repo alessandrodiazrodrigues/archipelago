@@ -3,15 +3,15 @@
    Data: 28/Outubro/2025
    ============================================ */
 
-/* CARDS - Remove azul escuro e aplica grafismo */
+/* CARDS - Mantém azul escuro e adiciona grafismo por cima */
 .card {
-    background-color: transparent !important;
-    background-image: 
-        linear-gradient(rgba(23, 41, 69, 0.2), rgba(23, 41, 69, 0.2)),
-        url('../imagens/Grafismo_Fundo.svg') !important;
+    background-color: #172945 !important;
+    background-image: url('../imagens/Grafismo_Fundo.svg') !important;
     background-size: cover !important;
     background-position: center !important;
     background-repeat: no-repeat !important;
+    background-blend-mode: soft-light !important;
+    opacity: 1 !important;
 }
 
 /* LOADING - Se existir */
@@ -46,17 +46,6 @@
     background-image: 
         linear-gradient(rgba(23, 41, 69, 0.2), rgba(23, 41, 69, 0.2)),
         url('../imagens/Grafismo_Fundo.svg') !important;
-    background-size: cover !important;
-    background-position: center !important;
-    background-repeat: no-repeat !important;
-    background-attachment: fixed !important;
-}
-
-/* BODY/CONTAINER PRINCIPAL - Background geral */
-body {
-    background-image: 
-        linear-gradient(rgba(23, 41, 69, 0.3), rgba(23, 41, 69, 0.3)),
-        url('imagens/Grafismo_Fundo.svg') !important;
     background-size: cover !important;
     background-position: center !important;
     background-repeat: no-repeat !important;
