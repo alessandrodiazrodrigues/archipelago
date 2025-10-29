@@ -1,17 +1,28 @@
 /* ============================================
    🎨 BACKGROUND GRAFISMO - ARCHIPELAGO
    Data: 28/Outubro/2025
+   TESTADO E APROVADO NO CONSOLE
    ============================================ */
 
-/* CARDS - Mantém azul escuro e adiciona grafismo por cima */
+/* CARDS */
 .card {
-    background-color: #172945 !important;
-    background-image: url('../imagens/Grafismo_Fundo.svg') !important;
+    background-image: 
+        linear-gradient(rgba(23, 41, 69, 0.2), rgba(23, 41, 69, 0.2)),
+        url('../imagens/Grafismo_Fundo.svg') !important;
     background-size: cover !important;
     background-position: center !important;
     background-repeat: no-repeat !important;
-    background-blend-mode: soft-light !important;
-    opacity: 1 !important;
+}
+
+/* BODY - Fundo geral */
+body {
+    background-image: 
+        linear-gradient(rgba(23, 41, 69, 0.3), rgba(23, 41, 69, 0.3)),
+        url('imagens/Grafismo_Fundo.svg') !important;
+    background-size: cover !important;
+    background-position: center !important;
+    background-repeat: no-repeat !important;
+    background-attachment: fixed !important;
 }
 
 /* LOADING - Se existir */
@@ -26,7 +37,7 @@
     background-repeat: no-repeat !important;
 }
 
-/* DASHBOARD HOSPITALAR - Se existir */
+/* DASHBOARD HOSPITALAR */
 .dashboard-hospitalar,
 #dashboard-hospitalar,
 [data-dashboard="hospital"] {
@@ -39,7 +50,7 @@
     background-attachment: fixed !important;
 }
 
-/* DASHBOARD EXECUTIVO - Se existir */
+/* DASHBOARD EXECUTIVO */
 .dashboard-executivo,
 #dashboard-executivo,
 [data-dashboard="executivo"] {
