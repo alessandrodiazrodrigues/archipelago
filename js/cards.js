@@ -1,5 +1,10 @@
 // =================== CARDS.JS V3.5.0 - BUSCA DINÂMICA EM CONCESSÕES E LINHAS ===================
 
+// ⚙️ CONFIGURAÇÃO DO SISTEMA - OCULTAR LINHAS DE CUIDADO
+const CONFIG_DASHBOARD = {
+    MOSTRAR_LINHAS_CUIDADO: false,  // false = ocultar | true = mostrar
+};
+
 // =================== VARIÁVEIS GLOBAIS ===================  
 window.selectedLeito = null;
 window.currentHospital = 'H1';
@@ -611,6 +616,7 @@ function createCard(leito, hospitalNome) {
             </div>
         </div>
 
+        ${CONFIG_DASHBOARD.MOSTRAR_LINHAS_CUIDADO ? `
         <!-- LINHAS DE CUIDADO -->
         <div class="card-section" style="margin-bottom: 15px; font-family: 'Poppins', sans-serif;">
             <div class="section-header" style="background: #0676bb; color: #ffffff; font-size: 10px; padding: 6px 8px; border-radius: 4px; margin-bottom: 6px; text-transform: uppercase; font-weight: 800; letter-spacing: 0.5px;">
@@ -623,6 +629,7 @@ function createCard(leito, hospitalNome) {
                 }
             </div>
         </div>
+        ` : ''}
 
         <!-- FOOTER -->
         <div class="card-footer" style="display: flex; justify-content: space-between; align-items: center; padding-top: 10px; border-top: 1px solid rgba(255,255,255,0.05); gap: 10px; font-family: 'Poppins', sans-serif;">
@@ -738,7 +745,9 @@ function openAdmissaoModal(leitoNumero) {
     
     setupModalEventListeners(modal, 'admissao');
     setupSearchFilter(modal, 'admConcessoes', 'searchConcessoes');
-    setupSearchFilter(modal, 'admLinhas', 'searchLinhas');
+    if (CONFIG_DASHBOARD.MOSTRAR_LINHAS_CUIDADO) {
+        setupSearchFilter(modal, 'admLinhas', 'searchLinhas');
+    }
 }
 
 function openAtualizacaoModal(leitoNumero, dadosLeito) {
@@ -753,7 +762,9 @@ function openAtualizacaoModal(leitoNumero, dadosLeito) {
     
     setupModalEventListeners(modal, 'atualizacao');
     setupSearchFilter(modal, 'updConcessoes', 'searchConcessoesUpd');
-    setupSearchFilter(modal, 'updLinhas', 'searchLinhasUpd');
+    if (CONFIG_DASHBOARD.MOSTRAR_LINHAS_CUIDADO) {
+        setupSearchFilter(modal, 'updLinhas', 'searchLinhasUpd');
+    }
     
     setTimeout(() => {
         forcarPreMarcacao(modal, dadosLeito);
@@ -1009,6 +1020,7 @@ function createAdmissaoForm(hospitalNome, leitoNumero, hospitalId) {
                 </div>
             </div>
             
+            ${CONFIG_DASHBOARD.MOSTRAR_LINHAS_CUIDADO ? `
             <!-- ⭐ LINHAS DE CUIDADO COM BUSCA -->
             <div style="margin-bottom: 20px;">
                 <div style="background: rgba(6,118,187,0.1); padding: 10px 15px; border-radius: 6px; margin-bottom: 10px;">
@@ -1029,6 +1041,7 @@ function createAdmissaoForm(hospitalNome, leitoNumero, hospitalId) {
                     `).join('')}
                 </div>
             </div>
+            ` : ''}
             
             <!-- BOTÕES -->
             <div class="modal-buttons" style="display: flex; justify-content: flex-end; gap: 12px; padding: 20px; border-top: 1px solid rgba(255,255,255,0.1);">
@@ -1239,6 +1252,7 @@ function createAtualizacaoForm(hospitalNome, leitoNumero, dadosLeito) {
                 </div>
             </div>
             
+            ${CONFIG_DASHBOARD.MOSTRAR_LINHAS_CUIDADO ? `
             <!-- ⭐ LINHAS DE CUIDADO COM BUSCA -->
             <div style="margin-bottom: 20px;">
                 <div style="background: rgba(6,118,187,0.1); padding: 10px 15px; border-radius: 6px; margin-bottom: 10px;">
@@ -1262,6 +1276,7 @@ function createAtualizacaoForm(hospitalNome, leitoNumero, dadosLeito) {
                     }).join('')}
                 </div>
             </div>
+            ` : ''}
             
             <!-- BOTÕES -->
             <div class="modal-buttons" style="display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 20px; border-top: 1px solid rgba(255,255,255,0.1);">
@@ -1300,12 +1315,14 @@ function forcarPreMarcacao(modal, dadosLeito) {
         }
     });
     
-    const linhasCheckboxes = modal.querySelectorAll('#updLinhas input[type="checkbox"]');
-    linhasCheckboxes.forEach(checkbox => {
-        if (linhasAtuais.includes(checkbox.value)) {
-            checkbox.checked = true;
-        }
-    });
+    if (CONFIG_DASHBOARD.MOSTRAR_LINHAS_CUIDADO) {
+        const linhasCheckboxes = modal.querySelectorAll('#updLinhas input[type="checkbox"]');
+        linhasCheckboxes.forEach(checkbox => {
+            if (linhasAtuais.includes(checkbox.value)) {
+                checkbox.checked = true;
+            }
+        });
+    }
     
     logDebug(`Pré-marcação concluída`);
 }
@@ -1560,7 +1577,12 @@ function coletarDadosFormulario(modal, tipo) {
         }
         
         dados.concessoes = coletarCheckboxesSelecionados(modal, '#admConcessoes');
-        dados.linhas = coletarCheckboxesSelecionados(modal, '#admLinhas');
+        
+        if (CONFIG_DASHBOARD.MOSTRAR_LINHAS_CUIDADO) {
+            dados.linhas = coletarCheckboxesSelecionados(modal, '#admLinhas');
+        } else {
+            dados.linhas = [];
+        }
         
     } else {
         dados.idade = parseInt(modal.querySelector('#updIdade')?.value) || null;
@@ -1579,7 +1601,12 @@ function coletarDadosFormulario(modal, tipo) {
         }
         
         dados.concessoes = coletarCheckboxesSelecionados(modal, '#updConcessoes');
-        dados.linhas = coletarCheckboxesSelecionados(modal, '#updLinhas');
+        
+        if (CONFIG_DASHBOARD.MOSTRAR_LINHAS_CUIDADO) {
+            dados.linhas = coletarCheckboxesSelecionados(modal, '#updLinhas');
+        } else {
+            dados.linhas = [];
+        }
     }
     
     return dados;
@@ -1991,6 +2018,7 @@ document.addEventListener('DOMContentLoaded', function() {
     logInfo('  • 🔍 Campo de busca dinâmica em LINHAS DE CUIDADO');
     logInfo('  • ⚡ Filtro em tempo real (enquanto digita)');
     logInfo('  • ✅ Funciona em admissão e atualização');
+    logInfo(`  • 🎯 LINHAS DE CUIDADO: ${CONFIG_DASHBOARD.MOSTRAR_LINHAS_CUIDADO ? 'VISÍVEIS' : 'OCULTAS'}`);
 });
 
 // =================== EXPORTS ===================
@@ -2008,3 +2036,4 @@ window.setupSearchFilter = setupSearchFilter;
 
 logSuccess('🎉 CARDS.JS V3.5.0 COMPLETO - BUSCA DINÂMICA IMPLEMENTADA!');
 console.log('✅ CARDS.JS V3.5.0 - CAMPO DE BUSCA EM CONCESSÕES E LINHAS ADICIONADO!');
+console.log(`🎯 LINHAS DE CUIDADO: ${CONFIG_DASHBOARD.MOSTRAR_LINHAS_CUIDADO ? 'VISÍVEIS ✅' : 'OCULTAS ❌'}`);
