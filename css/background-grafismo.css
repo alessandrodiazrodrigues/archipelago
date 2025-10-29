@@ -1,0 +1,64 @@
+/* ============================================
+   🎨 BACKGROUND GRAFISMO - ARCHIPELAGO
+   Data: 28/Outubro/2025
+   ============================================ */
+
+/* CARDS - Remove azul escuro e aplica grafismo */
+.card {
+    background-color: transparent !important;
+    background-image: 
+        linear-gradient(rgba(23, 41, 69, 0.2), rgba(23, 41, 69, 0.2)),
+        url('../imagens/Grafismo_Fundo.svg') !important;
+    background-size: cover !important;
+    background-position: center !important;
+    background-repeat: no-repeat !important;
+}
+
+/* LOADING - Se existir */
+.loading-overlay,
+#loading,
+.loading {
+    background-image: 
+        linear-gradient(rgba(23, 41, 69, 0.3), rgba(23, 41, 69, 0.3)),
+        url('../imagens/Grafismo_Fundo.svg') !important;
+    background-size: cover !important;
+    background-position: center !important;
+    background-repeat: no-repeat !important;
+}
+
+/* DASHBOARD HOSPITALAR - Se existir */
+.dashboard-hospitalar,
+#dashboard-hospitalar,
+[data-dashboard="hospital"] {
+    background-image: 
+        linear-gradient(rgba(23, 41, 69, 0.2), rgba(23, 41, 69, 0.2)),
+        url('../imagens/Grafismo_Fundo.svg') !important;
+    background-size: cover !important;
+    background-position: center !important;
+    background-repeat: no-repeat !important;
+    background-attachment: fixed !important;
+}
+
+/* DASHBOARD EXECUTIVO - Se existir */
+.dashboard-executivo,
+#dashboard-executivo,
+[data-dashboard="executivo"] {
+    background-image: 
+        linear-gradient(rgba(23, 41, 69, 0.2), rgba(23, 41, 69, 0.2)),
+        url('../imagens/Grafismo_Fundo.svg') !important;
+    background-size: cover !important;
+    background-position: center !important;
+    background-repeat: no-repeat !important;
+    background-attachment: fixed !important;
+}
+
+/* BODY/CONTAINER PRINCIPAL - Background geral */
+body {
+    background-image: 
+        linear-gradient(rgba(23, 41, 69, 0.3), rgba(23, 41, 69, 0.3)),
+        url('imagens/Grafismo_Fundo.svg') !important;
+    background-size: cover !important;
+    background-position: center !important;
+    background-repeat: no-repeat !important;
+    background-attachment: fixed !important;
+}
