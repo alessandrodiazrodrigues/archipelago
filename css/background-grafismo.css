@@ -1,7 +1,7 @@
 /* ============================================
    🎨 BACKGROUND GRAFISMO - ARCHIPELAGO
    Data: 28/Outubro/2025
-   TESTADO E APROVADO NO CONSOLE
+   CORRIGIDO - TODOS OS CAMINHOS AJUSTADOS
    ============================================ */
 
 /* CARDS */
@@ -18,7 +18,7 @@
 body {
     background-image: 
         linear-gradient(rgba(23, 41, 69, 0.3), rgba(23, 41, 69, 0.3)),
-        url('imagens/Grafismo_Fundo.svg') !important;
+        url('../imagens/Grafismo_Fundo.svg') !important;  /* ✅ CORRIGIDO - Adicionado ../ */
     background-size: cover !important;
     background-position: center !important;
     background-repeat: no-repeat !important;
@@ -40,7 +40,8 @@ body {
 /* DASHBOARD HOSPITALAR */
 .dashboard-hospitalar,
 #dashboard-hospitalar,
-[data-dashboard="hospital"] {
+[data-dashboard="hospital"],
+.dashboard-container {
     background-image: 
         linear-gradient(rgba(23, 41, 69, 0.2), rgba(23, 41, 69, 0.2)),
         url('../imagens/Grafismo_Fundo.svg') !important;
@@ -53,7 +54,8 @@ body {
 /* DASHBOARD EXECUTIVO */
 .dashboard-executivo,
 #dashboard-executivo,
-[data-dashboard="executivo"] {
+[data-dashboard="executivo"],
+.dashboard-executive-container {
     background-image: 
         linear-gradient(rgba(23, 41, 69, 0.2), rgba(23, 41, 69, 0.2)),
         url('../imagens/Grafismo_Fundo.svg') !important;
@@ -61,4 +63,61 @@ body {
     background-position: center !important;
     background-repeat: no-repeat !important;
     background-attachment: fixed !important;
+}
+
+/* MODAIS - Opcional, se quiser também no modal */
+.modal-content {
+    background-image: 
+        linear-gradient(rgba(23, 41, 69, 0.95), rgba(23, 41, 69, 0.95)),
+        url('../imagens/Grafismo_Fundo.svg') !important;
+    background-size: cover !important;
+    background-position: center !important;
+    background-repeat: no-repeat !important;
+}
+
+/* SEÇÕES ESPECÍFICAS */
+.section-leitos,
+#leitosView {
+    background-image: 
+        linear-gradient(rgba(23, 41, 69, 0.1), rgba(23, 41, 69, 0.1)),
+        url('../imagens/Grafismo_Fundo.svg') !important;
+    background-size: cover !important;
+    background-position: center !important;
+    background-repeat: no-repeat !important;
+    background-attachment: fixed !important;
+}
+
+/* HEADER E FOOTER - Sutil */
+.header,
+.footer {
+    background-image: 
+        linear-gradient(rgba(30, 41, 59, 0.98), rgba(30, 41, 59, 0.98)),
+        url('../imagens/Grafismo_Fundo.svg') !important;
+    background-size: cover !important;
+    background-position: center !important;
+    background-repeat: no-repeat !important;
+}
+
+/* MENU LATERAL - Sutil */
+.side-menu {
+    background-image: 
+        linear-gradient(rgba(30, 41, 59, 0.98), rgba(30, 41, 59, 0.98)),
+        url('../imagens/Grafismo_Fundo.svg') !important;
+    background-size: cover !important;
+    background-position: center !important;
+    background-repeat: no-repeat !important;
+}
+
+/* FORÇAR PRIORIDADE MÁXIMA - Caso necessário */
+html body,
+html body .card,
+html body .dashboard-container,
+html body .dashboard-hospitalar,
+html body .dashboard-executivo {
+    background-image: 
+        linear-gradient(rgba(23, 41, 69, 0.2), rgba(23, 41, 69, 0.2)),
+        url('../imagens/Grafismo_Fundo.svg') !important;
+    background-size: cover !important;
+    background-position: center !important;
+    background-repeat: no-repeat !important;
 }
