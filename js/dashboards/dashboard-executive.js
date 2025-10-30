@@ -1,11 +1,6 @@
 // =================== DASHBOARD EXECUTIVO V3.4.2 - MOBILE 100% CORRIGIDO ===================
 // =================== LAYOUT MOBILE: 1 BOX POR LINHA ===================
 
-// CONFIGURAÇÕES DO SISTEMA
-const CONFIG_DASHBOARD = {
-    MOSTRAR_LINHAS_CUIDADO: false,  // false = ocultar | true = mostrar
-};
-
 // Estado global para fundo branco (compartilhado com dashboard hospitalar)
 if (typeof window.fundoBranco === 'undefined') {
     window.fundoBranco = false;
