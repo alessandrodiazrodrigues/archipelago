@@ -1,9 +1,9 @@
 // js/dashboards/dashboard-hospital.js
-// =================== DASHBOARD HOSPITALAR V1.2.1 CORRIGIDO ===================
-// ✅ CORREÇÕES APLICADAS: Títulos, Cores, Ocultar Linhas, Remover 96H
+// =================== DASHBOARD HOSPITALAR V1.2.2 CORRIGIDO ===================
+// ✅ CORREÇÕES APLICADAS: Conflito de funções resolvido, TPH compatível com string/number, Escala TPH 10 dias
 // Data: 29/Outubro/2025
 
-console.log('🚀 [DASHBOARD HOSPITALAR V1.2.1 CORRIGIDO] Inicializando...');
+console.log('🚀 [DASHBOARD HOSPITALAR V1.2.2 CORRIGIDO] Inicializando...');
 
 /* ============================================
    CORES OFICIAIS ARCHIPELAGO
@@ -52,8 +52,8 @@ function normStr(s) {
         .trim().toLowerCase();
 }
 
-// ✅ CORREÇÃO PRINCIPAL - FUNÇÃO parseAdmDate CORRIGIDA
-function parseAdmDate(admAt) {
+// ✅ CORREÇÃO: Renomeada com sufixo _Hosp para evitar conflito
+function parseAdmDate_Hosp(admAt) {
     if (!admAt) return null;
     
     // Parse direto - funciona com formato ISO do Google Sheets
@@ -517,7 +517,7 @@ window.processarDadosHospital = function(hospitalId) {
             const admAt = l.admAt;
             if (!admAt) return 0;
             
-            const admData = parseAdmDate(admAt);
+            const admData = parseAdmDate_Hosp(admAt);
             if (!admData || isNaN(admData.getTime())) return 0;
             
             const hoje = new Date();
@@ -535,14 +535,14 @@ window.processarDadosHospital = function(hospitalId) {
         const admAt = l.admAt;
         if (!admAt) return false;
         
-        const admData = parseAdmDate(admAt);
+        const admData = parseAdmDate_Hosp(admAt);
         if (!admData || isNaN(admData.getTime())) return false;
         
         const hoje = new Date();
         const horas = (hoje - admData) / (1000 * 60 * 60);
         return horas >= 120; // 5 dias = 120 horas
     }).map(l => {
-        const admData = parseAdmDate(l.admAt);
+        const admData = parseAdmDate_Hosp(l.admAt);
         const dias = Math.floor((new Date() - admData) / (1000 * 60 * 60 * 24));
         
         return { 
@@ -651,17 +651,17 @@ window.processarDadosHospital = function(hospitalId) {
 };
 
 /* ============================================
-   RENDER GAUGE V5 - SEMPRE AZUL
+   RENDER GAUGE V5 - SEMPRE AZUL (Renomeada com _Hosp)
    ============================================ */
 
-function calcularGaugeOffset(porcentagem) {
+function calcularGaugeOffset_Hosp(porcentagem) {
     const circunferencia = Math.PI * 55;
     const progresso = (porcentagem / 100) * circunferencia;
     return circunferencia - progresso;
 }
 
-function renderGaugeV5(porcentagem, cor, numero) {
-    const offset = calcularGaugeOffset(porcentagem);
+function renderGaugeV5_Hosp(porcentagem, cor, numero) {
+    const offset = calcularGaugeOffset_Hosp(porcentagem);
     // Sempre usar azul e badge azul
     const badgeClass = 'blue';
     cor = CORES_ARCHIPELAGO.azulPrincipal; 
@@ -691,10 +691,10 @@ function renderGaugeV5(porcentagem, cor, numero) {
 }
 
 /* ============================================
-   RENDER MODALIDADE CONTRATUAL
+   RENDER MODALIDADE CONTRATUAL (Renomeada com _Hosp)
    ============================================ */
 
-function renderModalidadeContratual(modalidade) {
+function renderModalidadeContratual_Hosp(modalidade) {
     return `
         <div class="lista-simples-compacta">
             <div class="lista-item-compacto">
@@ -722,20 +722,26 @@ function renderModalidadeContratual(modalidade) {
 }
 
 /* ============================================
-   RENDER MINI GAUGE TPH
+   RENDER MINI GAUGE TPH (Renomeada com _Hosp e CORRIGIDA)
    ============================================ */
 
-function renderMiniGaugeTPH(dias) {
-    const maxDias = 30;
-    const diasFloat = parseFloat(dias);
-    const porcentagem = (diasFloat / maxDias) * 100;
+function renderMiniGaugeTPH_Hosp(dias) {
+    // ✅ CORREÇÃO: Converter string para número se necessário
+    const diasNum = typeof dias === 'string' ? parseFloat(dias) : dias;
     
+    // ✅ CORREÇÃO: Usar escala de 10 dias (não 30)
+    const maxDias = 10;
+    const porcentagem = (diasNum / maxDias) * 100;
+    
+    // ✅ CORREÇÃO: Ajustar cores conforme nova regra
+    // Verde: 0-5 dias, Amarelo: 6-8 dias, Vermelho: 9-10 dias
     let corClass = 'green';
-    if (porcentagem >= 67) corClass = 'red';
-    else if (porcentagem >= 47) corClass = 'yellow';
+    if (diasNum >= 9) corClass = 'red';      // 9-10 = vermelho
+    else if (diasNum >= 6) corClass = 'yellow'; // 6-8 = amarelo
+    // 0-5 = verde (default)
     
     const totalBlocos = 20;
-    const blocosCheios = Math.round((diasFloat / maxDias) * totalBlocos);
+    const blocosCheios = Math.round((diasNum / maxDias) * totalBlocos);
     
     let blocos = '';
     for (let i = 0; i < totalBlocos; i++) {
@@ -747,7 +753,7 @@ function renderMiniGaugeTPH(dias) {
             <div class="tph-gauge-bar ${corClass}">
                 ${blocos}
             </div>
-            <span class="tph-gauge-label">${dias}/${maxDias}</span>
+            <span class="tph-gauge-label">${diasNum.toFixed(2)}/${maxDias}</span>
         </div>
     `;
 }
@@ -757,7 +763,7 @@ function renderMiniGaugeTPH(dias) {
    ============================================ */
 
 window.renderDashboardHospitalar = function() {
-    console.log('📊 Renderizando Dashboard Hospitalar V1.2.1 CORRIGIDO');
+    console.log('📊 Renderizando Dashboard Hospitalar V1.2.2 CORRIGIDO');
     
     let container = document.getElementById('dashHospitalarContent');
     if (!container) {
@@ -888,7 +894,7 @@ function renderHospitalSection(hospitalId, hoje) {
                     <div class="kpi-title">Leitos Ocupados</div>
                     
                     <div class="kpi-content">
-                        ${renderGaugeV5(dados.taxaOcupacao, CORES_ARCHIPELAGO.ocupados, dados.ocupados.total)}
+                        ${renderGaugeV5_Hosp(dados.taxaOcupacao, CORES_ARCHIPELAGO.ocupados, dados.ocupados.total)}
                         
                         <div class="kpi-items-lista">
                             <div class="kpi-subtitle">Total por Tipo de Leito</div>
@@ -909,7 +915,7 @@ function renderHospitalSection(hospitalId, hoje) {
                     
                     <div class="kpi-detalhes">
                         <div class="detalhe-titulo">Total por Modalidade Contratual</div>
-                        ${renderModalidadeContratual(dados.ocupados.modalidade)}
+                        ${renderModalidadeContratual_Hosp(dados.ocupados.modalidade)}
                     </div>
                 </div>
 
@@ -917,7 +923,7 @@ function renderHospitalSection(hospitalId, hoje) {
                     <div class="kpi-title">Leitos em Previsão de Alta</div>
                     
                     <div class="kpi-content">
-                        ${renderGaugeV5((dados.previsao.total / dados.ocupados.total * 100) || 0, CORES_ARCHIPELAGO.previsao, dados.previsao.total)}
+                        ${renderGaugeV5_Hosp((dados.previsao.total / dados.ocupados.total * 100) || 0, CORES_ARCHIPELAGO.previsao, dados.previsao.total)}
                         
                         <div class="kpi-items-lista">
                             <div class="kpi-subtitle">Total por Tipo de Leito</div>
@@ -938,7 +944,7 @@ function renderHospitalSection(hospitalId, hoje) {
                     
                     <div class="kpi-detalhes">
                         <div class="detalhe-titulo">Total por Modalidade Contratual</div>
-                        ${renderModalidadeContratual(dados.previsao.modalidade)}
+                        ${renderModalidadeContratual_Hosp(dados.previsao.modalidade)}
                     </div>
                 </div>
 
@@ -946,7 +952,7 @@ function renderHospitalSection(hospitalId, hoje) {
                     <div class="kpi-title">Leitos Disponíveis</div>
                     
                     <div class="kpi-content">
-                        ${renderGaugeV5((dados.disponiveis.total / dados.totalLeitos * 100) || 0, CORES_ARCHIPELAGO.disponiveis, dados.disponiveis.total)}
+                        ${renderGaugeV5_Hosp((dados.disponiveis.total / dados.totalLeitos * 100) || 0, CORES_ARCHIPELAGO.disponiveis, dados.disponiveis.total)}
                         
                         <div class="kpi-items-lista">
                             <div class="kpi-subtitle">Capacidade Total por Tipo de Leito (não simultâneo)</div>
@@ -967,7 +973,7 @@ function renderHospitalSection(hospitalId, hoje) {
                     
                     <div class="kpi-detalhes">
                         <div class="detalhe-titulo">Total por Modalidade Contratual</div>
-                        ${renderModalidadeContratual(dados.disponiveis.modalidade)}
+                        ${renderModalidadeContratual_Hosp(dados.disponiveis.modalidade)}
                     </div>
                 </div>
 
@@ -977,7 +983,7 @@ function renderHospitalSection(hospitalId, hoje) {
                     <div class="kpi-tph-container">
                         <div class="kpi-tph-numero">${dados.tph.medio}</div>
                         <div class="kpi-tph-label">dias</div>
-                        ${renderMiniGaugeTPH(dados.tph.medio)}
+                        ${renderMiniGaugeTPH_Hosp(dados.tph.medio)}
                     </div>
                     
                     <div class="kpi-detalhes">
@@ -2219,17 +2225,13 @@ window.forceDataRefresh = function() {
    LOG FINAL
    ============================================ */
 
-console.log('✅ [DASHBOARD HOSPITALAR V1.2.1 CORRIGIDO] Carregado com sucesso!');
+console.log('✅ [DASHBOARD HOSPITALAR V1.2.2 CORRIGIDO] Carregado com sucesso!');
 console.log('📦 Funções disponíveis:');
 console.log('   - window.renderDashboardHospitalar()');
 console.log('   - window.processarDadosHospital(hospitalId)');
 console.log('🔧 Correções aplicadas:');
-console.log('   ✅ Título azul #0676bb centralizado');
-console.log('   ✅ Botão WhatsApp renomeado para "Relatório Via WhatsApp"');
-console.log('   ✅ Botão tema removido');
-console.log('   ✅ Títulos dos hospitais em azul #0676bb');
-console.log('   ✅ Títulos dos cards KPIs em branco, 14px, bold');
-console.log('   ✅ Gauge sempre azul #0676bb');
-console.log('   ✅ Subtítulos renomeados e em azul #0676bb');
-console.log('   ✅ Linhas de cuidado ocultas (CONFIG_DASHBOARD)');
-console.log('   ✅ 96H removido (CONFIG_DASHBOARD)');
+console.log('   ✅ Funções renomeadas com sufixo _Hosp para evitar conflitos');
+console.log('   ✅ renderMiniGaugeTPH_Hosp compatível com string e number');
+console.log('   ✅ Escala TPH ajustada para 10 dias (era 30)');
+console.log('   ✅ Cores TPH: Verde 0-5, Amarelo 6-8, Vermelho 9-10');
+console.log('   ✅ Todas as correções anteriores mantidas');
