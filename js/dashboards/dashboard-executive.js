@@ -782,17 +782,16 @@ window.renderDashboardExecutivo = function() {
     container.innerHTML = `
         <div style="background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); min-height: 100vh; padding: 20px; color: white;">
             
-            <div class="dashboard-header-exec" style="margin-bottom: 30px; padding: 20px; background: rgba(255, 255, 255, 0.05); border-radius: 12px; border-left: 4px solid #22c55e;">
-                <div style="display: flex; justify-content: center; align-items: center; margin-bottom: 10px;">
-                    <h2 style="margin: 0; color: #ffffff; font-size: 24px; font-weight: 700; text-align: center;">Rede Hospitalar Externa - Dashboard Geral</h2>
+<div class="dashboard-header-exec" style="margin-bottom: 30px; padding: 20px; background: rgba(255, 255, 255, 0.05); border-radius: 12px; border-left: 4px solid #ffffff;">                <div style="display: flex; justify-content: center; align-items: center; margin-bottom: 10px;">
+                    <h2 style="margin: 0; color: #0676bb; font-size: 24px; font-weight: 700; text-align: center;">Rede Hospitalar Externa - Dashboard Geral</h2>
                 </div>
-                <div style="display: flex; justify-content: flex-end; gap: 15px; flex-wrap: wrap;">
+                <div style="display: flex; justify-content: center; gap: 15px; flex-wrap: wrap;">
                     <button id="btnWhatsAppExec" style="padding: 8px 16px; background: #25D366; border: 1px solid #25D366; border-radius: 8px; color: white; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.3s ease; display: flex; align-items: center; gap: 8px;">
                         Copiar para WhatsApp
                     </button>
-                    <button id="toggleFundoBtnExec" class="toggle-fundo-btn" style="padding: 8px 16px; background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 8px; color: #e2e8f0; font-size: 14px; cursor: pointer; transition: all 0.3s ease; display: flex; align-items: center; gap: 8px;">
-                        <span id="toggleTextExec">Tema Escuro</span>
-                    </button>
+<button id="toggleFundoBtnExec" class="toggle-fundo-btn" style="padding: 8px 16px; background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 8px; color: #e2e8f0; font-size: 14px; cursor: pointer; transition: all 0.3s ease; display: none; align-items: center; gap: 8px;">
+    <span id="toggleTextExec">Tema Escuro</span>
+</button>
                 </div>
             </div>
             
