@@ -1389,7 +1389,7 @@ function calcularDadosLinhasReais(hospitaisComDados) {
     return linhasPorItem;
 }
 
-// CSS COM CORREÇÕES MOBILE 100% APLICADAS
+// CSS COM CORREÇÕES MOBILE 100% APLICADAS + CORREÇÃO GAUGE IPAD
 function getExecutiveCSS() {
     return `
         <style id="executiveCSS">
@@ -1414,7 +1414,7 @@ function getExecutiveCSS() {
             
  .kpi-box:hover {
     background: rgba(255, 255, 255, 0.05);
-    border-color: #ffffff !important;  /* ← Força branco no hover */
+    border-color: #ffffff !important;
     transform: translateY(-2px);
     box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
 }
@@ -1854,8 +1854,8 @@ function getExecutiveCSS() {
             
              .chart-header {
              display: flex;
-            justify-content: center;  /* ← CENTRALIZADO */
-            align-items: center;      /* ← MUDE TAMBÉM (opcional) */
+            justify-content: center;
+            align-items: center;
                 margin-bottom: 20px;
                 flex-wrap: wrap;
                 gap: 15px;
@@ -1866,7 +1866,7 @@ function getExecutiveCSS() {
                 color: white;
                 font-size: 18px;
                 font-weight: 600;
-                text-align: center;  /* ← ADICIONE ISTO */
+                text-align: center;
             }
             
             .chart-header p {
@@ -1955,6 +1955,24 @@ function getExecutiveCSS() {
                 background: #1da851 !important;
                 transform: translateY(-1px);
                 box-shadow: 0 4px 12px rgba(37, 211, 102, 0.3);
+            }
+            
+            /* ========== CORREÇÃO GAUGE IPAD ========== */
+            @media (min-width: 768px) and (max-width: 1024px) {
+                .gauge-largo-info {
+                    top: 52% !important;
+                    transform: translate(-50%, -42%) !important;
+                }
+                
+                .gauge-largo-number {
+                    font-size: 32px !important;
+                    margin-top: 20px !important;
+                    margin-bottom: 15px !important;
+                }
+                
+                .gauge-largo-percentage {
+                    font-size: 55px !important;
+                }
             }
             
             /* ========== MOBILE FIXES - 100% CORRIGIDO ========== */
@@ -2315,5 +2333,5 @@ function logError(message) {
     console.error('[DASHBOARD EXECUTIVO] ❌ ' + message);
 }
 
-console.log('Dashboard Executivo V3.4.2 - CORRIGIDO COM CONFIG_DASHBOARD');
+console.log('Dashboard Executivo V3.4.2 - CORRIGIDO COM GAUGE IPAD + CONFIG_DASHBOARD');
 console.log('Hospitais em ordem alfabética: ADVENTISTA, CRUZ AZUL, NEOMATER, SANTA CLARA, STA MARCELINA');
