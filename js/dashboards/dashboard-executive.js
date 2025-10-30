@@ -1413,19 +1413,19 @@ function getExecutiveCSS() {
                 color: white;
             }
             
-            .kpi-box:hover {
-                background: rgba(255, 255, 255, 0.05);
-                border-color: rgba(255, 255, 255, 0.2);
-                transform: translateY(-2px);
-                box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
-            }
+ .kpi-box:hover {
+    background: rgba(255, 255, 255, 0.05);
+    border-color: #ffffff !important;  /* ← Força branco no hover */
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+}
             
-            .box-ocupacao-geral { border-top: 3px solid #22c55e; }
-            .box-previsao { border-top: 3px solid #0676bb; }
-            .box-disponiveis { border-top: 3px solid #3b82f6; }
-            .box-tph { border-top: 3px solid #8b5cf6; }
-            .box-pps { border-top: 3px solid #ec4899; }
-            .box-spict { border-top: 3px solid #14b8a6; }
+.box-ocupacao-geral { border-top: 3px solid #ffffff; }
+.box-previsao { border-top: 3px solid #ffffff; }
+.box-disponiveis { border-top: 3px solid #ffffff; }
+.box-tph { border-top: 3px solid #ffffff; }
+.box-pps { border-top: 3px solid #ffffff; }
+.box-spict { border-top: 3px solid #ffffff; }
             
             .kpi-title {
                 font-size: 14px;
@@ -1853,10 +1853,10 @@ function getExecutiveCSS() {
                 color: white;
             }
             
-            .chart-header {
-                display: flex;
-                justify-content: space-between;
-                align-items: flex-start;
+             .chart-header {
+             display: flex;
+            justify-content: center;  /* ← CENTRALIZADO */
+            align-items: center;      /* ← MUDE TAMBÉM (opcional) */
                 margin-bottom: 20px;
                 flex-wrap: wrap;
                 gap: 15px;
@@ -1867,6 +1867,7 @@ function getExecutiveCSS() {
                 color: white;
                 font-size: 18px;
                 font-weight: 600;
+                text-align: center;  /* ← ADICIONE ISTO */
             }
             
             .chart-header p {
