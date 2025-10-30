@@ -215,17 +215,18 @@ function renderModalidadeContratual(modalidade) {
     `;
 }
 
-// =================== FUNÇÃO: RENDER MINI GAUGE TPH ===================
+// =================== FUNÇÃO: RENDER MINI GAUGE TPH (ESCALA 0-10) ===================
 function renderMiniGaugeTPH(dias) {
-    const maxDias = 30;
-    const porcentagem = (dias / maxDias) * 100;
+    const maxDias = 10;
+    const porcentagem = Math.min((dias / maxDias) * 100, 100);
     
     let corClass = 'green';
-    if (porcentagem >= 67) corClass = 'red';
-    else if (porcentagem >= 47) corClass = 'yellow';
+    if (dias >= 9) corClass = 'red';       // 9 e 10 = vermelho
+    else if (dias >= 6) corClass = 'yellow'; // 6, 7, 8 = amarelo
+    // abaixo de 6 = verde
     
     const totalBlocos = 20;
-    const blocosCheios = Math.round((dias / maxDias) * totalBlocos);
+    const blocosCheios = Math.round((Math.min(dias, maxDias) / maxDias) * totalBlocos);
     
     let blocos = '';
     for (let i = 0; i < totalBlocos; i++) {
@@ -237,7 +238,7 @@ function renderMiniGaugeTPH(dias) {
             <div class="tph-gauge-bar ${corClass}">
                 ${blocos}
             </div>
-            <span class="tph-gauge-label">${dias}/${maxDias}</span>
+            <span class="tph-gauge-label">${dias.toFixed(2)}/${maxDias}</span>
         </div>
     `;
 }
@@ -782,8 +783,8 @@ window.renderDashboardExecutivo = function() {
         <div style="background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); min-height: 100vh; padding: 20px; color: white;">
             
             <div class="dashboard-header-exec" style="margin-bottom: 30px; padding: 20px; background: rgba(255, 255, 255, 0.05); border-radius: 12px; border-left: 4px solid #22c55e;">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-                    <h2 style="margin: 0; color: #ffffff; font-size: 24px; font-weight: 700;">Rede Hospitalar Externa - Dashboard Geral</h2>
+                <div style="display: flex; justify-content: center; align-items: center; margin-bottom: 10px;">
+                    <h2 style="margin: 0; color: #ffffff; font-size: 24px; font-weight: 700; text-align: center;">Rede Hospitalar Externa - Dashboard Geral</h2>
                 </div>
                 <div style="display: flex; justify-content: flex-end; gap: 15px; flex-wrap: wrap;">
                     <button id="btnWhatsAppExec" style="padding: 8px 16px; background: #25D366; border: 1px solid #25D366; border-radius: 8px; color: white; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.3s ease; display: flex; align-items: center; gap: 8px;">
@@ -995,7 +996,6 @@ window.renderDashboardExecutivo = function() {
                 
             </div>
             
-            ${CONFIG_DASHBOARD.MOSTRAR_LINHAS_CUIDADO ? `
             <div class="executivo-graficos">
                 
                 <div class="executivo-grafico-card">
@@ -1008,6 +1008,7 @@ window.renderDashboardExecutivo = function() {
                     <div id="heatmapConcessoesContainer"></div>
                 </div>
                 
+                ${CONFIG_DASHBOARD.MOSTRAR_LINHAS_CUIDADO ? `
                 <div class="executivo-grafico-card">
                     <div class="chart-header">
                         <div>
@@ -1017,9 +1018,9 @@ window.renderDashboardExecutivo = function() {
                     </div>
                     <div id="heatmapLinhasContainer"></div>
                 </div>
+                ` : ''}
                 
             </div>
-            ` : ''}
         </div>
         
         ${getExecutiveCSS()}
@@ -1050,8 +1051,11 @@ window.renderDashboardExecutivo = function() {
                 text.textContent = 'Tema Escuro';
             }
             
+            // SEMPRE renderizar concessões
+            renderHeatmapConcessoes();
+            
+            // APENAS renderizar linhas se habilitado
             if (CONFIG_DASHBOARD.MOSTRAR_LINHAS_CUIDADO) {
-                renderHeatmapConcessoes();
                 renderHeatmapLinhas();
             }
             
@@ -1059,25 +1063,26 @@ window.renderDashboardExecutivo = function() {
         });
     }
     
-    if (CONFIG_DASHBOARD.MOSTRAR_LINHAS_CUIDADO) {
-        const aguardarChartJS = () => {
-            if (typeof Chart === 'undefined') {
-                setTimeout(aguardarChartJS, 100);
-                return;
+    const aguardarChartJS = () => {
+        if (typeof Chart === 'undefined') {
+            setTimeout(aguardarChartJS, 100);
+            return;
+        }
+        
+        setTimeout(() => {
+            // SEMPRE renderizar concessões
+            renderHeatmapConcessoes();
+            
+            // APENAS renderizar linhas se habilitado
+            if (CONFIG_DASHBOARD.MOSTRAR_LINHAS_CUIDADO) {
+                renderHeatmapLinhas();
             }
             
-            setTimeout(() => {
-                renderHeatmapConcessoes();
-                renderHeatmapLinhas();
-                
-                logSuccess('Dashboard Executivo renderizado com dados atualizados (5 hospitais)');
-            }, 200);
-        };
-        
-        aguardarChartJS();
-    } else {
-        logSuccess('Dashboard Executivo renderizado com dados atualizados (5 hospitais) - Linhas de cuidado ocultas');
-    }
+            logSuccess('Dashboard Executivo renderizado com dados atualizados (5 hospitais)');
+        }, 200);
+    };
+    
+    aguardarChartJS();
 };
 
 // =================== FUNÇÃO PARA OBTER COR POR VALOR ===================
@@ -1423,9 +1428,9 @@ function getExecutiveCSS() {
             .box-spict { border-top: 3px solid #14b8a6; }
             
             .kpi-title {
-                font-size: 12px;
-                font-weight: 600;
-                color: #9ca3af;
+                font-size: 14px;
+                font-weight: 700;
+                color: #ffffff;
                 text-transform: uppercase;
                 letter-spacing: 0.5px;
                 margin-bottom: 20px;
@@ -1989,6 +1994,7 @@ function getExecutiveCSS() {
                 .dashboard-header-exec h2 {
                     font-size: 16px !important;
                     margin-bottom: 15px !important;
+                    text-align: center !important;
                 }
                 
                 /* Botões em coluna no mobile */
@@ -2218,7 +2224,9 @@ function getExecutiveCSS() {
                 
                 /* Título dos boxes */
                 .kpi-title {
-                    font-size: 11px !important;
+                    font-size: 13px !important;
+                    font-weight: 700 !important;
+                    color: #ffffff !important;
                     margin-bottom: 15px !important;
                 }
                 
