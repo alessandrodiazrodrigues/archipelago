@@ -1,5 +1,5 @@
-// =================== QRCODE-OPTIMIZED.JS - GERADOR OTIMIZADO V3.3 ===================
-// ✅ CORRIGIDO: 5 hospitais com quantidades corretas (79 QR codes total)
+// =================== QRCODE-OPTIMIZED.JS - GERADOR OTIMIZADO V4.0 ===================
+// ✅ CORRIGIDO: 7 hospitais com quantidades corretas (93 QR codes total)
 // Sistema otimizado com carregamento sequencial
 
 const QR_API = {
@@ -10,9 +10,11 @@ const QR_API = {
     HOSPITAIS: {
         H1: { nome: 'Neomater', leitos: 10 },
         H2: { nome: 'Cruz Azul', leitos: 36 },
-        H3: { nome: 'Sta Marcelina', leitos: 7 },
+        H3: { nome: 'Santa Marcelina', leitos: 7 },
         H4: { nome: 'Santa Clara', leitos: 13 },
-        H5: { nome: 'Adventista', leitos: 13 }
+        H5: { nome: 'Adventista', leitos: 13 },
+        H6: { nome: 'Santa Cruz', leitos: 7 },
+        H7: { nome: 'Santa Virgínia', leitos: 7 }
     }
 };
 
@@ -44,7 +46,7 @@ function getNomeLeitoFormatado(hospitalId, numeroLeito) {
 
 // Função principal para abrir modal
 window.openQRCodesSimple = function() {
-    console.log('🔵 Abrindo gerador de QR Codes otimizado V3.3...');
+    console.log('🔵 Abrindo gerador de QR Codes otimizado V4.0...');
     
     // Prevenir múltiplas aberturas
     if (document.querySelector('.qr-modal-simple')) {
@@ -58,20 +60,22 @@ window.openQRCodesSimple = function() {
     modal.innerHTML = `
         <div class="qr-modal-content">
             <div class="qr-modal-header">
-                <h2>📱 QR Codes dos Leitos - Sistema V3.3 Corrigido</h2>
+                <h2>📱 QR Codes dos Leitos - Sistema V4.0</h2>
                 <button onclick="closeQRModalSimple()" class="close-btn">✕</button>
             </div>
             <div class="qr-modal-body">
                 <div class="qr-controls">
                     <select id="qrHospitalSelect" onchange="generateQRCodesSimple()">
-                        <option value="H1">Neomater (10 leitos)</option>
-                        <option value="H2">Cruz Azul (36 leitos)</option>
-                        <option value="H3">Sta Marcelina (7 leitos)</option>
-                        <option value="H4">Santa Clara (13 leitos)</option>
                         <option value="H5">Adventista (13 leitos)</option>
+                        <option value="H2">Cruz Azul (36 leitos)</option>
+                        <option value="H1">Neomater (10 leitos)</option>
+                        <option value="H4">Santa Clara (13 leitos)</option>
+                        <option value="H6">Santa Cruz (7 leitos)</option>
+                        <option value="H3">Santa Marcelina (7 leitos)</option>
+                        <option value="H7">Santa Virgínia (7 leitos)</option>
                     </select>
                     <button onclick="generateAllQRCodesOptimized()" class="btn-all" id="btnGenerateAll">
-                        Gerar Todos (79 QR Codes)
+                        Gerar Todos (93 QR Codes)
                     </button>
                     <button onclick="window.print()" class="btn-print">🖨️ Imprimir</button>
                 </div>
@@ -80,7 +84,7 @@ window.openQRCodesSimple = function() {
                 <div id="progressContainer" class="progress-container" style="display: none;">
                     <div class="progress-info">
                         <span id="progressText">Gerando QR Codes...</span>
-                        <span id="progressCount">0/79</span>
+                        <span id="progressCount">0/93</span>
                     </div>
                     <div class="progress-bar">
                         <div id="progressFill" class="progress-fill"></div>
@@ -98,7 +102,7 @@ window.openQRCodesSimple = function() {
         addOptimizedStyles();
     }
     
-    // Gerar QR codes iniciais
+    // Gerar QR codes iniciais (Adventista por padrão - ordem alfabética)
     generateQRCodesSimple();
 };
 
@@ -146,7 +150,7 @@ window.generateAllQRCodesOptimized = async function() {
     const progressContainer = document.getElementById('progressContainer');
     const container = document.getElementById('qrCodesContainer');
     
-    // Calcular total de QR codes
+    // Calcular total de QR codes (agora 93)
     totalQRCodes = Object.values(QR_API.HOSPITAIS).reduce((total, hospital) => total + hospital.leitos, 0);
     generationProgress = 0;
     
@@ -159,8 +163,18 @@ window.generateAllQRCodesOptimized = async function() {
     console.log(`🚀 Iniciando geração de ${totalQRCodes} QR Codes...`);
     
     try {
-        // Gerar por hospital sequencialmente
-        for (const [hospitalId, hospital] of Object.entries(QR_API.HOSPITAIS)) {
+        // Gerar por hospital sequencialmente (ordem alfabética)
+        const hospitaisOrdenados = [
+            ['H5', QR_API.HOSPITAIS.H5], // Adventista
+            ['H2', QR_API.HOSPITAIS.H2], // Cruz Azul
+            ['H1', QR_API.HOSPITAIS.H1], // Neomater
+            ['H4', QR_API.HOSPITAIS.H4], // Santa Clara
+            ['H6', QR_API.HOSPITAIS.H6], // Santa Cruz
+            ['H3', QR_API.HOSPITAIS.H3], // Santa Marcelina
+            ['H7', QR_API.HOSPITAIS.H7]  // Santa Virgínia
+        ];
+        
+        for (const [hospitalId, hospital] of hospitaisOrdenados) {
             await generateHospitalQRCodes(hospitalId, hospital, container);
         }
         
@@ -178,7 +192,7 @@ window.generateAllQRCodesOptimized = async function() {
     } finally {
         isGenerating = false;
         btnGenerateAll.disabled = false;
-        btnGenerateAll.textContent = 'Gerar Todos (79 QR Codes)';
+        btnGenerateAll.textContent = 'Gerar Todos (93 QR Codes)';
     }
 };
 
@@ -295,6 +309,8 @@ function addOptimizedStyles() {
             margin: 0;
             color: #1a1f2e;
             font-size: 24px;
+            font-family: 'Poppins', sans-serif;
+            font-weight: 700;
         }
         
         .close-btn {
@@ -307,6 +323,7 @@ function addOptimizedStyles() {
             font-size: 18px;
             font-weight: bold;
             transition: background 0.2s;
+            font-family: 'Poppins', sans-serif;
         }
         
         .close-btn:hover {
@@ -332,6 +349,8 @@ function addOptimizedStyles() {
             font-size: 16px;
             background: white;
             min-width: 250px;
+            font-family: 'Poppins', sans-serif;
+            font-weight: 700;
         }
         
         .qr-controls button {
@@ -341,9 +360,10 @@ function addOptimizedStyles() {
             border: none;
             border-radius: 8px;
             cursor: pointer;
-            font-weight: 600;
+            font-weight: 700;
             font-size: 16px;
             transition: all 0.2s;
+            font-family: 'Poppins', sans-serif;
         }
         
         .qr-controls button:disabled {
@@ -380,8 +400,9 @@ function addOptimizedStyles() {
             display: flex;
             justify-content: space-between;
             margin-bottom: 10px;
-            font-weight: 600;
+            font-weight: 700;
             color: #374151;
+            font-family: 'Poppins', sans-serif;
         }
         
         .progress-bar {
@@ -408,7 +429,9 @@ function addOptimizedStyles() {
             padding: 15px;
             background: #f8fafc;
             border-radius: 8px;
-            border-left: 4px solid #3b82f6;
+            border-left: 4px solid #60a5fa;
+            font-family: 'Poppins', sans-serif;
+            font-weight: 700;
         }
         
         .qr-container h3:first-child {
@@ -432,8 +455,8 @@ function addOptimizedStyles() {
         }
         
         .qr-item:hover {
-            border-color: #3b82f6;
-            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.1);
+            border-color: #60a5fa;
+            box-shadow: 0 4px 12px rgba(96, 165, 250, 0.2);
         }
         
         .qr-label {
@@ -441,11 +464,15 @@ function addOptimizedStyles() {
             margin-bottom: 12px;
             color: #374151;
             line-height: 1.4;
+            font-family: 'Poppins', sans-serif;
+            font-weight: 700;
         }
         
         .qr-label strong {
             color: #1e40af;
             font-size: 16px;
+            font-family: 'Poppins', sans-serif;
+            font-weight: 700;
         }
         
         .qr-img {
@@ -602,9 +629,10 @@ function addOptimizedStyles() {
 document.addEventListener('DOMContentLoaded', function() {
     // Substituir função openQRCodes pela versão otimizada
     window.openQRCodes = window.openQRCodesSimple;
-    console.log('✅ Sistema QR Code V3.3 CORRIGIDO carregado');
+    console.log('✅ Sistema QR Code V4.0 carregado');
     console.log('📱 Base URL: https://qrcode-seven-gamma.vercel.app');
-    console.log('🏥 Totais CORRETOS: H1:10, H2:36, H3:7, H4:13, H5:13 = 79 QR codes');
+    console.log('🏥 Totais: H1:10, H2:36, H3:7, H4:13, H5:13, H6:7, H7:7 = 93 QR codes');
     console.log('🖨️ Impressão: 12 QR codes por A4 (3x4)');
     console.log('⚡ Carregamento sequencial com delay otimizado');
+    console.log('📋 Ordem alfabética: Adventista → Santa Virgínia');
 });
