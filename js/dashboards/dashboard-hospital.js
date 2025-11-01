@@ -1779,7 +1779,7 @@ function getHospitalConsolidadoCSS() {
             /* =================== LINHA DOS HOSPITAIS =================== */
             .hospital-filter-selector {
                 display: flex;
-                gap: 10px;
+                gap: 15px;
                 flex-wrap: wrap;
                 justify-content: center;
                 margin-bottom: 20px;
@@ -1790,14 +1790,16 @@ function getHospitalConsolidadoCSS() {
                 background-color: #60a5fa;
                 color: #ffffff;
                 border: none;
-                padding: 12px 24px;
+                padding: 14px 28px;
                 border-radius: 8px;
                 cursor: pointer;
                 font-size: 14px;
                 font-weight: 700;
                 font-family: 'Poppins', sans-serif;
                 transition: all 0.3s ease;
-                width: 160px;
+                flex: 1;
+                min-width: 150px;
+                max-width: 200px;
                 text-transform: none;
             }
             
@@ -2340,6 +2342,7 @@ function getHospitalConsolidadoCSS() {
                 
                 .hospital-filter-btn {
                     width: 100%;
+                    max-width: 100%;
                 }
                 
                 .dashboard-title-central {
