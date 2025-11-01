@@ -5,7 +5,7 @@
 
 // =================== CONFIGURAÇÕES GLOBAIS V4.0 ===================
 window.CONFIG = {
-    AUTH_PASSWORD: '2305',
+    AUTH_PASSWORD: '1234',
     ADM_EMAIL: 'cvcalessandro@gmail.com',
     ADM_PASSWORD: '1234',
     REFRESH_INTERVAL: 240000, // 4 minutos
