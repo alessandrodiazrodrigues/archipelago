@@ -1,28 +1,30 @@
-// =================== CARDS.JS V3.5.1 - LINHAS DE CUIDADO INIBIDAS ===================
+// =================== CARDS.JS - GESTAO DE LEITOS HOSPITALARES ===================
 
-// =================== VARIÁVEIS GLOBAIS ===================  
+// =================== VARIAVEIS GLOBAIS ===================  
 window.selectedLeito = null;
 window.currentHospital = 'H1';
 
-// =================== MAPEAMENTO DE HOSPITAIS V3.5 ===================
+// =================== MAPEAMENTO DE HOSPITAIS ===================
 window.HOSPITAL_MAPPING = {
     H1: 'Neomater',
     H2: 'Cruz Azul', 
     H3: 'Santa Marcelina',
     H4: 'Santa Clara',
-    H5: 'Adventista'
+    H5: 'Adventista',
+    H6: 'Santa Cruz',
+    H7: 'Santa Virginia'
 };
 
-// ⭐ IDENTIFICAR HOSPITAIS HÍBRIDOS
-window.HOSPITAIS_HIBRIDOS = ['H1', 'H3', 'H5'];
+// IDENTIFICAR HOSPITAIS HIBRIDOS
+window.HOSPITAIS_HIBRIDOS = ['H1', 'H3', 'H5', 'H6', 'H7'];
 
-// ⭐ SANTA CLARA - TODOS OS LEITOS SÃO HÍBRIDOS (1-13)
+// SANTA CLARA - TODOS OS LEITOS SAO HIBRIDOS (1-13)
 window.SANTA_CLARA_TOTAL_LEITOS = 13;
 
-// ⭐ TIPO DE QUARTO (2 OPÇÕES - APENAS PARA HÍBRIDOS)
+// TIPO DE QUARTO (2 OPCOES - APENAS PARA HIBRIDOS)
 window.TIPO_QUARTO_OPTIONS = ['Apartamento', 'Enfermaria'];
 
-// ⭐ MAPEAMENTO FIXO NUMERAÇÃO CRUZ AZUL - ENFERMARIAS (16 leitos: 21-36)
+// MAPEAMENTO FIXO NUMERACAO CRUZ AZUL - ENFERMARIAS (16 leitos: 21-36)
 window.CRUZ_AZUL_NUMERACAO = {
     21: '711.1', 22: '711.3',
     23: '713.1', 24: '713.2',
@@ -34,7 +36,7 @@ window.CRUZ_AZUL_NUMERACAO = {
     35: '916.1', 36: '916.3'
 };
 
-// ⭐ MAPEAMENTO DE LEITOS IRMÃOS (CRUZ AZUL)
+// MAPEAMENTO DE LEITOS IRMAOS (CRUZ AZUL)
 window.CRUZ_AZUL_IRMAOS = {
     21: 22, 22: 21, 23: 24, 24: 23,
     25: 26, 26: 25, 27: 28, 28: 27,
@@ -42,68 +44,68 @@ window.CRUZ_AZUL_IRMAOS = {
     33: 34, 34: 33, 35: 36, 36: 35
 };
 
-// =================== LISTAS FINAIS V3.5 ===================
+// =================== LISTAS FINAIS ===================
 
-// ✅ CONCESSÕES - 12 ITENS
+// CONCESSOES - 12 ITENS
 window.CONCESSOES_LIST = [
-    "Não se aplica",
-    "Transição Domiciliar",
-    "Aplicação domiciliar de medicamentos",
-    "Aspiração",
+    "Nao se aplica",
+    "Transicao Domiciliar",
+    "Aplicacao domiciliar de medicamentos",
+    "Aspiracao",
     "Banho",
     "Curativo",
     "Curativo PICC",
     "Fisioterapia Domiciliar",
     "Fonoaudiologia Domiciliar",
     "Oxigenoterapia",
-    "Remoção",
-    "Solicitação domiciliar de exames"
+    "Remocao",
+    "Solicitacao domiciliar de exames"
 ];
 
 // LINHAS DE CUIDADO: 45 ESPECIALIDADES (MANTIDO PARA COMPATIBILIDADE)
 window.LINHAS_CUIDADO_LIST = [
-    "Assiste", "APS SP", "Cuidados Paliativos", "ICO (Insuficiência Coronariana)",
+    "Assiste", "APS SP", "Cuidados Paliativos", "ICO (Insuficiencia Coronariana)",
     "Nexus SP Cardiologia", "Nexus SP Gastroentereologia", "Nexus SP Geriatria",
     "Nexus SP Pneumologia", "Nexus SP Psiquiatria", "Nexus SP Reumatologia",
-    "Nexus SP Saúde do Fígado", "Generalista", "Bucomaxilofacial", "Cardiologia",
-    "Cirurgia Cardíaca", "Cirurgia de Cabeça e Pescoço", "Cirurgia do Aparelho Digestivo",
-    "Cirurgia Geral", "Cirurgia Oncológica", "Cirurgia Plástica", "Cirurgia Torácica",
-    "Cirurgia Vascular", "Clínica Médica", "Coloproctologia", "Dermatologia",
+    "Nexus SP Saude do Figado", "Generalista", "Bucomaxilofacial", "Cardiologia",
+    "Cirurgia Cardiaca", "Cirurgia de Cabeca e Pescoco", "Cirurgia do Aparelho Digestivo",
+    "Cirurgia Geral", "Cirurgia Oncologica", "Cirurgia Plastica", "Cirurgia Toracica",
+    "Cirurgia Vascular", "Clinica Medica", "Coloproctologia", "Dermatologia",
     "Endocrinologia", "Fisiatria", "Gastroenterologia", "Geriatria",
-    "Ginecologia e Obstetrícia", "Hematologia", "Infectologia", "Mastologia",
-    "Nefrologia", "Neurocirurgia", "Neurologia", "Oftalmologia", "Oncologia Clínica",
+    "Ginecologia e Obstetricia", "Hematologia", "Infectologia", "Mastologia",
+    "Nefrologia", "Neurocirurgia", "Neurologia", "Oftalmologia", "Oncologia Clinica",
     "Ortopedia", "Otorrinolaringologia", "Pediatria", "Pneumologia", "Psiquiatria",
     "Reumatologia", "Urologia"
 ];
 
-// PPS: 10 OPÇÕES
+// PPS: 10 OPCOES
 window.PPS_OPTIONS = ['10%', '20%', '30%', '40%', '50%', '60%', '70%', '80%', '90%', '100%'];
 
-// ✅ PREVISÃO DE ALTA - 10 OPÇÕES
+// PREVISAO DE ALTA - 10 OPCOES
 window.PREVISAO_ALTA_OPTIONS = [
     'Hoje Ouro', 'Hoje 2R', 'Hoje 3R',
     '24h Ouro', '24h 2R', '24h 3R', 
-    '48h', '72h', '96h', 'Sem Previsão'
+    '48h', '72h', '96h', 'Sem Previsao'
 ];
 
-// ISOLAMENTO: 3 OPÇÕES
+// ISOLAMENTO: 3 OPCOES
 window.ISOLAMENTO_OPTIONS = [
-    'Não Isolamento',
+    'Nao Isolamento',
     'Isolamento de Contato', 
-    'Isolamento Respiratório'
+    'Isolamento Respiratorio'
 ];
 
-// REGIÃO: 9 OPÇÕES
+// REGIAO: 9 OPCOES
 window.REGIAO_OPTIONS = [
     'Zona Central', 'Zona Sul', 'Zona Norte', 'Zona Leste', 'Zona Oeste',
     'ABC', 'Guarulhos', 'Osasco', 'Outra'
 ];
 
-// GÊNERO: 2 OPÇÕES
+// GENERO: 2 OPCOES
 window.SEXO_OPTIONS = ['Masculino', 'Feminino'];
 
-// ⭐ DIRETIVAS ANTECIPADAS
-window.DIRETIVAS_OPTIONS = ['Não se aplica', 'Sim', 'Não'];
+// DIRETIVAS ANTECIPADAS
+window.DIRETIVAS_OPTIONS = ['Nao se aplica', 'Sim', 'Nao'];
 
 // IDADE: DROPDOWN 14-115 ANOS
 window.IDADE_OPTIONS = [];
@@ -111,7 +113,7 @@ for (let i = 14; i <= 115; i++) {
     window.IDADE_OPTIONS.push(i);
 }
 
-// =================== FUNÇÃO: SELECT HOSPITAL ===================
+// =================== FUNCAO: SELECT HOSPITAL ===================
 window.selectHospital = function(hospitalId) {
     logInfo(`Selecionando hospital: ${hospitalId} (${window.HOSPITAL_MAPPING[hospitalId]})`);
     
@@ -128,13 +130,48 @@ window.selectHospital = function(hospitalId) {
     logSuccess(`Hospital selecionado: ${window.HOSPITAL_MAPPING[hospitalId]}`);
 };
 
-// =================== FUNÇÃO PRINCIPAL DE RENDERIZAÇÃO ===================
+// =================== FUNCAO DE BUSCA ===================
+window.searchLeitos = function() {
+    const searchInput = document.getElementById('searchLeitosInput');
+    if (!searchInput) return;
+    
+    const searchTerm = searchInput.value.toLowerCase().trim();
+    const cards = document.querySelectorAll('#cardsContainer .card');
+    
+    cards.forEach(card => {
+        if (searchTerm === '') {
+            card.style.display = '';
+            return;
+        }
+        
+        const cardText = card.textContent.toLowerCase();
+        const matricula = card.querySelector('[data-matricula]')?.dataset.matricula || '';
+        const leito = card.querySelector('[data-leito-numero]')?.dataset.leitoNumero || '';
+        const iniciais = card.querySelector('[data-iniciais]')?.dataset.iniciais || '';
+        
+        const matchMatricula = matricula.includes(searchTerm);
+        const matchLeito = leito.includes(searchTerm);
+        const matchIniciais = iniciais.toLowerCase().includes(searchTerm);
+        const matchGeral = cardText.includes(searchTerm);
+        
+        if (matchMatricula || matchLeito || matchIniciais || matchGeral) {
+            card.style.display = '';
+        } else {
+            card.style.display = 'none';
+        }
+    });
+    
+    const visibleCards = Array.from(cards).filter(c => c.style.display !== 'none');
+    logInfo(`Busca: "${searchTerm}" - ${visibleCards.length} resultados`);
+};
+
+// =================== FUNCAO PRINCIPAL DE RENDERIZACAO - CORRIGIDA ===================
 window.renderCards = function() {
-    logInfo('Renderizando cards V3.5.1 - LINHAS DE CUIDADO INIBIDAS');
+    logInfo('Renderizando cards - Gestao de Leitos Hospitalares');
     
     const container = document.getElementById('cardsContainer');
     if (!container) {
-        logError('Container cardsContainer não encontrado');
+        logError('Container cardsContainer nao encontrado');
         return;
     }
 
@@ -146,28 +183,56 @@ window.renderCards = function() {
     if (!hospital || !hospital.leitos || hospital.leitos.length === 0) {
         container.innerHTML = `
             <div class="card" style="grid-column: 1 / -1; text-align: center; padding: 40px;">
-                <div style="color: #0676bb; margin-bottom: 15px;">
+                <div style="color: #60a5fa; margin-bottom: 15px;">
                     <h3 style="font-family: 'Poppins', sans-serif;">${hospitalNome}</h3>
                 </div>
-                <div style="background: rgba(6,118,187,0.1); border-radius: 8px; padding: 20px;">
+                <div style="background: rgba(96,165,250,0.1); border-radius: 8px; padding: 20px;">
                     <p style="margin-bottom: 15px; font-family: 'Poppins', sans-serif;">Carregando dados...</p>
-                    <p style="color: #29ad8d; font-family: 'Poppins', sans-serif;"><em>✅ API V3.5 conectada</em></p>
+                    <p style="color: #60a5fa; font-family: 'Poppins', sans-serif;"><em>API conectada</em></p>
                 </div>
             </div>
         `;
         return;
     }
     
-    // ✅ ORDENAR CARDS - OCUPADOS PRIMEIRO, DEPOIS VAGOS
-    const leitosOrdenados = hospital.leitos.sort((a, b) => {
-        const aOcupado = (a.status === 'ocupado' || a.status === 'Em uso' || a.status === 'Ocupado');
-        const bOcupado = (b.status === 'ocupado' || b.status === 'Em uso' || b.status === 'Ocupado');
+    // =================== ✅ ORDENAÇÃO CORRIGIDA ===================
+    
+    // Separar ocupados e vagos
+    const leitosOcupados = hospital.leitos.filter(l => 
+        l.status === 'Ocupado' || l.status === 'Em uso' || l.status === 'ocupado'
+    );
+    const leitosVagos = hospital.leitos.filter(l => 
+        l.status === 'Vago' || l.status === 'vago'
+    );
+    
+    // Ordenar OCUPADOS por identificacao_leito (coluna AQ)
+    leitosOcupados.sort((a, b) => {
+        const idA = a.identificacaoLeito || a.identificacao_leito || '';
+        const idB = b.identificacaoLeito || b.identificacao_leito || '';
         
-        if (aOcupado && !bOcupado) return -1;
-        if (!aOcupado && bOcupado) return 1;
+        // Se ambos têm identificação, ordenar alfabeticamente
+        if (idA && idB) {
+            return idA.localeCompare(idB);
+        }
         
+        // Se só A tem identificação, A vem primeiro
+        if (idA) return -1;
+        if (idB) return 1;
+        
+        // Se nenhum tem, ordenar por número do leito
         return (a.leito || 0) - (b.leito || 0);
     });
+    
+    // Ordenar VAGOS por número do leito
+    leitosVagos.sort((a, b) => (a.leito || 0) - (b.leito || 0));
+    
+    // Juntar: OCUPADOS primeiro, depois VAGOS
+    const leitosOrdenados = [...leitosOcupados, ...leitosVagos];
+    
+    console.log('[CARDS] Total de leitos:', leitosOrdenados.length);
+    console.log('[CARDS] Ocupados:', leitosOcupados.length, '| Vagos:', leitosVagos.length);
+    
+    // =================== RENDERIZAR CARDS ===================
     
     leitosOrdenados.forEach(leito => {
         const card = createCard(leito, hospitalNome);
@@ -177,25 +242,25 @@ window.renderCards = function() {
     logInfo(`${hospital.leitos.length} cards renderizados para ${hospitalNome}`);
 };
 
-// =================== FUNÇÃO: BADGE DE ISOLAMENTO ===================
+// =================== FUNCAO: BADGE DE ISOLAMENTO ===================
 function getBadgeIsolamento(isolamento) {
-    if (!isolamento || isolamento === 'Não Isolamento') {
-        return { cor: '#b2adaa', texto: 'Não Isol', textoCor: '#ffffff' };
+    if (!isolamento || isolamento === 'Nao Isolamento') {
+        return { cor: '#b2adaa', texto: 'Nao Isol', textoCor: '#ffffff' };
     } else if (isolamento === 'Isolamento de Contato') {
         return { cor: '#f59a1d', texto: 'Contato', textoCor: '#131b2e' };
-    } else if (isolamento === 'Isolamento Respiratório') {
-        return { cor: '#c86420', texto: 'Respiratório', textoCor: '#ffffff' };
+    } else if (isolamento === 'Isolamento Respiratorio') {
+        return { cor: '#c86420', texto: 'Respiratorio', textoCor: '#ffffff' };
     }
-    return getBadgeIsolamento('Não Isolamento');
+    return getBadgeIsolamento('Nao Isolamento');
 }
 
-// =================== FUNÇÃO: BADGE DE GÊNERO ===================
+// =================== FUNCAO: BADGE DE GENERO ===================
 function getBadgeGenero(sexo) {
     if (sexo === 'Masculino') {
         return {
-            cor: 'rgba(6,118,187,0.2)',
-            borda: '#0676bb',
-            textoCor: '#0676bb',
+            cor: 'rgba(96,165,250,0.2)',
+            borda: '#60a5fa',
+            textoCor: '#60a5fa',
             texto: 'Masculino'
         };
     } else if (sexo === 'Feminino') {
@@ -214,17 +279,17 @@ function getBadgeGenero(sexo) {
     };
 }
 
-// ✅ BADGE DE DIRETIVAS
+// BADGE DE DIRETIVAS
 function getBadgeDiretivas(diretivas) {
     if (diretivas === 'Sim') {
-        return { cor: 'rgba(41,173,141,0.2)', borda: '#29ad8d', textoCor: '#29ad8d', texto: 'Sim' };
-    } else if (diretivas === 'Não') {
-        return { cor: 'rgba(60,58,62,0.2)', borda: '#3c3a3e', textoCor: '#b2adaa', texto: 'Não' };
+        return { cor: 'rgba(96,165,250,0.2)', borda: '#60a5fa', textoCor: '#60a5fa', texto: 'Sim' };
+    } else if (diretivas === 'Nao') {
+        return { cor: 'rgba(60,58,62,0.2)', borda: '#3c3a3e', textoCor: '#b2adaa', texto: 'Nao' };
     }
-    return { cor: 'rgba(6,118,187,0.2)', borda: '#0676bb', textoCor: '#0676bb', texto: 'Não se aplica' };
+    return { cor: 'rgba(96,165,250,0.2)', borda: '#60a5fa', textoCor: '#60a5fa', texto: 'Nao se aplica' };
 }
 
-// ⭐ DETERMINAR TIPO REAL DO LEITO
+// DETERMINAR TIPO REAL DO LEITO
 function getTipoLeito(leito, hospitalId) {
     const categoriaValue = leito.categoriaEscolhida || 
                           leito.categoria || 
@@ -234,34 +299,34 @@ function getTipoLeito(leito, hospitalId) {
     
     const numeroLeito = parseInt(leito.leito);
     
-    // SANTA CLARA: TODOS híbridos
+    // SANTA CLARA: TODOS hibridos
     if (hospitalId === 'H4') {
         const isVago = leito.status === 'Vago' || leito.status === 'vago';
-        if (isVago) return 'Híbrido';
+        if (isVago) return 'Hibrido';
         if (categoriaValue && categoriaValue.trim() !== '') return categoriaValue;
         return 'Apartamento';
     }
     
-    // VAGOS de híbridos: "Híbrido"
+    // VAGOS de hibridos: "Hibrido"
     const isVago = leito.status === 'Vago' || leito.status === 'vago';
     if (window.HOSPITAIS_HIBRIDOS.includes(hospitalId) && isVago) {
-        return 'Híbrido';
+        return 'Hibrido';
     }
     
-    // OCUPADOS de híbridos: usar categoria
+    // OCUPADOS de hibridos: usar categoria
     const isOcupado = leito.status === 'Em uso' || leito.status === 'ocupado' || leito.status === 'Ocupado';
     if (window.HOSPITAIS_HIBRIDOS.includes(hospitalId) && isOcupado) {
-        if (categoriaValue && categoriaValue.trim() !== '' && categoriaValue !== 'Híbrido') {
+        if (categoriaValue && categoriaValue.trim() !== '' && categoriaValue !== 'Hibrido') {
             return categoriaValue;
         }
-        if (leito.tipo && leito.tipo !== 'Híbrido') return leito.tipo;
+        if (leito.tipo && leito.tipo !== 'Hibrido') return leito.tipo;
         return 'Apartamento';
     }
     
     return leito.tipo || 'Apartamento';
 }
 
-// ⭐ FORMATAÇÃO DO TIPO (SEM EMOJI)
+// FORMATACAO DO TIPO (SEM EMOJI)
 function formatarTipoTexto(tipo) {
     const tipoUpper = (tipo || '').toUpperCase().trim();
     
@@ -272,15 +337,14 @@ function formatarTipoTexto(tipo) {
         case 'ENFERMARIA':
         case 'ENF':
             return 'Enfermaria';
-        case 'HÍBRIDO':
         case 'HIBRIDO':
-            return 'Híbrido';
+            return 'Hibrido';
         default:
             return tipo.charAt(0).toUpperCase() + tipo.slice(1).toLowerCase();
     }
 }
 
-// ✅ FORMATAR MATRÍCULA COM HÍFEN NO ÚLTIMO DÍGITO
+// FORMATAR MATRICULA COM HIFEN NO ULTIMO DIGITO
 function formatarMatriculaExibicao(matricula) {
     if (!matricula || matricula === '—') return '—';
     const mat = String(matricula).replace(/\D/g, '');
@@ -289,7 +353,7 @@ function formatarMatriculaExibicao(matricula) {
     return mat.slice(0, -1) + '-' + mat.slice(-1);
 }
 
-// ⭐ VALIDAÇÃO DE BLOQUEIO CRUZ AZUL
+// VALIDACAO DE BLOQUEIO CRUZ AZUL
 function validarAdmissaoCruzAzul(leitoNumero, generoNovo) {
     if (window.currentHospital !== 'H2' || leitoNumero < 21 || leitoNumero > 36) {
         return { permitido: true };
@@ -306,10 +370,10 @@ function validarAdmissaoCruzAzul(leitoNumero, generoNovo) {
     }
     
     const isolamentoIrmao = dadosLeitoIrmao.isolamento || '';
-    if (isolamentoIrmao && isolamentoIrmao !== 'Não Isolamento' && isolamentoIrmao !== '') {
+    if (isolamentoIrmao && isolamentoIrmao !== 'Nao Isolamento' && isolamentoIrmao !== '') {
         return {
             permitido: false,
-            motivo: `Leito bloqueado! O leito ${window.CRUZ_AZUL_NUMERACAO[leitoIrmao]} está com isolamento: ${isolamentoIrmao}`,
+            motivo: `Leito bloqueado! O leito ${window.CRUZ_AZUL_NUMERACAO[leitoIrmao]} esta com isolamento: ${isolamentoIrmao}`,
             tipo: 'isolamento'
         };
     }
@@ -318,7 +382,7 @@ function validarAdmissaoCruzAzul(leitoNumero, generoNovo) {
     if (generoIrmao && generoNovo && generoIrmao !== generoNovo) {
         return {
             permitido: false,
-            motivo: `Leito bloqueado! O leito ${window.CRUZ_AZUL_NUMERACAO[leitoIrmao]} está ocupado por paciente do gênero ${generoIrmao}`,
+            motivo: `Leito bloqueado! O leito ${window.CRUZ_AZUL_NUMERACAO[leitoIrmao]} esta ocupado por paciente do genero ${generoIrmao}`,
             tipo: 'genero'
         };
     }
@@ -326,7 +390,7 @@ function validarAdmissaoCruzAzul(leitoNumero, generoNovo) {
     return { permitido: true };
 }
 
-// ⭐ VALIDAÇÃO LIMITE SANTA CLARA
+// VALIDACAO LIMITE SANTA CLARA
 function validarLimiteSantaClara(tipoQuarto) {
     if (window.currentHospital !== 'H4' || tipoQuarto !== 'Enfermaria') {
         return { permitido: true };
@@ -345,20 +409,20 @@ function validarLimiteSantaClara(tipoQuarto) {
     if (enfermariaCount >= 4) {
         return {
             permitido: false,
-            motivo: 'Limite de enfermarias atingido! Santa Clara permite no máximo 4 enfermarias ocupadas simultaneamente.'
+            motivo: 'Limite de enfermarias atingido! Santa Clara permite no maximo 4 enfermarias ocupadas simultaneamente.'
         };
     }
     
     return { permitido: true };
 }
 
-// =================== CRIAR CARD INDIVIDUAL V3.5.1 ===================
+// =================== CRIAR CARD INDIVIDUAL - CORRIGIDO ===================
 function createCard(leito, hospitalNome) {
     const card = document.createElement('div');
     card.className = 'card';
-    card.style.cssText = 'background: var(--card); border-radius: 12px; padding: 18px; color: var(--text-white); box-shadow: 0 4px 6px rgba(0,0,0,0.1); font-family: "Poppins", sans-serif;';
+    card.style.cssText = 'background: #1a1f2e; border-radius: 12px; padding: 18px; color: #ffffff; box-shadow: 0 4px 6px rgba(0,0,0,0.1); font-family: "Poppins", sans-serif;';
     
-    // ⭐ VERIFICAR BLOQUEIO CRUZ AZUL
+    // VERIFICAR BLOQUEIO CRUZ AZUL
     let bloqueadoPorIsolamento = false;
     let bloqueadoPorGenero = false;
     let generoPermitido = null;
@@ -376,7 +440,7 @@ function createCard(leito, hospitalNome) {
             
             if (dadosLeitoIrmao && (dadosLeitoIrmao.status === 'Em uso' || dadosLeitoIrmao.status === 'ocupado')) {
                 const isolamentoIrmao = dadosLeitoIrmao.isolamento || '';
-                if (isolamentoIrmao && isolamentoIrmao !== 'Não Isolamento') {
+                if (isolamentoIrmao && isolamentoIrmao !== 'Nao Isolamento') {
                     bloqueadoPorIsolamento = true;
                     motivoBloqueio = `Isolamento no ${window.CRUZ_AZUL_NUMERACAO[leitoIrmao]}`;
                 } else if (dadosLeitoIrmao.genero) {
@@ -389,9 +453,9 @@ function createCard(leito, hospitalNome) {
     
     // Determinar status
     let isVago = false;
-    let statusBgColor = '#29ad8d';
+    let statusBgColor = '#60a5fa';
     let statusTextColor = '#ffffff';
-    let statusTexto = 'Disponível';
+    let statusTexto = 'Disponivel';
     
     if (bloqueadoPorIsolamento) {
         statusBgColor = '#c86420';
@@ -420,18 +484,18 @@ function createCard(leito, hospitalNome) {
     const previsaoAlta = leito.prevAlta || '';
     
     // Normalizar isolamento
-    let isolamento = leito.isolamento || 'Não Isolamento';
+    let isolamento = leito.isolamento || 'Nao Isolamento';
     const isolamentoLower = isolamento.toLowerCase().trim();
     
     if (isolamentoLower === 'isolamento de contato' || isolamentoLower === 'isolamento contato') {
         isolamento = 'Isolamento de Contato';
-    } else if (isolamentoLower === 'isolamento respiratório' || isolamentoLower === 'isolamento respiratorio') {
-        isolamento = 'Isolamento Respiratório';
-    } else if (isolamentoLower === 'não isolamento' || isolamentoLower === 'nao isolamento' || isolamentoLower.includes('não isol')) {
-        isolamento = 'Não Isolamento';
+    } else if (isolamentoLower === 'isolamento respiratorio') {
+        isolamento = 'Isolamento Respiratorio';
+    } else if (isolamentoLower === 'nao isolamento' || isolamentoLower.includes('nao isol')) {
+        isolamento = 'Nao Isolamento';
     }
     
-    // ✅ Identificação do leito
+    // Identificacao do leito
     let identificacaoLeito = '';
     if (isCruzAzulEnfermaria && window.CRUZ_AZUL_NUMERACAO[numeroLeito]) {
         identificacaoLeito = window.CRUZ_AZUL_NUMERACAO[numeroLeito];
@@ -441,7 +505,7 @@ function createCard(leito, hospitalNome) {
     
     const regiao = leito.regiao || '';
     const sexo = leito.genero || '';
-    const diretivas = leito.diretivas || 'Não se aplica';
+    const diretivas = leito.diretivas || 'Nao se aplica';
     
     const tipoReal = getTipoLeito(leito, hospitalId);
     const isHibrido = window.HOSPITAIS_HIBRIDOS.includes(hospitalId);
@@ -457,16 +521,16 @@ function createCard(leito, hospitalNome) {
         tempoInternacao = calcularTempoInternacao(admissao);
     }
     
-    // ✅ INICIAIS SEM TRANSFORMAÇÃO
-    const iniciais = isVago ? '—' : (nome.trim() || '—');
+    // ✅ CORREÇÃO CRÍTICA: Linha 491 - Evitar erro "nome.trim is not a function"
+    const iniciais = isVago ? '—' : (nome ? String(nome).trim() : '—');
     
     let ppsFormatado = pps ? `${pps}%` : '—';
     if (ppsFormatado !== '—' && !ppsFormatado.includes('%')) {
         ppsFormatado = `${pps}%`;
     }
     
-    const spictFormatado = spict === 'elegivel' ? 'Elegível' : 
-                          (spict === 'nao_elegivel' ? 'Não elegível' : '—');
+    const spictFormatado = spict === 'elegivel' ? 'Elegivel' : 
+                          (spict === 'nao_elegivel' ? 'Nao elegivel' : '—');
     
     const idSequencial = String(numeroLeito).padStart(2, '0');
     
@@ -478,42 +542,25 @@ function createCard(leito, hospitalNome) {
         leitoDisplay = identificacaoLeito;
     }
     
-    // COR DO CÍRCULO PESSOA
-    let circuloCor = '#29ad8d';
-    let circuloStroke = '#1c5083';
+    // COR DO CIRCULO PESSOA
+    const circuloCor = '#60a5fa'; // Sempre azul vibrante
+    // COR DO DESENHO (SVG): azul escuro quando vago, branco quando ocupado
+    const circuloStroke = isVago ? '#1a1f2e' : '#ffffff';
     
-    if (isVago && bloqueadoPorGenero && generoPermitido) {
-        if (generoPermitido === 'Masculino') {
-            circuloCor = '#0676bb';
-            circuloStroke = '#172945';
-        } else if (generoPermitido === 'Feminino') {
-            circuloCor = '#ec4899';
-            circuloStroke = '#9333EA';
-        }
-    } else if (!isVago) {
-        if (sexo === 'Masculino') {
-            circuloCor = '#0676bb';
-            circuloStroke = '#172945';
-        } else if (sexo === 'Feminino') {
-            circuloCor = '#ec4899';
-            circuloStroke = '#9333EA';
-        }
-    }
-    
-    // HTML do Card V3.5.1 - SEM LINHAS DE CUIDADO
+    // HTML do Card
     card.innerHTML = `
         <!-- HEADER: HOSPITAL FORA DOS BOXES -->
         <div class="card-header" style="text-align: center; margin-bottom: 12px; padding-bottom: 8px; font-family: 'Poppins', sans-serif;">
             <div style="font-size: 9px; color: rgba(255,255,255,0.7); font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 3px;">HOSPITAL</div>
             <div style="font-size: 16px; color: #ffffff; font-weight: 800; text-transform: uppercase; letter-spacing: 1px;">${hospitalNome}</div>
-            ${isHibrido ? '<div style="font-size: 10px; color: rgba(255,255,255,0.6); font-weight: 600; margin-top: 2px;">Leito Híbrido</div>' : ''}
+            ${isHibrido ? '<div style="font-size: 10px; color: rgba(255,255,255,0.6); font-weight: 600; margin-top: 2px;">Leito Hibrido</div>' : ''}
         </div>
 
         <!-- LINHA 1: LEITO | TIPO | STATUS -->
         <div class="card-row" style="display: grid; grid-template-columns: 100px 1fr 1fr; gap: 8px; margin-bottom: 10px; font-family: 'Poppins', sans-serif;">
             <div class="card-box" style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; padding: 8px; min-height: 45px; display: flex; flex-direction: column; justify-content: center;">
                 <div class="box-label" style="font-size: 9px; color: rgba(255,255,255,0.8); font-weight: 700; text-transform: uppercase; margin-bottom: 3px; letter-spacing: 0.5px;">LEITO</div>
-                <div class="box-value" style="color: #ffffff; font-weight: 700; font-size: 11px; line-height: 1.2;">${leitoDisplay}</div>
+                <div class="box-value" style="color: #ffffff; font-weight: 700; font-size: 11px; line-height: 1.2;" data-leito-numero="${numeroLeito}">${leitoDisplay}</div>
             </div>
             
             <div class="card-box" style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; padding: 8px; min-height: 45px; display: flex; flex-direction: column; justify-content: center;">
@@ -528,10 +575,10 @@ function createCard(leito, hospitalNome) {
             </div>
         </div>
 
-        <!-- LINHA 2: GÊNERO | ISOLAMENTO | PREV ALTA -->
+        <!-- LINHA 2: GENERO | ISOLAMENTO | PREV ALTA -->
         <div class="card-row" style="display: grid; grid-template-columns: 100px 1fr 1fr; gap: 8px; margin-bottom: 10px; font-family: 'Poppins', sans-serif;">
             <div class="card-box" style="background: ${badgeGenero.cor}; border: 1px solid ${badgeGenero.borda}; border-radius: 6px; padding: 8px; min-height: 45px; display: flex; flex-direction: column; justify-content: center;">
-                <div class="box-label" style="font-size: 9px; color: ${badgeGenero.textoCor}; font-weight: 700; text-transform: uppercase; margin-bottom: 3px; letter-spacing: 0.5px;">GÊNERO</div>
+                <div class="box-label" style="font-size: 9px; color: ${badgeGenero.textoCor}; font-weight: 700; text-transform: uppercase; margin-bottom: 3px; letter-spacing: 0.5px;">GENERO</div>
                 <div class="box-value" style="color: ${badgeGenero.textoCor}; font-weight: 700; font-size: 11px; line-height: 1.2;">${badgeGenero.texto}</div>
             </div>
             
@@ -540,16 +587,16 @@ function createCard(leito, hospitalNome) {
                 <div class="box-value" style="color: ${badgeIsolamento.textoCor}; font-weight: 700; font-size: 11px; line-height: 1.2;">${badgeIsolamento.texto}</div>
             </div>
             
-            <div class="card-box prev-alta" style="background: #0676bb; border: 1px solid rgba(6,118,187,0.5); border-radius: 6px; padding: 8px; min-height: 45px; display: flex; flex-direction: column; justify-content: center;">
-                <div class="box-label" style="font-size: 9px; color: #ffffff; font-weight: 700; text-transform: uppercase; margin-bottom: 3px; letter-spacing: 0.5px;">PREVISÃO ALTA</div>
+            <div class="card-box prev-alta" style="background: #60a5fa; border: 1px solid rgba(96,165,250,0.5); border-radius: 6px; padding: 8px; min-height: 45px; display: flex; flex-direction: column; justify-content: center;">
+                <div class="box-label" style="font-size: 9px; color: #ffffff; font-weight: 700; text-transform: uppercase; margin-bottom: 3px; letter-spacing: 0.5px;">PREVISAO ALTA</div>
                 <div class="box-value" style="color: #ffffff; font-weight: 700; font-size: 11px; line-height: 1.2;">${previsaoAlta || '—'}</div>
             </div>
         </div>
 
-        <!-- LINHA DIVISÓRIA -->
-        <div class="divider" style="height: 2px; background: rgba(255,255,255,0.3); margin: 12px 0;"></div>
+        <!-- LINHA DIVISORIA BRANCA SOLIDA -->
+        <div class="divider" style="height: 2px; background: #ffffff; margin: 12px 0;"></div>
 
-        <!-- SEÇÃO PESSOA: CÍRCULO + 4 CÉLULAS -->
+        <!-- SECAO PESSOA: CIRCULO + 4 CELULAS -->
         <div class="card-row-pessoa" style="display: grid; grid-template-columns: 100px 1fr 1fr; grid-template-rows: 1fr 1fr; gap: 8px; margin-bottom: 10px; font-family: 'Poppins', sans-serif;">
             <div class="pessoa-circle" style="grid-row: span 2; grid-column: 1; width: 100px; height: 100px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; background: ${circuloCor};">
                 <svg class="pessoa-icon" viewBox="0 0 24 24" fill="none" stroke="${circuloStroke}" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="width: 55%; height: 55%;">
@@ -560,12 +607,12 @@ function createCard(leito, hospitalNome) {
 
             <div class="small-cell" style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; padding: 6px; display: flex; flex-direction: column; justify-content: center; min-height: 46px;">
                 <div class="box-label" style="font-size: 8px; color: rgba(255,255,255,0.8); font-weight: 700; text-transform: uppercase; margin-bottom: 2px; letter-spacing: 0.5px;">INICIAIS</div>
-                <div class="box-value" style="color: #ffffff; font-weight: 700; font-size: 10px; line-height: 1.2;">${iniciais}</div>
+                <div class="box-value" style="color: #ffffff; font-weight: 700; font-size: 10px; line-height: 1.2;" data-iniciais="${iniciais}">${iniciais}</div>
             </div>
 
             <div class="small-cell" style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; padding: 6px; display: flex; flex-direction: column; justify-content: center; min-height: 46px;">
-                <div class="box-label" style="font-size: 8px; color: rgba(255,255,255,0.8); font-weight: 700; text-transform: uppercase; margin-bottom: 2px; letter-spacing: 0.5px;">MATRÍCULA</div>
-                <div class="box-value" style="color: #ffffff; font-weight: 700; font-size: 10px; line-height: 1.2;">${matriculaFormatada}</div>
+                <div class="box-label" style="font-size: 8px; color: rgba(255,255,255,0.8); font-weight: 700; text-transform: uppercase; margin-bottom: 2px; letter-spacing: 0.5px;">MATRICULA</div>
+                <div class="box-value" style="color: #ffffff; font-weight: 700; font-size: 10px; line-height: 1.2;" data-matricula="${matricula}">${matriculaFormatada}</div>
             </div>
 
             <div class="small-cell" style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; padding: 6px; display: flex; flex-direction: column; justify-content: center; min-height: 46px;">
@@ -574,7 +621,7 @@ function createCard(leito, hospitalNome) {
             </div>
 
             <div class="small-cell" style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; padding: 6px; display: flex; flex-direction: column; justify-content: center; min-height: 46px;">
-                <div class="box-label" style="font-size: 8px; color: rgba(255,255,255,0.8); font-weight: 700; text-transform: uppercase; margin-bottom: 2px; letter-spacing: 0.5px;">REGIÃO</div>
+                <div class="box-label" style="font-size: 8px; color: rgba(255,255,255,0.8); font-weight: 700; text-transform: uppercase; margin-bottom: 2px; letter-spacing: 0.5px;">REGIAO</div>
                 <div class="box-value" style="color: #ffffff; font-weight: 700; font-size: 10px; line-height: 1.2;">${regiao || '—'}</div>
             </div>
         </div>
@@ -597,14 +644,14 @@ function createCard(leito, hospitalNome) {
             </div>
         </div>
 
-        <!-- CONCESSÕES -->
+        <!-- CONCESSOES -->
         <div class="card-section" style="margin-bottom: 15px; font-family: 'Poppins', sans-serif;">
-            <div class="section-header" style="background: #0676bb; color: #ffffff; font-size: 10px; padding: 6px 8px; border-radius: 4px; margin-bottom: 6px; text-transform: uppercase; font-weight: 800; letter-spacing: 0.5px;">
-                CONCESSÕES PREVISTAS NA ALTA
+            <div class="section-header" style="background: #60a5fa; color: #ffffff; font-size: 10px; padding: 6px 8px; border-radius: 4px; margin-bottom: 6px; text-transform: uppercase; font-weight: 800; letter-spacing: 0.5px;">
+                CONCESSOES PREVISTAS NA ALTA
             </div>
             <div class="chips-container" style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); display: flex; flex-wrap: wrap; gap: 4px; min-height: 24px; border-radius: 6px; padding: 8px;">
                 ${(concessoes && concessoes.length > 0) 
-                    ? concessoes.map(concessao => `<span class="chip" style="font-size: 9px; background: rgba(6,118,187,0.2); border: 1px solid rgba(6,118,187,0.4); color: #0676bb; padding: 3px 8px; border-radius: 10px; font-weight: 700; font-family: 'Poppins', sans-serif;">${concessao}</span>`).join('') 
+                    ? concessoes.map(concessao => `<span class="chip" style="font-size: 9px; background: rgba(96,165,250,0.2); border: 1px solid rgba(96,165,250,0.4); color: #60a5fa; padding: 3px 8px; border-radius: 10px; font-weight: 700; font-family: 'Poppins', sans-serif;">${concessao}</span>`).join('') 
                     : '<span style="color: rgba(255,255,255,0.7); font-size: 10px;">Nenhuma</span>'
                 }
             </div>
@@ -615,7 +662,7 @@ function createCard(leito, hospitalNome) {
             <div class="card-info" style="display: flex; gap: 8px; flex-wrap: wrap; flex: 1;">
                 ${!isVago && admissao ? `
                 <div class="info-item" style="display: flex; flex-direction: column; opacity: 0.5;">
-                    <div class="info-label" style="font-size: 8px; color: rgba(255,255,255,0.5); font-weight: 600; text-transform: uppercase; margin-bottom: 1px;">ADMISSÃO</div>
+                    <div class="info-label" style="font-size: 8px; color: rgba(255,255,255,0.5); font-weight: 600; text-transform: uppercase; margin-bottom: 1px;">ADMISSAO</div>
                     <div class="info-value" style="color: rgba(255,255,255,0.6); font-weight: 600; font-size: 9px;">${formatarDataHora(admissao)}</div>
                 </div>
                 ` : ''}
@@ -635,7 +682,7 @@ function createCard(leito, hospitalNome) {
                 ${isVago ? `
                 <div class="info-item" style="display: flex; flex-direction: column;">
                     <div class="info-label" style="font-size: 8px; color: rgba(255,255,255,0.5); font-weight: 600; text-transform: uppercase; margin-bottom: 1px;">STATUS</div>
-                    <div class="info-value" style="color: #29ad8d; font-weight: 700; font-size: 9px;">✓ Disponível</div>
+                    <div class="info-value" style="color: #60a5fa; font-weight: 700; font-size: 9px;">Disponivel</div>
                 </div>
                 ` : ''}
             </div>
@@ -645,7 +692,7 @@ function createCard(leito, hospitalNome) {
                     data-leito="${numeroLeito}" 
                     ${bloqueadoPorIsolamento ? 'disabled' : ''}
                     style="padding: 10px 18px; 
-                           background: ${bloqueadoPorIsolamento ? '#b2adaa' : (isVago ? '#29ad8d' : '#3c3a3e')}; 
+                           background: ${bloqueadoPorIsolamento ? '#b2adaa' : (isVago ? '#60a5fa' : 'rgba(156,163,175,0.5)')}; 
                            color: #ffffff; 
                            border: none; 
                            border-radius: 6px; 
@@ -684,7 +731,7 @@ function createCard(leito, hospitalNome) {
     return card;
 }
 
-// =================== FLUXOS DE ADMISSÃO E ATUALIZAÇÃO ===================
+// =================== FLUXOS DE ADMISSAO E ATUALIZACAO ===================
 function openAdmissaoFlow(leitoNumero) {
     const button = document.querySelector(`[data-action="admitir"][data-leito="${leitoNumero}"]`);
     const originalText = button.innerHTML;
@@ -694,7 +741,7 @@ function openAdmissaoFlow(leitoNumero) {
     setTimeout(() => {
         hideButtonLoading(button, originalText);
         openAdmissaoModal(leitoNumero);
-        logInfo(`Modal de admissão V3.5.1 aberto: ${window.currentHospital} - Leito ${leitoNumero}`);
+        logInfo(`Modal de admissao aberto: ${window.currentHospital} - Leito ${leitoNumero}`);
     }, 800);
 }
 
@@ -707,11 +754,11 @@ function openAtualizacaoFlow(leitoNumero, dadosLeito) {
     setTimeout(() => {
         hideButtonLoading(button, originalText);
         openAtualizacaoModal(leitoNumero, dadosLeito);
-        logInfo(`Modal de atualização V3.5.1 aberto: ${window.currentHospital} - Leito ${leitoNumero}`);
+        logInfo(`Modal de atualizacao aberto: ${window.currentHospital} - Leito ${leitoNumero}`);
     }, 800);
 }
 
-// =================== MODAIS V3.5.1 ===================
+// =================== MODAIS ===================
 function openAdmissaoModal(leitoNumero) {
     const hospitalId = window.currentHospital;
     const hospitalNome = window.HOSPITAL_MAPPING[hospitalId] || 'Hospital';
@@ -756,13 +803,13 @@ function createModalOverlay() {
     return modal;
 }
 
-// ⭐ V3.5.1: FUNÇÃO DE BUSCA DINÂMICA
+// FUNCAO DE BUSCA DINAMICA
 function setupSearchFilter(modal, containerId, searchId) {
     const searchInput = modal.querySelector(`#${searchId}`);
     const container = modal.querySelector(`#${containerId}`);
     
     if (!searchInput || !container) {
-        logError(`Elementos não encontrados: ${searchId} ou ${containerId}`);
+        logError(`Elementos nao encontrados: ${searchId} ou ${containerId}`);
         return;
     }
     
@@ -782,7 +829,7 @@ function setupSearchFilter(modal, containerId, searchId) {
             }
         });
         
-        // Mensagem se não encontrar nada
+        // Mensagem se nao encontrar nada
         const visibleLabels = Array.from(labels).filter(l => l.style.display !== 'none');
         
         let msgNoResults = container.querySelector('.no-results-message');
@@ -802,10 +849,10 @@ function setupSearchFilter(modal, containerId, searchId) {
         }
     });
     
-    logSuccess(`✅ Busca dinâmica configurada: ${searchId}`);
+    logSuccess(`Busca dinamica configurada: ${searchId}`);
 }
 
-// =================== FORMULÁRIO DE ADMISSÃO V3.5.1 - SEM LINHAS ===================
+// =================== FORMULARIO DE ADMISSAO - SEM LINHAS ===================
 function createAdmissaoForm(hospitalNome, leitoNumero, hospitalId) {
     const idSequencial = String(leitoNumero).padStart(2, '0');
     const isHibrido = window.HOSPITAIS_HIBRIDOS.includes(hospitalId);
@@ -825,7 +872,7 @@ function createAdmissaoForm(hospitalNome, leitoNumero, hospitalId) {
             
             if (dadosLeitoIrmao && (dadosLeitoIrmao.status === 'Em uso' || dadosLeitoIrmao.status === 'ocupado')) {
                 const isolamentoIrmao = dadosLeitoIrmao.isolamento || '';
-                if (!isolamentoIrmao || isolamentoIrmao === 'Não Isolamento') {
+                if (!isolamentoIrmao || isolamentoIrmao === 'Nao Isolamento') {
                     if (dadosLeitoIrmao.genero) {
                         generoPreDefinido = dadosLeitoIrmao.genero;
                         generoDisabled = true;
@@ -845,42 +892,42 @@ function createAdmissaoForm(hospitalNome, leitoNumero, hospitalId) {
     
     return `
         <div class="modal-content" style="background: #1a1f2e; border-radius: 12px; padding: 30px; max-width: 700px; width: 95%; max-height: 90vh; overflow-y: auto; color: #ffffff; font-family: 'Poppins', sans-serif;">
-            <h2 style="margin: 0 0 20px 0; text-align: center; color: #0676bb; font-size: 24px; font-weight: 700; text-transform: uppercase;">
-                ADMITIR PACIENTE
+            <h2 style="margin: 0 0 20px 0; text-align: center; color: #60a5fa; font-size: 24px; font-weight: 700; text-transform: uppercase;">
+                Admitir Paciente
             </h2>
             
-            <div style="text-align: center; margin-bottom: 30px; padding: 15px; background: rgba(6,118,187,0.1); border-radius: 8px;">
+            <div style="text-align: center; margin-bottom: 30px; padding: 15px; background: rgba(96,165,250,0.1); border-radius: 8px;">
                 <div style="margin-bottom: 8px;">
-                    <strong>Hospital:</strong> ${hospitalNome} | <strong>ID:</strong> ${idSequencial} | <strong>Leito:</strong> ${leitoNumero}${isHibrido ? ' | <strong>LEITO HÍBRIDO</strong>' : ''}
+                    <strong>Hospital:</strong> ${hospitalNome} | <strong>ID:</strong> ${idSequencial} | <strong>Leito:</strong> ${leitoNumero}${isHibrido ? ' | <strong>LEITO HIBRIDO</strong>' : ''}
                 </div>
             </div>
             
-            <!-- ✅ LINHA 1: IDENTIFICAÇÃO | TIPO QUARTO | ISOLAMENTO -->
+            <!-- LINHA 1: IDENTIFICACAO | TIPO QUARTO | ISOLAMENTO -->
             <div style="margin-bottom: 20px;">
                 <div class="form-grid-3-cols" style="display: grid; grid-template-columns: ${(isHibrido || isCruzAzulEnfermaria || isApartamentoFixo || hospitalId === 'H4') ? '1fr 1fr 1fr' : '1fr 1fr'}; gap: 15px;">
                     <div>
-                        <label style="display: block; margin-bottom: 5px; color: #e2e8f0; font-weight: 600; font-size: 12px; white-space: nowrap;">IDENTIFICAÇÃO DO LEITO <span style="color: #c86420;">*</span></label>
+                        <label style="display: block; margin-bottom: 5px; color: #e2e8f0; font-weight: 600; font-size: 12px; white-space: nowrap;">Identificacao do Leito <span style="color: #c86420;">*</span></label>
                         ${isCruzAzulEnfermaria 
                             ? `<input id="admIdentificacaoLeito" type="text" value="${identificacaoFixa}" readonly style="width: 100%; padding: 12px; background: #1f2937; color: #9ca3af; border: 1px solid rgba(255,255,255,0.2); border-radius: 6px; font-size: 14px; cursor: not-allowed; font-family: 'Poppins', sans-serif;">
-                               <div style="font-size: 10px; color: rgba(255,255,255,0.5); margin-top: 3px;">🔒 Numeração fixa (Cruz Azul)</div>`
+                               <div style="font-size: 10px; color: rgba(255,255,255,0.5); margin-top: 3px;">Numeracao fixa (Cruz Azul)</div>`
                             : `<input id="admIdentificacaoLeito" type="text" placeholder="Ex: 1A, 21, 711.1" maxlength="6" required style="width: 100%; padding: 12px; background: #374151; color: #ffffff; border: 1px solid rgba(255,255,255,0.3); border-radius: 6px; font-size: 14px; font-family: 'Poppins', sans-serif;">
-                               <div style="font-size: 10px; color: rgba(255,255,255,0.5); margin-top: 3px;">✅ Aceita números e letras (1-6)</div>`
+                               <div style="font-size: 10px; color: rgba(255,255,255,0.5); margin-top: 3px;">Aceita numeros e letras (1-6)</div>`
                         }
                     </div>
                     
                     ${(isHibrido || isCruzAzulEnfermaria || isApartamentoFixo || hospitalId === 'H4') ? `
                     <div>
-                        <label style="display: block; margin-bottom: 5px; color: #e2e8f0; font-weight: 600;">TIPO DE QUARTO <span style="color: #c86420;">*</span></label>
+                        <label style="display: block; margin-bottom: 5px; color: #e2e8f0; font-weight: 600;">Tipo de Quarto <span style="color: #c86420;">*</span></label>
                         ${isCruzAzulEnfermaria 
                             ? `<select id="admTipoQuarto" disabled style="width: 100%; padding: 12px; background: #1f2937 !important; color: #9ca3af !important; border: 1px solid rgba(255,255,255,0.2); border-radius: 6px; font-size: 14px; cursor: not-allowed; font-family: 'Poppins', sans-serif;">
                                 <option value="Enfermaria" selected>Enfermaria</option>
                                </select>
-                               <div style="font-size: 10px; color: rgba(255,255,255,0.5); margin-top: 3px;">🔒 Tipo fixo (Enfermaria)</div>`
+                               <div style="font-size: 10px; color: rgba(255,255,255,0.5); margin-top: 3px;">Tipo fixo (Enfermaria)</div>`
                             : isApartamentoFixo
                             ? `<select id="admTipoQuarto" disabled style="width: 100%; padding: 12px; background: #1f2937 !important; color: #9ca3af !important; border: 1px solid rgba(255,255,255,0.2); border-radius: 6px; font-size: 14px; cursor: not-allowed; font-family: 'Poppins', sans-serif;">
                                 <option value="Apartamento" selected>Apartamento</option>
                                </select>
-                               <div style="font-size: 10px; color: rgba(255,255,255,0.5); margin-top: 3px;">🔒 Tipo fixo (Apartamento)</div>`
+                               <div style="font-size: 10px; color: rgba(255,255,255,0.5); margin-top: 3px;">Tipo fixo (Apartamento)</div>`
                             : `<select id="admTipoQuarto" required style="width: 100%; padding: 12px; background: #374151 !important; color: #ffffff !important; border: 1px solid rgba(255,255,255,0.3); border-radius: 6px; font-size: 14px; font-family: 'Poppins', sans-serif;">
                                 <option value="">Selecionar...</option>
                                 ${window.TIPO_QUARTO_OPTIONS.map(tipo => `<option value="${tipo}">${tipo}</option>`).join('')}
@@ -890,7 +937,7 @@ function createAdmissaoForm(hospitalNome, leitoNumero, hospitalId) {
                     ` : ''}
                     
                     <div>
-                        <label style="display: block; margin-bottom: 5px; color: #e2e8f0; font-weight: 600;">ISOLAMENTO <span style="color: #c86420;">*</span></label>
+                        <label style="display: block; margin-bottom: 5px; color: #e2e8f0; font-weight: 600;">Isolamento <span style="color: #c86420;">*</span></label>
                         <select id="admIsolamento" required style="width: 100%; padding: 12px; background: #374151 !important; color: #ffffff !important; border: 1px solid rgba(255,255,255,0.3); border-radius: 6px; font-size: 14px; font-family: 'Poppins', sans-serif;">
                             <option value="">Selecione...</option>
                             ${window.ISOLAMENTO_OPTIONS.map(opcao => `<option value="${opcao}">${opcao}</option>`).join('')}
@@ -899,11 +946,11 @@ function createAdmissaoForm(hospitalNome, leitoNumero, hospitalId) {
                 </div>
             </div>
             
-            <!-- ✅ LINHA 2: GÊNERO | REGIÃO | PREVISÃO ALTA -->
+            <!-- LINHA 2: GENERO | REGIAO | PREVISAO ALTA -->
             <div style="margin-bottom: 20px;">
                 <div class="form-grid-3-cols" style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px;">
                     <div>
-                        <label style="display: block; margin-bottom: 5px; color: #e2e8f0; font-weight: 600;">GÊNERO <span style="color: #c86420;">*</span></label>
+                        <label style="display: block; margin-bottom: 5px; color: #e2e8f0; font-weight: 600;">Genero <span style="color: #c86420;">*</span></label>
                         <select id="admSexo" required ${generoDisabled ? 'disabled' : ''} style="width: 100%; padding: 12px; background: ${generoDisabled ? '#1f2937' : '#374151'} !important; color: ${generoDisabled ? '#9ca3af' : '#ffffff'} !important; border: 1px solid rgba(255,255,255,0.3); border-radius: 6px; font-size: 14px; font-family: 'Poppins', sans-serif;">
                             ${generoPreDefinido 
                                 ? `<option value="${generoPreDefinido}" selected>${generoPreDefinido}</option>`
@@ -911,17 +958,17 @@ function createAdmissaoForm(hospitalNome, leitoNumero, hospitalId) {
                                    ${window.SEXO_OPTIONS.map(sexo => `<option value="${sexo}">${sexo}</option>`).join('')}`
                             }
                         </select>
-                        ${generoDisabled ? '<div style="font-size: 10px; color: rgba(255,255,255,0.5); margin-top: 3px;">🔒 Gênero definido pelo leito irmão</div>' : ''}
+                        ${generoDisabled ? '<div style="font-size: 10px; color: rgba(255,255,255,0.5); margin-top: 3px;">Genero definido pelo leito irmao</div>' : ''}
                     </div>
                     <div>
-                        <label style="display: block; margin-bottom: 5px; color: #e2e8f0; font-weight: 600;">REGIÃO <span style="color: #c86420;">*</span></label>
+                        <label style="display: block; margin-bottom: 5px; color: #e2e8f0; font-weight: 600;">Regiao <span style="color: #c86420;">*</span></label>
                         <select id="admRegiao" required style="width: 100%; padding: 12px; background: #374151 !important; color: #ffffff !important; border: 1px solid rgba(255,255,255,0.3); border-radius: 6px; font-size: 14px; font-family: 'Poppins', sans-serif;">
                             <option value="">Selecionar...</option>
                             ${window.REGIAO_OPTIONS.map(regiao => `<option value="${regiao}">${regiao}</option>`).join('')}
                         </select>
                     </div>
                     <div>
-                        <label style="display: block; margin-bottom: 5px; color: #e2e8f0; font-weight: 600;">PREVISÃO ALTA</label>
+                        <label style="display: block; margin-bottom: 5px; color: #e2e8f0; font-weight: 600;">Previsao Alta</label>
                         <select id="admPrevAlta" style="width: 100%; padding: 12px; background: #374151 !important; color: #ffffff !important; border: 1px solid rgba(255,255,255,0.3); border-radius: 6px; font-size: 14px; font-family: 'Poppins', sans-serif;">
                             ${window.PREVISAO_ALTA_OPTIONS.map(opt => `<option value="${opt}">${opt}</option>`).join('')}
                         </select>
@@ -929,18 +976,18 @@ function createAdmissaoForm(hospitalNome, leitoNumero, hospitalId) {
                 </div>
             </div>
             
-            <!-- LINHA 3: INICIAIS, MATRÍCULA, IDADE -->
+            <!-- LINHA 3: INICIAIS, MATRICULA, IDADE -->
             <div class="form-grid-3-cols" style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; margin-bottom: 20px;">
                 <div>
-                    <label style="display: block; margin-bottom: 5px; color: #e2e8f0; font-weight: 600;">INICIAIS</label>
+                    <label style="display: block; margin-bottom: 5px; color: #e2e8f0; font-weight: 600;">Iniciais</label>
                     <input id="admNome" type="text" placeholder="Ex: ADR, A D R, A.D.R" maxlength="10" style="width: 100%; padding: 12px; background: #374151; color: #ffffff; border: 1px solid rgba(255,255,255,0.3); border-radius: 6px; font-size: 14px; font-family: 'Poppins', sans-serif;">
                 </div>
                 <div>
-                    <label style="display: block; margin-bottom: 5px; color: #e2e8f0; font-weight: 600;">MATRÍCULA</label>
+                    <label style="display: block; margin-bottom: 5px; color: #e2e8f0; font-weight: 600;">Matricula</label>
                     <input id="admMatricula" type="text" placeholder="Ex: 123456789-0" maxlength="11" style="width: 100%; padding: 12px; background: #374151; color: #ffffff; border: 1px solid rgba(255,255,255,0.3); border-radius: 6px; font-size: 14px; font-family: 'Poppins', sans-serif;" oninput="formatarMatriculaInput(this)">
                 </div>
                 <div>
-                    <label style="display: block; margin-bottom: 5px; color: #e2e8f0; font-weight: 600;">IDADE</label>
+                    <label style="display: block; margin-bottom: 5px; color: #e2e8f0; font-weight: 600;">Idade</label>
                     <select id="admIdade" style="width: 100%; padding: 12px; background: #374151 !important; color: #ffffff !important; border: 1px solid rgba(255,255,255,0.3); border-radius: 6px; font-size: 14px; font-family: 'Poppins', sans-serif;">
                         <option value="">Selecionar...</option>
                         ${window.IDADE_OPTIONS.map(idade => `<option value="${idade}">${idade} anos</option>`).join('')}
@@ -948,7 +995,7 @@ function createAdmissaoForm(hospitalNome, leitoNumero, hospitalId) {
                 </div>
             </div>
             
-            <!-- ✅ LINHA 4: PPS | SPICT-BR | DIRETIVAS -->
+            <!-- LINHA 4: PPS | SPICT-BR | DIRETIVAS -->
             <div class="form-grid-3-cols" style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; margin-bottom: 20px;">
                 <div>
                     <label style="display: block; margin-bottom: 5px; color: #e2e8f0; font-weight: 600;">PPS</label>
@@ -960,49 +1007,55 @@ function createAdmissaoForm(hospitalNome, leitoNumero, hospitalId) {
                 <div>
                     <label style="display: block; margin-bottom: 5px; color: #e2e8f0; font-weight: 600;">SPICT-BR</label>
                     <select id="admSPICT" style="width: 100%; padding: 12px; background: #374151 !important; color: #ffffff !important; border: 1px solid rgba(255,255,255,0.3); border-radius: 6px; font-size: 14px; font-family: 'Poppins', sans-serif;">
-                        <option value="nao_elegivel">Não elegível</option>
-                        <option value="elegivel">Elegível</option>
+                        <option value="nao_elegivel">Nao elegivel</option>
+                        <option value="elegivel">Elegivel</option>
                     </select>
                 </div>
                 <div>
-                    <label style="display: block; margin-bottom: 5px; color: #e2e8f0; font-weight: 600;">DIRETIVAS</label>
+                    <label style="display: block; margin-bottom: 5px; color: #e2e8f0; font-weight: 600;">Diretivas</label>
                     <select id="admDiretivas" style="width: 100%; padding: 12px; background: #374151 !important; color: #ffffff !important; border: 1px solid rgba(255,255,255,0.3); border-radius: 6px; font-size: 14px; font-family: 'Poppins', sans-serif;">
                         ${window.DIRETIVAS_OPTIONS.map((opcao, index) => `<option value="${opcao}" ${index === 0 ? 'selected' : ''}>${opcao}</option>`).join('')}
                     </select>
                 </div>
             </div>
             
-            <!-- ⭐ CONCESSÕES COM BUSCA -->
+            <!-- CONCESSOES COM BUSCA -->
             <div style="margin-bottom: 20px;">
-                <div style="background: rgba(6,118,187,0.1); padding: 10px 15px; border-radius: 6px; margin-bottom: 10px;">
+                <div style="background: rgba(96,165,250,0.1); padding: 10px 15px; border-radius: 6px; margin-bottom: 10px;">
                     <div style="font-size: 11px; color: #ffffff; text-transform: uppercase; font-weight: 700;">
-                        CONCESSÕES PREVISTAS NA ALTA (${window.CONCESSOES_LIST.length} opções)
+                        Concessoes Previstas na Alta (${window.CONCESSOES_LIST.length} opcoes)
                     </div>
                 </div>
                 
-                <!-- ⭐ CAMPO DE BUSCA -->
-                <input type="text" id="searchConcessoes" placeholder="🔍 Digite para buscar... (ex: 'o2', 'banho')" style="width: 100%; padding: 10px; background: #374151; color: #ffffff; border: 1px solid rgba(255,255,255,0.3); border-radius: 6px; font-size: 13px; margin-bottom: 8px; font-family: 'Poppins', sans-serif;">
+                <!-- CAMPO DE BUSCA COM ICONE SVG -->
+                <div style="position: relative; margin-bottom: 8px;">
+                    <svg style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); width: 16px; height: 16px; color: #9ca3af; pointer-events: none;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <circle cx="11" cy="11" r="8"></circle>
+                        <path d="m21 21-4.35-4.35"></path>
+                    </svg>
+                    <input type="text" id="searchConcessoes" placeholder="Digite para buscar... (ex: 'o2', 'banho')" style="width: 100%; padding: 10px 10px 10px 36px; background: #374151; color: #ffffff; border: 1px solid rgba(255,255,255,0.3); border-radius: 6px; font-size: 13px; font-family: 'Poppins', sans-serif;">
+                </div>
                 
                 <div id="admConcessoes" style="max-height: 150px; overflow-y: auto; background: rgba(255,255,255,0.03); border-radius: 6px; padding: 10px; display: grid; grid-template-columns: 1fr; gap: 6px;">
                     ${window.CONCESSOES_LIST.map(c => `
                         <label style="display: flex; align-items: center; padding: 4px 0; cursor: pointer; font-size: 12px; font-family: 'Poppins', sans-serif;">
-                            <input type="checkbox" value="${c}" style="margin-right: 8px; accent-color: #0676bb;">
+                            <input type="checkbox" value="${c}" style="margin-right: 8px; accent-color: #60a5fa;">
                             <span>${c}</span>
                         </label>
                     `).join('')}
                 </div>
             </div>
             
-            <!-- BOTÕES -->
+            <!-- BOTOES -->
             <div class="modal-buttons" style="display: flex; justify-content: flex-end; gap: 12px; padding: 20px; border-top: 1px solid rgba(255,255,255,0.1);">
-                <button class="btn-cancelar" style="padding: 12px 30px; background: rgba(255,255,255,0.1); color: #ffffff; border: 1px solid rgba(255,255,255,0.2); border-radius: 8px; font-weight: 600; text-transform: uppercase; cursor: pointer; font-family: 'Poppins', sans-serif;">CANCELAR</button>
-                <button class="btn-salvar" style="padding: 12px 30px; background: #0676bb; color: #ffffff; border: none; border-radius: 8px; font-weight: 600; text-transform: uppercase; cursor: pointer; font-family: 'Poppins', sans-serif;">SALVAR</button>
+                <button class="btn-cancelar" style="padding: 12px 30px; background: rgba(255,255,255,0.1); color: #ffffff; border: 1px solid rgba(255,255,255,0.2); border-radius: 8px; font-weight: 600; text-transform: uppercase; cursor: pointer; font-family: 'Poppins', sans-serif;">Cancelar</button>
+                <button class="btn-salvar" style="padding: 12px 30px; background: #60a5fa; color: #ffffff; border: none; border-radius: 8px; font-weight: 600; text-transform: uppercase; cursor: pointer; font-family: 'Poppins', sans-serif;">Salvar</button>
             </div>
         </div>
     `;
 }
 
-// =================== FORMULÁRIO DE ATUALIZAÇÃO V3.5.1 - SEM LINHAS ===================
+// =================== FORMULARIO DE ATUALIZACAO - SEM LINHAS ===================
 function createAtualizacaoForm(hospitalNome, leitoNumero, dadosLeito) {
     const tempoInternacao = dadosLeito?.admAt ? calcularTempoInternacao(dadosLeito.admAt) : '';
     const iniciais = dadosLeito?.nome ? dadosLeito.nome.trim() : '';
@@ -1010,15 +1063,15 @@ function createAtualizacaoForm(hospitalNome, leitoNumero, dadosLeito) {
     
     const concessoesAtuais = Array.isArray(dadosLeito?.concessoes) ? dadosLeito.concessoes : [];
     
-    let isolamentoAtual = dadosLeito?.isolamento || 'Não Isolamento';
+    let isolamentoAtual = dadosLeito?.isolamento || 'Nao Isolamento';
     const isolamentoLower = isolamentoAtual.toLowerCase().trim();
     
     if (isolamentoLower === 'isolamento de contato' || isolamentoLower === 'isolamento contato') {
         isolamentoAtual = 'Isolamento de Contato';
-    } else if (isolamentoLower === 'isolamento respiratório' || isolamentoLower === 'isolamento respiratorio') {
-        isolamentoAtual = 'Isolamento Respiratório';
-    } else if (isolamentoLower === 'não isolamento' || isolamentoLower === 'nao isolamento' || isolamentoLower.includes('não isol')) {
-        isolamentoAtual = 'Não Isolamento';
+    } else if (isolamentoLower === 'isolamento respiratorio') {
+        isolamentoAtual = 'Isolamento Respiratorio';
+    } else if (isolamentoLower === 'nao isolamento' || isolamentoLower.includes('nao isol')) {
+        isolamentoAtual = 'Nao Isolamento';
     }
     
     const hospitalId = window.currentHospital;
@@ -1039,7 +1092,7 @@ function createAtualizacaoForm(hospitalNome, leitoNumero, dadosLeito) {
     
     const regiaoAtual = dadosLeito?.regiao || '';
     const sexoAtual = dadosLeito?.genero || '';
-    const diretivasAtual = dadosLeito?.diretivas || 'Não se aplica';
+    const diretivasAtual = dadosLeito?.diretivas || 'Nao se aplica';
     const admissaoData = dadosLeito?.admAt || '';
     
     const isHibrido = window.HOSPITAIS_HIBRIDOS.includes(hospitalId);
@@ -1050,39 +1103,39 @@ function createAtualizacaoForm(hospitalNome, leitoNumero, dadosLeito) {
     
     return `
         <div class="modal-content" style="background: #1a1f2e; border-radius: 12px; padding: 30px; max-width: 700px; width: 95%; max-height: 90vh; overflow-y: auto; color: #ffffff; font-family: 'Poppins', sans-serif;">
-            <h2 style="margin: 0 0 20px 0; text-align: center; color: #0676bb; font-size: 24px; font-weight: 700; text-transform: uppercase;">
-                ATUALIZAR PACIENTE
+            <h2 style="margin: 0 0 20px 0; text-align: center; color: #60a5fa; font-size: 24px; font-weight: 700; text-transform: uppercase;">
+                Atualizar Paciente
             </h2>
             
-            <div style="text-align: center; margin-bottom: 30px; padding: 15px; background: rgba(6,118,187,0.1); border-radius: 8px;">
+            <div style="text-align: center; margin-bottom: 30px; padding: 15px; background: rgba(96,165,250,0.1); border-radius: 8px;">
                 <strong>Hospital:</strong> ${hospitalNome} | <strong>ID:</strong> ${idSequencial} | <strong>Leito:</strong> ${leitoDisplay}
             </div>
             
-            <!-- ✅ LINHA 1: IDENTIFICAÇÃO | TIPO QUARTO | ISOLAMENTO -->
+            <!-- LINHA 1: IDENTIFICACAO | TIPO QUARTO | ISOLAMENTO -->
             <div style="margin-bottom: 20px;">
                 <div class="form-grid-3-cols" style="display: grid; grid-template-columns: ${(isHibrido || isCruzAzulEnfermaria || isApartamentoFixo || hospitalId === 'H4') ? '1fr 1fr 1fr' : '1fr 1fr'}; gap: 15px;">
                     <div>
-                        <label style="display: block; margin-bottom: 5px; color: #e2e8f0; font-weight: 600; white-space: nowrap;">IDENTIFICAÇÃO DO LEITO <span style="color: #c86420;">*</span></label>
+                        <label style="display: block; margin-bottom: 5px; color: #e2e8f0; font-weight: 600; white-space: nowrap;">Identificacao do Leito <span style="color: #c86420;">*</span></label>
                         ${isCruzAzulEnfermaria 
                             ? `<input id="updIdentificacaoLeito" type="text" value="${identificacaoAtual}" readonly style="width: 100%; padding: 12px; background: #1f2937; color: #9ca3af; border: 1px solid rgba(255,255,255,0.2); border-radius: 6px; font-size: 14px; cursor: not-allowed; font-family: 'Poppins', sans-serif;">`
                             : `<input id="updIdentificacaoLeito" type="text" value="${identificacaoAtual}" placeholder="Ex: 1A, 21, 711.1" maxlength="6" required style="width: 100%; padding: 12px; background: #374151; color: #ffffff; border: 1px solid rgba(255,255,255,0.3); border-radius: 6px; font-size: 14px; font-family: 'Poppins', sans-serif;">`
                         }
-                        ${isCruzAzulEnfermaria ? '<div style="font-size: 10px; color: rgba(255,255,255,0.5); margin-top: 3px;">🔒 Identificação fixa</div>' : '<div style="font-size: 10px; color: rgba(255,255,255,0.5); margin-top: 3px;">✅ Aceita números e letras (1-6)</div>'}
+                        ${isCruzAzulEnfermaria ? '<div style="font-size: 10px; color: rgba(255,255,255,0.5); margin-top: 3px;">Identificacao fixa</div>' : '<div style="font-size: 10px; color: rgba(255,255,255,0.5); margin-top: 3px;">Aceita numeros e letras (1-6)</div>'}
                     </div>
                     
                     ${(isHibrido || isCruzAzulEnfermaria || isApartamentoFixo || hospitalId === 'H4') ? `
                     <div>
-                        <label style="display: block; margin-bottom: 5px; color: #e2e8f0; font-weight: 600;">TIPO DE QUARTO <span style="color: #c86420;">*</span></label>
+                        <label style="display: block; margin-bottom: 5px; color: #e2e8f0; font-weight: 600;">Tipo de Quarto <span style="color: #c86420;">*</span></label>
                         ${isCruzAzulEnfermaria 
                             ? `<select id="updTipoQuarto" disabled style="width: 100%; padding: 12px; background: #1f2937 !important; color: #9ca3af !important; border: 1px solid rgba(255,255,255,0.2); border-radius: 6px; font-size: 14px; cursor: not-allowed; font-family: 'Poppins', sans-serif;">
                                 <option value="Enfermaria" selected>Enfermaria</option>
                                </select>
-                               <div style="font-size: 10px; color: rgba(255,255,255,0.5); margin-top: 3px;">🔒 Tipo fixo (Enfermaria)</div>`
+                               <div style="font-size: 10px; color: rgba(255,255,255,0.5); margin-top: 3px;">Tipo fixo (Enfermaria)</div>`
                             : isApartamentoFixo
                             ? `<select id="updTipoQuarto" disabled style="width: 100%; padding: 12px; background: #1f2937 !important; color: #9ca3af !important; border: 1px solid rgba(255,255,255,0.2); border-radius: 6px; font-size: 14px; cursor: not-allowed; font-family: 'Poppins', sans-serif;">
                                 <option value="Apartamento" selected>Apartamento</option>
                                </select>
-                               <div style="font-size: 10px; color: rgba(255,255,255,0.5); margin-top: 3px;">🔒 Tipo fixo (Apartamento)</div>`
+                               <div style="font-size: 10px; color: rgba(255,255,255,0.5); margin-top: 3px;">Tipo fixo (Apartamento)</div>`
                             : `<select id="updTipoQuarto" required style="width: 100%; padding: 12px; background: #374151 !important; color: #ffffff !important; border: 1px solid rgba(255,255,255,0.3); border-radius: 6px; font-size: 14px; font-family: 'Poppins', sans-serif;">
                                 <option value="">Selecionar...</option>
                                 ${window.TIPO_QUARTO_OPTIONS.map(tipo => `<option value="${tipo}" ${tipoAtual === tipo ? 'selected' : ''}>${tipo}</option>`).join('')}
@@ -1092,7 +1145,7 @@ function createAtualizacaoForm(hospitalNome, leitoNumero, dadosLeito) {
                     ` : ''}
                     
                     <div>
-                        <label style="display: block; margin-bottom: 5px; color: #e2e8f0; font-weight: 600;">ISOLAMENTO <span style="color: #c86420;">*</span></label>
+                        <label style="display: block; margin-bottom: 5px; color: #e2e8f0; font-weight: 600;">Isolamento <span style="color: #c86420;">*</span></label>
                         <select id="updIsolamento" required style="width: 100%; padding: 12px; background: #374151 !important; color: #ffffff !important; border: 1px solid rgba(255,255,255,0.3); border-radius: 6px; font-size: 14px; font-family: 'Poppins', sans-serif;">
                             ${window.ISOLAMENTO_OPTIONS.map(opcao => `<option value="${opcao}" ${isolamentoAtual === opcao ? 'selected' : ''}>${opcao}</option>`).join('')}
                         </select>
@@ -1100,31 +1153,31 @@ function createAtualizacaoForm(hospitalNome, leitoNumero, dadosLeito) {
                 </div>
             </div>
             
-            <!-- ✅ LINHA 2: GÊNERO | REGIÃO | PREVISÃO ALTA -->
+            <!-- LINHA 2: GENERO | REGIAO | PREVISAO ALTA -->
             <div style="margin-bottom: 20px;">
                 <div class="form-grid-3-cols" style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px;">
                     <div>
-                        <label style="display: block; margin-bottom: 5px; color: #e2e8f0; font-weight: 600;">GÊNERO <span style="color: #c86420;">*</span></label>
+                        <label style="display: block; margin-bottom: 5px; color: #e2e8f0; font-weight: 600;">Genero <span style="color: #c86420;">*</span></label>
                         <select id="updSexo" required style="width: 100%; padding: 12px; background: #374151 !important; color: #ffffff !important; border: 1px solid rgba(255,255,255,0.3); border-radius: 6px; font-size: 14px; font-family: 'Poppins', sans-serif;">
                             <option value="">Selecionar...</option>
                             ${window.SEXO_OPTIONS.map(sexo => `<option value="${sexo}" ${sexoAtual === sexo ? 'selected' : ''}>${sexo}</option>`).join('')}
                         </select>
                     </div>
                     <div>
-                        <label style="display: block; margin-bottom: 5px; color: #e2e8f0; font-weight: 600;">REGIÃO <span style="color: #c86420;">*</span></label>
+                        <label style="display: block; margin-bottom: 5px; color: #e2e8f0; font-weight: 600;">Regiao <span style="color: #c86420;">*</span></label>
                         <select id="updRegiao" required style="width: 100%; padding: 12px; background: #374151 !important; color: #ffffff !important; border: 1px solid rgba(255,255,255,0.3); border-radius: 6px; font-size: 14px; font-family: 'Poppins', sans-serif;">
                             <option value="">Selecionar...</option>
                             ${window.REGIAO_OPTIONS.map(regiao => `<option value="${regiao}" ${regiaoAtual === regiao ? 'selected' : ''}>${regiao}</option>`).join('')}
                         </select>
                     </div>
                     <div>
-                        <label style="display: block; margin-bottom: 5px; color: #e2e8f0; font-weight: 600;">PREVISÃO ALTA</label>
+                        <label style="display: block; margin-bottom: 5px; color: #e2e8f0; font-weight: 600;">Previsao Alta</label>
                         <select id="updPrevAlta" style="width: 100%; padding: 12px; background: #374151 !important; color: #ffffff !important; border: 1px solid rgba(255,255,255,0.3); border-radius: 6px; font-size: 14px; font-family: 'Poppins', sans-serif;">
                             ${window.PREVISAO_ALTA_OPTIONS.map(opt => {
                                 const previsaoAtual = (dadosLeito?.prevAlta || '').trim();
                                 const isSelected = previsaoAtual === opt || 
-                                                  (previsaoAtual === 'SP' && opt === 'Sem Previsão') ||
-                                                  (previsaoAtual === 'Sem Previsão' && opt === 'Sem Previsão');
+                                                  (previsaoAtual === 'SP' && opt === 'Sem Previsao') ||
+                                                  (previsaoAtual === 'Sem Previsao' && opt === 'Sem Previsao');
                                 return `<option value="${opt}" ${isSelected ? 'selected' : ''}>${opt}</option>`;
                             }).join('')}
                         </select>
@@ -1132,18 +1185,18 @@ function createAtualizacaoForm(hospitalNome, leitoNumero, dadosLeito) {
                 </div>
             </div>
             
-            <!-- LINHA 3: INICIAIS, MATRÍCULA, IDADE -->
+            <!-- LINHA 3: INICIAIS, MATRICULA, IDADE -->
             <div class="form-grid-3-cols" style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; margin-bottom: 20px;">
                 <div>
-                    <label style="display: block; margin-bottom: 5px; color: #e2e8f0; font-weight: 600;">INICIAIS</label>
+                    <label style="display: block; margin-bottom: 5px; color: #e2e8f0; font-weight: 600;">Iniciais</label>
                     <input value="${iniciais}" readonly style="width: 100%; padding: 12px; background: #1f2937; color: #9ca3af; border: 1px solid rgba(255,255,255,0.2); border-radius: 6px; font-size: 14px; font-family: 'Poppins', sans-serif;">
                 </div>
                 <div>
-                    <label style="display: block; margin-bottom: 5px; color: #e2e8f0; font-weight: 600;">MATRÍCULA</label>
+                    <label style="display: block; margin-bottom: 5px; color: #e2e8f0; font-weight: 600;">Matricula</label>
                     <input value="${matriculaFormatada}" readonly style="width: 100%; padding: 12px; background: #1f2937; color: #9ca3af; border: 1px solid rgba(255,255,255,0.2); border-radius: 6px; font-size: 14px; font-family: 'Poppins', sans-serif;">
                 </div>
                 <div>
-                    <label style="display: block; margin-bottom: 5px; color: #e2e8f0; font-weight: 600;">IDADE</label>
+                    <label style="display: block; margin-bottom: 5px; color: #e2e8f0; font-weight: 600;">Idade</label>
                     <select id="updIdade" style="width: 100%; padding: 12px; background: #374151 !important; color: #ffffff !important; border: 1px solid rgba(255,255,255,0.3); border-radius: 6px; font-size: 14px; font-family: 'Poppins', sans-serif;">
                         <option value="">Selecionar...</option>
                         ${window.IDADE_OPTIONS.map(idade => `<option value="${idade}" ${dadosLeito?.idade == idade ? 'selected' : ''}>${idade} anos</option>`).join('')}
@@ -1151,7 +1204,7 @@ function createAtualizacaoForm(hospitalNome, leitoNumero, dadosLeito) {
                 </div>
             </div>
             
-            <!-- ✅ LINHA 4: PPS | SPICT-BR | DIRETIVAS -->
+            <!-- LINHA 4: PPS | SPICT-BR | DIRETIVAS -->
             <div class="form-grid-3-cols" style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; margin-bottom: 20px;">
                 <div>
                     <label style="display: block; margin-bottom: 5px; color: #e2e8f0; font-weight: 600;">PPS</label>
@@ -1164,36 +1217,42 @@ function createAtualizacaoForm(hospitalNome, leitoNumero, dadosLeito) {
                 <div>
                     <label style="display: block; margin-bottom: 5px; color: #e2e8f0; font-weight: 600;">SPICT-BR</label>
                     <select id="updSPICT" style="width: 100%; padding: 12px; background: #374151 !important; color: #ffffff !important; border: 1px solid rgba(255,255,255,0.3); border-radius: 6px; font-size: 14px; font-family: 'Poppins', sans-serif;">
-                        <option value="nao_elegivel" ${dadosLeito?.spict === 'nao_elegivel' ? 'selected' : ''}>Não elegível</option>
-                        <option value="elegivel" ${dadosLeito?.spict === 'elegivel' ? 'selected' : ''}>Elegível</option>
+                        <option value="nao_elegivel" ${dadosLeito?.spict === 'nao_elegivel' ? 'selected' : ''}>Nao elegivel</option>
+                        <option value="elegivel" ${dadosLeito?.spict === 'elegivel' ? 'selected' : ''}>Elegivel</option>
                     </select>
                 </div>
                 
                 <div>
-                    <label style="display: block; margin-bottom: 5px; color: #e2e8f0; font-weight: 600;">DIRETIVAS</label>
+                    <label style="display: block; margin-bottom: 5px; color: #e2e8f0; font-weight: 600;">Diretivas</label>
                     <select id="updDiretivas" style="width: 100%; padding: 12px; background: #374151 !important; color: #ffffff !important; border: 1px solid rgba(255,255,255,0.3); border-radius: 6px; font-size: 14px; font-family: 'Poppins', sans-serif;">
                         ${window.DIRETIVAS_OPTIONS.map(opcao => `<option value="${opcao}" ${diretivasAtual === opcao ? 'selected' : ''}>${opcao}</option>`).join('')}
                     </select>
                 </div>
             </div>
             
-            <!-- ⭐ CONCESSÕES COM BUSCA -->
+            <!-- CONCESSOES COM BUSCA -->
             <div style="margin-bottom: 20px;">
-                <div style="background: rgba(6,118,187,0.1); padding: 10px 15px; border-radius: 6px; margin-bottom: 10px;">
+                <div style="background: rgba(96,165,250,0.1); padding: 10px 15px; border-radius: 6px; margin-bottom: 10px;">
                     <div style="font-size: 11px; color: #ffffff; text-transform: uppercase; font-weight: 700;">
-                        CONCESSÕES PREVISTAS NA ALTA (${window.CONCESSOES_LIST.length} opções)
+                        Concessoes Previstas na Alta (${window.CONCESSOES_LIST.length} opcoes)
                     </div>
                 </div>
                 
-                <!-- ⭐ CAMPO DE BUSCA -->
-                <input type="text" id="searchConcessoesUpd" placeholder="🔍 Digite para buscar... (ex: 'o2', 'banho')" style="width: 100%; padding: 10px; background: #374151; color: #ffffff; border: 1px solid rgba(255,255,255,0.3); border-radius: 6px; font-size: 13px; margin-bottom: 8px; font-family: 'Poppins', sans-serif;">
+                <!-- CAMPO DE BUSCA COM ICONE SVG -->
+                <div style="position: relative; margin-bottom: 8px;">
+                    <svg style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); width: 16px; height: 16px; color: #9ca3af; pointer-events: none;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <circle cx="11" cy="11" r="8"></circle>
+                        <path d="m21 21-4.35-4.35"></path>
+                    </svg>
+                    <input type="text" id="searchConcessoesUpd" placeholder="Digite para buscar... (ex: 'o2', 'banho')" style="width: 100%; padding: 10px 10px 10px 36px; background: #374151; color: #ffffff; border: 1px solid rgba(255,255,255,0.3); border-radius: 6px; font-size: 13px; font-family: 'Poppins', sans-serif;">
+                </div>
                 
                 <div id="updConcessoes" style="max-height: 150px; overflow-y: auto; background: rgba(255,255,255,0.03); border-radius: 6px; padding: 10px; display: grid; grid-template-columns: 1fr; gap: 6px;">
                     ${window.CONCESSOES_LIST.map(c => {
                         const isChecked = concessoesAtuais.includes(c);
                         return `
                             <label style="display: flex; align-items: center; padding: 4px 0; cursor: pointer; font-size: 12px; font-family: 'Poppins', sans-serif;">
-                                <input type="checkbox" value="${c}" ${isChecked ? 'checked' : ''} style="margin-right: 8px; accent-color: #0676bb;">
+                                <input type="checkbox" value="${c}" ${isChecked ? 'checked' : ''} style="margin-right: 8px; accent-color: #60a5fa;">
                                 <span>${c}</span>
                             </label>
                         `;
@@ -1201,57 +1260,57 @@ function createAtualizacaoForm(hospitalNome, leitoNumero, dadosLeito) {
                 </div>
             </div>
             
-            <!-- BOTÕES -->
+            <!-- BOTOES -->
             <div class="modal-buttons" style="display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 20px; border-top: 1px solid rgba(255,255,255,0.1);">
-                <button class="btn-alta" style="padding: 12px 30px; background: #c86420; color: #ffffff; border: none; border-radius: 8px; font-weight: 600; text-transform: uppercase; cursor: pointer; font-family: 'Poppins', sans-serif;">ALTA</button>
+                <button class="btn-alta" style="padding: 12px 30px; background: #c86420; color: #ffffff; border: none; border-radius: 8px; font-weight: 600; text-transform: uppercase; cursor: pointer; font-family: 'Poppins', sans-serif;">Alta</button>
                 
                 <div style="text-align: center; font-size: 10px; color: rgba(255,255,255,0.5);">
-                    ${admissaoData ? `<div>ADMISSÃO: ${formatarDataHora(admissaoData)}</div>` : ''}
-                    ${tempoInternacao ? `<div>INTERNADO: ${tempoInternacao}</div>` : ''}
+                    ${admissaoData ? `<div>Admissao: ${formatarDataHora(admissaoData)}</div>` : ''}
+                    ${tempoInternacao ? `<div>Internado: ${tempoInternacao}</div>` : ''}
                 </div>
                 
                 <div style="display: flex; gap: 12px;">
-                    <button class="btn-cancelar" style="padding: 12px 30px; background: rgba(255,255,255,0.1); color: #ffffff; border: 1px solid rgba(255,255,255,0.2); border-radius: 8px; font-weight: 600; text-transform: uppercase; cursor: pointer; font-family: 'Poppins', sans-serif;">CANCELAR</button>
-                    <button class="btn-salvar" style="padding: 12px 30px; background: #0676bb; color: #ffffff; border: none; border-radius: 8px; font-weight: 600; text-transform: uppercase; cursor: pointer; font-family: 'Poppins', sans-serif;">SALVAR</button>
+                    <button class="btn-cancelar" style="padding: 12px 30px; background: rgba(255,255,255,0.1); color: #ffffff; border: 1px solid rgba(255,255,255,0.2); border-radius: 8px; font-weight: 600; text-transform: uppercase; cursor: pointer; font-family: 'Poppins', sans-serif;">Cancelar</button>
+                    <button class="btn-salvar" style="padding: 12px 30px; background: #60a5fa; color: #ffffff; border: none; border-radius: 8px; font-weight: 600; text-transform: uppercase; cursor: pointer; font-family: 'Poppins', sans-serif;">Salvar</button>
                 </div>
             </div>
         </div>
     `;
 }
 
-// =================== PRÉ-MARCAÇÃO DE CHECKBOXES ===================
+// =================== PRE-MARCACAO DE CHECKBOXES ===================
 function forcarPreMarcacao(modal, dadosLeito) {
-    logDebug(`Forçando pré-marcação...`);
+    logDebug(`Forcando pre-marcacao...`);
     
     const concessoesAtuais = Array.isArray(dadosLeito?.concessoes) ? dadosLeito.concessoes : [];
     
     const concessoesCheckboxes = modal.querySelectorAll('#updConcessoes input[type="checkbox"]');
     const naoSeAplicaCheckbox = Array.from(concessoesCheckboxes)
-        .find(cb => cb.value === 'Não se aplica');
+        .find(cb => cb.value === 'Nao se aplica');
     
     concessoesCheckboxes.forEach(checkbox => {
-        if (checkbox.value === 'Não se aplica') {
+        if (checkbox.value === 'Nao se aplica') {
             checkbox.checked = concessoesAtuais.length === 0;
         } else if (concessoesAtuais.includes(checkbox.value)) {
             checkbox.checked = true;
         }
     });
     
-    logDebug(`Pré-marcação concluída`);
+    logDebug(`Pre-marcacao concluida`);
 }
 
-// ⭐ LÓGICA "NÃO SE APLICA" PARA CONCESSÕES
+// LOGICA "NAO SE APLICA" PARA CONCESSOES
 function setupConcessoesLogic(modal, concessoesId) {
     const container = modal.querySelector(`#${concessoesId}`);
     if (!container) return;
     
     const naoSeAplicaCheckbox = Array.from(container.querySelectorAll('input[type="checkbox"]'))
-        .find(cb => cb.value === 'Não se aplica');
+        .find(cb => cb.value === 'Nao se aplica');
     
     if (!naoSeAplicaCheckbox) return;
     
     const outrasCheckboxes = Array.from(container.querySelectorAll('input[type="checkbox"]'))
-        .filter(cb => cb.value !== 'Não se aplica');
+        .filter(cb => cb.value !== 'Nao se aplica');
     
     naoSeAplicaCheckbox.addEventListener('change', function() {
         if (this.checked) {
@@ -1297,14 +1356,14 @@ function setupModalEventListeners(modal, tipo) {
             
             const identificacaoField = modal.querySelector(tipo === 'admissao' ? '#admIdentificacaoLeito' : '#updIdentificacaoLeito');
             if (!identificacaoField.value.trim()) {
-                showErrorMessage('❌ Campo "Identificação do Leito" é obrigatório!');
+                showErrorMessage('Campo "Identificacao do Leito" e obrigatorio!');
                 identificacaoField.focus();
                 return;
             }
             
             const identificacao = identificacaoField.value.trim();
             if (identificacao.length < 1 || identificacao.length > 6) {
-                showErrorMessage('❌ Identificação deve ter de 1 a 6 caracteres!');
+                showErrorMessage('Identificacao deve ter de 1 a 6 caracteres!');
                 identificacaoField.focus();
                 return;
             }
@@ -1314,19 +1373,19 @@ function setupModalEventListeners(modal, tipo) {
             const sexoField = modal.querySelector(tipo === 'admissao' ? '#admSexo' : '#updSexo');
             
             if (!isolamentoField.value) {
-                showErrorMessage('❌ Campo "Isolamento" é obrigatório!');
+                showErrorMessage('Campo "Isolamento" e obrigatorio!');
                 isolamentoField.focus();
                 return;
             }
             
             if (!regiaoField.value) {
-                showErrorMessage('❌ Campo "Região" é obrigatório!');
+                showErrorMessage('Campo "Regiao" e obrigatorio!');
                 regiaoField.focus();
                 return;
             }
             
             if (!sexoField.value) {
-                showErrorMessage('❌ Campo "Gênero" é obrigatório!');
+                showErrorMessage('Campo "Genero" e obrigatorio!');
                 sexoField.focus();
                 return;
             }
@@ -1339,7 +1398,7 @@ function setupModalEventListeners(modal, tipo) {
             if (isHibrido || isSantaClara) {
                 const tipoQuartoField = modal.querySelector(tipo === 'admissao' ? '#admTipoQuarto' : '#updTipoQuarto');
                 if (tipoQuartoField && !tipoQuartoField.disabled && !tipoQuartoField.value) {
-                    showErrorMessage('❌ Campo "Tipo de Quarto" é obrigatório para hospitais híbridos!');
+                    showErrorMessage('Campo "Tipo de Quarto" e obrigatorio para hospitais hibridos!');
                     tipoQuartoField.focus();
                     return;
                 }
@@ -1350,7 +1409,7 @@ function setupModalEventListeners(modal, tipo) {
                 const validacaoCruz = validarAdmissaoCruzAzul(leitoNumero, generoNovo);
                 
                 if (!validacaoCruz.permitido) {
-                    showErrorMessage('❌ ' + validacaoCruz.motivo);
+                    showErrorMessage(validacaoCruz.motivo);
                     return;
                 }
             }
@@ -1361,7 +1420,7 @@ function setupModalEventListeners(modal, tipo) {
                 const validacaoSanta = validarLimiteSantaClara(tipoEscolhido);
                 
                 if (!validacaoSanta.permitido) {
-                    showErrorMessage('❌ ' + validacaoSanta.motivo);
+                    showErrorMessage(validacaoSanta.motivo);
                     return;
                 }
             }
@@ -1380,7 +1439,7 @@ function setupModalEventListeners(modal, tipo) {
                     if (tipoAtual === 'Enfermaria' && tipoAnterior !== 'Enfermaria') {
                         const validacaoSanta = validarLimiteSantaClara(tipoAtual);
                         if (!validacaoSanta.permitido) {
-                            showErrorMessage('❌ ' + validacaoSanta.motivo);
+                            showErrorMessage(validacaoSanta.motivo);
                             hideButtonLoading(this, originalText);
                             return;
                         }
@@ -1389,10 +1448,10 @@ function setupModalEventListeners(modal, tipo) {
                 
                 if (tipo === 'admissao') {
                     await window.admitirPaciente(dadosFormulario.hospital, dadosFormulario.leito, dadosFormulario);
-                    showSuccessMessage('✅ Paciente admitido com sucesso!');
+                    showSuccessMessage('Paciente admitido com sucesso!');
                 } else {
                     await window.atualizarPaciente(dadosFormulario.hospital, dadosFormulario.leito, dadosFormulario);
-                    showSuccessMessage('✅ Dados atualizados com sucesso!');
+                    showSuccessMessage('Dados atualizados com sucesso!');
                 }
                 
                 hideButtonLoading(this, originalText);
@@ -1402,7 +1461,7 @@ function setupModalEventListeners(modal, tipo) {
                 
             } catch (error) {
                 hideButtonLoading(this, originalText);
-                showErrorMessage('❌ Erro ao salvar: ' + error.message);
+                showErrorMessage('Erro ao salvar: ' + error.message);
                 logError('Erro ao salvar:', error);
             }
         });
@@ -1423,14 +1482,14 @@ function setupModalEventListeners(modal, tipo) {
                 await window.darAltaPaciente(window.currentHospital, window.selectedLeito);
                 
                 hideButtonLoading(this, originalText);
-                showSuccessMessage('✅ Alta processada!');
+                showSuccessMessage('Alta processada!');
                 closeModal(modal);
                 
                 await window.refreshAfterAction();
                 
             } catch (error) {
                 hideButtonLoading(this, originalText);
-                showErrorMessage('❌ Erro ao processar alta: ' + error.message);
+                showErrorMessage('Erro ao processar alta: ' + error.message);
                 logError('Erro alta:', error);
             }
         });
@@ -1463,7 +1522,7 @@ function closeModal(modal) {
     }
 }
 
-// =================== COLETAR DADOS DO FORMULÁRIO V3.5.1 ===================
+// =================== COLETAR DADOS DO FORMULARIO ===================
 function coletarDadosFormulario(modal, tipo) {
     const dados = {
         hospital: window.currentHospital,
@@ -1477,12 +1536,12 @@ function coletarDadosFormulario(modal, tipo) {
         dados.idade = parseInt(modal.querySelector('#admIdade')?.value) || null;
         dados.pps = modal.querySelector('#admPPS')?.value?.replace('%', '') || null;
         dados.spict = modal.querySelector('#admSPICT')?.value || 'nao_elegivel';
-        dados.prevAlta = modal.querySelector('#admPrevAlta')?.value || 'Sem Previsão';
+        dados.prevAlta = modal.querySelector('#admPrevAlta')?.value || 'Sem Previsao';
         dados.isolamento = modal.querySelector('#admIsolamento')?.value || '';
         dados.identificacaoLeito = modal.querySelector('#admIdentificacaoLeito')?.value?.trim() || '';
         dados.regiao = modal.querySelector('#admRegiao')?.value || '';
         dados.genero = modal.querySelector('#admSexo')?.value || '';
-        dados.diretivas = modal.querySelector('#admDiretivas')?.value || 'Não se aplica';
+        dados.diretivas = modal.querySelector('#admDiretivas')?.value || 'Nao se aplica';
         
         const tipoQuartoField = modal.querySelector('#admTipoQuarto');
         if (tipoQuartoField) {
@@ -1490,18 +1549,18 @@ function coletarDadosFormulario(modal, tipo) {
         }
         
         dados.concessoes = coletarCheckboxesSelecionados(modal, '#admConcessoes');
-        dados.linhas = []; // LINHAS INIBIDAS - SEMPRE RETORNA ARRAY VAZIO
+        dados.linhas = [];
         
     } else {
         dados.idade = parseInt(modal.querySelector('#updIdade')?.value) || null;
         dados.pps = modal.querySelector('#updPPS')?.value?.replace('%', '') || null;
         dados.spict = modal.querySelector('#updSPICT')?.value || 'nao_elegivel';
-        dados.prevAlta = modal.querySelector('#updPrevAlta')?.value || 'Sem Previsão';
+        dados.prevAlta = modal.querySelector('#updPrevAlta')?.value || 'Sem Previsao';
         dados.isolamento = modal.querySelector('#updIsolamento')?.value || '';
         dados.identificacaoLeito = modal.querySelector('#updIdentificacaoLeito')?.value?.trim() || '';
         dados.regiao = modal.querySelector('#updRegiao')?.value || '';
         dados.genero = modal.querySelector('#updSexo')?.value || '';
-        dados.diretivas = modal.querySelector('#updDiretivas')?.value || 'Não se aplica';
+        dados.diretivas = modal.querySelector('#updDiretivas')?.value || 'Nao se aplica';
         
         const tipoQuartoField = modal.querySelector('#updTipoQuarto');
         if (tipoQuartoField) {
@@ -1509,7 +1568,7 @@ function coletarDadosFormulario(modal, tipo) {
         }
         
         dados.concessoes = coletarCheckboxesSelecionados(modal, '#updConcessoes');
-        dados.linhas = []; // LINHAS INIBIDAS - SEMPRE RETORNA ARRAY VAZIO
+        dados.linhas = [];
     }
     
     return dados;
@@ -1521,7 +1580,7 @@ function coletarCheckboxesSelecionados(modal, seletor) {
     const selecionados = [];
     
     checkboxes.forEach(checkbox => {
-        if (checkbox.checked && checkbox.value !== 'Não se aplica') {
+        if (checkbox.checked && checkbox.value !== 'Nao se aplica') {
             selecionados.push(checkbox.value);
         }
     });
@@ -1529,7 +1588,7 @@ function coletarCheckboxesSelecionados(modal, seletor) {
     return selecionados;
 }
 
-// ✅ FORMATAÇÃO AUTOMÁTICA MATRÍCULA COM HÍFEN NO INPUT
+// FORMATACAO AUTOMATICA MATRICULA COM HIFEN NO INPUT
 function formatarMatriculaInput(input) {
     let valor = input.value.replace(/\D/g, '');
     if (valor.length > 10) {
@@ -1542,10 +1601,10 @@ function formatarMatriculaInput(input) {
     }
 }
 
-// Criar função global para o oninput do HTML
+// Criar funcao global para o oninput do HTML
 window.formatarMatriculaInput = formatarMatriculaInput;
 
-// =================== FUNÇÕES AUXILIARES ===================
+// =================== FUNCOES AUXILIARES ===================
 function showButtonLoading(button, loadingText) {
     if (button) {
         button.disabled = true;
@@ -1566,7 +1625,7 @@ function showSuccessMessage(message) {
     const toast = document.createElement('div');
     toast.innerHTML = message;
     toast.style.cssText = `
-        position: fixed; top: 20px; right: 20px; background: #29ad8d;
+        position: fixed; top: 20px; right: 20px; background: #60a5fa;
         color: white; padding: 15px 20px; border-radius: 8px; font-weight: 500;
         z-index: 10000; animation: slideIn 0.3s ease; font-family: 'Poppins', sans-serif;
     `;
@@ -1606,7 +1665,7 @@ function calcularTempoInternacao(admissao) {
                         d >= 1 && d <= 31 && m >= 1 && m <= 12 && a >= 1900) {
                         dataAdmissao = new Date(a, m - 1, d);
                     } else {
-                        return 'Data inválida';
+                        return 'Data invalida';
                     }
                 } else {
                     return 'Data incompleta';
@@ -1619,7 +1678,7 @@ function calcularTempoInternacao(admissao) {
         }
         
         if (!dataAdmissao || isNaN(dataAdmissao.getTime())) {
-            return 'Data inválida';
+            return 'Data invalida';
         }
         
         const agora = new Date();
@@ -1636,8 +1695,8 @@ function calcularTempoInternacao(admissao) {
         return `${diffDays}d ${diffHours}h`;
         
     } catch (error) {
-        logError('Erro ao calcular tempo internação:', error);
-        return 'Erro no cálculo';
+        logError('Erro ao calcular tempo internacao:', error);
+        return 'Erro no calculo';
     }
 }
 
@@ -1659,24 +1718,24 @@ function formatarDataHora(dataISO) {
     }
 }
 
-// =================== FUNÇÕES DE LOG ===================
+// =================== FUNCOES DE LOG ===================
 function logInfo(message, data = null) {
-    console.log(`🔵 [CARDS V3.5.1] ${message}`, data || '');
+    console.log(`[CARDS] ${message}`, data || '');
 }
 
 function logError(message, error = null) {
-    console.error(`🔴 [CARDS V3.5.1 ERROR] ${message}`, error || '');
+    console.error(`[CARDS ERROR] ${message}`, error || '');
 }
 
 function logSuccess(message) {
-    console.log(`🟢 [CARDS V3.5.1 SUCCESS] ${message}`);
+    console.log(`[CARDS SUCCESS] ${message}`);
 }
 
 function logDebug(message, data = null) {
-    console.log(`🟡 [CARDS V3.5.1 DEBUG] ${message}`, data || '');
+    console.log(`[CARDS DEBUG] ${message}`, data || '');
 }
 
-// =================== CSS CONSOLIDADO V3.5.1 ===================
+// =================== CSS CONSOLIDADO ===================
 if (!document.getElementById('cardsConsolidadoCSS')) {
     const style = document.createElement('style');
     style.id = 'cardsConsolidadoCSS';
@@ -1706,7 +1765,7 @@ if (!document.getElementById('cardsConsolidadoCSS')) {
             transition: all 0.2s ease;
         }
         
-        .btn-action:hover {
+        .btn-action:hover:not(:disabled) {
             transform: translateY(-1px);
             box-shadow: 0 4px 8px rgba(0,0,0,0.2);
         }
@@ -1736,14 +1795,14 @@ if (!document.getElementById('cardsConsolidadoCSS')) {
 
         select:focus {
             outline: none !important;
-            border-color: #0676bb !important;
-            box-shadow: 0 0 0 2px rgba(6, 118, 187, 0.2) !important;
+            border-color: #60a5fa !important;
+            box-shadow: 0 0 0 2px rgba(96, 165, 250, 0.2) !important;
         }
 
         input[type="checkbox"] {
             width: 16px;
             height: 16px;
-            accent-color: #0676bb;
+            accent-color: #60a5fa;
             cursor: pointer;
         }
         
@@ -1755,7 +1814,7 @@ if (!document.getElementById('cardsConsolidadoCSS')) {
         }
         
         label:has(input[type="checkbox"]):hover {
-            background-color: rgba(6, 118, 187, 0.1);
+            background-color: rgba(96, 165, 250, 0.1);
         }
 
         .card {
@@ -1850,7 +1909,7 @@ if (!document.getElementById('cardsConsolidadoCSS')) {
                 background: #1a1f2e !important;
                 padding: 15px 10px !important;
                 margin: 0 -20px -20px -20px !important;
-                border-top: 2px solid rgba(6, 118, 187, 0.3) !important;
+                border-top: 2px solid rgba(96, 165, 250, 0.3) !important;
                 z-index: 10 !important;
                 flex-wrap: wrap !important;
                 justify-content: center !important;
@@ -1899,17 +1958,17 @@ if (!document.getElementById('cardsConsolidadoCSS')) {
     document.head.appendChild(style);
 }
 
-// =================== INICIALIZAÇÃO V3.5.1 ===================
+// =================== INICIALIZACAO ===================
 document.addEventListener('DOMContentLoaded', function() {
-    logSuccess('✅ CARDS.JS V3.5.1 CARREGADO - LINHAS DE CUIDADO INIBIDAS');
+    logSuccess('CARDS.JS CARREGADO - Gestao de Leitos Hospitalares');
     
     if (window.CONCESSOES_LIST.length !== 12) {
-        logError(`ERRO: Esperadas 12 concessões, encontradas ${window.CONCESSOES_LIST.length}`);
+        logError(`ERRO: Esperadas 12 concessoes, encontradas ${window.CONCESSOES_LIST.length}`);
     } else {
-        logSuccess(`✅ ${window.CONCESSOES_LIST.length} concessões confirmadas`);
+        logSuccess(`${window.CONCESSOES_LIST.length} concessoes confirmadas`);
     }
     
-    logInfo('⚠️ LINHAS DE CUIDADO INIBIDAS - Não aparecerão na interface');
+    logInfo('LINHAS DE CUIDADO INIBIDAS - Nao aparecerao na interface');
 });
 
 // =================== EXPORTS ===================
@@ -1924,6 +1983,7 @@ window.getBadgeDiretivas = getBadgeDiretivas;
 window.formatarMatriculaInput = formatarMatriculaInput;
 window.formatarMatriculaExibicao = formatarMatriculaExibicao;
 window.setupSearchFilter = setupSearchFilter;
+window.searchLeitos = searchLeitos;
 
-logSuccess('🎉 CARDS.JS V3.5.1 COMPLETO - LINHAS DE CUIDADO INIBIDAS!');
-console.log('✅ CARDS.JS V3.5.1 - LINHAS DE CUIDADO REMOVIDAS DA INTERFACE!');
+logSuccess('CARDS.JS COMPLETO - Gestao de Leitos Hospitalares!');
+console.log('CARDS.JS - LINHAS DE CUIDADO REMOVIDAS DA INTERFACE!');
