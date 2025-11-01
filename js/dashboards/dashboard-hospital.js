@@ -3,6 +3,9 @@
 
 console.log('Dashboard Hospitalar V4.0 - Inicializando...');
 
+// Variável global para controlar o filtro atual
+window.hospitalFiltroAtual = 'todos';
+
 const CORES_ARCHIPELAGO = {
     azulMarinhoEscuro: '#131b2e',
     azulEscuro: '#172945',
@@ -127,6 +130,52 @@ window.atualizarTodasAsCores = function() {
     }
 };
 
+/**
+ * Filtra hospitais no dashboard
+ * @param {string} hospitalId - ID do hospital ou 'todos'
+ * @param {HTMLElement} botao - Elemento do botão clicado
+ */
+window.filtrarHospitalDashboard = function(hospitalId, botao) {
+    console.log('[FILTRO] Filtrando:', hospitalId);
+    
+    // Atualizar variável global
+    window.hospitalFiltroAtual = hospitalId;
+    
+    // Remover active de todos os botões
+    document.querySelectorAll('.hospital-filter-btn').forEach(btn => {
+        btn.classList.remove('active');
+    });
+    
+    // Adicionar active no botão clicado
+    if (botao) {
+        botao.classList.add('active');
+    }
+    
+    // Filtrar cards
+    const hospitaisCards = document.querySelectorAll('.hospital-card');
+    let totalVisiveis = 0;
+    
+    hospitaisCards.forEach(card => {
+        const cardHospitalId = card.getAttribute('data-hospital');
+        
+        if (hospitalId === 'todos') {
+            card.style.display = 'block';
+            card.style.animation = 'fadeIn 0.3s ease';
+            totalVisiveis++;
+        } else {
+            if (cardHospitalId === hospitalId) {
+                card.style.display = 'block';
+                card.style.animation = 'fadeIn 0.3s ease';
+                totalVisiveis++;
+            } else {
+                card.style.display = 'none';
+            }
+        }
+    });
+    
+    console.log('[FILTRO] Visíveis:', totalVisiveis);
+};
+
 window.copiarDashboardParaWhatsApp = function() {
     const hospitaisIds = ['H5', 'H2', 'H1', 'H4', 'H3', 'H6', 'H7'];
     const hospitaisNomes = {
@@ -139,18 +188,29 @@ window.copiarDashboardParaWhatsApp = function() {
         'H7': 'SANTA VIRGINIA'
     };
     
-    let texto = `*DASHBOARD HOSPITALAR*\n`;
+    // Verificar qual hospital está selecionado
+    const filtroAtual = window.hospitalFiltroAtual || 'todos';
+    const hospitaisParaRelatorio = filtroAtual === 'todos' ? hospitaisIds : [filtroAtual];
+    
+    let texto = filtroAtual === 'todos' ? 
+        `*DASHBOARD HOSPITALAR*\n` : 
+        `*DASHBOARD HOSPITALAR - ${hospitaisNomes[filtroAtual]}*\n`;
+    
     texto += `${new Date().toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })}\n\n`;
     
-    hospitaisIds.forEach((hospitalId, index) => {
+    hospitaisParaRelatorio.forEach((hospitalId, index) => {
         const hospital = window.hospitalData[hospitalId];
         if (!hospital || !hospital.leitos) return;
         
         const nome = hospitaisNomes[hospitalId];
-        texto += `━━━━━━━━━━━━━━━━━\n`;
-        texto += `*${index + 1}. ${nome}*\n`;
-        texto += `━━━━━━━━━━━━━━━━━\n\n`;
         
+        if (filtroAtual === 'todos') {
+            texto += `━━━━━━━━━━━━━━━━━\n`;
+            texto += `*${index + 1}. ${nome}*\n`;
+            texto += `━━━━━━━━━━━━━━━━━\n\n`;
+        }
+        
+        // ========== ALTAS PREVISTAS ==========
         const altasTimeline = {
             'HOJE': { 'Ouro': [], '2R': [], '3R': [] },
             '24H': { 'Ouro': [], '2R': [], '3R': [] },
@@ -213,7 +273,95 @@ window.copiarDashboardParaWhatsApp = function() {
             texto += `48h: ${altasTimeline['48H'].join(', ')}\n\n`;
         }
         
-        if (!temAltasHoje && !temAltas24h && !temAltas48h) {
+        // ========== CONCESSÕES PREVISTAS ==========
+        const concessoesTimeline = {
+            'HOJE': {},
+            '24H': {}
+        };
+        
+        hospital.leitos.forEach(leito => {
+            if (isOcupado(leito)) {
+                const concessoes = leito.concessoes || (leito.paciente && leito.paciente.concessoes);
+                const prevAlta = leito.prevAlta || (leito.paciente && leito.paciente.prevAlta);
+                const matricula = leito.matricula || 'S/N';
+                
+                if (concessoes && prevAlta) {
+                    const concessoesList = Array.isArray(concessoes) ? 
+                        concessoes : 
+                        String(concessoes).split('|');
+                    
+                    const prev = normStr(prevAlta).replace(/\s+/g, ' ');
+                    let timeline = null;
+                    
+                    if (prev.includes('hoje')) timeline = 'HOJE';
+                    else if (prev.includes('24h') || prev.includes('24 h')) timeline = '24H';
+                    
+                    if (timeline) {
+                        concessoesList.forEach(concessao => {
+                            if (concessao && concessao.trim()) {
+                                const nome = concessao.trim();
+                                if (!concessoesTimeline[timeline][nome]) {
+                                    concessoesTimeline[timeline][nome] = [];
+                                }
+                                concessoesTimeline[timeline][nome].push(matricula);
+                            }
+                        });
+                    }
+                }
+            }
+        });
+        
+        const temConcessoesHoje = Object.keys(concessoesTimeline['HOJE']).length > 0;
+        const temConcessoes24h = Object.keys(concessoesTimeline['24H']).length > 0;
+        
+        if (temConcessoesHoje) {
+            texto += `*Concessões Previstas HOJE:*\n`;
+            Object.entries(concessoesTimeline['HOJE']).forEach(([nome, mats]) => {
+                texto += `${nome}: ${mats.join(', ')}\n`;
+            });
+            texto += `\n`;
+        }
+        
+        if (temConcessoes24h) {
+            texto += `*Concessões Previstas 24H:*\n`;
+            Object.entries(concessoesTimeline['24H']).forEach(([nome, mats]) => {
+                texto += `${nome}: ${mats.join(', ')}\n`;
+            });
+            texto += `\n`;
+        }
+        
+        // ========== DIRETIVAS PENDENTES ==========
+        const diretivasPendentes = hospital.leitos.filter(l => {
+            if (!isOcupado(l)) return false;
+            
+            const spict = l.spict;
+            if (!spict) return false;
+            
+            const spictNorm = normStr(spict);
+            const spictElegivel = spictNorm === 'elegivel' || spictNorm === 'elegível';
+            
+            if (!spictElegivel) return false;
+            
+            const diretivas = l.diretivas;
+            const dirNorm = normStr(diretivas);
+            
+            const valoresPendentes = ['', 'não', 'nao', 'n/a', 'pendente', 'não se aplica'];
+            
+            return valoresPendentes.includes(dirNorm);
+        });
+        
+        if (diretivasPendentes.length > 0) {
+            texto += `*Diretivas Pendentes:*\n`;
+            diretivasPendentes.forEach(l => {
+                const leito = l.identificacaoLeito || l.leito || '---';
+                const matricula = l.matricula || '---';
+                texto += `Leito ${leito} - Mat. ${matricula}\n`;
+            });
+            texto += `\n`;
+        }
+        
+        // Se não tem nada
+        if (!temAltasHoje && !temAltas24h && !temAltas48h && !temConcessoesHoje && !temConcessoes24h && diretivasPendentes.length === 0) {
             texto += `_Nenhuma atividade prevista_\n\n`;
         }
     });
@@ -775,15 +923,46 @@ window.renderDashboardHospitalar = function() {
     
     container.innerHTML = `
         <div class="dashboard-hospitalar-wrapper" style="background: linear-gradient(135deg, ${CORES_ARCHIPELAGO.azulMarinhoEscuro} 0%, ${CORES_ARCHIPELAGO.azulEscuro} 100%); min-height: 100vh; padding: 20px; color: white; font-family: 'Poppins', sans-serif;">
-            <div class="dashboard-header" style="margin-bottom: 30px; padding: 20px; background: rgba(255, 255, 255, 0.05); border-radius: 12px; border-left: 4px solid #ffffff;">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; flex-wrap: wrap; gap: 15px;">
-                    <h2 style="margin: 0; color: #60a5fa; font-size: 24px; font-weight: 700; text-align: center; width: 100%; font-family: 'Poppins', sans-serif;">Dashboard Hospitalar</h2>
-                    <div style="display: flex; gap: 10px; margin: 0 auto;">
-                        <button onclick="window.copiarDashboardParaWhatsApp()" class="btn-whatsapp" style="padding: 8px 16px; background: #25D366; border: none; border-radius: 8px; color: white; font-size: 14px; cursor: pointer; font-weight: 600; display: flex; align-items: center; gap: 8px; transition: all 0.3s ease; font-family: 'Poppins', sans-serif;">
-                            Relatório Via WhatsApp
-                        </button>
-                    </div>
+            
+            <!-- HEADER COM FILTRO -->
+            <div class="dashboard-header-filtro">
+                <h2 class="dashboard-title-central">Dashboard Hospitalar</h2>
+                
+                <!-- BOTÃO TODOS (PRIMEIRA LINHA) -->
+                <div class="filtro-linha-todos">
+                    <button class="hospital-filter-btn active" onclick="window.filtrarHospitalDashboard('todos', this)">
+                        Todos
+                    </button>
                 </div>
+                
+                <!-- BOTÕES DE HOSPITAIS (SEGUNDA LINHA) -->
+                <div class="hospital-filter-selector">
+                    <button class="hospital-filter-btn" onclick="window.filtrarHospitalDashboard('H5', this)">
+                        Adventista
+                    </button>
+                    <button class="hospital-filter-btn" onclick="window.filtrarHospitalDashboard('H2', this)">
+                        Cruz Azul
+                    </button>
+                    <button class="hospital-filter-btn" onclick="window.filtrarHospitalDashboard('H1', this)">
+                        Neomater
+                    </button>
+                    <button class="hospital-filter-btn" onclick="window.filtrarHospitalDashboard('H4', this)">
+                        Santa Clara
+                    </button>
+                    <button class="hospital-filter-btn" onclick="window.filtrarHospitalDashboard('H6', this)">
+                        Santa Cruz
+                    </button>
+                    <button class="hospital-filter-btn" onclick="window.filtrarHospitalDashboard('H3', this)">
+                        Santa Marcelina
+                    </button>
+                    <button class="hospital-filter-btn" onclick="window.filtrarHospitalDashboard('H7', this)">
+                        Santa Virginia
+                    </button>
+                </div>
+                
+                <button onclick="window.copiarDashboardParaWhatsApp()" class="btn-whatsapp-dashboard">
+                    Relatorio Via WhatsApp
+                </button>
             </div>
             
             <div class="hospitais-container">
@@ -1556,6 +1735,11 @@ function getHospitalConsolidadoCSS() {
                 text-transform: none !important;
             }
             
+            @keyframes fadeIn {
+                from { opacity: 0; transform: translateY(10px); }
+                to { opacity: 1; transform: translateY(0); }
+            }
+            
             #dashHospitalarContent,
             #dash1 {
                 background: transparent !important;
@@ -1566,16 +1750,87 @@ function getHospitalConsolidadoCSS() {
                 box-shadow: none;
             }
             
-            .dashboard-header h2 {
-                text-align: center !important;
-                width: 100% !important;
-                margin: 0 auto !important;
-                color: #60a5fa !important;
+            /* =================== HEADER COM FILTRO =================== */
+            .dashboard-header-filtro {
+                background: rgba(255, 255, 255, 0.05);
+                border-radius: 12px;
+                padding: 25px;
+                border-left: 4px solid #ffffff;
+                margin-bottom: 30px;
             }
             
-            .btn-whatsapp:hover {
-                background: #128C7E !important;
-                transform: translateY(-1px);
+            .dashboard-title-central {
+                color: #60a5fa !important;
+                font-size: 24px !important;
+                margin-bottom: 20px !important;
+                font-family: 'Poppins', sans-serif !important;
+                font-weight: 700 !important;
+                text-align: center !important;
+                text-transform: none !important;
+            }
+            
+            /* =================== LINHA DO BOTÃO "TODOS" =================== */
+            .filtro-linha-todos {
+                display: flex;
+                justify-content: center;
+                margin-bottom: 15px;
+            }
+            
+            /* =================== LINHA DOS HOSPITAIS =================== */
+            .hospital-filter-selector {
+                display: flex;
+                gap: 10px;
+                flex-wrap: wrap;
+                justify-content: center;
+                margin-bottom: 20px;
+            }
+            
+            /* =================== BOTÕES DE FILTRO =================== */
+            .hospital-filter-btn {
+                background-color: #60a5fa;
+                color: #ffffff;
+                border: none;
+                padding: 12px 24px;
+                border-radius: 8px;
+                cursor: pointer;
+                font-size: 14px;
+                font-weight: 700;
+                font-family: 'Poppins', sans-serif;
+                transition: all 0.3s ease;
+                width: 160px;
+                text-transform: none;
+            }
+            
+            .hospital-filter-btn:hover {
+                background-color: #3b82f6;
+                transform: translateY(-2px);
+                box-shadow: 0 4px 12px rgba(96, 165, 250, 0.4);
+            }
+            
+            .hospital-filter-btn.active {
+                background-color: #3b82f6;
+                box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.3);
+            }
+            
+            /* =================== BOTÃO WHATSAPP =================== */
+            .btn-whatsapp-dashboard {
+                display: block;
+                margin: 0 auto;
+                padding: 12px 24px;
+                background: #25D366;
+                border: none;
+                border-radius: 8px;
+                color: white;
+                font-size: 14px;
+                cursor: pointer;
+                font-weight: 700;
+                transition: all 0.3s ease;
+                font-family: 'Poppins', sans-serif;
+            }
+            
+            .btn-whatsapp-dashboard:hover {
+                background: #128C7E;
+                transform: translateY(-2px);
                 box-shadow: 0 4px 12px rgba(37, 211, 102, 0.4);
             }
             
@@ -2075,22 +2330,24 @@ function getHospitalConsolidadoCSS() {
                 line-height: 1.4;
             }
             
-            @media (max-width: 1200px) {
-                .kpis-grid {
-                    grid-template-columns: repeat(2, 1fr);
-                }
-            }
-            
+            /* =================== RESPONSIVIDADE MOBILE =================== */
             @media (max-width: 768px) {
-                .dashboard-header > div {
-                    flex-direction: column !important;
-                    align-items: center !important;
-                    gap: 15px !important;
+                .filtro-linha-todos,
+                .hospital-filter-selector {
+                    flex-direction: column;
+                    align-items: stretch;
                 }
                 
-                .dashboard-header h2 {
-                    order: -1 !important;
-                    margin-bottom: 10px !important;
+                .hospital-filter-btn {
+                    width: 100%;
+                }
+                
+                .dashboard-title-central {
+                    font-size: 20px !important;
+                }
+                
+                .btn-whatsapp-dashboard {
+                    width: 100%;
                 }
                 
                 .kpis-grid {
