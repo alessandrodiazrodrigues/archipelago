@@ -3,7 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Archipelago Dashboard V3.3.2 CORRIGIDO</title>
+    <title>Archipelago Dashboard V4.0</title>
+    
+    <!-- Google Fonts - Poppins Bold -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@700&display=swap" rel="stylesheet">
     
     <!-- CSS MODULAR -->
     <link rel="stylesheet" href="css/variables.css">
@@ -41,7 +46,7 @@
             <h1>Archipelago Dashboard</h1>
         </div>
         <div class="header-right">
-            <div id="updateTimer">Próxima atualização em: 4:00</div>
+            <div id="updateTimer">Proxima atualizacao em: 4:00</div>
             <button onclick="updateData()">Atualizar</button>
         </div>
     </header>
@@ -54,21 +59,21 @@
         </div>
         
         <nav class="menu-items">
-            <a href="#" class="side-menu-item active" data-tab="leitos" onclick="setActiveTabAndCloseMenu('leitos'); return false;">
-                Leitos
+            <a href="#" class="side-menu-item" data-tab="dash2" onclick="setActiveTabAndCloseMenu('dash2'); return false;">
+                Dashboard Executivo
             </a>
             <a href="#" class="side-menu-item" data-tab="dash1" onclick="setActiveTabAndCloseMenu('dash1'); return false;">
                 Dashboard Hospitalar
             </a>
-            <a href="#" class="side-menu-item" data-tab="dash2" onclick="setActiveTabAndCloseMenu('dash2'); return false;">
-                Dashboard Executivo
+            <a href="#" class="side-menu-item" data-tab="leitos" onclick="setActiveTabAndCloseMenu('leitos'); return false;">
+                Gestao de Leitos
             </a>
         </nav>
         
         <div class="menu-footer">
             <div class="menu-divider"></div>
-            <a href="#" class="menu-qr" onclick="openQRCodesAndCloseMenu(); return false;">
-                <span>📱</span> Gerar QR Codes
+            <a href="#" class="side-menu-item" onclick="openQRCodesAndCloseMenu(); return false;">
+                Gerar QR Codes
             </a>
         </div>
     </aside>
@@ -79,42 +84,59 @@
     <!-- =================== CONTEÚDO PRINCIPAL =================== -->
     <main id="mainContent" class="main-content hidden">
         
-        <!-- SEÇÃO DE LEITOS -->
-        <section id="leitosView" class="section-leitos">
-            <div class="leitos-header">
-                <h2>Gestão de Leitos Hospitalares</h2>
-                
-                <!-- SELETOR DE HOSPITAL -->
-                <div class="hospital-selector" id="hospitalSelector">
-                    <button class="hospital-btn active" data-hospital="H1" onclick="selectHospital('H1')">Neomater</button>
-                    <button class="hospital-btn" data-hospital="H2" onclick="selectHospital('H2')">Cruz Azul</button>
-                    <button class="hospital-btn" data-hospital="H3" onclick="selectHospital('H3')">Santa Marcelina</button>
-                    <button class="hospital-btn" data-hospital="H4" onclick="selectHospital('H4')">Santa Clara</button>
-                    <button class="hospital-btn" data-hospital="H5" onclick="selectHospital('H5')">Hospital Adventista</button>
-                </div>
-            </div>
-            
-            <!-- CONTAINER DOS CARDS -->
-            <div id="cardsContainer" class="cards-grid"></div>
+        <!-- DASHBOARD EXECUTIVO - TELA INICIAL -->
+        <section id="dash2">
+            <div id="dashExecutivoContent"></div>
         </section>
 
         <!-- DASHBOARD HOSPITALAR -->
         <section id="dash1" class="hidden">
             <div id="dashHospitalarContent"></div>
         </section>
-
-        <!-- DASHBOARD EXECUTIVO -->
-        <section id="dash2" class="hidden">
-            <div id="dashExecutivoContent"></div>
+        
+        <!-- SEÇÃO DE LEITOS -->
+        <section id="leitosView" class="section-leitos hidden">
+            <div class="leitos-header">
+                <!-- BOX ÚNICO COM TÍTULO E BOTÕES -->
+                <div class="hospital-selector-container">
+                    <h2>Gestao de Leitos Hospitalares</h2>
+                    
+                    <div class="hospital-selector" id="hospitalSelector">
+                        <button class="hospital-btn active" data-hospital="H5" onclick="selectHospital('H5')">Adventista</button>
+                        <button class="hospital-btn" data-hospital="H2" onclick="selectHospital('H2')">Cruz Azul</button>
+                        <button class="hospital-btn" data-hospital="H1" onclick="selectHospital('H1')">Neomater</button>
+                        <button class="hospital-btn" data-hospital="H4" onclick="selectHospital('H4')">Santa Clara</button>
+                        <button class="hospital-btn" data-hospital="H6" onclick="selectHospital('H6')">Santa Cruz</button>
+                        <button class="hospital-btn" data-hospital="H3" onclick="selectHospital('H3')">Santa Marcelina</button>
+                        <button class="hospital-btn" data-hospital="H7" onclick="selectHospital('H7')">Santa Virginia</button>
+                    </div>
+                </div>
+                
+                <!-- CAMPO DE BUSCA - NOVO V4.0 -->
+                <div class="search-container">
+                    <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="11" cy="11" r="8"></circle>
+                        <path d="m21 21-4.35-4.35"></path>
+                    </svg>
+                    <input 
+                        type="text" 
+                        id="searchLeitosInput" 
+                        placeholder="Buscar por matricula, leito ou iniciais..." 
+                        oninput="window.searchLeitos()">
+                </div>
+            </div>
+            
+            <!-- CONTAINER DOS CARDS -->
+            <div id="cardsContainer" class="cards-grid"></div>
         </section>
         
     </main>
 
-    <!-- =================== FOOTER V3.3.2 COM CRÉDITOS COMPLETOS =================== -->
+    <!-- =================== FOOTER V4.0 =================== -->
     <footer id="mainFooter" class="footer hidden">
-        <p>Sistema em versão BETA - não pode ser usado como única fonte de referência</p>
-        <p>Para decisões críticas, consulte sempre fontes adicionais e profissionais qualificados</p>
-        <p><strong>Archipelago Dashboard V3.3.2 CORRIGIDO - Outubro/2025</strong></p>
+        <p>Sistema em versao BETA - nao pode ser usado como unica fonte de referencia</p>
+        <p>Para decisoes criticas, consulte sempre fontes adicionais e profissionais qualificados</p>
+        <p><strong>Archipelago Dashboard V4.0 - Novembro/2025</strong></p>
     </footer>
 
     <!-- =================== MODAL DE PACIENTE =================== -->
@@ -137,16 +159,13 @@
         </div>
     </div>
 
-    <!-- =================== SCRIPTS MODULARES V3.3.2 CORRIGIDOS =================== -->
-    
-    <!-- ✅ CORREÇÃO APLICADA: Scripts dos Dashboards ANTES de cards.js -->
-    <!-- Isso resolve a Race Condition identificada nos 3 pareceres técnicos -->
+    <!-- =================== SCRIPTS MODULARES V4.0 =================== -->
     
     <!-- Scripts Core (ORDEM IMPORTA!) -->
     <script src="js/app.js"></script>
     <script src="js/api.js"></script>
     
-    <!-- ✅ DASHBOARDS CARREGADOS ESTATICAMENTE (SOLUÇÃO DO PROBLEMA) -->
+    <!-- Dashboards ANTES de cards.js (evita race condition) -->
     <script src="js/dashboards/dashboard-hospital.js"></script>
     <script src="js/dashboards/dashboard-executive.js"></script>
     
@@ -159,27 +178,21 @@
     <!-- Script de Inicialização -->
     <script src="js/main.js"></script>
     
-    <!-- =================== FUNÇÕES AUXILIARES MENU V3.3.2 =================== -->
+    <!-- =================== FUNÇÕES AUXILIARES MENU V4.0 =================== -->
     <script>
-        console.log('🚀 Archipelago Dashboard V3.3.2 CORRIGIDO - Inicializando...');
-        console.log('📅 Outubro/2025 - Versão V3.3.2 CORRIGIDA');
+        console.log('🚀 Archipelago Dashboard V4.0 - Inicializando...');
+        console.log('📅 Novembro/2025 - Versão V4.0');
         console.log('');
-        console.log('✅ CORREÇÃO APLICADA:');
-        console.log('   • ✅ Dashboards carregados ESTATICAMENTE');
-        console.log('   • ✅ Scripts na ordem correta (antes de cards.js)');
-        console.log('   • ✅ Race Condition RESOLVIDA');
-        console.log('   • ✅ Baseado nos 3 pareceres técnicos');
+        console.log('✅ NOVIDADES V4.0:');
+        console.log('   • ✅ 7 Hospitais (H1-H7) - Total: 93 leitos');
+        console.log('   • ✅ H6: Santa Cruz (7 leitos)');
+        console.log('   • ✅ H7: Santa Virgínia (7 leitos)');
+        console.log('   • ✅ Campo de busca implementado');
+        console.log('   • ✅ Novas cores aplicadas (#60a5fa)');
+        console.log('   • ✅ Fonte Poppins Bold');
+        console.log('   • ✅ Title Case aplicado');
+        console.log('   • ✅ Ordem alfabética dos hospitais');
         console.log('');
-        console.log('📊 Ordem de carregamento:');
-        console.log('   1️⃣ app.js');
-        console.log('   2️⃣ api.js');
-        console.log('   3️⃣ dashboard-hospital.js ⭐ NOVO');
-        console.log('   4️⃣ dashboard-executive.js ⭐ NOVO');
-        console.log('   5️⃣ cards.js');
-        console.log('   6️⃣ qrcode.js');
-        console.log('   7️⃣ main.js');
-        console.log('');
-        console.log('🎯 Dashboard Hospitalar deve funcionar na 1ª tentativa agora!');
         
         /**
          * Função que combina mudança de aba + fechamento do menu
@@ -242,9 +255,9 @@
         }
     </script>
     
-    <!-- =================== ESTILOS INLINE =================== -->
+    <!-- =================== ESTILOS INLINE V4.0 =================== -->
     <style>
-        /* Reset e Base */
+        /* =================== RESET E BASE =================== */
         * {
             margin: 0;
             padding: 0;
@@ -252,7 +265,8 @@
         }
         
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            font-weight: 700;
             background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
             color: #e2e8f0;
             min-height: 100vh;
@@ -262,18 +276,19 @@
             display: none !important;
         }
         
-        /* Modal de Autenticação */
+        /* =================== MODAL DE AUTENTICAÇÃO (TRANSPARENTE PARA VER FUNDO) =================== */
         .modal-auth {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0, 0, 0, 0.8);
+            background: rgba(0, 0, 0, 0.6); /* REDUZIDO DE 0.9 PARA 0.6 */
             display: flex;
             justify-content: center;
             align-items: center;
             z-index: 10000;
+            backdrop-filter: blur(4px); /* BLUR LEVE PARA VER O FUNDO */
         }
         
         .auth-container {
@@ -290,12 +305,15 @@
             color: #60a5fa;
             margin-bottom: 10px;
             font-size: 28px;
+            font-family: 'Poppins', sans-serif;
+            font-weight: 700;
         }
         
         .auth-container p {
             color: #9ca3af;
             margin-bottom: 25px;
             font-size: 14px;
+            font-weight: 400;
         }
         
         .auth-container input {
@@ -308,6 +326,7 @@
             font-size: 16px;
             margin-bottom: 20px;
             transition: border-color 0.3s;
+            font-family: 'Poppins', sans-serif;
         }
         
         .auth-container input:focus {
@@ -323,9 +342,10 @@
             border: none;
             border-radius: 8px;
             font-size: 16px;
-            font-weight: 600;
+            font-weight: 700;
             cursor: pointer;
             transition: background 0.3s;
+            font-family: 'Poppins', sans-serif;
         }
         
         .auth-container button:hover {
@@ -339,7 +359,7 @@
             font-size: 14px;
         }
         
-        /* Header */
+        /* =================== HEADER =================== */
         .header {
             background: #1e293b;
             padding: 20px 30px;
@@ -375,6 +395,7 @@
             font-size: 22px;
             color: #60a5fa;
             font-weight: 700;
+            font-family: 'Poppins', sans-serif;
         }
         
         .header-right {
@@ -386,24 +407,26 @@
         #updateTimer {
             color: #9ca3af;
             font-size: 14px;
+            font-weight: 400;
         }
         
         .header-right button {
-            background: #60a5fa;
+            background: rgba(156, 163, 175, 0.5);
             color: white;
             border: none;
             padding: 10px 20px;
             border-radius: 6px;
             cursor: pointer;
-            font-weight: 600;
+            font-weight: 700;
             transition: background 0.3s;
+            font-family: 'Poppins', sans-serif;
         }
         
         .header-right button:hover {
-            background: #3b82f6;
+            background: rgba(156, 163, 175, 0.7);
         }
         
-        /* Menu Lateral */
+        /* =================== MENU LATERAL =================== */
         .side-menu {
             position: fixed;
             left: -280px;
@@ -433,6 +456,8 @@
             margin: 0;
             color: #60a5fa;
             font-size: 20px;
+            font-family: 'Poppins', sans-serif;
+            font-weight: 700;
         }
         
         .menu-close {
@@ -466,6 +491,8 @@
             text-decoration: none;
             transition: all 0.3s;
             border-left: 3px solid transparent;
+            font-family: 'Poppins', sans-serif;
+            font-weight: 700;
         }
         
         .side-menu-item:hover {
@@ -477,38 +504,21 @@
             background: rgba(96, 165, 250, 0.1);
             border-left-color: #60a5fa;
             color: #60a5fa;
-            font-weight: 600;
+            font-weight: 700;
         }
         
         .menu-footer {
             position: absolute;
             bottom: 0;
             width: 100%;
-            padding: 20px;
+            padding: 20px 0;
             background: #1e293b;
         }
         
         .menu-divider {
             height: 1px;
             background: rgba(255, 255, 255, 0.1);
-            margin-bottom: 20px;
-        }
-        
-        .menu-qr {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            padding: 12px 20px;
-            color: #e2e8f0;
-            text-decoration: none;
-            border-radius: 6px;
-            transition: all 0.3s;
-            margin: 0 -20px;
-        }
-        
-        .menu-qr:hover {
-            background: rgba(255, 255, 255, 0.05);
-            color: #60a5fa;
+            margin: 0 20px 20px;
         }
         
         .menu-overlay {
@@ -526,13 +536,126 @@
             display: block;
         }
         
-        /* Conteúdo Principal */
+        /* =================== CONTEÚDO PRINCIPAL =================== */
         .main-content {
             padding: 30px;
             min-height: calc(100vh - 200px);
         }
         
-        /* Footer */
+        /* =================== SEÇÃO DE LEITOS =================== */
+        .section-leitos {
+            width: 100%;
+        }
+        
+        .leitos-header {
+            margin-bottom: 30px;
+        }
+        
+        /* BOX AZUL ESCURO COM TÍTULO E BOTÕES */
+        .hospital-selector-container {
+            background: #1e293b;
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            margin-bottom: 25px;
+        }
+        
+        .hospital-selector-container h2 {
+            color: #60a5fa;
+            font-size: 24px;
+            margin-bottom: 20px;
+            font-family: 'Poppins', sans-serif;
+            font-weight: 700;
+            text-align: center;
+        }
+        
+        /* =================== SELETOR DE HOSPITAL =================== */
+        .hospital-selector {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        
+        .hospital-btn {
+            background-color: #60a5fa;
+            color: #ffffff;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 700;
+            font-family: 'Poppins', sans-serif;
+            transition: all 0.3s ease;
+            min-width: 140px;
+            text-transform: none;
+        }
+        
+        .hospital-btn:hover {
+            background-color: #3b82f6;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(96, 165, 250, 0.4);
+        }
+        
+        .hospital-btn.active {
+            background-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.3);
+        }
+        
+        /* =================== CAMPO DE BUSCA V4.0 =================== */
+        .search-container {
+            position: relative;
+            max-width: 600px;
+            margin: 0 auto 30px;
+        }
+        
+        .search-icon {
+            position: absolute;
+            left: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 20px;
+            height: 20px;
+            color: #9ca3af;
+            pointer-events: none;
+        }
+        
+        #searchLeitosInput {
+            width: 100%;
+            padding: 14px 14px 14px 46px;
+            background: #374151;
+            color: #ffffff;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+            font-size: 14px;
+            font-family: 'Poppins', sans-serif;
+            font-weight: 400;
+            transition: all 0.3s ease;
+        }
+        
+        #searchLeitosInput:focus {
+            outline: none;
+            border-color: #60a5fa;
+            box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.2);
+            background: #475569;
+        }
+        
+        #searchLeitosInput::placeholder {
+            color: rgba(255, 255, 255, 0.5);
+        }
+        
+        /* =================== CARDS GRID - 3 POR LINHA =================== */
+        .cards-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+            padding: 10px 0;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        /* =================== FOOTER =================== */
         .footer {
             background: #1e293b;
             padding: 20px;
@@ -540,6 +663,7 @@
             color: #9ca3af;
             font-size: 13px;
             border-top: 1px solid rgba(255, 255, 255, 0.1);
+            font-weight: 400;
         }
         
         .footer p {
@@ -548,6 +672,42 @@
         
         .footer strong {
             color: #e2e8f0;
+            font-weight: 700;
+        }
+        
+        /* =================== RESPONSIVIDADE =================== */
+        @media (max-width: 1200px) {
+            .cards-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .cards-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .hospital-selector {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .hospital-btn {
+                width: 100%;
+                min-width: unset;
+            }
+            
+            .header-left h1 {
+                font-size: 18px;
+            }
+            
+            .hospital-selector-container h2 {
+                font-size: 20px;
+            }
+            
+            .search-container {
+                max-width: 100%;
+            }
         }
     </style>
 </body>
