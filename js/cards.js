@@ -4,6 +4,15 @@
 window.selectedLeito = null;
 window.currentHospital = 'H1';
 
+// =================== FUNÇÃO DE NORMALIZAÇÃO DE ACENTOS ===================
+function normalizarTextoParaAPI(texto) {
+    return texto
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '') // Remove acentos
+        .replace(/ç/g, 'c')
+        .replace(/Ç/g, 'C');
+}
+
 // =================== MAPEAMENTO DE HOSPITAIS ===================
 window.HOSPITAL_MAPPING = {
     H1: 'Neomater',
@@ -1575,14 +1584,16 @@ function coletarDadosFormulario(modal, tipo) {
     return dados;
 }
 
-// =================== COLETAR CHECKBOXES SELECIONADOS ===================
+// =================== COLETAR CHECKBOXES SELECIONADOS - CORRIGIDO ===================
 function coletarCheckboxesSelecionados(modal, seletor) {
     const checkboxes = modal.querySelectorAll(`${seletor} input[type="checkbox"]`);
     const selecionados = [];
     
     checkboxes.forEach(checkbox => {
         if (checkbox.checked && checkbox.value !== 'Não se aplica') {
-            selecionados.push(checkbox.value);
+            // NORMALIZA o texto antes de adicionar ao array
+            const valorNormalizado = normalizarTextoParaAPI(checkbox.value);
+            selecionados.push(valorNormalizado);
         }
     });
     
@@ -1988,3 +1999,4 @@ window.searchLeitos = searchLeitos;
 
 logSuccess('CARDS.JS COMPLETO - Gestão de Leitos Hospitalares!');
 console.log('CARDS.JS - LINHAS DE CUIDADO REMOVIDAS DA INTERFACE!');
+console.log('✅ CORREÇÃO APLICADA: Normalização de acentos nas concessões!');
