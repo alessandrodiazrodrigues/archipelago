@@ -3,6 +3,79 @@
 
 console.log('Dashboard Hospitalar V4.0 - Inicializando...');
 
+// =================== MAPAS DE DESNORMALIZAÇÃO ===================
+// Convertem texto sem acentos → texto com acentos para exibição
+
+const CONCESSOES_DISPLAY_MAP = {
+    "Transicao Domiciliar": "Transição Domiciliar",
+    "Aplicacao domiciliar de medicamentos": "Aplicação domiciliar de medicamentos",
+    "Aspiracao": "Aspiração",
+    "Banho": "Banho",
+    "Curativo": "Curativo",
+    "Curativo PICC": "Curativo PICC",
+    "Fisioterapia Domiciliar": "Fisioterapia Domiciliar",
+    "Fonoaudiologia Domiciliar": "Fonoaudiologia Domiciliar",
+    "Oxigenoterapia": "Oxigenoterapia",
+    "Remocao": "Remoção",
+    "Solicitacao de Exames Domiciliar": "Solicitação de Exames Domiciliar"
+};
+
+const LINHAS_DISPLAY_MAP = {
+    "Assiste": "Assiste",
+    "APS SP": "APS SP",
+    "Cuidados Paliativos": "Cuidados Paliativos",
+    "ICO (Insuficiencia Coronariana)": "ICO (Insuficiência Coronariana)",
+    "Nexus SP Saude do Figado": "Nexus SP Saúde do Fígado",
+    "Cardiologia": "Cardiologia",
+    "Clinica Medica": "Clínica Médica",
+    "Dermatologia": "Dermatologia",
+    "Endocrinologia": "Endocrinologia",
+    "Gastroenterologia": "Gastroenterologia",
+    "Geriatria": "Geriatria",
+    "Ginecologia": "Ginecologia",
+    "Hematologia": "Hematologia",
+    "Nefrologia": "Nefrologia",
+    "Neurologia": "Neurologia",
+    "Nutrição": "Nutrição",
+    "Nutricao": "Nutrição",
+    "Oncologia": "Oncologia",
+    "Ortopedia": "Ortopedia",
+    "Pneumologia": "Pneumologia",
+    "Psicologia": "Psicologia",
+    "Psiquiatria": "Psiquiatria",
+    "Reumatologia": "Reumatologia",
+    "Urologia": "Urologia",
+    "Fisioterapia": "Fisioterapia",
+    "Fonoaudiologia": "Fonoaudiologia",
+    "Terapia Ocupacional": "Terapia Ocupacional",
+    "Servico Social": "Serviço Social",
+    "Servico de Atencao Domiciliar": "Serviço de Atenção Domiciliar",
+    "Farmacia": "Farmácia",
+    "Odontologia": "Odontologia"
+};
+
+/**
+ * Desnormaliza texto restaurando acentos para exibição
+ * @param {string} texto - Texto sem acentos
+ * @returns {string} Texto com acentos
+ */
+function desnormalizarTexto(texto) {
+    if (!texto || typeof texto !== 'string') return texto;
+    
+    // Tentar concessões primeiro
+    if (CONCESSOES_DISPLAY_MAP[texto]) {
+        return CONCESSOES_DISPLAY_MAP[texto];
+    }
+    
+    // Depois tentar linhas
+    if (LINHAS_DISPLAY_MAP[texto]) {
+        return LINHAS_DISPLAY_MAP[texto];
+    }
+    
+    // Se não encontrar, retornar o texto original
+    return texto;
+}
+
 // Variável global para controlar o filtro atual
 window.hospitalFiltroAtual = 'todos';
 
@@ -28,7 +101,7 @@ const CORES_ARCHIPELAGO = {
 };
 
 const CONFIG_DASHBOARD = {
-    MOSTRAR_LINHAS_CUIDADO: false,
+    MOSTRAR_LINHAS_CUIDADO: true,
     MOSTRAR_96H: false,
 };
 
@@ -273,7 +346,7 @@ window.copiarDashboardParaWhatsApp = function() {
             texto += `48h: ${altasTimeline['48H'].join(', ')}\n\n`;
         }
         
-        // ========== CONCESSÕES PREVISTAS ==========
+        // ========== CONCESSÕES PREVISTAS (✅ COM DESNORMALIZAÇÃO) ==========
         const concessoesTimeline = {
             'HOJE': {},
             '24H': {}
@@ -299,7 +372,8 @@ window.copiarDashboardParaWhatsApp = function() {
                     if (timeline) {
                         concessoesList.forEach(concessao => {
                             if (concessao && concessao.trim()) {
-                                const nome = concessao.trim();
+                                // ✅ APLICAR DESNORMALIZAÇÃO AQUI
+                                const nome = desnormalizarTexto(concessao.trim());
                                 if (!concessoesTimeline[timeline][nome]) {
                                     concessoesTimeline[timeline][nome] = [];
                                 }
@@ -317,7 +391,8 @@ window.copiarDashboardParaWhatsApp = function() {
         if (temConcessoesHoje) {
             texto += `*Concessões Previstas HOJE:*\n`;
             Object.entries(concessoesTimeline['HOJE']).forEach(([nome, mats]) => {
-                texto += `${nome}: ${mats.join(', ')}\n`;
+                // ✅ APLICAR DESNORMALIZAÇÃO AQUI TAMBÉM
+                texto += `${desnormalizarTexto(nome)}: ${mats.join(', ')}\n`;
             });
             texto += `\n`;
         }
@@ -325,7 +400,8 @@ window.copiarDashboardParaWhatsApp = function() {
         if (temConcessoes24h) {
             texto += `*Concessões Previstas 24H:*\n`;
             Object.entries(concessoesTimeline['24H']).forEach(([nome, mats]) => {
-                texto += `${nome}: ${mats.join(', ')}\n`;
+                // ✅ APLICAR DESNORMALIZAÇÃO AQUI TAMBÉM
+                texto += `${desnormalizarTexto(nome)}: ${mats.join(', ')}\n`;
             });
             texto += `\n`;
         }
@@ -928,15 +1004,11 @@ window.renderDashboardHospitalar = function() {
             <div class="dashboard-header-filtro">
                 <h2 class="dashboard-title-central">Dashboard Hospitalar</h2>
                 
-                <!-- BOTÃO TODOS (PRIMEIRA LINHA) -->
-                <div class="filtro-linha-todos">
+                <!-- TODOS OS 8 BOTÕES NA MESMA LINHA -->
+                <div class="hospital-filter-selector">
                     <button class="hospital-filter-btn active" onclick="window.filtrarHospitalDashboard('todos', this)">
                         Todos
                     </button>
-                </div>
-                
-                <!-- BOTÕES DE HOSPITAIS (SEGUNDA LINHA) -->
-                <div class="hospital-filter-selector">
                     <button class="hospital-filter-btn" onclick="window.filtrarHospitalDashboard('H5', this)">
                         Adventista
                     </button>
@@ -1428,7 +1500,8 @@ function renderConcessoesHospital(hospitalId) {
                 if (timeline) {
                     concessoesList.forEach(concessao => {
                         if (concessao && concessao.trim()) {
-                            const nome = concessao.trim();
+                            // ✅ APLICAR DESNORMALIZAÇÃO AQUI
+                            const nome = desnormalizarTexto(concessao.trim());
                             if (!concessoesPorTimeline[timeline][nome]) {
                                 concessoesPorTimeline[timeline][nome] = [];
                             }
@@ -1594,7 +1667,8 @@ function renderLinhasHospital(hospitalId) {
                 if (timeline) {
                     linhasList.forEach(linha => {
                         if (linha && linha.trim()) {
-                            const nome = linha.trim();
+                            // ✅ APLICAR DESNORMALIZAÇÃO AQUI
+                            const nome = desnormalizarTexto(linha.trim());
                             if (!linhasPorTimeline[timeline][nome]) {
                                 linhasPorTimeline[timeline][nome] = [];
                             }
@@ -1755,7 +1829,8 @@ function getHospitalConsolidadoCSS() {
                 background: rgba(255, 255, 255, 0.05);
                 border-radius: 12px;
                 padding: 25px;
-                border-left: 4px solid #ffffff;
+                border: 1px solid rgba(255, 255, 255, 0.8);
+                border-top: 3px solid #ffffff;
                 margin-bottom: 30px;
             }
             
@@ -1769,17 +1844,10 @@ function getHospitalConsolidadoCSS() {
                 text-transform: none !important;
             }
             
-            /* =================== LINHA DO BOTÃO "TODOS" =================== */
-            .filtro-linha-todos {
-                display: flex;
-                justify-content: center;
-                margin-bottom: 15px;
-            }
-            
-            /* =================== LINHA DOS HOSPITAIS =================== */
+            /* =================== LINHA DOS BOTÕES (8 BOTÕES) =================== */
             .hospital-filter-selector {
                 display: flex;
-                gap: 15px;
+                gap: 10px;
                 flex-wrap: wrap;
                 justify-content: center;
                 margin-bottom: 20px;
@@ -1790,17 +1858,18 @@ function getHospitalConsolidadoCSS() {
                 background-color: #60a5fa;
                 color: #ffffff;
                 border: none;
-                padding: 14px 28px;
+                padding: 12px 20px;
                 border-radius: 8px;
                 cursor: pointer;
-                font-size: 14px;
+                font-size: 13px;
                 font-weight: 700;
                 font-family: 'Poppins', sans-serif;
                 transition: all 0.3s ease;
-                flex: 1;
-                min-width: 150px;
-                max-width: 200px;
+                flex: 1 1 calc(12.5% - 10px);
+                min-width: 120px;
+                max-width: 160px;
                 text-transform: none;
+                white-space: nowrap;
             }
             
             .hospital-filter-btn:hover {
@@ -1847,7 +1916,8 @@ function getHospitalConsolidadoCSS() {
                 border-radius: 16px;
                 padding: 25px;
                 box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-                border: 1px solid rgba(255, 255, 255, 0.1);
+                border: 1px solid rgba(255, 255, 255, 0.8);
+                border-top: 3px solid #ffffff;
                 transition: all 0.3s ease;
             }
             
@@ -2206,7 +2276,8 @@ function getHospitalConsolidadoCSS() {
                 background: rgba(255, 255, 255, 0.03);
                 border-radius: 12px;
                 padding: 20px;
-                border: 1px solid rgba(255, 255, 255, 0.1);
+                border: 1px solid rgba(255, 255, 255, 0.8);
+                border-top: 3px solid #ffffff;
                 box-sizing: border-box;
             }
             
@@ -2334,7 +2405,6 @@ function getHospitalConsolidadoCSS() {
             
             /* =================== RESPONSIVIDADE MOBILE =================== */
             @media (max-width: 768px) {
-                .filtro-linha-todos,
                 .hospital-filter-selector {
                     flex-direction: column;
                     align-items: stretch;
@@ -2343,6 +2413,7 @@ function getHospitalConsolidadoCSS() {
                 .hospital-filter-btn {
                     width: 100%;
                     max-width: 100%;
+                    flex: 1 1 100%;
                 }
                 
                 .dashboard-title-central {
