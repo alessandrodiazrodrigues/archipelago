@@ -1,17 +1,140 @@
+// =================== 🟢 DEBUG #1 - INÍCIO ABSOLUTO DO ARQUIVO ===================
+console.log('🟢 CARDS.JS - Iniciando carregamento (linha 1)');
+console.log('🔍 Timestamp:', new Date().toISOString());
+console.log('🔍 CONCESSOES_DISPLAY_MAP já existe?', typeof window.CONCESSOES_DISPLAY_MAP !== 'undefined');
+console.log('🔍 LINHAS_DISPLAY_MAP já existe?', typeof window.LINHAS_DISPLAY_MAP !== 'undefined');
+console.log('🔍 desnormalizarTexto já existe?', typeof window.desnormalizarTexto !== 'undefined');
+
+// =================== 🔵 DEBUG INICIAL ===================
+console.log('🔵 [DEBUG] cards.js - INÍCIO DO CARREGAMENTO');
+console.log('🔵 [DEBUG] window.desnormalizarTexto existe?', typeof window.desnormalizarTexto !== 'undefined');
+
 // =================== CARDS.JS - GESTÃO DE LEITOS HOSPITALARES ===================
+
+// =================== ✅ FUNÇÃO DE NORMALIZAÇÃO (PARA COMPARAÇÕES) ===================
+function normalizarTexto(texto) {
+    if (!texto || typeof texto !== 'string') return texto;
+    return texto
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .replace(/ç/g, 'c')
+        .replace(/Ç/g, 'C');
+}
+
+// =================== ✅ MAPAS DE DESNORMALIZAÇÃO - EXIBIÇÃO COM ACENTOS ===================
+// ✅ PROTEÇÃO CONTRA DUPLICAÇÃO - SÓ DECLARA SE NÃO EXISTIR
+
+// Converte texto SEM acentos (vindo da planilha) → COM acentos (exibição)
+if (typeof window.CONCESSOES_DISPLAY_MAP === 'undefined') {
+    console.log('✅ Declarando CONCESSOES_DISPLAY_MAP pela primeira vez');
+    window.CONCESSOES_DISPLAY_MAP = {
+        // Chave = texto sem acentos (como vem da planilha)
+        // Valor = texto com acentos (como deve ser exibido)
+        "Transicao Domiciliar": "Transição Domiciliar",
+        "Aplicacao domiciliar de medicamentos": "Aplicação domiciliar de medicamentos",
+        "Aspiracao": "Aspiração",
+        "Banho": "Banho",
+        "Curativo": "Curativo",
+        "Curativo PICC": "Curativo PICC",
+        "Fisioterapia Motora Domiciliar": "Fisioterapia Motora Domiciliar",
+        "Fonoaudiologia Domiciliar": "Fonoaudiologia Domiciliar",
+        "Oxigenoterapia": "Oxigenoterapia",
+        "Remocao": "Remoção",
+        "Solicitacao domiciliar de exames": "Solicitação domiciliar de exames",
+        "Fisioterapia Respiratoria Domiciliar": "Fisioterapia Respiratória Domiciliar"
+    };
+} else {
+    console.log('⚠️ CONCESSOES_DISPLAY_MAP já existia - usando versão existente');
+}
+
+if (typeof window.LINHAS_DISPLAY_MAP === 'undefined') {
+    console.log('✅ Declarando LINHAS_DISPLAY_MAP pela primeira vez');
+    window.LINHAS_DISPLAY_MAP = {
+        "Assiste": "Assiste",
+        "APS SP": "APS SP",
+        "Cuidados Paliativos": "Cuidados Paliativos",
+        "ICO (Insuficiencia Coronariana)": "ICO (Insuficiência Coronariana)",
+        "Nexus SP Cardiologia": "Nexus SP Cardiologia",
+        "Nexus SP Gastroentereologia": "Nexus SP Gastroentereologia",
+        "Nexus SP Geriatria": "Nexus SP Geriatria",
+        "Nexus SP Pneumologia": "Nexus SP Pneumologia",
+        "Nexus SP Psiquiatria": "Nexus SP Psiquiatria",
+        "Nexus SP Reumatologia": "Nexus SP Reumatologia",
+        "Nexus SP Saude do Figado": "Nexus SP Saúde do Fígado",
+        "Generalista": "Generalista",
+        "Bucomaxilofacial": "Bucomaxilofacial",
+        "Cardiologia": "Cardiologia",
+        "Cirurgia Cardiaca": "Cirurgia Cardíaca",
+        "Cirurgia de Cabeca e Pescoco": "Cirurgia de Cabeça e Pescoço",
+        "Cirurgia do Aparelho Digestivo": "Cirurgia do Aparelho Digestivo",
+        "Cirurgia Geral": "Cirurgia Geral",
+        "Cirurgia Oncologica": "Cirurgia Oncológica",
+        "Cirurgia Plastica": "Cirurgia Plástica",
+        "Cirurgia Toracica": "Cirurgia Torácica",
+        "Cirurgia Vascular": "Cirurgia Vascular",
+        "Clinica Medica": "Clínica Médica",
+        "Coloproctologia": "Coloproctologia",
+        "Dermatologia": "Dermatologia",
+        "Endocrinologia": "Endocrinologia",
+        "Fisiatria": "Fisiatria",
+        "Gastroenterologia": "Gastroenterologia",
+        "Geriatria": "Geriatria",
+        "Ginecologia e Obstetricia": "Ginecologia e Obstetrícia",
+        "Hematologia": "Hematologia",
+        "Infectologia": "Infectologia",
+        "Mastologia": "Mastologia",
+        "Nefrologia": "Nefrologia",
+        "Neurocirurgia": "Neurocirurgia",
+        "Neurologia": "Neurologia",
+        "Oftalmologia": "Oftalmologia",
+        "Oncologia Clinica": "Oncologia Clínica",
+        "Ortopedia": "Ortopedia",
+        "Otorrinolaringologia": "Otorrinolaringologia",
+        "Pediatria": "Pediatria",
+        "Pneumologia": "Pneumologia",
+        "Psiquiatria": "Psiquiatria",
+        "Reumatologia": "Reumatologia",
+        "Urologia": "Urologia"
+    };
+} else {
+    console.log('⚠️ LINHAS_DISPLAY_MAP já existia - usando versão existente');
+}
+
+// =================== 🔵 DEBUG ANTES DA DECLARAÇÃO ===================
+console.log('🔵 [DEBUG] Antes de declarar desnormalizarTexto');
+console.log('🔵 [DEBUG] window.desnormalizarTexto =', window.desnormalizarTexto);
+
+// =================== ✅ FUNÇÃO DE DESNORMALIZAÇÃO - CORRIGIDA PARA EVITAR CONFLITO ===================
+// Verificar se já existe antes de declarar (evita conflito com dashboard-hospital.js)
+if (typeof window.desnormalizarTexto === 'undefined') {
+    console.log('✅ Declarando desnormalizarTexto pela primeira vez');
+    window.desnormalizarTexto = function(texto) {
+        if (!texto || typeof texto !== 'string') return texto;
+        
+        // Tentar encontrar no mapa de concessões
+        if (window.CONCESSOES_DISPLAY_MAP[texto]) {
+            return window.CONCESSOES_DISPLAY_MAP[texto];
+        }
+        
+        // Tentar encontrar no mapa de linhas
+        if (window.LINHAS_DISPLAY_MAP[texto]) {
+            return window.LINHAS_DISPLAY_MAP[texto];
+        }
+        
+        // Se não encontrar nos mapas, retornar o texto original
+        return texto;
+    };
+} else {
+    console.log('⚠️ desnormalizarTexto já existia - usando versão existente');
+}
+
+// =================== 🔵 DEBUG DEPOIS DA DECLARAÇÃO ===================
+console.log('🔵 [DEBUG] Depois de declarar desnormalizarTexto');
+console.log('🔵 [DEBUG] window.desnormalizarTexto =', typeof window.desnormalizarTexto);
 
 // =================== VARIÁVEIS GLOBAIS ===================  
 window.selectedLeito = null;
 window.currentHospital = 'H1';
-
-// =================== FUNÇÃO DE NORMALIZAÇÃO DE ACENTOS ===================
-function normalizarTextoParaAPI(texto) {
-    return texto
-        .normalize('NFD')
-        .replace(/[\u0300-\u036f]/g, '') // Remove acentos
-        .replace(/ç/g, 'c')
-        .replace(/Ç/g, 'C');
-}
 
 // =================== MAPEAMENTO DE HOSPITAIS ===================
 window.HOSPITAL_MAPPING = {
@@ -53,9 +176,9 @@ window.CRUZ_AZUL_IRMAOS = {
     33: 34, 34: 33, 35: 36, 36: 35
 };
 
-// =================== LISTAS FINAIS ===================
+// =================== ✅ LISTAS FINAIS - 12 CONCESSÕES COM ACENTOS UTF-8 ===================
 
-// CONCESSÕES - 12 ITENS
+// ✅ CONCESSÕES - 13 ITENS (12 + "Não se aplica")
 window.CONCESSOES_LIST = [
     "Não se aplica",
     "Transição Domiciliar",
@@ -64,27 +187,61 @@ window.CONCESSOES_LIST = [
     "Banho",
     "Curativo",
     "Curativo PICC",
-    "Fisioterapia Domiciliar",
+    "Fisioterapia Motora Domiciliar",           // ✅ RENOMEADA
     "Fonoaudiologia Domiciliar",
     "Oxigenoterapia",
     "Remoção",
-    "Solicitação domiciliar de exames"
+    "Solicitação domiciliar de exames",
+    "Fisioterapia Respiratória Domiciliar"      // ✅ NOVA (12ª)
 ];
 
-// LINHAS DE CUIDADO: 45 ESPECIALIDADES (MANTIDO PARA COMPATIBILIDADE)
+// LINHAS DE CUIDADO: 45 ESPECIALIDADES (✅ COM ACENTOS - api.js normaliza depois)
 window.LINHAS_CUIDADO_LIST = [
-    "Assiste", "APS SP", "Cuidados Paliativos", "ICO (Insuficiência Coronariana)",
-    "Nexus SP Cardiologia", "Nexus SP Gastroentereologia", "Nexus SP Geriatria",
-    "Nexus SP Pneumologia", "Nexus SP Psiquiatria", "Nexus SP Reumatologia",
-    "Nexus SP Saúde do Fígado", "Generalista", "Bucomaxilofacial", "Cardiologia",
-    "Cirurgia Cardíaca", "Cirurgia de Cabeça e Pescoço", "Cirurgia do Aparelho Digestivo",
-    "Cirurgia Geral", "Cirurgia Oncológica", "Cirurgia Plástica", "Cirurgia Torácica",
-    "Cirurgia Vascular", "Clínica Médica", "Coloproctologia", "Dermatologia",
-    "Endocrinologia", "Fisiatria", "Gastroenterologia", "Geriatria",
-    "Ginecologia e Obstetrícia", "Hematologia", "Infectologia", "Mastologia",
-    "Nefrologia", "Neurocirurgia", "Neurologia", "Oftalmologia", "Oncologia Clínica",
-    "Ortopedia", "Otorrinolaringologia", "Pediatria", "Pneumologia", "Psiquiatria",
-    "Reumatologia", "Urologia"
+    "Assiste", 
+    "APS SP", 
+    "Cuidados Paliativos", 
+    "ICO (Insuficiência Coronariana)",
+    "Nexus SP Cardiologia", 
+    "Nexus SP Gastroentereologia", 
+    "Nexus SP Geriatria",
+    "Nexus SP Pneumologia", 
+    "Nexus SP Psiquiatria", 
+    "Nexus SP Reumatologia",
+    "Nexus SP Saúde do Fígado", 
+    "Generalista", 
+    "Bucomaxilofacial", 
+    "Cardiologia",
+    "Cirurgia Cardíaca", 
+    "Cirurgia de Cabeça e Pescoço", 
+    "Cirurgia do Aparelho Digestivo",
+    "Cirurgia Geral", 
+    "Cirurgia Oncológica", 
+    "Cirurgia Plástica", 
+    "Cirurgia Torácica",
+    "Cirurgia Vascular", 
+    "Clínica Médica", 
+    "Coloproctologia", 
+    "Dermatologia",
+    "Endocrinologia", 
+    "Fisiatria", 
+    "Gastroenterologia", 
+    "Geriatria",
+    "Ginecologia e Obstetrícia", 
+    "Hematologia", 
+    "Infectologia", 
+    "Mastologia",
+    "Nefrologia", 
+    "Neurocirurgia", 
+    "Neurologia", 
+    "Oftalmologia", 
+    "Oncologia Clínica",
+    "Ortopedia", 
+    "Otorrinolaringologia", 
+    "Pediatria", 
+    "Pneumologia", 
+    "Psiquiatria",
+    "Reumatologia", 
+    "Urologia"
 ];
 
 // PPS: 10 OPÇÕES
@@ -426,7 +583,7 @@ function validarLimiteSantaClara(tipoQuarto) {
     return { permitido: true };
 }
 
-// =================== CRIAR CARD INDIVIDUAL - CORRIGIDO ===================
+// =================== CRIAR CARD INDIVIDUAL - ✅ COM DESNORMALIZAÇÃO ===================
 function createCard(leito, hospitalNome) {
     const card = document.createElement('div');
     card.className = 'card';
@@ -524,14 +681,18 @@ function createCard(leito, hospitalNome) {
     const badgeGenero = getBadgeGenero(sexo);
     const badgeDiretivas = getBadgeDiretivas(diretivas);
     
-    const concessoes = Array.isArray(leito.concessoes) ? leito.concessoes : [];
+    // ✅ DESNORMALIZAR CONCESSÕES E LINHAS PARA EXIBIÇÃO - USAR window.desnormalizarTexto
+    const concessoesRaw = Array.isArray(leito.concessoes) ? leito.concessoes : [];
+    const concessoes = concessoesRaw.map(c => window.desnormalizarTexto(c));
+    
+    const linhasRaw = Array.isArray(leito.linhas) ? leito.linhas : [];
+    const linhas = linhasRaw.map(l => window.desnormalizarTexto(l));
     
     let tempoInternacao = '';
     if (!isVago && admissao) {
         tempoInternacao = calcularTempoInternacao(admissao);
     }
     
-    // ✅ CORREÇÃO CRÍTICA: Linha 491 - Evitar erro "nome.trim is not a function"
     const iniciais = isVago ? '—' : (nome ? String(nome).trim() : '—');
     
     let ppsFormatado = pps ? `${pps}%` : '—';
@@ -654,7 +815,7 @@ function createCard(leito, hospitalNome) {
             </div>
         </div>
 
-        <!-- CONCESSÕES -->
+        <!-- CONCESSÕES - ✅ COM DESNORMALIZAÇÃO -->
         <div class="card-section" style="margin-bottom: 15px; font-family: 'Poppins', sans-serif;">
             <div class="section-header" style="background: #60a5fa; color: #ffffff; font-size: 10px; padding: 6px 8px; border-radius: 4px; margin-bottom: 6px; text-transform: uppercase; font-weight: 800; letter-spacing: 0.5px;">
                 CONCESSÕES PREVISTAS NA ALTA
@@ -662,6 +823,19 @@ function createCard(leito, hospitalNome) {
             <div class="chips-container" style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); display: flex; flex-wrap: wrap; gap: 4px; min-height: 24px; border-radius: 6px; padding: 8px;">
                 ${(concessoes && concessoes.length > 0) 
                     ? concessoes.map(concessao => `<span class="chip" style="font-size: 9px; background: rgba(96,165,250,0.2); border: 1px solid rgba(96,165,250,0.4); color: #60a5fa; padding: 3px 8px; border-radius: 10px; font-weight: 700; font-family: 'Poppins', sans-serif;">${concessao}</span>`).join('') 
+                    : '<span style="color: rgba(255,255,255,0.7); font-size: 10px;">Nenhuma</span>'
+                }
+            </div>
+        </div>
+
+        <!-- LINHAS DE CUIDADO - ✅ COM DESNORMALIZAÇÃO -->
+        <div class="card-section" style="margin-bottom: 15px; font-family: 'Poppins', sans-serif;">
+            <div class="section-header" style="background: #60a5fa; color: #ffffff; font-size: 10px; padding: 6px 8px; border-radius: 4px; margin-bottom: 6px; text-transform: uppercase; font-weight: 800; letter-spacing: 0.5px;">
+                LINHAS DE CUIDADO
+            </div>
+            <div class="chips-container" style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); display: flex; flex-wrap: wrap; gap: 4px; min-height: 24px; border-radius: 6px; padding: 8px;">
+                ${(linhas && linhas.length > 0) 
+                    ? linhas.map(linha => `<span class="chip" style="font-size: 9px; background: rgba(96,165,250,0.2); border: 1px solid rgba(96,165,250,0.4); color: #60a5fa; padding: 3px 8px; border-radius: 10px; font-weight: 700; font-family: 'Poppins', sans-serif;">${linha}</span>`).join('') 
                     : '<span style="color: rgba(255,255,255,0.7); font-size: 10px;">Nenhuma</span>'
                 }
             </div>
@@ -781,6 +955,7 @@ function openAdmissaoModal(leitoNumero) {
     
     setupModalEventListeners(modal, 'admissao');
     setupSearchFilter(modal, 'admConcessoes', 'searchConcessoes');
+    setupSearchFilter(modal, 'admLinhas', 'searchLinhas');
 }
 
 function openAtualizacaoModal(leitoNumero, dadosLeito) {
@@ -795,6 +970,7 @@ function openAtualizacaoModal(leitoNumero, dadosLeito) {
     
     setupModalEventListeners(modal, 'atualizacao');
     setupSearchFilter(modal, 'updConcessoes', 'searchConcessoesUpd');
+    setupSearchFilter(modal, 'updLinhas', 'searchLinhasUpd');
     
     setTimeout(() => {
         forcarPreMarcacao(modal, dadosLeito);
@@ -862,7 +1038,7 @@ function setupSearchFilter(modal, containerId, searchId) {
     logSuccess(`Busca dinâmica configurada: ${searchId}`);
 }
 
-// =================== FORMULÁRIO DE ADMISSÃO - SEM LINHAS ===================
+// =================== FORMULÁRIO DE ADMISSÃO - ARQUIVO ORIGINAL COMPLETO ===================
 function createAdmissaoForm(hospitalNome, leitoNumero, hospitalId) {
     const idSequencial = String(leitoNumero).padStart(2, '0');
     const isHibrido = window.HOSPITAIS_HIBRIDOS.includes(hospitalId);
@@ -1055,6 +1231,33 @@ function createAdmissaoForm(hospitalNome, leitoNumero, hospitalId) {
                     `).join('')}
                 </div>
             </div>
+
+            <!-- LINHAS DE CUIDADO COM BUSCA -->
+            <div style="margin-bottom: 20px;">
+                <div style="background: rgba(96,165,250,0.1); padding: 10px 15px; border-radius: 6px; margin-bottom: 10px;">
+                    <div style="font-size: 11px; color: #ffffff; text-transform: uppercase; font-weight: 700;">
+                        Linhas de Cuidado (${window.LINHAS_CUIDADO_LIST.length} opções)
+                    </div>
+                </div>
+                
+                <!-- CAMPO DE BUSCA COM ÍCONE SVG -->
+                <div style="position: relative; margin-bottom: 8px;">
+                    <svg style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); width: 16px; height: 16px; color: #9ca3af; pointer-events: none;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <circle cx="11" cy="11" r="8"></circle>
+                        <path d="m21 21-4.35-4.35"></path>
+                    </svg>
+                    <input type="text" id="searchLinhas" placeholder="Digite para buscar... (ex: 'cardiologia', 'geriatria')" style="width: 100%; padding: 10px 10px 10px 36px; background: #374151; color: #ffffff; border: 1px solid rgba(255,255,255,0.3); border-radius: 6px; font-size: 13px; font-family: 'Poppins', sans-serif;">
+                </div>
+                
+                <div id="admLinhas" style="max-height: 150px; overflow-y: auto; background: rgba(255,255,255,0.03); border-radius: 6px; padding: 10px; display: grid; grid-template-columns: 1fr; gap: 6px;">
+                    ${window.LINHAS_CUIDADO_LIST.map(linha => `
+                        <label style="display: flex; align-items: center; padding: 4px 0; cursor: pointer; font-size: 12px; font-family: 'Poppins', sans-serif;">
+                            <input type="checkbox" value="${linha}" style="margin-right: 8px; accent-color: #60a5fa;">
+                            <span>${linha}</span>
+                        </label>
+                    `).join('')}
+                </div>
+            </div>
             
             <!-- BOTÕES -->
             <div class="modal-buttons" style="display: flex; justify-content: flex-end; gap: 12px; padding: 20px; border-top: 1px solid rgba(255,255,255,0.1);">
@@ -1065,12 +1268,13 @@ function createAdmissaoForm(hospitalNome, leitoNumero, hospitalId) {
     `;
 }
 
-// =================== FORMULÁRIO DE ATUALIZAÇÃO - SEM LINHAS ===================
+// =================== FORMULÁRIO DE ATUALIZAÇÃO - ✅ CORRIGIDO ===================
 function createAtualizacaoForm(hospitalNome, leitoNumero, dadosLeito) {
     const tempoInternacao = dadosLeito?.admAt ? calcularTempoInternacao(dadosLeito.admAt) : '';
     const iniciais = dadosLeito?.nome ? dadosLeito.nome.trim() : '';
     const idSequencial = String(leitoNumero).padStart(2, '0');
     
+    // ✅ Normalizar concessões vindas da planilha
     const concessoesAtuais = Array.isArray(dadosLeito?.concessoes) ? dadosLeito.concessoes : [];
     
     let isolamentoAtual = dadosLeito?.isolamento || 'Não Isolamento';
@@ -1240,7 +1444,7 @@ function createAtualizacaoForm(hospitalNome, leitoNumero, dadosLeito) {
                 </div>
             </div>
             
-            <!-- CONCESSÕES COM BUSCA -->
+            <!-- CONCESSÕES COM BUSCA - ✅ CORRIGIDO -->
             <div style="margin-bottom: 20px;">
                 <div style="background: rgba(96,165,250,0.1); padding: 10px 15px; border-radius: 6px; margin-bottom: 10px;">
                     <div style="font-size: 11px; color: #ffffff; text-transform: uppercase; font-weight: 700;">
@@ -1259,11 +1463,52 @@ function createAtualizacaoForm(hospitalNome, leitoNumero, dadosLeito) {
                 
                 <div id="updConcessoes" style="max-height: 150px; overflow-y: auto; background: rgba(255,255,255,0.03); border-radius: 6px; padding: 10px; display: grid; grid-template-columns: 1fr; gap: 6px;">
                     ${window.CONCESSOES_LIST.map(c => {
-                        const isChecked = concessoesAtuais.includes(c);
+                        // ✅ NORMALIZAR ambos os lados antes de comparar
+                        const checkboxNormalizado = normalizarTexto(c);
+                        const isChecked = concessoesAtuais.some(atual => 
+                            normalizarTexto(atual) === checkboxNormalizado
+                        );
+                        
                         return `
                             <label style="display: flex; align-items: center; padding: 4px 0; cursor: pointer; font-size: 12px; font-family: 'Poppins', sans-serif;">
                                 <input type="checkbox" value="${c}" ${isChecked ? 'checked' : ''} style="margin-right: 8px; accent-color: #60a5fa;">
                                 <span>${c}</span>
+                            </label>
+                        `;
+                    }).join('')}
+                </div>
+            </div>
+
+            <!-- LINHAS DE CUIDADO COM BUSCA - ✅ CORRIGIDO -->
+            <div style="margin-bottom: 20px;">
+                <div style="background: rgba(96,165,250,0.1); padding: 10px 15px; border-radius: 6px; margin-bottom: 10px;">
+                    <div style="font-size: 11px; color: #ffffff; text-transform: uppercase; font-weight: 700;">
+                        Linhas de Cuidado (${window.LINHAS_CUIDADO_LIST.length} opções)
+                    </div>
+                </div>
+                
+                <!-- CAMPO DE BUSCA COM ÍCONE SVG -->
+                <div style="position: relative; margin-bottom: 8px;">
+                    <svg style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); width: 16px; height: 16px; color: #9ca3af; pointer-events: none;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <circle cx="11" cy="11" r="8"></circle>
+                        <path d="m21 21-4.35-4.35"></path>
+                    </svg>
+                    <input type="text" id="searchLinhasUpd" placeholder="Digite para buscar... (ex: 'cardiologia', 'geriatria')" style="width: 100%; padding: 10px 10px 10px 36px; background: #374151; color: #ffffff; border: 1px solid rgba(255,255,255,0.3); border-radius: 6px; font-size: 13px; font-family: 'Poppins', sans-serif;">
+                </div>
+                
+                <div id="updLinhas" style="max-height: 150px; overflow-y: auto; background: rgba(255,255,255,0.03); border-radius: 6px; padding: 10px; display: grid; grid-template-columns: 1fr; gap: 6px;">
+                    ${window.LINHAS_CUIDADO_LIST.map(linha => {
+                        // ✅ NORMALIZAR ambos os lados antes de comparar
+                        const linhasAtuais = Array.isArray(dadosLeito?.linhas) ? dadosLeito.linhas : [];
+                        const linhaNormalizada = normalizarTexto(linha);
+                        const isChecked = linhasAtuais.some(atual => 
+                            normalizarTexto(atual) === linhaNormalizada
+                        );
+                        
+                        return `
+                            <label style="display: flex; align-items: center; padding: 4px 0; cursor: pointer; font-size: 12px; font-family: 'Poppins', sans-serif;">
+                                <input type="checkbox" value="${linha}" ${isChecked ? 'checked' : ''} style="margin-right: 8px; accent-color: #60a5fa;">
+                                <span>${linha}</span>
                             </label>
                         `;
                     }).join('')}
@@ -1288,12 +1533,12 @@ function createAtualizacaoForm(hospitalNome, leitoNumero, dadosLeito) {
     `;
 }
 
-// =================== PRÉ-MARCAÇÃO DE CHECKBOXES ===================
+// =================== ✅ PRÉ-MARCAÇÃO COM NORMALIZAÇÃO ===================
 function forcarPreMarcacao(modal, dadosLeito) {
-    logDebug(`Forçando pré-marcação...`);
+    logDebug(`Forçando pré-marcação com normalização...`);
     
+    // ✅ CONCESSÕES - Normalizar antes de comparar
     const concessoesAtuais = Array.isArray(dadosLeito?.concessoes) ? dadosLeito.concessoes : [];
-    
     const concessoesCheckboxes = modal.querySelectorAll('#updConcessoes input[type="checkbox"]');
     const naoSeAplicaCheckbox = Array.from(concessoesCheckboxes)
         .find(cb => cb.value === 'Não se aplica');
@@ -1301,12 +1546,32 @@ function forcarPreMarcacao(modal, dadosLeito) {
     concessoesCheckboxes.forEach(checkbox => {
         if (checkbox.value === 'Não se aplica') {
             checkbox.checked = concessoesAtuais.length === 0;
-        } else if (concessoesAtuais.includes(checkbox.value)) {
-            checkbox.checked = true;
+        } else {
+            // ✅ NORMALIZAR ambos os lados antes de comparar
+            const checkboxNormalizado = normalizarTexto(checkbox.value);
+            const isChecked = concessoesAtuais.some(atual => 
+                normalizarTexto(atual) === checkboxNormalizado
+            );
+            checkbox.checked = isChecked;
         }
     });
-    
-    logDebug(`Pré-marcação concluída`);
+
+    // ✅ LINHAS - Normalizar antes de comparar
+    const linhasAtuais = Array.isArray(dadosLeito?.linhas) ? dadosLeito.linhas : [];
+    const linhasCheckboxes = modal.querySelectorAll('#updLinhas input[type="checkbox"]');
+
+    linhasCheckboxes.forEach(checkbox => {
+        // ✅ NORMALIZAR ambos os lados antes de comparar
+        const linhaNormalizada = normalizarTexto(checkbox.value);
+        const isChecked = linhasAtuais.some(atual => 
+            normalizarTexto(atual) === linhaNormalizada
+        );
+        checkbox.checked = isChecked;
+    });
+
+    logDebug(`Concessões pré-marcadas: ${concessoesAtuais.length}`);
+    logDebug(`Linhas pré-marcadas: ${linhasAtuais.length}`);
+    logSuccess(`Pré-marcação concluída com normalização!`);
 }
 
 // LÓGICA "NÃO SE APLICA" PARA CONCESSÕES
@@ -1559,7 +1824,7 @@ function coletarDadosFormulario(modal, tipo) {
         }
         
         dados.concessoes = coletarCheckboxesSelecionados(modal, '#admConcessoes');
-        dados.linhas = [];
+        dados.linhas = coletarCheckboxesSelecionados(modal, '#admLinhas');
         
     } else {
         dados.idade = parseInt(modal.querySelector('#updIdade')?.value) || null;
@@ -1578,22 +1843,21 @@ function coletarDadosFormulario(modal, tipo) {
         }
         
         dados.concessoes = coletarCheckboxesSelecionados(modal, '#updConcessoes');
-        dados.linhas = [];
+        dados.linhas = coletarCheckboxesSelecionados(modal, '#updLinhas');
     }
     
     return dados;
 }
 
-// =================== COLETAR CHECKBOXES SELECIONADOS - CORRIGIDO ===================
+// =================== ✅ COLETAR CHECKBOXES - PRESERVA ACENTOS UTF-8 ===================
 function coletarCheckboxesSelecionados(modal, seletor) {
     const checkboxes = modal.querySelectorAll(`${seletor} input[type="checkbox"]`);
     const selecionados = [];
     
     checkboxes.forEach(checkbox => {
         if (checkbox.checked && checkbox.value !== 'Não se aplica') {
-            // NORMALIZA o texto antes de adicionar ao array
-            const valorNormalizado = normalizarTextoParaAPI(checkbox.value);
-            selecionados.push(valorNormalizado);
+            // ✅ MANTÉM os acentos UTF-8 - api.js fará a normalização depois
+            selecionados.push(checkbox.value);
         }
     });
     
@@ -1899,7 +2163,8 @@ if (!document.getElementById('cardsConsolidadoCSS')) {
                 margin-bottom: 3px !important;
             }
             
-            .modal-content div[id$="Concessoes"] {
+            .modal-content div[id$="Concessoes"],
+            .modal-content div[id$="Linhas"] {
                 grid-template-columns: 1fr !important;
                 max-height: 120px !important;
             }
@@ -1972,15 +2237,19 @@ if (!document.getElementById('cardsConsolidadoCSS')) {
 
 // =================== INICIALIZAÇÃO ===================
 document.addEventListener('DOMContentLoaded', function() {
-    logSuccess('CARDS.JS CARREGADO - Gestão de Leitos Hospitalares');
+    logSuccess('CARDS.JS V4.1.1 FINAL CARREGADO - Gestão de Leitos Hospitalares');
     
-    if (window.CONCESSOES_LIST.length !== 12) {
-        logError(`ERRO: Esperadas 12 concessões, encontradas ${window.CONCESSOES_LIST.length}`);
+    if (window.CONCESSOES_LIST.length !== 13) {
+        logError(`ERRO: Esperadas 13 concessões (12 + "Não se aplica"), encontradas ${window.CONCESSOES_LIST.length}`);
     } else {
-        logSuccess(`${window.CONCESSOES_LIST.length} concessões confirmadas`);
+        logSuccess(`✅ ${window.CONCESSOES_LIST.length} concessões confirmadas (12 + "Não se aplica")`);
     }
     
-    logInfo('LINHAS DE CUIDADO INIBIDAS - Não aparecerão na interface');
+    if (window.LINHAS_CUIDADO_LIST.length !== 45) {
+        logError(`ERRO: Esperadas 45 linhas, encontradas ${window.LINHAS_CUIDADO_LIST.length}`);
+    } else {
+        logSuccess(`✅ ${window.LINHAS_CUIDADO_LIST.length} linhas de cuidado confirmadas`);
+    }
 });
 
 // =================== EXPORTS ===================
@@ -1997,6 +2266,7 @@ window.formatarMatriculaExibicao = formatarMatriculaExibicao;
 window.setupSearchFilter = setupSearchFilter;
 window.searchLeitos = searchLeitos;
 
-logSuccess('CARDS.JS COMPLETO - Gestão de Leitos Hospitalares!');
-console.log('CARDS.JS - LINHAS DE CUIDADO REMOVIDAS DA INTERFACE!');
-console.log('✅ CORREÇÃO APLICADA: Normalização de acentos nas concessões!');
+// =================== 🔵 DEBUG FINAL ===================
+console.log('🔵 [DEBUG] CARDS.JS - FIM DO CARREGAMENTO');
+console.log('🔵 [DEBUG] Timestamp:', new Date().toISOString());
+console.log('✅ CARDS.JS V4.1.1 COM LOGS DE DEBUG - PRONTO PARA TESTE!');
