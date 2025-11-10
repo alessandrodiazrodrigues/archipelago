@@ -159,7 +159,7 @@ window.TIPO_QUARTO_OPTIONS = ['Apartamento', 'Enfermaria'];
 // MAPEAMENTO FIXO NUMERAÇÃO CRUZ AZUL - ENFERMARIAS (16 leitos: 21-36)
 window.CRUZ_AZUL_NUMERACAO = {
     21: '711.1', 22: '711.3',
-    23: '713.1', 24: '713.2',
+    23: '713.1', 24: '713.3',
     25: '915.1', 26: '915.3',
     27: '911.1', 28: '911.3',
     29: '912.1', 30: '912.3',
