@@ -1,283 +1,45 @@
-// =================== 🟢 DEBUG #1 - INÍCIO ABSOLUTO DO ARQUIVO ===================
-console.log('🟢 CARDS.JS - Iniciando carregamento (linha 1)');
-console.log('🔍 Timestamp:', new Date().toISOString());
-console.log('🔍 CONCESSOES_DISPLAY_MAP já existe?', typeof window.CONCESSOES_DISPLAY_MAP !== 'undefined');
-console.log('🔍 LINHAS_DISPLAY_MAP já existe?', typeof window.LINHAS_DISPLAY_MAP !== 'undefined');
-console.log('🔍 desnormalizarTexto já existe?', typeof window.desnormalizarTexto !== 'undefined');
+// =================== CARDS.JS - GESTAO DE LEITOS HOSPITALARES ===================
+// Versao: 4.2
+// Depende de: cards-config.js (carregar ANTES)
 
-// =================== 🔵 DEBUG INICIAL ===================
-console.log('🔵 [DEBUG] cards.js - INÍCIO DO CARREGAMENTO');
-console.log('🔵 [DEBUG] window.desnormalizarTexto existe?', typeof window.desnormalizarTexto !== 'undefined');
+console.log('CARDS.JS v4.2 - Carregando...');
 
-// =================== CARDS.JS - GESTÃO DE LEITOS HOSPITALARES ===================
-
-// =================== ✅ FUNÇÃO DE NORMALIZAÇÃO (PARA COMPARAÇÕES) ===================
-function normalizarTexto(texto) {
-    if (!texto || typeof texto !== 'string') return texto;
-    return texto
-        .normalize('NFD')
-        .replace(/[\u0300-\u036f]/g, '')
-        .replace(/ç/g, 'c')
-        .replace(/Ç/g, 'C');
-}
-
-// =================== ✅ MAPAS DE DESNORMALIZAÇÃO - EXIBIÇÃO COM ACENTOS ===================
-// ✅ PROTEÇÃO CONTRA DUPLICAÇÃO - SÓ DECLARA SE NÃO EXISTIR
-
-// Converte texto SEM acentos (vindo da planilha) → COM acentos (exibição)
+// =================== VALIDAR DEPENDENCIAS ===================
 if (typeof window.CONCESSOES_DISPLAY_MAP === 'undefined') {
-    console.log('✅ Declarando CONCESSOES_DISPLAY_MAP pela primeira vez');
-    window.CONCESSOES_DISPLAY_MAP = {
-        // Chave = texto sem acentos (como vem da planilha)
-        // Valor = texto com acentos (como deve ser exibido)
-        "Transicao Domiciliar": "Transição Domiciliar",
-        "Aplicacao domiciliar de medicamentos": "Aplicação domiciliar de medicamentos",
-        "Aspiracao": "Aspiração",
-        "Banho": "Banho",
-        "Curativo": "Curativo",
-        "Curativo PICC": "Curativo PICC",
-        "Fisioterapia Motora Domiciliar": "Fisioterapia Motora Domiciliar",
-        "Fonoaudiologia Domiciliar": "Fonoaudiologia Domiciliar",
-        "Oxigenoterapia": "Oxigenoterapia",
-        "Remocao": "Remoção",
-        "Solicitacao domiciliar de exames": "Solicitação domiciliar de exames",
-        "Fisioterapia Respiratoria Domiciliar": "Fisioterapia Respiratória Domiciliar"
-    };
-} else {
-    console.log('⚠️ CONCESSOES_DISPLAY_MAP já existia - usando versão existente');
+    console.error('ERRO CRITICO: cards-config.js NAO foi carregado!');
+    throw new Error('cards-config.js deve ser carregado ANTES de cards.js');
 }
 
-if (typeof window.LINHAS_DISPLAY_MAP === 'undefined') {
-    console.log('✅ Declarando LINHAS_DISPLAY_MAP pela primeira vez');
-    window.LINHAS_DISPLAY_MAP = {
-        "Assiste": "Assiste",
-        "APS SP": "APS SP",
-        "Cuidados Paliativos": "Cuidados Paliativos",
-        "ICO (Insuficiencia Coronariana)": "ICO (Insuficiência Coronariana)",
-        "Nexus SP Cardiologia": "Nexus SP Cardiologia",
-        "Nexus SP Gastroentereologia": "Nexus SP Gastroentereologia",
-        "Nexus SP Geriatria": "Nexus SP Geriatria",
-        "Nexus SP Pneumologia": "Nexus SP Pneumologia",
-        "Nexus SP Psiquiatria": "Nexus SP Psiquiatria",
-        "Nexus SP Reumatologia": "Nexus SP Reumatologia",
-        "Nexus SP Saude do Figado": "Nexus SP Saúde do Fígado",
-        "Generalista": "Generalista",
-        "Bucomaxilofacial": "Bucomaxilofacial",
-        "Cardiologia": "Cardiologia",
-        "Cirurgia Cardiaca": "Cirurgia Cardíaca",
-        "Cirurgia de Cabeca e Pescoco": "Cirurgia de Cabeça e Pescoço",
-        "Cirurgia do Aparelho Digestivo": "Cirurgia do Aparelho Digestivo",
-        "Cirurgia Geral": "Cirurgia Geral",
-        "Cirurgia Oncologica": "Cirurgia Oncológica",
-        "Cirurgia Plastica": "Cirurgia Plástica",
-        "Cirurgia Toracica": "Cirurgia Torácica",
-        "Cirurgia Vascular": "Cirurgia Vascular",
-        "Clinica Medica": "Clínica Médica",
-        "Coloproctologia": "Coloproctologia",
-        "Dermatologia": "Dermatologia",
-        "Endocrinologia": "Endocrinologia",
-        "Fisiatria": "Fisiatria",
-        "Gastroenterologia": "Gastroenterologia",
-        "Geriatria": "Geriatria",
-        "Ginecologia e Obstetricia": "Ginecologia e Obstetrícia",
-        "Hematologia": "Hematologia",
-        "Infectologia": "Infectologia",
-        "Mastologia": "Mastologia",
-        "Nefrologia": "Nefrologia",
-        "Neurocirurgia": "Neurocirurgia",
-        "Neurologia": "Neurologia",
-        "Oftalmologia": "Oftalmologia",
-        "Oncologia Clinica": "Oncologia Clínica",
-        "Ortopedia": "Ortopedia",
-        "Otorrinolaringologia": "Otorrinolaringologia",
-        "Pediatria": "Pediatria",
-        "Pneumologia": "Pneumologia",
-        "Psiquiatria": "Psiquiatria",
-        "Reumatologia": "Reumatologia",
-        "Urologia": "Urologia"
-    };
-} else {
-    console.log('⚠️ LINHAS_DISPLAY_MAP já existia - usando versão existente');
-}
-
-// =================== 🔵 DEBUG ANTES DA DECLARAÇÃO ===================
-console.log('🔵 [DEBUG] Antes de declarar desnormalizarTexto');
-console.log('🔵 [DEBUG] window.desnormalizarTexto =', window.desnormalizarTexto);
-
-// =================== ✅ FUNÇÃO DE DESNORMALIZAÇÃO - CORRIGIDA PARA EVITAR CONFLITO ===================
-// Verificar se já existe antes de declarar (evita conflito com dashboard-hospital.js)
 if (typeof window.desnormalizarTexto === 'undefined') {
-    console.log('✅ Declarando desnormalizarTexto pela primeira vez');
-    window.desnormalizarTexto = function(texto) {
-        if (!texto || typeof texto !== 'string') return texto;
-        
-        // Tentar encontrar no mapa de concessões
-        if (window.CONCESSOES_DISPLAY_MAP[texto]) {
-            return window.CONCESSOES_DISPLAY_MAP[texto];
-        }
-        
-        // Tentar encontrar no mapa de linhas
-        if (window.LINHAS_DISPLAY_MAP[texto]) {
-            return window.LINHAS_DISPLAY_MAP[texto];
-        }
-        
-        // Se não encontrar nos mapas, retornar o texto original
-        return texto;
-    };
-} else {
-    console.log('⚠️ desnormalizarTexto já existia - usando versão existente');
+    console.error('ERRO CRITICO: desnormalizarTexto() nao encontrada!');
+    throw new Error('cards-config.js nao carregou corretamente');
 }
 
-// =================== 🔵 DEBUG DEPOIS DA DECLARAÇÃO ===================
-console.log('🔵 [DEBUG] Depois de declarar desnormalizarTexto');
-console.log('🔵 [DEBUG] window.desnormalizarTexto =', typeof window.desnormalizarTexto);
+console.log('Dependencias validadas - cards-config.js OK');
 
-// =================== VARIÁVEIS GLOBAIS ===================  
-window.selectedLeito = null;
-window.currentHospital = 'H1';
+// =================== VARIAVEIS GLOBAIS (do cards-config.js) ===================
+// ESTAS JA EXISTEM EM cards-config.js - NAO REDECLARAR:
+// - window.CONCESSOES_DISPLAY_MAP
+// - window.LINHAS_DISPLAY_MAP
+// - window.normalizarTexto()
+// - window.desnormalizarTexto()
+// - window.HOSPITAL_MAPPING
+// - window.CRUZ_AZUL_IRMAOS (leitos irmaos)
+// - window.selectedLeito
+// - window.currentHospital
 
-// =================== MAPEAMENTO DE HOSPITAIS ===================
-window.HOSPITAL_MAPPING = {
-    H1: 'Neomater',
-    H2: 'Cruz Azul', 
-    H3: 'Santa Marcelina',
-    H4: 'Santa Clara',
-    H5: 'Adventista',
-    H6: 'Santa Cruz',
-    H7: 'Santa Virgínia'
-};
+// =================== LISTAS DE OPCOES (do cards-config.js) ===================
+// - window.CONCESSOES_LIST
+// - window.LINHAS_CUIDADO_LIST
+// - window.PPS_OPTIONS
+// - window.PREVISAO_ALTA_OPTIONS
+// - window.ISOLAMENTO_OPTIONS
+// - window.REGIAO_OPTIONS
+// - window.SEXO_OPTIONS
+// - window.DIRETIVAS_OPTIONS
+// - window.IDADE_OPTIONS
 
-// IDENTIFICAR HOSPITAIS HÍBRIDOS
-window.HOSPITAIS_HIBRIDOS = ['H1', 'H3', 'H5', 'H6', 'H7'];
-
-// SANTA CLARA - TODOS OS LEITOS SÃO HÍBRIDOS (1-13)
-window.SANTA_CLARA_TOTAL_LEITOS = 13;
-
-// TIPO DE QUARTO (2 OPÇÕES - APENAS PARA HÍBRIDOS)
-window.TIPO_QUARTO_OPTIONS = ['Apartamento', 'Enfermaria'];
-
-// MAPEAMENTO FIXO NUMERAÇÃO CRUZ AZUL - ENFERMARIAS (16 leitos: 21-36)
-window.CRUZ_AZUL_NUMERACAO = {
-    21: '711.1', 22: '711.3',
-    23: '713.1', 24: '713.3',
-    25: '915.1', 26: '915.3',
-    27: '911.1', 28: '911.3',
-    29: '912.1', 30: '912.3',
-    31: '913.1', 32: '913.3',
-    33: '914.1', 34: '914.3',
-    35: '916.1', 36: '916.3'
-};
-
-// MAPEAMENTO DE LEITOS IRMÃOS (CRUZ AZUL)
-window.CRUZ_AZUL_IRMAOS = {
-    21: 22, 22: 21, 23: 24, 24: 23,
-    25: 26, 26: 25, 27: 28, 28: 27,
-    29: 30, 30: 29, 31: 32, 32: 31,
-    33: 34, 34: 33, 35: 36, 36: 35
-};
-
-// =================== ✅ LISTAS FINAIS - 12 CONCESSÕES COM ACENTOS UTF-8 ===================
-
-// ✅ CONCESSÕES - 13 ITENS (12 + "Não se aplica")
-window.CONCESSOES_LIST = [
-    "Não se aplica",
-    "Transição Domiciliar",
-    "Aplicação domiciliar de medicamentos",
-    "Aspiração",
-    "Banho",
-    "Curativo",
-    "Curativo PICC",
-    "Fisioterapia Motora Domiciliar",           // ✅ RENOMEADA
-    "Fonoaudiologia Domiciliar",
-    "Oxigenoterapia",
-    "Remoção",
-    "Solicitação domiciliar de exames",
-    "Fisioterapia Respiratória Domiciliar"      // ✅ NOVA (12ª)
-];
-
-// LINHAS DE CUIDADO: 45 ESPECIALIDADES (✅ COM ACENTOS - api.js normaliza depois)
-window.LINHAS_CUIDADO_LIST = [
-    "Assiste", 
-    "APS SP", 
-    "Cuidados Paliativos", 
-    "ICO (Insuficiência Coronariana)",
-    "Nexus SP Cardiologia", 
-    "Nexus SP Gastroentereologia", 
-    "Nexus SP Geriatria",
-    "Nexus SP Pneumologia", 
-    "Nexus SP Psiquiatria", 
-    "Nexus SP Reumatologia",
-    "Nexus SP Saúde do Fígado", 
-    "Generalista", 
-    "Bucomaxilofacial", 
-    "Cardiologia",
-    "Cirurgia Cardíaca", 
-    "Cirurgia de Cabeça e Pescoço", 
-    "Cirurgia do Aparelho Digestivo",
-    "Cirurgia Geral", 
-    "Cirurgia Oncológica", 
-    "Cirurgia Plástica", 
-    "Cirurgia Torácica",
-    "Cirurgia Vascular", 
-    "Clínica Médica", 
-    "Coloproctologia", 
-    "Dermatologia",
-    "Endocrinologia", 
-    "Fisiatria", 
-    "Gastroenterologia", 
-    "Geriatria",
-    "Ginecologia e Obstetrícia", 
-    "Hematologia", 
-    "Infectologia", 
-    "Mastologia",
-    "Nefrologia", 
-    "Neurocirurgia", 
-    "Neurologia", 
-    "Oftalmologia", 
-    "Oncologia Clínica",
-    "Ortopedia", 
-    "Otorrinolaringologia", 
-    "Pediatria", 
-    "Pneumologia", 
-    "Psiquiatria",
-    "Reumatologia", 
-    "Urologia"
-];
-
-// PPS: 10 OPÇÕES
-window.PPS_OPTIONS = ['10%', '20%', '30%', '40%', '50%', '60%', '70%', '80%', '90%', '100%'];
-
-// PREVISÃO DE ALTA - 10 OPÇÕES
-window.PREVISAO_ALTA_OPTIONS = [
-    'Hoje Ouro', 'Hoje 2R', 'Hoje 3R',
-    '24h Ouro', '24h 2R', '24h 3R', 
-    '48h', '72h', '96h', 'Sem Previsão'
-];
-
-// ISOLAMENTO: 3 OPÇÕES
-window.ISOLAMENTO_OPTIONS = [
-    'Não Isolamento',
-    'Isolamento de Contato', 
-    'Isolamento Respiratório'
-];
-
-// REGIÃO: 9 OPÇÕES
-window.REGIAO_OPTIONS = [
-    'Zona Central', 'Zona Sul', 'Zona Norte', 'Zona Leste', 'Zona Oeste',
-    'ABC', 'Guarulhos', 'Osasco', 'Outra'
-];
-
-// GÊNERO: 2 OPÇÕES
-window.SEXO_OPTIONS = ['Masculino', 'Feminino'];
-
-// DIRETIVAS ANTECIPADAS
-window.DIRETIVAS_OPTIONS = ['Não se aplica', 'Sim', 'Não'];
-
-// IDADE: DROPDOWN 14-115 ANOS
-window.IDADE_OPTIONS = [];
-for (let i = 14; i <= 115; i++) {
-    window.IDADE_OPTIONS.push(i);
-}
+// =================== CONTINUACAO DO CARDS.JS ===================
 
 // =================== FUNÇÃO: SELECT HOSPITAL ===================
 window.selectHospital = function(hospitalId) {
