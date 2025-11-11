@@ -584,46 +584,55 @@ window.processarDadosHospital = function(hospitalId) {
     let vagosApto, vagosEnfFem, vagosEnfMasc;
     
     if (hospitalId === 'H2') {
+        // APARTAMENTOS: simples
         vagosApto = vagos.filter(l => 
             l.tipo === 'Apartamento' || l.tipo === 'APTO'
         ).length;
         
-        vagosEnfFem = 0;
-        vagosEnfMasc = 0;
-        let vagosEnfSemRestricao = 0;
+        // ENFERMARIAS: calcular por PARES (capacidade total)
+        const paresEnfermarias = [
+            [21, 22], [23, 24], [25, 26], [27, 28],
+            [29, 30], [31, 32], [33, 34], [35, 36]
+        ];
         
-        vagos.forEach(leitoVago => {
-            const tipo = leitoVago.tipo || '';
+        let capacidadeFem = 0;
+        let capacidadeMasc = 0;
+        
+        paresEnfermarias.forEach(([num1, num2]) => {
+            const leito1 = leitos.find(l => getLeitoNumero(l.leito) === num1);
+            const leito2 = leitos.find(l => getLeitoNumero(l.leito) === num2);
             
-            if (tipo === 'ENFERMARIA' || tipo === 'Enfermaria') {
-                const numeroLeito = getLeitoNumero(leitoVago.leito);
-                
-                if (!numeroLeito) {
-                    vagosEnfSemRestricao++;
-                    return;
+            const vago1 = leito1 && isVago(leito1);
+            const vago2 = leito2 && isVago(leito2);
+            const ocupado1 = leito1 && isOcupado(leito1);
+            const ocupado2 = leito2 && isOcupado(leito2);
+            
+            if (vago1 && vago2) {
+                capacidadeFem += 2;
+                capacidadeMasc += 2;
+            }
+            else if (ocupado1 && vago2) {
+                const isolamento1 = leito1.isolamento && leito1.isolamento !== 'Não Isolamento';
+                if (!isolamento1) {
+                    const genero1 = leito1.genero;
+                    if (genero1 === 'Feminino') capacidadeFem += 1;
+                    else if (genero1 === 'Masculino') capacidadeMasc += 1;
+                    else { capacidadeFem += 1; capacidadeMasc += 1; }
                 }
-                
-                const numeroIrmao = (numeroLeito % 2 === 0) 
-                    ? numeroLeito - 1
-                    : numeroLeito + 1;
-                
-                const irmao = leitos.find(l => getLeitoNumero(l.leito) === numeroIrmao);
-                
-                if (!irmao || isVago(irmao)) {
-                    vagosEnfSemRestricao++;
-                } else if (irmao.isolamento && irmao.isolamento !== 'Não Isolamento') {
-                    // Isolamento
-                } else {
-                    if (irmao.genero === 'Feminino') {
-                        vagosEnfFem++;
-                    } else if (irmao.genero === 'Masculino') {
-                        vagosEnfMasc++;
-                    } else {
-                        vagosEnfSemRestricao++;
-                    }
+            }
+            else if (vago1 && ocupado2) {
+                const isolamento2 = leito2.isolamento && leito2.isolamento !== 'Não Isolamento';
+                if (!isolamento2) {
+                    const genero2 = leito2.genero;
+                    if (genero2 === 'Feminino') capacidadeFem += 1;
+                    else if (genero2 === 'Masculino') capacidadeMasc += 1;
+                    else { capacidadeFem += 1; capacidadeMasc += 1; }
                 }
             }
         });
+        
+        vagosEnfFem = capacidadeFem;
+        vagosEnfMasc = capacidadeMasc;
     } else {
         vagosApto = vagos.filter(l => 
             l.tipo === 'Apartamento' || l.tipo === 'APTO' || l.tipo === 'Híbrido'
