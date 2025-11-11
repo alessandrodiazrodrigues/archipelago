@@ -72,6 +72,9 @@
         
         <div class="menu-footer">
             <div class="menu-divider"></div>
+            <a href="#" class="side-menu-item" onclick="openSimuladorAndCloseMenu(); return false;">
+                Simulador
+            </a>
             <a href="#" class="side-menu-item" onclick="openQRCodesAndCloseMenu(); return false;">
                 Gerar QR Codes
             </a>
@@ -159,23 +162,26 @@
         </div>
     </div>
 
-    <!-- =================== SCRIPTS MODULARES V4.0 =================== -->
+    <!-- =================== SCRIPTS MODULARES V4.0 - ORDEM CORRETA! =================== -->
     
-    <!-- Scripts Core (ORDEM IMPORTA!) -->
+    <!-- 1. SCRIPTS CORE (Base do sistema) -->
     <script src="js/app.js"></script>
     <script src="js/api.js"></script>
     
-    <!-- Dashboards ANTES de cards.js (evita race condition) -->
+    <!-- 2. CONFIGURAÇÕES GLOBAIS (Fonte única de verdade - DEVE vir ANTES de tudo) -->
+    <script src="js/cards-config.js"></script>
+    
+    <!-- 3. INTERFACE (Depende de cards-config.js) -->
+    <script src="js/cards.js"></script>
+    
+    <!-- 4. DASHBOARDS (Dependem de cards-config.js) -->
     <script src="js/dashboards/dashboard-hospital.js"></script>
     <script src="js/dashboards/dashboard-executive.js"></script>
     
-    <!-- Scripts de Interface -->
-    <script src="js/cards.js"></script>
-    
-    <!-- Scripts de Funcionalidades -->
+    <!-- 5. FUNCIONALIDADES -->
     <script src="js/qrcode.js"></script>
     
-    <!-- Script de Inicialização -->
+    <!-- 6. INICIALIZAÇÃO (Último a carregar) -->
     <script src="js/main.js"></script>
     
     <!-- =================== FUNÇÕES AUXILIARES MENU V4.0 =================== -->
@@ -192,6 +198,17 @@
         console.log('   • ✅ Fonte Poppins Bold');
         console.log('   • ✅ Title Case aplicado');
         console.log('   • ✅ Ordem alfabética dos hospitais');
+        console.log('   • ✅ Simulador Mobile adicionado');
+        console.log('');
+        console.log('📦 ORDEM DE CARREGAMENTO DOS SCRIPTS:');
+        console.log('   1. app.js (autenticação)');
+        console.log('   2. api.js (comunicação com backend)');
+        console.log('   3. cards-config.js (configurações globais) ⭐');
+        console.log('   4. cards.js (interface de leitos)');
+        console.log('   5. dashboard-hospital.js');
+        console.log('   6. dashboard-executive.js');
+        console.log('   7. qrcode.js');
+        console.log('   8. main.js (inicialização)');
         console.log('');
         
         /**
@@ -230,6 +247,28 @@
             if (overlay) {
                 overlay.style.display = 'none';
             }
+        }
+        
+        /**
+         * Função para abrir Simulador e fechar menu
+         */
+        function openSimuladorAndCloseMenu() {
+            // Primeiro fecha o menu
+            const menu = document.getElementById('sideMenu');
+            const overlay = document.getElementById('menuOverlay');
+            
+            if (menu && menu.classList.contains('open')) {
+                menu.classList.remove('open');
+            }
+            
+            if (overlay) {
+                overlay.style.display = 'none';
+            }
+            
+            // Depois abre o simulador em nova aba
+            window.open('simulador-qrcode.html', '_blank');
+            
+            console.log('🎮 Abrindo Simulador Mobile em nova aba...');
         }
         
         /**
