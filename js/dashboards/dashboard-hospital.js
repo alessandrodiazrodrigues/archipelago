@@ -1,80 +1,24 @@
 // js/dashboards/dashboard-hospital.js
 // Dashboard Hospitalar - Archipelago V4.0
 
-console.log('Dashboard Hospitalar V4.0 - Inicializando...');
 
-// =================== MAPAS DE DESNORMALIZAÇÃO ===================
-// Convertem texto sem acentos → texto com acentos para exibição
+// =================== DASHBOARD HOSPITALAR V4.0 ===================
+// Versão: 4.2
+// Depende de: cards-config.js (carregar ANTES)
 
-const CONCESSOES_DISPLAY_MAP = {
-    "Transicao Domiciliar": "Transição Domiciliar",
-    "Aplicacao domiciliar de medicamentos": "Aplicação domiciliar de medicamentos",
-    "Aspiracao": "Aspiração",
-    "Banho": "Banho",
-    "Curativo": "Curativo",
-    "Curativo PICC": "Curativo PICC",
-    "Fisioterapia Domiciliar": "Fisioterapia Domiciliar",
-    "Fonoaudiologia Domiciliar": "Fonoaudiologia Domiciliar",
-    "Oxigenoterapia": "Oxigenoterapia",
-    "Remocao": "Remoção",
-    "Solicitacao de Exames Domiciliar": "Solicitação de Exames Domiciliar"
-};
+console.log('Dashboard Hospitalar v4.2 - Carregando...');
 
-const LINHAS_DISPLAY_MAP = {
-    "Assiste": "Assiste",
-    "APS SP": "APS SP",
-    "Cuidados Paliativos": "Cuidados Paliativos",
-    "ICO (Insuficiencia Coronariana)": "ICO (Insuficiência Coronariana)",
-    "Nexus SP Saude do Figado": "Nexus SP Saúde do Fígado",
-    "Cardiologia": "Cardiologia",
-    "Clinica Medica": "Clínica Médica",
-    "Dermatologia": "Dermatologia",
-    "Endocrinologia": "Endocrinologia",
-    "Gastroenterologia": "Gastroenterologia",
-    "Geriatria": "Geriatria",
-    "Ginecologia": "Ginecologia",
-    "Hematologia": "Hematologia",
-    "Nefrologia": "Nefrologia",
-    "Neurologia": "Neurologia",
-    "Nutrição": "Nutrição",
-    "Nutricao": "Nutrição",
-    "Oncologia": "Oncologia",
-    "Ortopedia": "Ortopedia",
-    "Pneumologia": "Pneumologia",
-    "Psicologia": "Psicologia",
-    "Psiquiatria": "Psiquiatria",
-    "Reumatologia": "Reumatologia",
-    "Urologia": "Urologia",
-    "Fisioterapia": "Fisioterapia",
-    "Fonoaudiologia": "Fonoaudiologia",
-    "Terapia Ocupacional": "Terapia Ocupacional",
-    "Servico Social": "Serviço Social",
-    "Servico de Atencao Domiciliar": "Serviço de Atenção Domiciliar",
-    "Farmacia": "Farmácia",
-    "Odontologia": "Odontologia"
-};
-
-/**
- * Desnormaliza texto restaurando acentos para exibição
- * @param {string} texto - Texto sem acentos
- * @returns {string} Texto com acentos
- */
-function desnormalizarTexto(texto) {
-    if (!texto || typeof texto !== 'string') return texto;
-    
-    // Tentar concessões primeiro
-    if (CONCESSOES_DISPLAY_MAP[texto]) {
-        return CONCESSOES_DISPLAY_MAP[texto];
-    }
-    
-    // Depois tentar linhas
-    if (LINHAS_DISPLAY_MAP[texto]) {
-        return LINHAS_DISPLAY_MAP[texto];
-    }
-    
-    // Se não encontrar, retornar o texto original
-    return texto;
+// =================== VALIDAR DEPENDÊNCIAS ===================
+if (typeof window.desnormalizarTexto === 'undefined') {
+    console.error('ERRO CRITICO: cards-config.js NAO foi carregado!');
+    throw new Error('cards-config.js deve ser carregado ANTES de dashboard-hospital.js');
 }
+
+console.log('Dependencias validadas - cards-config.js OK');
+
+// =================== CONTINUACAO DO DASHBOARD HOSPITALAR ===================
+
+console.log('Dashboard Hospitalar V4.0 - Inicializando...');
 
 // Variável global para controlar o filtro atual
 window.hospitalFiltroAtual = 'todos';
