@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Archipelago Dashboard V4.0</title>
+    <title>Archipelago Dashboard V6.0</title>
     
     <!-- Google Fonts - Poppins Bold -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -72,7 +72,7 @@
         
         <div class="menu-footer">
             <div class="menu-divider"></div>
-            <a href="#" class="side-menu-item" onclick="openSimuladorAndCloseMenu(); return false;">
+            <a href="#" class="side-menu-item" onclick="openSimuladorAndCloseMenu(); return false;" style="display: none;">
                 Simulador
             </a>
             <a href="#" class="side-menu-item" onclick="openQRCodesAndCloseMenu(); return false;">
@@ -100,18 +100,22 @@
         <!-- SEÇÃO DE LEITOS -->
         <section id="leitosView" class="section-leitos hidden">
             <div class="leitos-header">
-                <!-- BOX ÚNICO COM TÍTULO E BOTÕES -->
+                <!-- BOX ÚNICO COM TÍTULO E DROPDOWN -->
                 <div class="hospital-selector-container">
                     <h2>Gestão de Leitos Hospitalares</h2>
                     
                     <div class="hospital-selector" id="hospitalSelector">
-                        <button class="hospital-btn active" data-hospital="H5" onclick="selectHospital('H5')">Adventista</button>
-                        <button class="hospital-btn" data-hospital="H2" onclick="selectHospital('H2')">Cruz Azul</button>
-                        <button class="hospital-btn" data-hospital="H1" onclick="selectHospital('H1')">Neomater</button>
-                        <button class="hospital-btn" data-hospital="H4" onclick="selectHospital('H4')">Santa Clara</button>
-                        <button class="hospital-btn" data-hospital="H6" onclick="selectHospital('H6')">Santa Cruz</button>
-                        <button class="hospital-btn" data-hospital="H3" onclick="selectHospital('H3')">Santa Marcelina</button>
-                        <button class="hospital-btn" data-hospital="H7" onclick="selectHospital('H7')">Santa Virgínia</button>
+                        <select id="hospitalDropdown" class="hospital-select" onchange="selectHospital(this.value)">
+                            <option value="H5" selected>Adventista</option>
+                            <option value="H2">Cruz Azul</option>
+                            <option value="H1">Neomater</option>
+                            <option value="H4">Santa Clara</option>
+                            <option value="H6">Santa Cruz</option>
+                            <option value="H3">Santa Marcelina</option>
+                            <option value="H7">Santa Virgínia</option>
+                            <option value="H8">São Camilo Ipiranga</option>
+                            <option value="H9">São Camilo Pompeia</option>
+                        </select>
                     </div>
                 </div>
                 
@@ -139,7 +143,7 @@
     <footer id="mainFooter" class="footer hidden">
         <p>Sistema em versão BETA - não pode ser usado como única fonte de referência</p>
         <p>Para decisões críticas, consulte sempre fontes adicionais e profissionais qualificados</p>
-        <p><strong>Archipelago Dashboard V4.0 - Novembro/2025</strong></p>
+        <p><strong>Archipelago Dashboard V6.0 - Novembro/2025</strong></p>
     </footer>
 
     <!-- =================== MODAL DE PACIENTE =================== -->
@@ -186,19 +190,19 @@
     
     <!-- =================== FUNÇÕES AUXILIARES MENU V4.0 =================== -->
     <script>
-        console.log('🚀 Archipelago Dashboard V4.0 - Inicializando...');
-        console.log('📅 Novembro/2025 - Versão V4.0');
+        console.log('Archipelago Dashboard V6.0 - Inicializando...');
+        console.log('Novembro/2025 - Versao V6.0');
         console.log('');
-        console.log('✅ NOVIDADES V4.0:');
-        console.log('   • ✅ 7 Hospitais (H1-H7) - Total: 93 leitos');
-        console.log('   • ✅ H6: Santa Cruz (7 leitos)');
-        console.log('   • ✅ H7: Santa Virgínia (7 leitos)');
-        console.log('   • ✅ Campo de busca implementado');
-        console.log('   • ✅ Novas cores aplicadas (#60a5fa)');
-        console.log('   • ✅ Fonte Poppins Bold');
-        console.log('   • ✅ Title Case aplicado');
-        console.log('   • ✅ Ordem alfabética dos hospitais');
-        console.log('   • ✅ Simulador Mobile adicionado');
+        console.log('NOVIDADES V6.0:');
+        console.log('   • 11 Hospitais (9 ativos + 2 reservas) - Total: 341 leitos');
+        console.log('   • H8: Sao Camilo Ipiranga (22 leitos)');
+        console.log('   • H9: Sao Camilo Pompeia (22 leitos)');
+        console.log('   • Sistema de leitos extras dinamico');
+        console.log('   • Campo anotacoes (800 caracteres)');
+        console.log('   • Santa Clara expandido (57 leitos)');
+        console.log('   • Cruz Azul expandido (67 leitos)');
+        console.log('   • Santa Marcelina expandido (28 leitos)');
+        console.log('   • Dropdown de selecao de hospitais');
         console.log('');
         console.log('📦 ORDEM DE CARREGAMENTO DOS SCRIPTS:');
         console.log('   1. app.js (autenticação)');
@@ -287,10 +291,18 @@
                 overlay.style.display = 'none';
             }
             
-            // Depois abre QR Codes
-            if (typeof openQRCodes === 'function') {
-                openQRCodes();
-            }
+            
+            // Aguardar menu fechar
+            setTimeout(() => {
+                // Abre MODAL do qrcode.js na mesma página (com X no canto)
+                if (typeof window.openQRCodesSimple === 'function') {
+                    window.openQRCodesSimple();
+                } else if (typeof openQRCodes === 'function') {
+                    openQRCodes();
+                } else {
+                    console.error('❌ qrcode.js não carregado!');
+                }
+            }, 100);
         }
     </script>
     
@@ -608,40 +620,43 @@
             text-align: center;
         }
         
-        /* =================== SELETOR DE HOSPITAL =================== */
+        /* =================== SELETOR DE HOSPITAL (DROPDOWN) =================== */
         .hospital-selector {
             display: flex;
-            gap: 10px;
-            flex-wrap: wrap;
             justify-content: center;
         }
         
-        .hospital-btn {
+        .hospital-select {
             background-color: #60a5fa;
-            color: #ffffff !important;
+            color: #ffffff;
             border: none;
-            padding: 12px 24px;
+            padding: 14px 28px;
             border-radius: 8px;
             cursor: pointer;
-            font-size: 14px;
+            font-size: 16px;
             font-weight: 700;
             font-family: 'Poppins', sans-serif;
+            min-width: 345px;
             transition: all 0.3s ease;
-            min-width: 140px;
-            text-transform: none;
+            text-align: center;
         }
         
-        .hospital-btn:hover {
+        .hospital-select:hover {
             background-color: #3b82f6;
-            transform: translateY(-2px);
             box-shadow: 0 4px 12px rgba(96, 165, 250, 0.4);
-            color: #ffffff !important;
         }
         
-        .hospital-btn.active {
-            background-color: #3b82f6;
+        .hospital-select:focus {
+            outline: none;
             box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.3);
-            color: #ffffff !important;
+        }
+        
+        .hospital-select option {
+            background-color: #1e293b;
+            color: #ffffff;
+            padding: 12px;
+            font-family: 'Poppins', sans-serif;
+            font-weight: 700;
         }
         
         /* =================== CAMPO DE BUSCA V4.0 =================== */
@@ -728,14 +743,8 @@
                 grid-template-columns: 1fr;
             }
             
-            .hospital-selector {
-                flex-direction: column;
-                align-items: stretch;
-            }
-            
-            .hospital-btn {
-                width: 100%;
-                min-width: unset;
+            .hospital-select {
+                min-width: 100%;
             }
             
             .header-left h1 {

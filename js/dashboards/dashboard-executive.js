@@ -1,5 +1,9 @@
-// =================== DASHBOARD EXECUTIVO V4.0 - CORRIGIDO COMPLETO ===================
-// =================== 7 HOSPITAIS | 93 LEITOS | DIRETIVAS CORRIGIDAS ===================
+// =================== DASHBOARD EXECUTIVO V6.0 - CORRIGIDO COMPLETO ===================
+// =================== 9 HOSPITAIS | 293 LEITOS (126 CONTRATUAIS) ===================
+
+// =================== CONSTANTES GLOBAIS V6.0 ===================
+const TOTAL_CONTRATUAIS = 126; // 9 hospitais ativos (H1-H9)
+const TOTAL_LEITOS = 293; // 126 contratuais + 167 extras
 
 // Estado global para fundo branco (compartilhado com dashboard hospitalar)
 if (typeof window.fundoBranco === 'undefined') {
@@ -17,8 +21,8 @@ function parseAdmDate(admAt) {
     return null;
 }
 
-// =================== ORDEM ALFABÉTICA DOS HOSPITAIS (7 HOSPITAIS) ===================
-const ORDEM_ALFABETICA_HOSPITAIS = ['H5', 'H2', 'H1', 'H4', 'H3', 'H6', 'H7'];
+// =================== ORDEM ALFABÉTICA DOS HOSPITAIS (9 HOSPITAIS) ===================
+const ORDEM_ALFABETICA_HOSPITAIS = ['H5', 'H2', 'H1', 'H4', 'H6', 'H3', 'H7', 'H8', 'H9'];
 
 // =================== FUNÇÃO PARA OBTER CORES DO API.JS ===================
 function getCorExataExec(itemName, tipo = 'concessao') {
@@ -145,7 +149,7 @@ function renderGaugeLargo(porcentagem, numeroTotal) {
                     <div class="gauge-largo-number">${numeroTotal}</div>
                     <div class="gauge-largo-label">Leitos Ocupados</div>
                     <div class="gauge-largo-percentage">${porcentagem.toFixed(0)}%</div>
-                    <div class="gauge-largo-subtitle">Total da Rede Externa (7 Hospitais)</div>
+                    <div class="gauge-largo-subtitle">Total da Rede Externa (9 Hospitais)</div>
                 </div>
             </div>
         </div>
@@ -254,69 +258,119 @@ function calcularModalidadesVagosExecutivo(leitos, hospitalId) {
 
     const vagos = leitos.filter(l => isVagoExecutivo(l));
 
-    // Híbridos Puros: H1, H3, H5, H6, H7
-    if (hospitalId === 'H1' || hospitalId === 'H3' || hospitalId === 'H5' || hospitalId === 'H6' || hospitalId === 'H7') {
-        modalidade.flexiveis = vagos.length;
+    // Híbridos Puros: H1, H3, H5, H6, H7, H8, H9
+    if (hospitalId === 'H1' || hospitalId === 'H3' || hospitalId === 'H5' || hospitalId === 'H6' || hospitalId === 'H7' || hospitalId === 'H8' || hospitalId === 'H9') {
+        // V6.0: Usar contratuais (não conta extras)
+        const capacidadeInfo = window.HOSPITAL_CAPACIDADE ? window.HOSPITAL_CAPACIDADE[hospitalId] : null;
+        const contratuais = capacidadeInfo ? capacidadeInfo.contratuais : leitos.length;
+        const ocupados = leitos.filter(l => isOcupadoExecutivo(l)).length;
+        modalidade.flexiveis = Math.max(0, contratuais - ocupados);
         return modalidade;
     }
 
-    // H4 - Santa Clara (Híbrido com limites)
-    if (hospitalId === 'H4') {
-        const ocupados = leitos.filter(l => isOcupadoExecutivo(l));
-        
-        const aptosOcupados = ocupados.filter(l => 
-            l.categoriaEscolhida === 'Apartamento'
-        ).length;
-        
-        const enfOcupadas = ocupados.filter(l => 
-            l.categoriaEscolhida === 'Enfermaria'
-        ).length;
-        
-        modalidade.flexiveis = 0;
-        modalidade.exclusivo_apto = 9 - aptosOcupados;
-        modalidade.exclusivo_enf_sem_restricao = 4 - enfOcupadas;
-        modalidade.exclusivo_enf_fem = 0;
-        modalidade.exclusivo_enf_masc = 0;
-        
-        return modalidade;
-    }
-
-    // H2 - Cruz Azul (Tipos fixos + Leito irmão)
+    // =================== H2 - CRUZ AZUL ===================
     if (hospitalId === 'H2') {
-        vagos.forEach(leitoVago => {
-            const tipo = leitoVago.tipo || '';
+        // APARTAMENTOS: contratuais - ocupados
+        const aptosContratuais = 20;
+        const aptosOcupados = leitos.filter(l => 
+            isOcupadoExecutivo(l) && (l.tipo === 'APTO' || l.tipo === 'Apartamento')
+        ).length;
+        modalidade.exclusivo_apto = Math.max(0, aptosContratuais - aptosOcupados);
+        
+        // ENFERMARIAS: apenas leitos contratuais (21-36)
+        const vagosContratuais = vagos.filter(l => {
+            const tipo = l.tipo || '';
+            if (tipo !== 'ENFERMARIA' && tipo !== 'Enfermaria') return false;
+            const numeroLeito = typeof l.leito === 'number' ? l.leito : parseInt(l.leito);
+            return numeroLeito && numeroLeito >= 21 && numeroLeito <= 36;
+        });
+        
+        vagosContratuais.forEach(leitoVago => {
+            const numeroLeito = typeof leitoVago.leito === 'number' ? leitoVago.leito : parseInt(leitoVago.leito);
             
-            if (tipo === 'APTO' || tipo === 'Apartamento') {
-                modalidade.exclusivo_apto++;
+            // Buscar irmão usando CRUZ_AZUL_IRMAOS
+            const irmaosMap = window.CRUZ_AZUL_IRMAOS || {};
+            const numeroIrmao = irmaosMap[numeroLeito];
+            
+            if (!numeroIrmao) {
+                modalidade.exclusivo_enf_sem_restricao++;
                 return;
             }
             
-            if (tipo === 'ENFERMARIA' || tipo === 'Enfermaria') {
-                const numeroLeito = leitoVago.leito;
-                
-                if (!numeroLeito || typeof numeroLeito !== 'number') {
-                    modalidade.exclusivo_enf_sem_restricao++;
-                    return;
-                }
-                
-                const numeroIrmao = (numeroLeito % 2 === 0) 
-                    ? numeroLeito - 1
-                    : numeroLeito + 1;
-                
-                const irmao = leitos.find(l => l.leito === numeroIrmao);
-                
-                if (!irmao || isVagoExecutivo(irmao)) {
-                    modalidade.exclusivo_enf_sem_restricao++;
-                } else if (irmao.isolamento && irmao.isolamento !== 'Não Isolamento') {
-                    // Isolamento: não conta
+            const irmao = leitos.find(l => {
+                const leitoNum = typeof l.leito === 'number' ? l.leito : parseInt(l.leito);
+                return leitoNum === numeroIrmao;
+            });
+            
+            if (!irmao || isVagoExecutivo(irmao)) {
+                modalidade.exclusivo_enf_sem_restricao++;
+            } else if (irmao.isolamento && irmao.isolamento !== 'Não Isolamento') {
+                // Isolamento: leito não disponível (não conta)
+            } else {
+                if (irmao.genero === 'Feminino') {
+                    modalidade.exclusivo_enf_fem++;
+                } else if (irmao.genero === 'Masculino') {
+                    modalidade.exclusivo_enf_masc++;
                 } else {
-                    if (irmao.genero === 'Feminino') {
-                        modalidade.exclusivo_enf_fem++;
-                    } else if (irmao.genero === 'Masculino') {
-                        modalidade.exclusivo_enf_masc++;
-                    } else {
-                        modalidade.exclusivo_enf_sem_restricao++;
-                    }
+                    modalidade.exclusivo_enf_sem_restricao++;
+                }
+            }
+        });
+        
+        return modalidade;
+    }
+    
+    // =================== H4 - SANTA CLARA ===================
+    if (hospitalId === 'H4') {
+        // APARTAMENTOS: contratuais - ocupados
+        const aptosContratuais = 18;
+        const aptosOcupados = leitos.filter(l => 
+            isOcupadoExecutivo(l) && (l.tipo === 'APTO' || l.tipo === 'Apartamento')
+        ).length;
+        modalidade.exclusivo_apto = Math.max(0, aptosContratuais - aptosOcupados);
+        
+        // ENFERMARIAS: apenas leitos contratuais (10-17)
+        const vagosContratuais = vagos.filter(l => {
+            const tipo = l.tipo || '';
+            if (tipo !== 'ENFERMARIA' && tipo !== 'Enfermaria') return false;
+            const numeroLeito = typeof l.leito === 'number' ? l.leito : parseInt(l.leito);
+            return numeroLeito && numeroLeito >= 10 && numeroLeito <= 17;
+        });
+        
+        vagosContratuais.forEach(leitoVago => {
+            const numeroLeito = typeof leitoVago.leito === 'number' ? leitoVago.leito : parseInt(leitoVago.leito);
+            
+            // Determinar irmão usando SANTA_CLARA_IRMAOS
+            const irmaosMap = window.SANTA_CLARA_IRMAOS || {
+                10: 11, 11: 10,
+                12: 13, 13: 12,
+                14: 15, 15: 14,
+                16: 17, 17: 16
+            };
+            
+            const numeroIrmao = irmaosMap[numeroLeito];
+            
+            if (!numeroIrmao) {
+                modalidade.exclusivo_enf_sem_restricao++;
+                return;
+            }
+            
+            const irmao = leitos.find(l => {
+                const leitoNum = typeof l.leito === 'number' ? l.leito : parseInt(l.leito);
+                return leitoNum === numeroIrmao;
+            });
+            
+            if (!irmao || isVagoExecutivo(irmao)) {
+                modalidade.exclusivo_enf_sem_restricao++;
+            } else if (irmao.isolamento && irmao.isolamento !== 'Não Isolamento') {
+                // Isolamento: leito não disponível (não conta)
+            } else {
+                if (irmao.genero === 'Feminino') {
+                    modalidade.exclusivo_enf_fem++;
+                } else if (irmao.genero === 'Masculino') {
+                    modalidade.exclusivo_enf_masc++;
+                } else {
+                    modalidade.exclusivo_enf_sem_restricao++;
                 }
             }
         });
@@ -336,8 +390,8 @@ function calcularModalidadePorTipoExecutivo(leitos, hospitalId) {
         exclusivo_enf_masc: 0
     };
 
-    // Híbridos Puros: H1, H3, H5, H6, H7
-    if (hospitalId === 'H1' || hospitalId === 'H3' || hospitalId === 'H5' || hospitalId === 'H6' || hospitalId === 'H7') {
+    // Híbridos Puros: H1, H3, H5, H6, H7, H8, H9
+    if (hospitalId === 'H1' || hospitalId === 'H3' || hospitalId === 'H5' || hospitalId === 'H6' || hospitalId === 'H7' || hospitalId === 'H8' || hospitalId === 'H9') {
         modalidade.flexiveis = leitos.length;
         return modalidade;
     }
@@ -349,7 +403,7 @@ function calcularModalidadePorTipoExecutivo(leitos, hospitalId) {
         if (catEscolhida === 'Apartamento') {
             modalidade.exclusivo_apto++;
         } else if (catEscolhida === 'Enfermaria') {
-            if (hospitalId === 'H2') {
+            if (hospitalId === 'H2' || hospitalId === 'H4') {
                 if (genero === 'Feminino') {
                     modalidade.exclusivo_enf_fem++;
                 } else if (genero === 'Masculino') {
@@ -381,8 +435,8 @@ function processarDadosHospitalExecutivo(hospitalId) {
     
     let ocupadosApto, ocupadosEnfFem, ocupadosEnfMasc;
     
-    // Híbridos (H1, H3, H4, H5, H6, H7) usam categoriaEscolhida
-    if (hospitalId === 'H1' || hospitalId === 'H3' || hospitalId === 'H4' || hospitalId === 'H5' || hospitalId === 'H6' || hospitalId === 'H7') {
+    // Híbridos (H1, H3, H5, H6, H7, H8, H9) usam categoriaEscolhida
+    if (hospitalId === 'H1' || hospitalId === 'H3' || hospitalId === 'H5' || hospitalId === 'H6' || hospitalId === 'H7' || hospitalId === 'H8' || hospitalId === 'H9') {
         ocupadosApto = ocupados.filter(l => 
             l.categoriaEscolhida === 'Apartamento'
         ).length;
@@ -393,7 +447,7 @@ function processarDadosHospitalExecutivo(hospitalId) {
             l.categoriaEscolhida === 'Enfermaria' && l.genero === 'Masculino'
         ).length;
     } else {
-        // H2 usa tipo estrutural
+        // H2 e H4 usam tipo estrutural (tipos fixos)
         ocupadosApto = ocupados.filter(l => 
             l.tipo === 'Apartamento' || l.tipo === 'APTO'
         ).length;
@@ -413,7 +467,7 @@ function processarDadosHospitalExecutivo(hospitalId) {
     
     let previsaoApto, previsaoEnfFem, previsaoEnfMasc;
     
-    if (hospitalId === 'H1' || hospitalId === 'H3' || hospitalId === 'H4' || hospitalId === 'H5' || hospitalId === 'H6' || hospitalId === 'H7') {
+    if (hospitalId === 'H1' || hospitalId === 'H3' || hospitalId === 'H5' || hospitalId === 'H6' || hospitalId === 'H7' || hospitalId === 'H8' || hospitalId === 'H9') {
         previsaoApto = previsaoAlta.filter(l => 
             l.categoriaEscolhida === 'Apartamento'
         ).length;
@@ -437,79 +491,123 @@ function processarDadosHospitalExecutivo(hospitalId) {
     
     const vagos = leitos.filter(l => isVagoExecutivo(l));
     
+    // Buscar capacidade do hospital (DEVE VIR ANTES DE USAR)
+    const capacidade = window.HOSPITAL_CAPACIDADE[hospitalId];
+    if (!capacidade) {
+        console.error(`[ERRO] Capacidade não encontrada para ${hospitalId}`);
+        return null;
+    }
+    
     let vagosApto, vagosEnfFem, vagosEnfMasc;
     
-    if (hospitalId === 'H2') {
-        // APARTAMENTOS: simples
-        vagosApto = vagos.filter(l => 
-            l.tipo === 'Apartamento' || l.tipo === 'APTO'
+    if (hospitalId === 'H2' || hospitalId === 'H4') {
+        // =================== LÓGICA APENAS PARA CONTRATUAIS ===================
+        
+        // Definir estrutura de contratuais
+        let aptosContratuais, enfsContratuais, rangeMin, rangeMax;
+        if (hospitalId === 'H2') {
+            aptosContratuais = 20; // leitos 1-20
+            enfsContratuais = 16;  // leitos 21-36 (8 pares)
+            rangeMin = 21;
+            rangeMax = 36;
+        } else {
+            aptosContratuais = 18; // leitos 1-9 + 27-35
+            enfsContratuais = 8;   // leitos 10-17 (4 pares)
+            rangeMin = 10;
+            rangeMax = 17;
+        }
+        
+        // APARTAMENTOS: contratuais - ocupados
+        const aptosOcupados = leitos.filter(l => 
+            isOcupadoExecutivo(l) && (l.tipo === 'APTO' || l.tipo === 'Apartamento')
         ).length;
+        vagosApto = Math.max(0, aptosContratuais - aptosOcupados);
         
-        // ENFERMARIAS: calcular por PARES (capacidade total)
-        const paresEnfermarias = [
-            [21, 22], [23, 24], [25, 26], [27, 28],
-            [29, 30], [31, 32], [33, 34], [35, 36]
-        ];
+        // ENFERMARIAS: processar apenas contratuais com sistema de irmãos
+        let irmaosMap;
+        if (hospitalId === 'H2') {
+            irmaosMap = window.CRUZ_AZUL_IRMAOS || {
+                21: 22, 22: 21, 23: 24, 24: 23,
+                25: 26, 26: 25, 27: 28, 28: 27,
+                29: 30, 30: 29, 31: 32, 32: 31,
+                33: 34, 34: 33, 35: 36, 36: 35
+            };
+        } else {
+            irmaosMap = window.SANTA_CLARA_IRMAOS || {
+                10: 11, 11: 10,
+                12: 13, 13: 12,
+                14: 15, 15: 14,
+                16: 17, 17: 16
+            };
+        }
         
-        let capacidadeFem = 0;
-        let capacidadeMasc = 0;
-        
-        paresEnfermarias.forEach(([num1, num2]) => {
-            const leito1 = leitos.find(l => l.leito === num1);
-            const leito2 = leitos.find(l => l.leito === num2);
+        // Processar APENAS leitos vagos DENTRO DO RANGE CONTRATUAL
+        const vagosContratuais = vagos.filter(l => {
+            const tipo = l.tipo || '';
+            if (tipo !== 'ENFERMARIA' && tipo !== 'Enfermaria') return false;
             
-            const vago1 = leito1 && isVagoExecutivo(leito1);
-            const vago2 = leito2 && isVagoExecutivo(leito2);
-            const ocupado1 = leito1 && isOcupadoExecutivo(leito1);
-            const ocupado2 = leito2 && isOcupadoExecutivo(leito2);
+            const numeroLeito = typeof l.leito === 'number' ? l.leito : parseInt(l.leito);
+            return numeroLeito && numeroLeito >= rangeMin && numeroLeito <= rangeMax;
+        });
+        
+        let vagosEnfSemRestricao = 0;
+        let vagosEnfFemRestrita = 0;
+        let vagosEnfMascRestrita = 0;
+        
+        vagosContratuais.forEach(leitoVago => {
+            const numeroLeito = typeof leitoVago.leito === 'number' ? leitoVago.leito : parseInt(leitoVago.leito);
+            const numeroIrmao = irmaosMap[numeroLeito];
             
-            if (vago1 && vago2) {
-                capacidadeFem += 2;
-                capacidadeMasc += 2;
+            if (!numeroIrmao) {
+                vagosEnfSemRestricao++;
+                return;
             }
-            else if (ocupado1 && vago2) {
-                const isolamento1 = leito1.isolamento && leito1.isolamento !== 'Não Isolamento';
-                if (!isolamento1) {
-                    const genero1 = leito1.genero;
-                    if (genero1 === 'Feminino') capacidadeFem += 1;
-                    else if (genero1 === 'Masculino') capacidadeMasc += 1;
-                    else { capacidadeFem += 1; capacidadeMasc += 1; }
-                }
+            
+            const irmao = leitos.find(l => {
+                const leitoNum = typeof l.leito === 'number' ? l.leito : parseInt(l.leito);
+                return leitoNum === numeroIrmao;
+            });
+            
+            // Irmão vago: sem restrição
+            if (!irmao || isVagoExecutivo(irmao)) {
+                vagosEnfSemRestricao++;
             }
-            else if (vago1 && ocupado2) {
-                const isolamento2 = leito2.isolamento && leito2.isolamento !== 'Não Isolamento';
-                if (!isolamento2) {
-                    const genero2 = leito2.genero;
-                    if (genero2 === 'Feminino') capacidadeFem += 1;
-                    else if (genero2 === 'Masculino') capacidadeMasc += 1;
-                    else { capacidadeFem += 1; capacidadeMasc += 1; }
+            // Irmão com isolamento: NÃO conta (leito bloqueado)
+            else if (irmao.isolamento && irmao.isolamento !== 'Não Isolamento') {
+                // Não conta nada - leito bloqueado
+            }
+            // Irmão ocupado: contar por gênero
+            else {
+                if (irmao.genero === 'Feminino') {
+                    vagosEnfFemRestrita++;
+                } else if (irmao.genero === 'Masculino') {
+                    vagosEnfMascRestrita++;
+                } else {
+                    vagosEnfSemRestricao++;
                 }
             }
         });
         
-        vagosEnfFem = capacidadeFem;
-        vagosEnfMasc = capacidadeMasc;
+        // CAPACIDADE TOTAL: somar todas as possibilidades
+        vagosEnfFem = vagosEnfSemRestricao + vagosEnfFemRestrita;
+        vagosEnfMasc = vagosEnfSemRestricao + vagosEnfMascRestrita;
     } else {
-        vagosApto = vagos.filter(l => 
-            l.tipo === 'Apartamento' || l.tipo === 'APTO' || l.tipo === 'Híbrido'
-        ).length;
-        vagosEnfFem = vagos.filter(l => 
-            l.tipo === 'Enfermaria Feminina'
-        ).length;
-        vagosEnfMasc = vagos.filter(l => 
-            l.tipo === 'Enfermaria Masculina'
-        ).length;
+        // Híbridos: não usa essa lógica (será substituído abaixo)
+        vagosApto = 0;
+        vagosEnfFem = 0;
+        vagosEnfMasc = 0;
     }
 
     let vagosAptoFinal = vagosApto;
     let vagosEnfFemFinal = vagosEnfFem;
     let vagosEnfMascFinal = vagosEnfMasc;
     
-    // Híbridos Puros: todos os vagos podem ser qualquer tipo
-    if (hospitalId === 'H1' || hospitalId === 'H3' || hospitalId === 'H5' || hospitalId === 'H6' || hospitalId === 'H7') {
-        vagosAptoFinal = vagos.length;
-        vagosEnfFemFinal = vagos.length;
-        vagosEnfMascFinal = vagos.length;
+    // Híbridos Puros: usar vagos CONTRATUAIS (não incluir extras)
+    if (hospitalId === 'H1' || hospitalId === 'H3' || hospitalId === 'H5' || hospitalId === 'H6' || hospitalId === 'H7' || hospitalId === 'H8' || hospitalId === 'H9') {
+        const vagosContratuais = Math.max(capacidade.contratuais - ocupados.length, 0);
+        vagosAptoFinal = vagosContratuais;
+        vagosEnfFemFinal = vagosContratuais;
+        vagosEnfMascFinal = vagosContratuais;
     }
     
     // =================== TPH CORRIGIDO ===================
@@ -546,13 +644,14 @@ function processarDadosHospitalExecutivo(hospitalId) {
     );
     
     const totalLeitos = leitos.length;
-    const taxaOcupacao = totalLeitos > 0 ? (ocupados.length / totalLeitos * 100) : 0;
+    const base = Math.max(capacidade.contratuais, ocupados.length);
+    const taxaOcupacao = Math.min((ocupados.length / base) * 100, 100);
     
     const modalidadeOcupados = calcularModalidadePorTipoExecutivo(ocupados, hospitalId);
     const modalidadePrevisao = calcularModalidadePorTipoExecutivo(previsaoAlta, hospitalId);
     const modalidadeDisponiveis = calcularModalidadesVagosExecutivo(leitos, hospitalId);
     
-    const nomeHospital = window.HOSPITAL_MAPPING?.[hospitalId] || 
+    const nomeHospital = window.HOSPITAL_MAPPING?.[hospitalId]?.nome || 
                         (hospitalId === 'H1' ? 'Neomater' :
                          hospitalId === 'H2' ? 'Cruz Azul' :
                          hospitalId === 'H3' ? 'Santa Marcelina' :
@@ -562,6 +661,8 @@ function processarDadosHospitalExecutivo(hospitalId) {
                          'Santa Virgínia');
     
     return {
+        id: hospitalId,
+        contratuais: capacidade.contratuais,
         nome: nomeHospital,
         totalLeitos,
         taxaOcupacao,
@@ -580,7 +681,7 @@ function processarDadosHospitalExecutivo(hospitalId) {
             modalidade: modalidadePrevisao
         },
         disponiveis: {
-            total: vagos.length,
+            total: Math.max(capacidade.contratuais - ocupados.length, 0),
             apartamento: vagosAptoFinal,
             enf_feminina: vagosEnfFemFinal,
             enf_masculina: vagosEnfMascFinal,
@@ -606,7 +707,8 @@ function copiarParaWhatsAppExecutivo() {
     
     const totalLeitos = hospitais.reduce((sum, h) => sum + h.totalLeitos, 0);
     const totalOcupados = hospitais.reduce((sum, h) => sum + h.ocupados.total, 0);
-    const taxaOcupacao = ((totalOcupados / totalLeitos) * 100).toFixed(1);
+    const baseGeral = Math.max(TOTAL_CONTRATUAIS, totalOcupados);
+    const taxaOcupacao = Math.min((totalOcupados / baseGeral) * 100, 100);
     
     const agora = new Date();
     const dataFormatada = agora.toLocaleDateString('pt-BR', {
@@ -620,7 +722,7 @@ function copiarParaWhatsAppExecutivo() {
     let texto = `*KPIs ARCHIPELAGO*\n`;
     texto += `${dataFormatada}\n`;
     texto += `━━━━━━━━━━━━━━━━━\n`;
-    texto += `*REDE EXTERNA (7 HOSPITAIS)*\n`;
+    texto += `*REDE EXTERNA (9 HOSPITAIS)*\n`;
     texto += `━━━━━━━━━━━━━━━━━\n`;
     texto += `Taxa de Ocupação: *${taxaOcupacao}%*\n`;
     texto += `Leitos Ocupados: *${totalOcupados}/${totalLeitos}*\n\n`;
@@ -657,7 +759,7 @@ function copiarParaWhatsAppExecutivo() {
 
 // =================== FUNÇÃO PRINCIPAL: RENDER DASHBOARD ===================
 window.renderDashboardExecutivo = function() {
-    logInfo('Renderizando Dashboard Executivo: REDE HOSPITALAR EXTERNA (7 HOSPITAIS - 93 LEITOS)');
+    logInfo('Renderizando Dashboard Executivo: REDE HOSPITALAR EXTERNA (9 HOSPITAIS - 293 LEITOS (126 CONTRATUAIS))');
     
     let container = document.getElementById('dashExecutivoContent');
     if (!container) {
@@ -726,15 +828,45 @@ window.renderDashboardExecutivo = function() {
     const totalOcupados = hospitais.reduce((sum, h) => sum + h.ocupados.total, 0);
     const totalPrevisao = hospitais.reduce((sum, h) => sum + h.previsao.total, 0);
     const totalDisponiveis = hospitais.reduce((sum, h) => sum + h.disponiveis.total, 0);
-    const taxaOcupacao = (totalOcupados / totalLeitos * 100);
+    const baseGeral = Math.max(TOTAL_CONTRATUAIS, totalOcupados);
+    const taxaOcupacao = Math.min((totalOcupados / baseGeral) * 100, 100);
     
     const previsaoApto = hospitais.reduce((sum, h) => sum + h.previsao.apartamento, 0);
     const previsaoEnfFem = hospitais.reduce((sum, h) => sum + h.previsao.enf_feminina, 0);
     const previsaoEnfMasc = hospitais.reduce((sum, h) => sum + h.previsao.enf_masculina, 0);
     
-    const disponiveisApto = hospitais.reduce((sum, h) => sum + h.disponiveis.apartamento, 0);
-    const disponiveisEnfFem = hospitais.reduce((sum, h) => sum + h.disponiveis.enf_feminina, 0);
-    const disponiveisEnfMasc = hospitais.reduce((sum, h) => sum + h.disponiveis.enf_masculina, 0);
+    // Calcular capacidade de apartamentos corretamente
+    let disponiveisApto = 0;
+    hospitais.forEach(h => {
+        const hospitalId = h.id;
+        if (hospitalId === 'H1' || hospitalId === 'H3' || hospitalId === 'H5' || hospitalId === 'H6' || hospitalId === 'H7' || hospitalId === 'H8' || hospitalId === 'H9') {
+            // Híbridos: cada vago PODE ser apartamento
+            disponiveisApto += Math.max(0, h.contratuais - h.ocupados.total);
+        } else if (hospitalId === 'H2') {
+            // Cruz Azul: apartamentos contratuais - ocupados
+            disponiveisApto += Math.max(0, 20 - h.ocupados.apartamento);
+        } else if (hospitalId === 'H4') {
+            // Santa Clara: apartamentos contratuais - ocupados
+            disponiveisApto += Math.max(0, 18 - h.ocupados.apartamento);
+        }
+    });
+    // Calcular capacidade de enfermarias corretamente
+    let disponiveisEnfFem = 0;
+    let disponiveisEnfMasc = 0;
+    
+    hospitais.forEach(h => {
+        const hospitalId = h.id;
+        if (hospitalId === 'H1' || hospitalId === 'H3' || hospitalId === 'H5' || hospitalId === 'H6' || hospitalId === 'H7' || hospitalId === 'H8' || hospitalId === 'H9') {
+            // Híbridos: cada vago PODE ser enfermaria (qualquer gênero)
+            const vagosContratuais = Math.max(0, h.contratuais - h.ocupados.total);
+            disponiveisEnfFem += vagosContratuais;
+            disponiveisEnfMasc += vagosContratuais;
+        } else {
+            // H2 e H4: somar todas as possibilidades
+            disponiveisEnfFem += h.disponiveis.enf_feminina;
+            disponiveisEnfMasc += h.disponiveis.enf_masculina;
+        }
+    });
     
     const modalidadePrevisao = {
         flexiveis: hospitais.reduce((sum, h) => sum + h.previsao.modalidade.flexiveis, 0),
@@ -744,13 +876,29 @@ window.renderDashboardExecutivo = function() {
         exclusivo_enf_masc: hospitais.reduce((sum, h) => sum + h.previsao.modalidade.exclusivo_enf_masc, 0)
     };
     
+    // Calcular modalidade contratual corretamente
     const modalidadeDisponiveis = {
-        flexiveis: hospitais.reduce((sum, h) => sum + h.disponiveis.modalidade.flexiveis, 0),
-        exclusivo_apto: hospitais.reduce((sum, h) => sum + h.disponiveis.modalidade.exclusivo_apto, 0),
-        exclusivo_enf_sem_restricao: hospitais.reduce((sum, h) => sum + h.disponiveis.modalidade.exclusivo_enf_sem_restricao, 0),
-        exclusivo_enf_fem: hospitais.reduce((sum, h) => sum + h.disponiveis.modalidade.exclusivo_enf_fem, 0),
-        exclusivo_enf_masc: hospitais.reduce((sum, h) => sum + h.disponiveis.modalidade.exclusivo_enf_masc, 0)
+        flexiveis: 0,
+        exclusivo_apto: 0,
+        exclusivo_enf_sem_restricao: 0,
+        exclusivo_enf_fem: 0,
+        exclusivo_enf_masc: 0
     };
+    
+    hospitais.forEach(h => {
+        const hospitalId = h.id;
+        
+        if (hospitalId === 'H1' || hospitalId === 'H3' || hospitalId === 'H5' || hospitalId === 'H6' || hospitalId === 'H7' || hospitalId === 'H8' || hospitalId === 'H9') {
+            // Híbridos: apenas flexíveis (contratuais - ocupados)
+            modalidadeDisponiveis.flexiveis += Math.max(0, h.contratuais - h.ocupados.total);
+        } else if (hospitalId === 'H2' || hospitalId === 'H4') {
+            // H2 e H4: somar cada categoria
+            modalidadeDisponiveis.exclusivo_apto += h.disponiveis.modalidade.exclusivo_apto || 0;
+            modalidadeDisponiveis.exclusivo_enf_sem_restricao += h.disponiveis.modalidade.exclusivo_enf_sem_restricao || 0;
+            modalidadeDisponiveis.exclusivo_enf_fem += h.disponiveis.modalidade.exclusivo_enf_fem || 0;
+            modalidadeDisponiveis.exclusivo_enf_masc += h.disponiveis.modalidade.exclusivo_enf_masc || 0;
+        }
+    });
     
     // =================== TPH MÉDIO GERAL CORRIGIDO (MÉDIA PONDERADA) ===================
     let totalDiasPonderado = 0;
@@ -843,7 +991,7 @@ window.renderDashboardExecutivo = function() {
                                 ${hospitais.map(h => `
                                     <tr>
                                         <td><strong>${h.nome}</strong></td>
-                                        <td>${h.totalLeitos}</td>
+                                        <td>${window.HOSPITAL_CAPACIDADE[h.id]?.contratuais || h.totalLeitos}</td>
                                         <td>${h.ocupados.total}</td>
                                         <td>${h.taxaOcupacao.toFixed(1)}%</td>
                                     </tr>
@@ -891,7 +1039,7 @@ window.renderDashboardExecutivo = function() {
                     <div class="kpi-title">Leitos Disponíveis</div>
                     
                     <div class="kpi-content">
-                        ${renderGaugeV5((totalDisponiveis / totalLeitos * 100), '#3b82f6', totalDisponiveis)}
+                        ${renderGaugeV5((totalDisponiveis / TOTAL_CONTRATUAIS * 100), '#3b82f6', totalDisponiveis)}
                         
                         <div class="kpi-items-lista">
                             <div class="kpi-subtitle">Capacidade por Tipo de Leito (não Simultâneo)</div>
@@ -1135,7 +1283,9 @@ function renderHeatmapConcessoes() {
             H4: { nome: 'Santa Clara', cor: '#2d3748' },
             H5: { nome: 'Adventista', cor: '#2d3748' },
             H6: { nome: 'Santa Cruz', cor: '#2d3748' },
-            H7: { nome: 'Santa Virgínia', cor: '#2d3748' }
+            H7: { nome: 'Santa Virgínia', cor: '#2d3748' },
+            H8: { nome: 'São Camilo Ipiranga', cor: '#2d3748' },
+            H9: { nome: 'São Camilo Pompeia', cor: '#2d3748' }
         }
     };
     
@@ -1231,7 +1381,9 @@ function renderHeatmapLinhas() {
             H4: { nome: 'Santa Clara', cor: '#2d3748' },
             H5: { nome: 'Adventista', cor: '#2d3748' },
             H6: { nome: 'Santa Cruz', cor: '#2d3748' },
-            H7: { nome: 'Santa Virgínia', cor: '#2d3748' }
+            H7: { nome: 'Santa Virgínia', cor: '#2d3748' },
+            H8: { nome: 'São Camilo Ipiranga', cor: '#2d3748' },
+            H9: { nome: 'São Camilo Pompeia', cor: '#2d3748' }
         }
     };
     
@@ -1527,7 +1679,7 @@ function getExecutiveCSS() {
                 top: 50%;
                 left: 50%;
                 transform: translate(-50%, -50%);
-                font-size: 43px;
+                font-size: 26px;
                 font-weight: 700;
                 color: white;
                 line-height: 1;
@@ -2426,25 +2578,27 @@ function getExecutiveCSS() {
 }
 
 function logInfo(message) {
-    console.log('[DASHBOARD EXECUTIVO V4.0] ' + message);
+    console.log('[DASHBOARD EXECUTIVO V6.0] ' + message);
 }
 
 function logSuccess(message) {
-    console.log('[DASHBOARD EXECUTIVO V4.0] ✅ ' + message);
+    console.log('[DASHBOARD EXECUTIVO V6.0] ✅ ' + message);
 }
 
 function logError(message) {
-    console.error('[DASHBOARD EXECUTIVO V4.0] ❌ ' + message);
+    console.error('[DASHBOARD EXECUTIVO V6.0] ❌ ' + message);
 }
 
-console.log('Dashboard Executivo V4.0 - CORRIGIDO COMPLETO + ACENTOS UTF-8');
-console.log('✅ 7 Hospitais (H1-H7) | 93 Leitos');
+console.log('Dashboard Executivo V6.0 - CORRIGIDO COMPLETO + ACENTOS UTF-8');
+console.log('✅ 9 Hospitais (H1-H9) | 293 Leitos (126 Contratuais + 167 Extras)');
 console.log('✅ Diretivas: SPICT elegível + Diretivas = "Não"');
 console.log('✅ text-transform: none !important em TUDO');
 console.log('✅ Bordas brancas sempre visíveis');
-console.log('✅ Ordem alfabética: Adventista → Santa Virgínia');
+console.log('✅ Ordem alfabética: Adventista → Sao Camilo Pompeia');
 console.log('✅ Gauge Leitos Disponíveis fixo em azul (#3b82f6)');
 console.log('✅ Tabelas TPH, PPS e SPICT com títulos centralizados');
 console.log('✅ Linhas de Cuidado reativadas com borda branca');
 console.log('✅ Títulos e subtítulos centralizados nos heatmaps');
 console.log('✅ CORREÇÃO UTF-8: Acentos (ç, ~, ^, ´) aplicados nos heatmaps');
+console.log('✅ Taxa de ocupação máxima: 100% (base dinâmica)');
+console.log('✅ Disponíveis baseados em contratuais (não total)');
