@@ -75,20 +75,27 @@ function getNomeLeitoFormatado(hospitalId, numeroLeito) {
         }
     }
     
-    // H4 - SANTA CLARA
+    // H4 - SANTA CLARA - CORRIGIDO
     if (hospitalId === 'H4') {
-        // Apartamentos: leitos 27-57
-        if (numeroLeito >= 27 && numeroLeito <= 57) {
+        // Apartamentos: leitos 1-9 e 28-57
+        if ((numeroLeito >= 1 && numeroLeito <= 9) || (numeroLeito >= 28 && numeroLeito <= 57)) {
             return `Apartamento ID ${String(numeroLeito).padStart(2, '0')}`;
         } 
-        // Enfermarias: leitos 1-26
-        else if (numeroLeito >= 1 && numeroLeito <= 26) {
+        // Enfermarias: leitos 10-27
+        else if (numeroLeito >= 10 && numeroLeito <= 27) {
             return `Enfermaria ID ${String(numeroLeito).padStart(2, '0')}`;
         }
     }
     
     // Outros hospitais: Leito XX
     return `Leito ${String(numeroLeito).padStart(2, '0')}`;
+}
+
+// =================== FUNÇÃO PARA VERIFICAR SE É HOSPITAL HÍBRIDO ===================
+function isHospitalHibrido(hospitalId) {
+    // Hospitais híbridos: H1, H3, H5, H6, H7, H8, H9
+    // Hospitais com tipos fixos: H2 (Cruz Azul), H4 (Santa Clara)
+    return ['H1', 'H3', 'H5', 'H6', 'H7', 'H8', 'H9'].includes(hospitalId);
 }
 
 // =================== FUNÇÃO PRINCIPAL - MODAL COM OPÇÕES ===================
@@ -205,7 +212,15 @@ window.openQRCodesSimple = function() {
         addOptimizedStyles();
     }
     
-    generateQRCodesSimple();
+    setTimeout(() => generateQRCodesSimple(), 100);
+};
+
+window.closeQRModalSimple = function() {
+    const modal = document.querySelector('.qr-modal-simple');
+    if (modal) {
+        modal.remove();
+        console.log('Modal de QR Codes fechado');
+    }
 };
 
 // =================== TROCAR ABA ===================
@@ -353,7 +368,7 @@ function atualizarContadorSelecao() {
 }
 
 // =================== GERAR QR CODES SELECIONADOS ===================
-window.gerarQRCodesSelecionados = async function() {
+window.gerarQRCodesSelecionados = function() {
     if (leitosSelecionados.length === 0) {
         alert('Selecione pelo menos um leito!');
         return;
@@ -549,47 +564,48 @@ function gerarHTMLImpressao(leitos) {
 
         .dados-header p {
             font-size: 10px;
+            color: #d1d5db;
         }
 
         .dados-principais {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
             gap: 6px;
-            margin-bottom: 6px;
+            padding: 6px 0;
+            border-bottom: 1px solid #e5e7eb;
         }
 
         .dado-destaque {
-            background: white;
-            padding: 6px;
-            border-radius: 4px;
-            border: 2px solid #000;
+            background: #f9fafb;
+            padding: 5px;
+            border-radius: 3px;
+            border: 1px solid #e5e7eb;
         }
 
         .dado-destaque .label {
             font-size: 8px;
-            color: #000;
-            font-weight: 700;
+            color: #6b7280;
+            font-weight: 600;
             text-transform: uppercase;
-            margin-bottom: 2px;
+            margin-bottom: 1px;
         }
 
         .dado-destaque .valor {
-            font-size: 13px;
+            font-size: 11px;
             color: #000;
-            font-weight: 800;
+            font-weight: 700;
         }
 
         .dados-secundarios {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
             gap: 4px;
+            padding: 6px 0;
+            border-bottom: 1px solid #e5e7eb;
         }
 
         .dado-item {
-            background: #f9fafb;
-            padding: 4px;
-            border-radius: 3px;
-            border: 1px solid #d1d5db;
+            padding: 3px;
         }
 
         .dado-item .label {
@@ -601,22 +617,18 @@ function gerarHTMLImpressao(leitos) {
         }
 
         .dado-item .valor {
-            font-size: 10px;
+            font-size: 9px;
             color: #000;
-            font-weight: 700;
+            font-weight: 600;
         }
 
         .concessoes-section {
-            margin-top: 6px;
-            padding: 6px;
-            background: #f9fafb;
-            border-radius: 4px;
-            border: 1px solid #d1d5db;
+            padding: 6px 0;
         }
 
         .concessoes-section .titulo {
             font-size: 8px;
-            color: #000;
+            color: #6b7280;
             font-weight: 700;
             text-transform: uppercase;
             margin-bottom: 4px;
@@ -629,22 +641,22 @@ function gerarHTMLImpressao(leitos) {
         }
 
         .chip {
-            background: white;
-            border: 1px solid #000;
-            color: #000;
+            background: #000;
+            color: white;
             padding: 2px 6px;
-            border-radius: 8px;
-            font-size: 8px;
+            border-radius: 3px;
+            font-size: 7px;
             font-weight: 700;
+            text-transform: uppercase;
         }
 
         @media print {
             body {
-                padding: 10mm;
+                padding: 0;
             }
 
             .controles {
-                display: none;
+                display: none !important;
             }
 
             @page {
@@ -894,6 +906,7 @@ window.generateQRCodesSimple = function() {
     
     const leitosIrmaos = LEITOS_IRMAOS[hospitalId] || {};
     const leitosProcessados = new Set();
+    const isHibrido = isHospitalHibrido(hospitalId);
     
     // Primeiro gerar QR codes não-irmãos
     container.innerHTML += '<div class="qr-grid" id="grid-normais">';
@@ -910,6 +923,7 @@ window.generateQRCodesSimple = function() {
                     <div class="qr-label">
                         <strong>${hospital.nome}</strong><br>
                         ${nomeLeitoFormatado}
+                        ${isHibrido ? '<br><span style="font-size: 9px; font-style: italic; font-weight: 400;">(ID não representa número real do leito)</span>' : ''}
                     </div>
                     <img src="${imgURL}" alt="QR Code ${nomeLeitoFormatado}" class="qr-img" loading="eager">
                 </div>
@@ -1016,6 +1030,7 @@ async function generateHospitalQRCodes(hospitalId, hospital, container) {
     
     const leitosIrmaos = LEITOS_IRMAOS[hospitalId] || {};
     const leitosProcessados = new Set();
+    const isHibrido = isHospitalHibrido(hospitalId);
     
     // Leitos normais
     container.innerHTML += '<div class="qr-grid" id="grid-' + hospitalId + '-normais">';
@@ -1033,6 +1048,7 @@ async function generateHospitalQRCodes(hospitalId, hospital, container) {
                 <div class="qr-label">
                     <strong>${hospital.nome}</strong><br>
                     ${nomeLeitoFormatado}
+                    ${isHibrido ? '<br><span style="font-size: 9px; font-style: italic; font-weight: 400;">(ID não representa número real do leito)</span>' : ''}
                 </div>
                 <img src="${imgURL}" alt="QR Code ${nomeLeitoFormatado}" class="qr-img" loading="eager">
             `;
@@ -1087,7 +1103,7 @@ async function generateHospitalQRCodes(hospitalId, hospital, container) {
                 leitosProcessados.add(irmao);
                 generationProgress += 2;
                 updateProgress(`Gerando ${hospital.nome}...`, generationProgress, totalQRCodes);
-                await sleep(QR_API.DELAY);
+                await sleep(QR_API.DELAY * 2);
             }
         }
         container.innerHTML += '</div>';
@@ -1108,344 +1124,250 @@ function sleep(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
 
-window.closeQRModalSimple = function() {
-    const modal = document.querySelector('.qr-modal-simple');
-    if (modal) {
-        isGenerating = false;
-        modal.remove();
-    }
-};
-
-// =================== ESTILOS CSS ===================
+// =================== ESTILOS OTIMIZADOS ===================
 function addOptimizedStyles() {
     const styles = document.createElement('style');
     styles.id = 'qrOptimizedStyles';
-    styles.innerHTML = `
+    styles.textContent = `
         .qr-modal-simple {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0,0,0,0.9);
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            background: rgba(0, 0, 0, 0.7);
             z-index: 10000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
             overflow: auto;
         }
         
         .qr-modal-content {
-            background: white;
-            border-radius: 12px;
-            width: 95%;
+            background: #ffffff;
+            width: 90%;
             max-width: 1400px;
-            max-height: 95vh;
-            overflow: auto;
-            color: #333;
-            margin: 20px;
+            max-height: 90vh;
+            border-radius: 8px;
+            box-shadow: 0 10px 50px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
         }
         
         .qr-modal-header {
-            padding: 20px;
-            border-bottom: 2px solid #e5e7eb;
+            background: #172945;
+            color: white;
+            padding: 20px 25px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            background: #f8fafc;
         }
         
         .qr-modal-header h2 {
             margin: 0;
-            color: #1a1f2e;
-            font-size: 24px;
-            font-family: 'Poppins', sans-serif;
+            font-size: 20px;
             font-weight: 700;
+            font-family: 'Poppins', sans-serif;
         }
         
         .close-btn {
-            background: #ef4444;
-            color: white;
+            background: none;
             border: none;
-            border-radius: 6px;
-            padding: 10px 16px;
+            color: white;
+            font-size: 28px;
             cursor: pointer;
-            font-size: 18px;
-            font-weight: bold;
-            transition: background 0.2s;
+            padding: 0;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.2s;
         }
         
         .close-btn:hover {
-            background: #dc2626;
-        }
-        
-        .qr-tabs {
-            display: flex;
-            gap: 10px;
-            padding: 15px 20px 0;
-            border-bottom: 2px solid #e5e7eb;
-        }
-        
-        .qr-tab {
-            padding: 10px 20px;
-            background: transparent;
-            border: none;
-            border-bottom: 3px solid transparent;
-            font-weight: 700;
-            font-size: 15px;
-            cursor: pointer;
-            transition: all 0.2s;
-            color: #6b7280;
-        }
-        
-        .qr-tab:hover {
-            color: #1a1f2e;
-        }
-        
-        .qr-tab.active {
-            color: #60a5fa;
-            border-bottom-color: #60a5fa;
-        }
-        
-        .qr-tab-content {
-            padding: 20px;
-        }
-        
-        .selecao-controls {
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-        
-        .selecao-header {
-            margin-bottom: 20px;
-        }
-        
-        .selecao-header h3 {
-            font-size: 18px;
-            font-weight: 700;
-            color: #1a1f2e;
-            margin-bottom: 10px;
-        }
-        
-        .selecao-header select {
-            width: 100%;
-            padding: 12px;
-            border: 2px solid #d1d5db;
-            border-radius: 8px;
-            font-size: 16px;
-            font-weight: 700;
-        }
-        
-        .selecao-actions {
-            display: flex;
-            gap: 10px;
-        }
-        
-        .btn-secondary {
-            padding: 8px 16px;
-            background: #6b7280;
-            color: white;
-            border: none;
-            border-radius: 6px;
-            font-weight: 700;
-            font-size: 14px;
-            cursor: pointer;
-        }
-        
-        .btn-secondary:hover {
-            background: #4b5563;
-        }
-        
-        .tabela-leitos {
-            margin-top: 20px;
-        }
-        
-        .tabela-selecao {
-            width: 100%;
-            border-collapse: collapse;
-            background: white;
-            border-radius: 8px;
-            overflow: hidden;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-        }
-        
-        .tabela-selecao thead {
-            background: #1a1f2e;
-            color: white;
-        }
-        
-        .tabela-selecao th {
-            padding: 12px;
-            text-align: left;
-            font-weight: 700;
-            font-size: 13px;
-            text-transform: uppercase;
-        }
-        
-        .tabela-selecao td {
-            padding: 10px 12px;
-            border-bottom: 1px solid #e5e7eb;
-            font-size: 14px;
-        }
-        
-        .linha-leito:hover {
-            background: #f9fafb;
-        }
-        
-        .checkbox-leito {
-            width: 18px;
-            height: 18px;
-            cursor: pointer;
-            accent-color: #60a5fa;
-        }
-        
-        .selecao-footer {
-            margin-top: 20px;
-            padding: 20px;
-            background: #f9fafb;
-            border-radius: 8px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        
-        .contador-selecao {
-            font-size: 18px;
-            color: #1a1f2e;
-        }
-        
-        .contador-selecao strong {
-            font-size: 24px;
-            color: #60a5fa;
-        }
-        
-        .btn-gerar-selecao {
-            padding: 12px 30px;
-            background: #10b981;
-            color: white;
-            border: none;
-            border-radius: 8px;
-            font-weight: 700;
-            font-size: 16px;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-        
-        .btn-gerar-selecao:hover:not(:disabled) {
-            background: #059669;
-            transform: translateY(-2px);
-        }
-        
-        .btn-gerar-selecao:disabled {
-            background: #9ca3af;
-            cursor: not-allowed;
-            transform: none;
+            transform: scale(1.2);
         }
         
         .qr-modal-body {
             padding: 0;
+            overflow-y: auto;
+            flex: 1;
+        }
+        
+        .qr-tabs {
+            display: flex;
+            background: #f3f4f6;
+            border-bottom: 2px solid #e5e7eb;
+        }
+        
+        .qr-tab {
+            flex: 1;
+            padding: 15px 20px;
+            background: none;
+            border: none;
+            font-family: 'Poppins', sans-serif;
+            font-size: 14px;
+            font-weight: 600;
+            color: #6b7280;
+            cursor: pointer;
+            transition: all 0.3s;
+            border-bottom: 3px solid transparent;
+        }
+        
+        .qr-tab:hover {
+            background: #e5e7eb;
+            color: #172945;
+        }
+        
+        .qr-tab.active {
+            background: white;
+            color: #0676bb;
+            border-bottom: 3px solid #0676bb;
+        }
+        
+        .qr-tab-content {
+            padding: 25px;
         }
         
         .qr-controls {
-            margin-bottom: 20px;
             display: flex;
             gap: 15px;
+            margin-bottom: 25px;
             align-items: center;
-            flex-wrap: wrap;
-            padding: 0 20px;
         }
         
         .qr-controls select {
-            padding: 12px;
+            flex: 1;
+            padding: 12px 15px;
             border: 2px solid #d1d5db;
-            border-radius: 8px;
-            font-size: 16px;
-            background: white;
-            min-width: 250px;
-            font-weight: 700;
+            border-radius: 6px;
+            font-family: 'Poppins', sans-serif;
+            font-size: 14px;
+            font-weight: 600;
+            color: #172945;
+            cursor: pointer;
+            transition: all 0.3s;
         }
         
-        .qr-controls button {
-            padding: 12px 24px;
-            background: #3b82f6;
+        .qr-controls select:hover {
+            border-color: #0676bb;
+        }
+        
+        .qr-controls select:focus {
+            outline: none;
+            border-color: #0676bb;
+            box-shadow: 0 0 0 3px rgba(6, 118, 187, 0.1);
+        }
+        
+        .btn-all {
+            background: #172945;
             color: white;
             border: none;
-            border-radius: 8px;
-            cursor: pointer;
+            padding: 12px 20px;
+            border-radius: 6px;
+            font-family: 'Poppins', sans-serif;
+            font-size: 14px;
             font-weight: 700;
-            font-size: 16px;
-            transition: all 0.2s;
+            cursor: pointer;
+            transition: all 0.3s;
+            white-space: nowrap;
         }
         
-        .qr-controls button:disabled {
+        .btn-all:hover:not(:disabled) {
+            background: #0676bb;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(6, 118, 187, 0.3);
+        }
+        
+        .btn-all:disabled {
             background: #9ca3af;
             cursor: not-allowed;
         }
         
-        .btn-all {
-            background: #10b981 !important;
-        }
-        
-        .btn-all:hover:not(:disabled) {
-            background: #059669 !important;
-        }
-        
         .btn-print {
-            background: #8b5cf6 !important;
+            background: #0676bb;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 6px;
+            font-family: 'Poppins', sans-serif;
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+            white-space: nowrap;
         }
         
         .btn-print:hover {
-            background: #7c3aed !important;
+            background: #055a94;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(6, 118, 187, 0.3);
         }
         
         .progress-container {
-            background: #f1f5f9;
-            border: 2px solid #e2e8f0;
-            border-radius: 8px;
+            background: #f9fafb;
             padding: 15px;
-            margin: 0 20px 20px;
+            border-radius: 8px;
+            margin-bottom: 25px;
+            border: 1px solid #e5e7eb;
         }
         
         .progress-info {
             display: flex;
             justify-content: space-between;
             margin-bottom: 10px;
-            font-weight: 700;
-            color: #374151;
+            font-family: 'Poppins', sans-serif;
+            font-size: 14px;
+            font-weight: 600;
+            color: #172945;
         }
         
         .progress-bar {
-            width: 100%;
-            height: 20px;
             background: #e5e7eb;
-            border-radius: 10px;
+            height: 12px;
+            border-radius: 6px;
             overflow: hidden;
         }
         
         .progress-fill {
+            background: linear-gradient(90deg, #0676bb, #055a94);
             height: 100%;
-            background: linear-gradient(90deg, #10b981, #059669);
-            width: 0%;
+            border-radius: 6px;
             transition: width 0.3s ease;
         }
         
         .qr-container {
-            padding: 0 20px;
+            width: 100%;
         }
         
         .qr-container h3 {
-            text-align: center;
-            color: #1a1f2e;
-            margin: 30px 0 20px 0;
-            font-size: 24px;
-            padding: 15px;
-            background: #f8fafc;
-            border-radius: 8px;
-            border-left: 4px solid #60a5fa;
+            background: #172945;
+            color: white;
+            padding: 12px 15px;
+            margin: 0 0 20px 0;
+            border-radius: 6px;
+            font-family: 'Poppins', sans-serif;
+            font-size: 16px;
             font-weight: 700;
+            text-align: center;
         }
         
-        .qr-container h3:first-child {
+        .hospital-title {
+            background: #172945;
+            color: white;
+            padding: 12px 15px;
+            margin: 20px 0 20px 0;
+            border-radius: 6px;
+            font-family: 'Poppins', sans-serif;
+            font-size: 16px;
+            font-weight: 700;
+            text-align: center;
+        }
+        
+        .hospital-title:first-child {
             margin-top: 0;
         }
         
@@ -1463,76 +1385,232 @@ function addOptimizedStyles() {
             margin-bottom: 30px;
         }
         
+        .qr-item {
+            background: white;
+            border: 2px solid #172945;
+            border-radius: 8px;
+            padding: 15px;
+            text-align: center;
+            transition: all 0.3s;
+        }
+        
+        .qr-item:hover {
+            border-color: #0676bb;
+            box-shadow: 0 4px 12px rgba(6, 118, 187, 0.2);
+            transform: translateY(-2px);
+        }
+        
         .qr-item-duplo {
-            border: 3px solid #60a5fa;
-            border-radius: 12px;
+            background: white;
+            border: 3px solid #172945;
+            border-radius: 8px;
             padding: 10px;
-            background: #f0f9ff;
             display: flex;
             flex-direction: column;
             gap: 10px;
         }
         
         .qr-item-irmao {
-            border: 2px solid #e5e7eb;
-            border-radius: 12px;
-            padding: 15px;
-            text-align: center;
-            background: white;
-            transition: all 0.2s;
-        }
-        
-        .qr-item {
-            border: 2px solid #e5e7eb;
-            border-radius: 12px;
-            padding: 15px;
-            text-align: center;
             background: #f9fafb;
-            transition: all 0.2s;
-            page-break-inside: avoid;
-        }
-        
-        .qr-item:hover, .qr-item-irmao:hover {
-            border-color: #60a5fa;
-            box-shadow: 0 4px 12px rgba(96, 165, 250, 0.2);
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            padding: 10px;
+            text-align: center;
         }
         
         .qr-label {
-            font-size: 14px;
-            margin-bottom: 12px;
-            color: #374151;
+            font-family: 'Poppins', sans-serif;
+            font-size: 12px;
+            color: #172945;
+            margin-bottom: 10px;
             line-height: 1.4;
-            font-weight: 700;
         }
         
         .qr-label strong {
-            color: #1e40af;
-            font-size: 16px;
-            font-weight: 700;
+            color: #0676bb;
+            font-size: 13px;
+            font-weight: 800;
         }
         
         .qr-img {
-            width: 160px;
-            height: 160px;
+            width: 180px;
+            height: 180px;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
             display: block;
             margin: 0 auto;
+        }
+        
+        .qr-item-irmao .qr-img {
+            width: 150px;
+            height: 150px;
+        }
+        
+        .selecao-controls {
+            padding: 0;
+        }
+        
+        .selecao-header {
+            margin-bottom: 20px;
+        }
+        
+        .selecao-header h3 {
+            font-family: 'Poppins', sans-serif;
+            font-size: 16px;
+            font-weight: 700;
+            color: #172945;
+            margin-bottom: 10px;
+        }
+        
+        .selecao-header select {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #d1d5db;
+            border-radius: 6px;
+            font-family: 'Poppins', sans-serif;
+            font-size: 14px;
+            font-weight: 600;
+            color: #172945;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .selecao-header select:hover {
+            border-color: #0676bb;
+        }
+        
+        .selecao-header select:focus {
+            outline: none;
+            border-color: #0676bb;
+            box-shadow: 0 0 0 3px rgba(6, 118, 187, 0.1);
+        }
+        
+        .selecao-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        
+        .btn-secondary {
+            background: #f3f4f6;
+            color: #172945;
+            border: 2px solid #d1d5db;
+            padding: 10px 18px;
+            border-radius: 6px;
+            font-family: 'Poppins', sans-serif;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .btn-secondary:hover {
+            background: #e5e7eb;
+            border-color: #0676bb;
+            color: #0676bb;
+        }
+        
+        .tabela-leitos {
+            margin: 20px 0;
+        }
+        
+        .tabela-selecao {
+            width: 100%;
+            border-collapse: collapse;
+            font-family: 'Poppins', sans-serif;
+            font-size: 13px;
+            background: white;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        
+        .tabela-selecao thead {
+            background: #172945;
+            color: white;
+        }
+        
+        .tabela-selecao th {
+            padding: 12px 15px;
+            text-align: left;
+            font-weight: 700;
+            font-size: 12px;
+            text-transform: uppercase;
+        }
+        
+        .tabela-selecao td {
+            padding: 12px 15px;
+            border-top: 1px solid #e5e7eb;
+        }
+        
+        .tabela-selecao tbody tr {
+            transition: background 0.2s;
+        }
+        
+        .tabela-selecao tbody tr:hover {
+            background: #f9fafb;
+        }
+        
+        .checkbox-leito {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+        }
+        
+        .selecao-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 20px;
+            padding: 15px;
+            background: #f9fafb;
+            border: 1px solid #e5e7eb;
             border-radius: 8px;
         }
         
+        .contador-selecao {
+            font-family: 'Poppins', sans-serif;
+            font-size: 14px;
+            color: #6b7280;
+        }
+        
+        .contador-selecao strong {
+            color: #0676bb;
+            font-size: 18px;
+        }
+        
+        .btn-gerar-selecao {
+            background: #0676bb;
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 6px;
+            font-family: 'Poppins', sans-serif;
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .btn-gerar-selecao:hover:not(:disabled) {
+            background: #055a94;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(6, 118, 187, 0.3);
+        }
+        
+        .btn-gerar-selecao:disabled {
+            background: #9ca3af;
+            cursor: not-allowed;
+        }
+        
         @media print {
-            @page {
-                margin: 10mm;
-                size: A4 portrait;
+            body {
+                margin: 0;
+                padding: 0;
+                background: white;
             }
             
-            body > *:not(.qr-modal-simple) {
-                display: none !important;
-            }
-            
-            .qr-modal-simple {
-                position: static !important;
-                background: white !important;
-                display: block !important;
+            body * {
                 overflow: visible !important;
             }
             
