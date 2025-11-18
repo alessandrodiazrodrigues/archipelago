@@ -6,8 +6,9 @@
 // ✅ 9 hospitais ativos - 293 leitos
 // ✅ H2 Cruz Azul: 13 pares de irmãos (26 enfermarias)
 // ✅ H4 Santa Clara: 9 pares de irmãos (18 enfermarias)
-// ✅ Nota "(ID não representa número real do leito)" apenas em híbridos
+// ✅ Nota "(ID não representa número real do leito)" em TODOS os QR codes
 // ✅ Total sistema: 353 leitos (156 contratuais + 197 extras)
+// ✅ Debug logs no console para conferência
 
 // OBSERVAÇÃO: URL antiga (comentada para futura reversão se necessário)
 // const QR_BASE_URL_OLD = 'https://qrcode-seven-gamma.vercel.app';
@@ -905,17 +906,23 @@ window.generateQRCodesSimple = function() {
     const hospital = QR_API.HOSPITAIS[hospitalId];
     const container = document.getElementById('qrCodesContainer');
     
+    console.log('=== QRCODE V6.1 FINAL - GERANDO QR CODES ===');
+    console.log('Hospital:', hospitalId, '-', hospital.nome);
+    console.log('Total de leitos:', hospital.leitos);
+    
     document.getElementById('progressContainer').style.display = 'none';
     container.innerHTML = `<h3>${hospital.nome}</h3>`;
     
     const leitosIrmaos = LEITOS_IRMAOS[hospitalId] || {};
     const leitosProcessados = new Set();
-    const isHibrido = isHospitalHibrido(hospitalId);
+    
+    console.log('Leitos irmãos encontrados:', Object.keys(leitosIrmaos).length > 0 ? 'SIM' : 'NÃO');
     
     // Primeiro gerar QR codes não-irmãos
     container.innerHTML += '<div class="qr-grid" id="grid-normais">';
     const gridNormais = container.querySelector('#grid-normais');
     
+    let countNormais = 0;
     for (let i = 1; i <= hospital.leitos; i++) {
         if (!leitosIrmaos[i] && !leitosProcessados.has(i)) {
             const qrURL = `${QR_API.BASE_URL}/?h=${hospitalId}&l=${i}`;
@@ -926,18 +933,21 @@ window.generateQRCodesSimple = function() {
                 <div class="qr-item">
                     <div class="qr-label">
                         <strong>${hospital.nome}</strong><br>
-                        ${nomeLeitoFormatado}
-                        ${isHibrido ? '<br><span style="font-size: 9px; font-style: italic; font-weight: 400;">(ID não representa número real do leito)</span>' : ''}
+                        ${nomeLeitoFormatado}<br><span style="font-size: 9px; font-style: italic; font-weight: 400;">(ID não representa número real do leito)</span>
                     </div>
                     <img src="${imgURL}" alt="QR Code ${nomeLeitoFormatado}" class="qr-img" loading="eager">
                 </div>
             `;
             leitosProcessados.add(i);
+            countNormais++;
         }
     }
     container.innerHTML += '</div>';
     
+    console.log('QR Codes normais gerados:', countNormais);
+    
     // Se houver leitos irmãos, gerar em grid separado empilhado
+    let countIrmaos = 0;
     if (Object.keys(leitosIrmaos).length > 0) {
         container.innerHTML += '<div class="qr-grid-irmaos" id="grid-irmaos">';
         const gridIrmaos = container.querySelector('#grid-irmaos');
@@ -959,14 +969,14 @@ window.generateQRCodesSimple = function() {
                         <div class="qr-item-irmao">
                             <div class="qr-label">
                                 <strong>${hospital.nome}</strong><br>
-                                ${nome1}
+                                ${nome1}<br><span style="font-size: 9px; font-style: italic; font-weight: 400;">(ID não representa número real do leito)</span>
                             </div>
                             <img src="${imgURL1}" alt="QR Code ${nome1}" class="qr-img" loading="eager">
                         </div>
                         <div class="qr-item-irmao">
                             <div class="qr-label">
                                 <strong>${hospital.nome}</strong><br>
-                                ${nome2}
+                                ${nome2}<br><span style="font-size: 9px; font-style: italic; font-weight: 400;">(ID não representa número real do leito)</span>
                             </div>
                             <img src="${imgURL2}" alt="QR Code ${nome2}" class="qr-img" loading="eager">
                         </div>
@@ -975,12 +985,16 @@ window.generateQRCodesSimple = function() {
                 
                 leitosProcessados.add(i);
                 leitosProcessados.add(irmao);
+                countIrmaos += 2;
             }
         }
         container.innerHTML += '</div>';
     }
     
+    console.log('QR Codes irmãos gerados:', countIrmaos);
+    console.log('TOTAL DE QR CODES:', countNormais + countIrmaos);
     console.log(`${hospital.leitos} QR Codes gerados para ${hospital.nome}`);
+    console.log('=== FIM DA GERAÇÃO ===');
 };
 
 // =================== GERAR TODOS OS QR CODES ===================
@@ -1030,11 +1044,11 @@ window.generateAllQRCodesOptimized = async function() {
 };
 
 async function generateHospitalQRCodes(hospitalId, hospital, container) {
+    console.log(`Gerando ${hospital.nome} (${hospital.leitos} leitos)...`);
     container.innerHTML += `<h3 class="hospital-title">${hospital.nome}</h3>`;
     
     const leitosIrmaos = LEITOS_IRMAOS[hospitalId] || {};
     const leitosProcessados = new Set();
-    const isHibrido = isHospitalHibrido(hospitalId);
     
     // Leitos normais
     container.innerHTML += '<div class="qr-grid" id="grid-' + hospitalId + '-normais">';
@@ -1051,8 +1065,7 @@ async function generateHospitalQRCodes(hospitalId, hospital, container) {
             qrItem.innerHTML = `
                 <div class="qr-label">
                     <strong>${hospital.nome}</strong><br>
-                    ${nomeLeitoFormatado}
-                    ${isHibrido ? '<br><span style="font-size: 9px; font-style: italic; font-weight: 400;">(ID não representa número real do leito)</span>' : ''}
+                    ${nomeLeitoFormatado}<br><span style="font-size: 9px; font-style: italic; font-weight: 400;">(ID não representa número real do leito)</span>
                 </div>
                 <img src="${imgURL}" alt="QR Code ${nomeLeitoFormatado}" class="qr-img" loading="eager">
             `;
@@ -1068,6 +1081,7 @@ async function generateHospitalQRCodes(hospitalId, hospital, container) {
     
     // Leitos irmãos empilhados
     if (Object.keys(leitosIrmaos).length > 0) {
+        console.log(`${hospital.nome} - Gerando leitos irmãos...`);
         container.innerHTML += '<div class="qr-grid-irmaos" id="grid-' + hospitalId + '-irmaos">';
         const gridIrmaos = container.querySelector('#grid-' + hospitalId + '-irmaos');
         
@@ -1089,14 +1103,14 @@ async function generateHospitalQRCodes(hospitalId, hospital, container) {
                     <div class="qr-item-irmao">
                         <div class="qr-label">
                             <strong>${hospital.nome}</strong><br>
-                            ${nome1}
+                            ${nome1}<br><span style="font-size: 9px; font-style: italic; font-weight: 400;">(ID não representa número real do leito)</span>
                         </div>
                         <img src="${imgURL1}" alt="QR Code ${nome1}" class="qr-img" loading="eager">
                     </div>
                     <div class="qr-item-irmao">
                         <div class="qr-label">
                             <strong>${hospital.nome}</strong><br>
-                            ${nome2}
+                            ${nome2}<br><span style="font-size: 9px; font-style: italic; font-weight: 400;">(ID não representa número real do leito)</span>
                         </div>
                         <img src="${imgURL2}" alt="QR Code ${nome2}" class="qr-img" loading="eager">
                     </div>
@@ -1112,6 +1126,8 @@ async function generateHospitalQRCodes(hospitalId, hospital, container) {
         }
         container.innerHTML += '</div>';
     }
+    
+    console.log(`${hospital.nome} concluído!`);
 }
 
 function updateProgress(text, current, total) {
@@ -1813,9 +1829,14 @@ function addOptimizedStyles() {
 // =================== INICIALIZAÇÃO ===================
 document.addEventListener('DOMContentLoaded', function() {
     window.openQRCodes = window.openQRCodesSimple;
-    console.log('Sistema QR Code V6.0 carregado');
+    console.log('╔════════════════════════════════════════════════════════════╗');
+    console.log('║   SISTEMA QR CODE V6.1 FINAL - CARREGADO COM SUCESSO     ║');
+    console.log('╚════════════════════════════════════════════════════════════╝');
     console.log('✅ 9 hospitais ativos - 293 leitos');
     console.log('✅ H2: 13 pares de irmãos | H4: 9 pares de irmãos');
     console.log('✅ Molduras de 14,5cm x 9,5cm');
     console.log('✅ URL: https://qrcode-seven-gamma.vercel.app');
+    console.log('✅ Nota em itálico: TODOS os hospitais');
+    console.log('✅ Quebra de página: 1 QR code por página');
+    console.log('═══════════════════════════════════════════════════════════');
 });
