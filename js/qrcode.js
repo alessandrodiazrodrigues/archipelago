@@ -918,82 +918,95 @@ window.generateQRCodesSimple = function() {
     
     console.log('Leitos irmãos encontrados:', Object.keys(leitosIrmaos).length > 0 ? 'SIM' : 'NÃO');
     
-    // Primeiro gerar QR codes não-irmãos
+    // CRIAR ARRAY DE LEITOS E ORDENAR
+    const todosLeitos = [];
+    for (let i = 1; i <= hospital.leitos; i++) {
+        todosLeitos.push(i);
+    }
+    
+    // Separar leitos normais e irmãos
+    const leitosNormais = [];
+    const paresIrmaos = [];
+    
+    for (const leito of todosLeitos) {
+        if (!leitosIrmaos[leito] && !leitosProcessados.has(leito)) {
+            leitosNormais.push(leito);
+            leitosProcessados.add(leito);
+        } else if (leitosIrmaos[leito] && !leitosProcessados.has(leito)) {
+            const irmao = leitosIrmaos[leito];
+            if (leito < irmao) {
+                paresIrmaos.push([leito, irmao]);
+                leitosProcessados.add(leito);
+                leitosProcessados.add(irmao);
+            }
+        }
+    }
+    
+    console.log('Leitos normais:', leitosNormais.length);
+    console.log('Pares de irmãos:', paresIrmaos.length);
+    
+    // Primeiro gerar QR codes não-irmãos EM ORDEM
     container.innerHTML += '<div class="qr-grid" id="grid-normais">';
     const gridNormais = container.querySelector('#grid-normais');
     
-    let countNormais = 0;
-    for (let i = 1; i <= hospital.leitos; i++) {
-        if (!leitosIrmaos[i] && !leitosProcessados.has(i)) {
-            const qrURL = `${QR_API.BASE_URL}/?h=${hospitalId}&l=${i}`;
-            const imgURL = `${QR_API.API_URL}?size=${QR_API.SIZE}x${QR_API.SIZE}&data=${encodeURIComponent(qrURL)}`;
-            const nomeLeitoFormatado = getNomeLeitoFormatado(hospitalId, i);
-            
-            gridNormais.innerHTML += `
-                <div class="qr-item">
-                    <div class="qr-label">
-                        <strong>${hospital.nome}</strong><br>
-                        ${nomeLeitoFormatado}<br><span style="font-size: 9px; font-style: italic; font-weight: 400;">(ID não representa número real do leito)</span>
-                    </div>
-                    <img src="${imgURL}" alt="QR Code ${nomeLeitoFormatado}" class="qr-img" loading="eager">
+    for (const numeroLeito of leitosNormais) {
+        const qrURL = `${QR_API.BASE_URL}/?h=${hospitalId}&l=${numeroLeito}`;
+        const imgURL = `${QR_API.API_URL}?size=${QR_API.SIZE}x${QR_API.SIZE}&data=${encodeURIComponent(qrURL)}`;
+        const nomeLeitoFormatado = getNomeLeitoFormatado(hospitalId, numeroLeito);
+        
+        gridNormais.innerHTML += `
+            <div class="qr-item">
+                <div class="qr-label">
+                    <strong>${hospital.nome}</strong><br>
+                    ${nomeLeitoFormatado}<br><span style="font-size: 9px; font-style: italic; font-weight: 400;">(ID não representa número real do leito)</span>
                 </div>
-            `;
-            leitosProcessados.add(i);
-            countNormais++;
-        }
+                <img src="${imgURL}" alt="QR Code ${nomeLeitoFormatado}" class="qr-img" loading="eager">
+            </div>
+        `;
     }
     container.innerHTML += '</div>';
     
-    console.log('QR Codes normais gerados:', countNormais);
+    console.log('QR Codes normais gerados:', leitosNormais.length);
     
-    // Se houver leitos irmãos, gerar em grid separado empilhado
-    let countIrmaos = 0;
-    if (Object.keys(leitosIrmaos).length > 0) {
+    // Depois gerar leitos irmãos EM ORDEM
+    if (paresIrmaos.length > 0) {
         container.innerHTML += '<div class="qr-grid-irmaos" id="grid-irmaos">';
         const gridIrmaos = container.querySelector('#grid-irmaos');
         
-        for (let i = 1; i <= hospital.leitos; i++) {
-            const irmao = leitosIrmaos[i];
+        for (const [leito1, leito2] of paresIrmaos) {
+            const qrURL1 = `${QR_API.BASE_URL}/?h=${hospitalId}&l=${leito1}`;
+            const qrURL2 = `${QR_API.BASE_URL}/?h=${hospitalId}&l=${leito2}`;
+            const imgURL1 = `${QR_API.API_URL}?size=${QR_API.SIZE}x${QR_API.SIZE}&data=${encodeURIComponent(qrURL1)}`;
+            const imgURL2 = `${QR_API.API_URL}?size=${QR_API.SIZE}x${QR_API.SIZE}&data=${encodeURIComponent(qrURL2)}`;
             
-            if (irmao && !leitosProcessados.has(i) && i < irmao) {
-                const qrURL1 = `${QR_API.BASE_URL}/?h=${hospitalId}&l=${i}`;
-                const qrURL2 = `${QR_API.BASE_URL}/?h=${hospitalId}&l=${irmao}`;
-                const imgURL1 = `${QR_API.API_URL}?size=${QR_API.SIZE}x${QR_API.SIZE}&data=${encodeURIComponent(qrURL1)}`;
-                const imgURL2 = `${QR_API.API_URL}?size=${QR_API.SIZE}x${QR_API.SIZE}&data=${encodeURIComponent(qrURL2)}`;
-                
-                const nome1 = getNomeLeitoFormatado(hospitalId, i);
-                const nome2 = getNomeLeitoFormatado(hospitalId, irmao);
-                
-                gridIrmaos.innerHTML += `
-                    <div class="qr-item-duplo">
-                        <div class="qr-item-irmao">
-                            <div class="qr-label">
-                                <strong>${hospital.nome}</strong><br>
-                                ${nome1}<br><span style="font-size: 9px; font-style: italic; font-weight: 400;">(ID não representa número real do leito)</span>
-                            </div>
-                            <img src="${imgURL1}" alt="QR Code ${nome1}" class="qr-img" loading="eager">
+            const nome1 = getNomeLeitoFormatado(hospitalId, leito1);
+            const nome2 = getNomeLeitoFormatado(hospitalId, leito2);
+            
+            gridIrmaos.innerHTML += `
+                <div class="qr-item-duplo">
+                    <div class="qr-item-irmao">
+                        <div class="qr-label">
+                            <strong>${hospital.nome}</strong><br>
+                            ${nome1}<br><span style="font-size: 9px; font-style: italic; font-weight: 400;">(ID não representa número real do leito)</span>
                         </div>
-                        <div class="qr-item-irmao">
-                            <div class="qr-label">
-                                <strong>${hospital.nome}</strong><br>
-                                ${nome2}<br><span style="font-size: 9px; font-style: italic; font-weight: 400;">(ID não representa número real do leito)</span>
-                            </div>
-                            <img src="${imgURL2}" alt="QR Code ${nome2}" class="qr-img" loading="eager">
-                        </div>
+                        <img src="${imgURL1}" alt="QR Code ${nome1}" class="qr-img" loading="eager">
                     </div>
-                `;
-                
-                leitosProcessados.add(i);
-                leitosProcessados.add(irmao);
-                countIrmaos += 2;
-            }
+                    <div class="qr-item-irmao">
+                        <div class="qr-label">
+                            <strong>${hospital.nome}</strong><br>
+                            ${nome2}<br><span style="font-size: 9px; font-style: italic; font-weight: 400;">(ID não representa número real do leito)</span>
+                        </div>
+                        <img src="${imgURL2}" alt="QR Code ${nome2}" class="qr-img" loading="eager">
+                    </div>
+                </div>
+            `;
         }
         container.innerHTML += '</div>';
+        
+        console.log('QR Codes irmãos gerados:', paresIrmaos.length * 2);
     }
     
-    console.log('QR Codes irmãos gerados:', countIrmaos);
-    console.log('TOTAL DE QR CODES:', countNormais + countIrmaos);
-    console.log(`${hospital.leitos} QR Codes gerados para ${hospital.nome}`);
+    console.log('TOTAL DE QR CODES:', leitosNormais.length + (paresIrmaos.length * 2));
     console.log('=== FIM DA GERAÇÃO ===');
 };
 
@@ -1044,90 +1057,105 @@ window.generateAllQRCodesOptimized = async function() {
 };
 
 async function generateHospitalQRCodes(hospitalId, hospital, container) {
-    console.log(`Gerando ${hospital.nome} (${hospital.leitos} leitos)...`);
+    console.log(`Gerando ${hospital.nome} (${hospital.leitos} leitos) - ORDENADO...`);
     container.innerHTML += `<h3 class="hospital-title">${hospital.nome}</h3>`;
     
     const leitosIrmaos = LEITOS_IRMAOS[hospitalId] || {};
     const leitosProcessados = new Set();
     
-    // Leitos normais
+    // CRIAR ARRAY DE LEITOS E ORDENAR
+    const todosLeitos = [];
+    for (let i = 1; i <= hospital.leitos; i++) {
+        todosLeitos.push(i);
+    }
+    
+    // Separar leitos normais e irmãos
+    const leitosNormais = [];
+    const paresIrmaos = [];
+    
+    for (const leito of todosLeitos) {
+        if (!leitosIrmaos[leito] && !leitosProcessados.has(leito)) {
+            leitosNormais.push(leito);
+            leitosProcessados.add(leito);
+        } else if (leitosIrmaos[leito] && !leitosProcessados.has(leito)) {
+            const irmao = leitosIrmaos[leito];
+            if (leito < irmao) {
+                paresIrmaos.push([leito, irmao]);
+                leitosProcessados.add(leito);
+                leitosProcessados.add(irmao);
+            }
+        }
+    }
+    
+    // Leitos normais EM ORDEM
     container.innerHTML += '<div class="qr-grid" id="grid-' + hospitalId + '-normais">';
     const gridNormais = container.querySelector('#grid-' + hospitalId + '-normais');
     
-    for (let i = 1; i <= hospital.leitos; i++) {
-        if (!leitosIrmaos[i] && !leitosProcessados.has(i)) {
-            const qrURL = `${QR_API.BASE_URL}/?h=${hospitalId}&l=${i}`;
-            const imgURL = `${QR_API.API_URL}?size=${QR_API.SIZE}x${QR_API.SIZE}&data=${encodeURIComponent(qrURL)}`;
-            const nomeLeitoFormatado = getNomeLeitoFormatado(hospitalId, i);
-            
-            const qrItem = document.createElement('div');
-            qrItem.className = 'qr-item';
-            qrItem.innerHTML = `
-                <div class="qr-label">
-                    <strong>${hospital.nome}</strong><br>
-                    ${nomeLeitoFormatado}<br><span style="font-size: 9px; font-style: italic; font-weight: 400;">(ID não representa número real do leito)</span>
-                </div>
-                <img src="${imgURL}" alt="QR Code ${nomeLeitoFormatado}" class="qr-img" loading="eager">
-            `;
-            
-            gridNormais.appendChild(qrItem);
-            leitosProcessados.add(i);
-            generationProgress++;
-            updateProgress(`Gerando ${hospital.nome}...`, generationProgress, totalQRCodes);
-            await sleep(QR_API.DELAY);
-        }
+    for (const numeroLeito of leitosNormais) {
+        const qrURL = `${QR_API.BASE_URL}/?h=${hospitalId}&l=${numeroLeito}`;
+        const imgURL = `${QR_API.API_URL}?size=${QR_API.SIZE}x${QR_API.SIZE}&data=${encodeURIComponent(qrURL)}`;
+        const nomeLeitoFormatado = getNomeLeitoFormatado(hospitalId, numeroLeito);
+        
+        const qrItem = document.createElement('div');
+        qrItem.className = 'qr-item';
+        qrItem.innerHTML = `
+            <div class="qr-label">
+                <strong>${hospital.nome}</strong><br>
+                ${nomeLeitoFormatado}<br><span style="font-size: 9px; font-style: italic; font-weight: 400;">(ID não representa número real do leito)</span>
+            </div>
+            <img src="${imgURL}" alt="QR Code ${nomeLeitoFormatado}" class="qr-img" loading="eager">
+        `;
+        
+        gridNormais.appendChild(qrItem);
+        generationProgress++;
+        updateProgress(`Gerando ${hospital.nome}...`, generationProgress, totalQRCodes);
+        await sleep(QR_API.DELAY);
     }
     container.innerHTML += '</div>';
     
-    // Leitos irmãos empilhados
-    if (Object.keys(leitosIrmaos).length > 0) {
-        console.log(`${hospital.nome} - Gerando leitos irmãos...`);
+    // Leitos irmãos empilhados EM ORDEM
+    if (paresIrmaos.length > 0) {
+        console.log(`${hospital.nome} - Gerando ${paresIrmaos.length} pares de irmãos...`);
         container.innerHTML += '<div class="qr-grid-irmaos" id="grid-' + hospitalId + '-irmaos">';
         const gridIrmaos = container.querySelector('#grid-' + hospitalId + '-irmaos');
         
-        for (let i = 1; i <= hospital.leitos; i++) {
-            const irmao = leitosIrmaos[i];
+        for (const [leito1, leito2] of paresIrmaos) {
+            const qrURL1 = `${QR_API.BASE_URL}/?h=${hospitalId}&l=${leito1}`;
+            const qrURL2 = `${QR_API.BASE_URL}/?h=${hospitalId}&l=${leito2}`;
+            const imgURL1 = `${QR_API.API_URL}?size=${QR_API.SIZE}x${QR_API.SIZE}&data=${encodeURIComponent(qrURL1)}`;
+            const imgURL2 = `${QR_API.API_URL}?size=${QR_API.SIZE}x${QR_API.SIZE}&data=${encodeURIComponent(qrURL2)}`;
             
-            if (irmao && !leitosProcessados.has(i) && i < irmao) {
-                const qrURL1 = `${QR_API.BASE_URL}/?h=${hospitalId}&l=${i}`;
-                const qrURL2 = `${QR_API.BASE_URL}/?h=${hospitalId}&l=${irmao}`;
-                const imgURL1 = `${QR_API.API_URL}?size=${QR_API.SIZE}x${QR_API.SIZE}&data=${encodeURIComponent(qrURL1)}`;
-                const imgURL2 = `${QR_API.API_URL}?size=${QR_API.SIZE}x${QR_API.SIZE}&data=${encodeURIComponent(qrURL2)}`;
-                
-                const nome1 = getNomeLeitoFormatado(hospitalId, i);
-                const nome2 = getNomeLeitoFormatado(hospitalId, irmao);
-                
-                const qrItemDuplo = document.createElement('div');
-                qrItemDuplo.className = 'qr-item-duplo';
-                qrItemDuplo.innerHTML = `
-                    <div class="qr-item-irmao">
-                        <div class="qr-label">
-                            <strong>${hospital.nome}</strong><br>
-                            ${nome1}<br><span style="font-size: 9px; font-style: italic; font-weight: 400;">(ID não representa número real do leito)</span>
-                        </div>
-                        <img src="${imgURL1}" alt="QR Code ${nome1}" class="qr-img" loading="eager">
+            const nome1 = getNomeLeitoFormatado(hospitalId, leito1);
+            const nome2 = getNomeLeitoFormatado(hospitalId, leito2);
+            
+            const qrItemDuplo = document.createElement('div');
+            qrItemDuplo.className = 'qr-item-duplo';
+            qrItemDuplo.innerHTML = `
+                <div class="qr-item-irmao">
+                    <div class="qr-label">
+                        <strong>${hospital.nome}</strong><br>
+                        ${nome1}<br><span style="font-size: 9px; font-style: italic; font-weight: 400;">(ID não representa número real do leito)</span>
                     </div>
-                    <div class="qr-item-irmao">
-                        <div class="qr-label">
-                            <strong>${hospital.nome}</strong><br>
-                            ${nome2}<br><span style="font-size: 9px; font-style: italic; font-weight: 400;">(ID não representa número real do leito)</span>
-                        </div>
-                        <img src="${imgURL2}" alt="QR Code ${nome2}" class="qr-img" loading="eager">
+                    <img src="${imgURL1}" alt="QR Code ${nome1}" class="qr-img" loading="eager">
+                </div>
+                <div class="qr-item-irmao">
+                    <div class="qr-label">
+                        <strong>${hospital.nome}</strong><br>
+                        ${nome2}<br><span style="font-size: 9px; font-style: italic; font-weight: 400;">(ID não representa número real do leito)</span>
                     </div>
-                `;
-                
-                gridIrmaos.appendChild(qrItemDuplo);
-                leitosProcessados.add(i);
-                leitosProcessados.add(irmao);
-                generationProgress += 2;
-                updateProgress(`Gerando ${hospital.nome}...`, generationProgress, totalQRCodes);
-                await sleep(QR_API.DELAY * 2);
-            }
+                    <img src="${imgURL2}" alt="QR Code ${nome2}" class="qr-img" loading="eager">
+                </div>
+            `;
+            
+            gridIrmaos.appendChild(qrItemDuplo);
+            generationProgress += 2;
+            updateProgress(`Gerando ${hospital.nome}...`, generationProgress, totalQRCodes);
+            await sleep(QR_API.DELAY * 2);
         }
         container.innerHTML += '</div>';
     }
     
-    console.log(`${hospital.nome} concluído!`);
+    console.log(`${hospital.nome} concluído! (${leitosNormais.length} normais + ${paresIrmaos.length * 2} irmãos)`);
 }
 
 function updateProgress(text, current, total) {
@@ -1624,6 +1652,11 @@ function addOptimizedStyles() {
         }
         
         @media print {
+            * {
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+            }
+            
             body {
                 margin: 0;
                 padding: 0;
@@ -1632,6 +1665,11 @@ function addOptimizedStyles() {
             
             body * {
                 overflow: visible !important;
+            }
+            
+            @page {
+                size: A4 portrait;
+                margin: 0;
             }
             
             .qr-modal-content {
@@ -1649,6 +1687,7 @@ function addOptimizedStyles() {
             .qr-tabs,
             .qr-controls,
             .progress-container,
+            .selecao-controls,
             .close-btn {
                 display: none !important;
             }
@@ -1666,48 +1705,43 @@ function addOptimizedStyles() {
                 padding: 0 !important;
             }
             
-            .qr-container h3 {
-                page-break-before: always;
-                page-break-after: avoid;
-                margin: 0 0 5mm 0 !important;
-                font-size: 16px !important;
-                background: white !important;
-                border: none !important;
-                padding: 2mm 0 !important;
-                color: #000 !important;
-                text-align: left !important;
-            }
-            
-            .qr-container h3:first-child {
-                page-break-before: auto;
+            .qr-container h3,
+            .hospital-title {
+                display: none !important;
             }
             
             .qr-grid {
                 display: block !important;
-                page-break-inside: auto !important;
-                margin-bottom: 5mm !important;
+                margin: 0 !important;
+                padding: 0 !important;
             }
             
             .qr-grid-irmaos {
                 display: block !important;
-                page-break-inside: auto !important;
-                margin-bottom: 5mm !important;
+                margin: 0 !important;
+                padding: 0 !important;
             }
             
             .qr-item-duplo {
-                width: 95mm !important;
-                height: 145mm !important;
+                width: 210mm !important;
+                height: 297mm !important;
                 border: 2px solid #000 !important;
-                border-radius: 2mm !important;
-                padding: 3mm !important;
+                border-radius: 0 !important;
+                padding: 10mm !important;
                 background: white !important;
-                page-break-inside: avoid !important;
+                page-break-before: always !important;
                 page-break-after: always !important;
+                page-break-inside: avoid !important;
                 display: flex !important;
                 flex-direction: column !important;
                 justify-content: space-around !important;
                 align-items: center !important;
-                margin: 0 auto 5mm !important;
+                margin: 0 !important;
+                box-sizing: border-box !important;
+            }
+            
+            .qr-item-duplo:first-child {
+                page-break-before: auto !important;
             }
             
             .qr-item-duplo:last-child {
@@ -1716,9 +1750,10 @@ function addOptimizedStyles() {
             
             .qr-item-irmao {
                 width: 100% !important;
+                max-width: 180mm !important;
                 border: 1px solid #333 !important;
-                border-radius: 2mm !important;
-                padding: 2mm !important;
+                border-radius: 5mm !important;
+                padding: 5mm !important;
                 background: white !important;
                 display: flex !important;
                 flex-direction: column !important;
@@ -1727,19 +1762,24 @@ function addOptimizedStyles() {
             }
             
             .qr-item {
-                width: 95mm !important;
-                height: 145mm !important;
-                padding: 5mm !important;
-                page-break-inside: avoid !important;
+                width: 210mm !important;
+                height: 297mm !important;
+                padding: 20mm !important;
+                page-break-before: always !important;
                 page-break-after: always !important;
-                border: 2px solid #000 !important;
+                page-break-inside: avoid !important;
+                border: none !important;
                 background: white !important;
-                margin: 0 auto 5mm !important;
-                border-radius: 2mm !important;
+                margin: 0 !important;
+                box-sizing: border-box !important;
                 display: flex !important;
                 flex-direction: column !important;
                 align-items: center !important;
                 justify-content: center !important;
+            }
+            
+            .qr-item:first-child {
+                page-break-before: auto !important;
             }
             
             .qr-item:last-child {
@@ -1747,39 +1787,53 @@ function addOptimizedStyles() {
             }
             
             .qr-label {
-                font-size: 14px !important;
-                margin-bottom: 5mm !important;
+                font-size: 16px !important;
+                margin-bottom: 10mm !important;
                 color: #000 !important;
-                line-height: 1.4 !important;
+                line-height: 1.6 !important;
                 text-align: center !important;
             }
             
             .qr-label strong {
                 color: #000 !important;
-                font-size: 16px !important;
+                font-size: 20px !important;
                 font-weight: bold !important;
+                display: block !important;
+                margin-bottom: 5mm !important;
+            }
+            
+            .qr-label span {
+                display: block !important;
+                margin-top: 5mm !important;
+                font-style: italic !important;
+                font-size: 12px !important;
             }
             
             .qr-img {
-                width: 70mm !important;
-                height: 70mm !important;
-                border: none !important;
-                border-radius: 2mm !important;
+                width: 120mm !important;
+                height: 120mm !important;
+                border: 2px solid #000 !important;
+                border-radius: 5mm !important;
                 display: block !important;
+                margin: 0 auto !important;
             }
             
             .qr-item-irmao .qr-img {
-                width: 50mm !important;
-                height: 50mm !important;
+                width: 80mm !important;
+                height: 80mm !important;
             }
             
             .qr-item-irmao .qr-label {
-                font-size: 11px !important;
-                margin-bottom: 2mm !important;
+                font-size: 14px !important;
+                margin-bottom: 5mm !important;
             }
             
             .qr-item-irmao .qr-label strong {
-                font-size: 13px !important;
+                font-size: 16px !important;
+            }
+            
+            .qr-item-irmao .qr-label span {
+                font-size: 11px !important;
             }
         }
         
