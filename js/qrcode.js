@@ -1,9 +1,13 @@
-// =================== QRCODE-OPTIMIZED.JS - V6.0 IMPRESSÃO OTIMIZADA ===================
-// ✅ Molduras de 14,5cm x 9,5cm
-// ✅ 4 QR Codes por página (2x2)
-// ✅ Leitos irmãos empilhados verticalmente
-// ✅ 9 hospitais ativos - 293 leitos total
-// ✅ H2: 13 pares de irmãos | H4: 9 pares de irmãos
+// =================== QRCODE-OPTIMIZED.JS - V6.1 FINAL ===================
+// ✅ V6.1 - Sistema completo de QR Codes
+// ✅ Molduras de 14,5cm x 9,5cm (95mm x 145mm)
+// ✅ 1 QR Code por página (exceto leitos irmãos)
+// ✅ Leitos irmãos: 2 QR codes empilhados verticalmente (1 página)
+// ✅ 9 hospitais ativos - 293 leitos
+// ✅ H2 Cruz Azul: 13 pares de irmãos (26 enfermarias)
+// ✅ H4 Santa Clara: 9 pares de irmãos (18 enfermarias)
+// ✅ Nota "(ID não representa número real do leito)" apenas em híbridos
+// ✅ Total sistema: 353 leitos (156 contratuais + 197 extras)
 
 // OBSERVAÇÃO: URL antiga (comentada para futura reversão se necessário)
 // const QR_BASE_URL_OLD = 'https://qrcode-seven-gamma.vercel.app';
