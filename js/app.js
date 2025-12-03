@@ -17,7 +17,7 @@ window.CONFIG = {
         H3: { nome: "Santa Marcelina", leitos: 7, tipo: "Híbrido", ativo: true },
         H4: { nome: "Santa Clara", leitos: 13, tipo: "Misto", ativo: true },
         H5: { nome: "Hospital Adventista", leitos: 13, tipo: "Híbrido", ativo: true },
-        H6: { nome: "Santa Cruz", leitos: 7, tipo: "Híbrido", ativo: true },
+        H6: { nome: "Santa Cruz", leitos: 13, tipo: "Híbrido", ativo: true },
         H7: { nome: "Santa Virgínia", leitos: 7, tipo: "Híbrido", ativo: true }
     }
 };
@@ -830,7 +830,7 @@ console.log('%c   H2 - Cruz Azul:            36 leitos (Misto)', 'color: #10b981
 console.log('%c   H3 - Santa Marcelina:       7 leitos (Híbrido)', 'color: #10b981;');
 console.log('%c   H4 - Santa Clara:          13 leitos (Misto)', 'color: #10b981;');
 console.log('%c   H5 - Hospital Adventista:  13 leitos (Híbrido)', 'color: #10b981;');
-console.log('%c   H6 - Santa Cruz:            7 leitos (Híbrido)', 'color: #10b981;');
+console.log('%c   H6 - Santa Cruz:           13 leitos (Híbrido)', 'color: #10b981;');
 console.log('%c   H7 - Santa Virgínia:        7 leitos (Híbrido)', 'color: #10b981;');
 console.log('%c   ────────────────────────────────────────────', 'color: #9ca3af;');
 console.log('%c   TOTAL:                     93 leitos', 'color: #60a5fa; font-weight: bold;');
