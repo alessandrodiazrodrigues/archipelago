@@ -120,7 +120,7 @@ window.HOSPITAL_CAPACIDADE = {
     H4: { contratuais: 26, extras: 31, total: 57 },
     H5: { contratuais: 13, extras: 15, total: 28 },
     H6: { contratuais: 13, extras: 9, total: 22 },
-    H7: { contratuais: 7, extras: 15, total: 22 },
+    H7: { contratuais: 13, extras: 9, total: 22 },
     H8: { contratuais: 7, extras: 15, total: 22 },
     H9: { contratuais: 7, extras: 15, total: 22 }
 };
