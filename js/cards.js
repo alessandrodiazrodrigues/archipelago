@@ -1465,7 +1465,11 @@ function createAtualizacaoForm(hospitalNome, leitoNumero, dadosLeito) {
     const idadeAtual = dadosLeito?.idade || '';
     const ppsAtual = dadosLeito?.pps || '';
     const spictAtual = dadosLeito?.spict || 'nao_elegivel';
-    const prevAltaAtual = dadosLeito?.prevAlta || 'Sem Previsão';
+    // ✅ CORREÇÃO: Mapeamento reverso SP -> "Sem Previsão"
+    let prevAltaAtual = dadosLeito?.prevAlta || 'Sem Previsão';
+    if (prevAltaAtual === 'SP') {
+        prevAltaAtual = 'Sem Previsão';
+    }
     
     const anotacoesAtual = dadosLeito?.anotacoes || '';
     
