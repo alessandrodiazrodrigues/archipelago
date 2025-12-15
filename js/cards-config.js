@@ -1,14 +1,15 @@
-// =================== CARDS-CONFIG.JS V6.1 - CONFIGURAÇÕES GLOBAIS ===================
-// Versão: 6.1 - ATUALIZADO COM TODOS OS PARES DE LEITOS IRMÃOS
+// =================== CARDS-CONFIG.JS V7.0 - CONFIGURAÇÕES GLOBAIS ===================
+// Versão: 7.0 - SISTEMA COMPLETO COM UTI E RESERVAS
 // Descrição: Fonte única de verdade para mapas, funções e configurações
-// ✅ NOVIDADE V6.1: Cruz Azul - 13 pares de irmãos (8 contratuais + 5 extras)
-// ✅ NOVIDADE V6.1: Santa Clara - 9 pares de irmãos (4 contratuais + 5 extras)
-// ✅ NOVIDADE V6.0: H8 e H9 adicionados (São Camilo Ipiranga e Pompeia)
-// ✅ NOVIDADE V6.0: Sistema de leitos extras dinâmico
-// ✅ NOVIDADE V6.0: Santa Marcelina expandido (28 leitos)
-// ✅ NOVIDADE V6.0: Campo anotações (800 caracteres)
+// ✅ NOVIDADE V7.0: Sistema de UTI (63 leitos em 8 hospitais)
+// ✅ NOVIDADE V7.0: Sistema de Reservas
+// ✅ NOVIDADE V7.0: Campos bloqueados para UTI
+// ✅ NOVIDADE V7.0: H7 Santa Virgínia sem UTI
+// ✅ MANTIDO V6.1: Cruz Azul - 13 pares de irmãos (8 contratuais + 5 extras)
+// ✅ MANTIDO V6.1: Santa Clara - 9 pares de irmãos (4 contratuais + 5 extras)
+// ✅ MANTIDO V6.0: Sistema de leitos extras dinâmico
 
-console.log('🔵 CARDS-CONFIG.JS v6.1 - Iniciando carregamento...');
+console.log('🔵 CARDS-CONFIG.JS v7.0 - Iniciando carregamento...');
 
 // =================== ✅ MAPAS DE DISPLAY (COM ACENTOS UTF-8) ===================
 window.CONCESSOES_DISPLAY_MAP = {
@@ -98,7 +99,7 @@ window.desnormalizarTexto = function(texto) {
     return texto;
 };
 
-// =================== ✅ CONFIGURAÇÕES DE HOSPITAIS V6.0 ===================
+// =================== ✅ CONFIGURAÇÕES DE HOSPITAIS - ENFERMARIA ===================
 window.HOSPITAL_MAPPING = {
     H1: { nome: 'Neomater', leitos: 25, tipo: 'hibrido_puro' },
     H2: { nome: 'Cruz Azul', leitos: 67, tipo: 'tipos_fixos' },
@@ -112,18 +113,59 @@ window.HOSPITAL_MAPPING = {
     // H10 e H11 existem no backend mas não aparecem no frontend (reservas desabilitadas)
 };
 
-// =================== ✅ SISTEMA DE LEITOS EXTRAS V6.0 (DINÂMICO) ===================
+// =================== ✅ SISTEMA DE LEITOS EXTRAS - ENFERMARIA ===================
 window.HOSPITAL_CAPACIDADE = {
     H1: { contratuais: 10, extras: 15, total: 25 },
     H2: { contratuais: 36, extras: 31, total: 67 },
     H3: { contratuais: 13, extras: 15, total: 28 },
     H4: { contratuais: 26, extras: 31, total: 57 },
     H5: { contratuais: 13, extras: 15, total: 28 },
-    H6: { contratuais: 13, extras: 9, total: 22 },
-    H7: { contratuais: 13, extras: 9, total: 22 },
+    H6: { contratuais: 13, extras: 9, total: 22 },   // ✅ CORRIGIDO 03/DEZ/2025
+    H7: { contratuais: 13, extras: 9, total: 22 },   // ✅ CORRIGIDO 03/DEZ/2025
     H8: { contratuais: 7, extras: 15, total: 22 },
     H9: { contratuais: 7, extras: 15, total: 22 }
 };
+
+// =================== ✅ NOVO V7.0: SISTEMA DE UTI (63 LEITOS) ===================
+window.UTI_CAPACIDADE = {
+    H1: { contratuais: 3, extras: 2, total: 5 },
+    H2: { contratuais: 20, extras: 10, total: 30 },
+    H3: { contratuais: 2, extras: 2, total: 4 },
+    H4: { contratuais: 4, extras: 2, total: 6 },
+    H5: { contratuais: 4, extras: 2, total: 6 },
+    H6: { contratuais: 2, extras: 2, total: 4 },
+    H7: { contratuais: 0, extras: 0, total: 0 },     // ✅ SEM UTI
+    H8: { contratuais: 2, extras: 2, total: 4 },
+    H9: { contratuais: 2, extras: 2, total: 4 }
+};
+
+console.log('✅ UTI_CAPACIDADE carregado: 63 leitos em 8 hospitais (H7 sem UTI)');
+
+// =================== ✅ NOVO V7.0: HOSPITAIS SEM UTI ===================
+window.HOSPITAIS_SEM_UTI = ['H7'];
+
+// =================== ✅ NOVO V7.0: CAMPOS BLOQUEADOS PARA UTI ===================
+// Estes campos não se aplicam a leitos UTI
+window.CAMPOS_BLOQUEADOS_UTI = [
+    'pps',
+    'spict',
+    'complexidade',
+    'diretivas',
+    'categoriaEscolhida'
+];
+
+// =================== ✅ NOVO V7.0: PREVISÃO DE ALTA UTI ===================
+window.PREVISAO_ALTA_UTI = [
+    'Alta para Enfermaria',
+    'Alta Domiciliar',
+    'Transferência Externa',
+    'Sem Previsão'
+];
+
+// =================== ✅ NOVO V7.0: STATUS DE RESERVA ===================
+window.STATUS_RESERVA = 'Reservado';
+window.COR_RESERVADO = '#fbbf24';  // Amarelo
+window.COR_BORDA_RESERVADO = '#f59e0b';
 
 // =================== ✅ ORDEM ALFABÉTICA (9 HOSPITAIS ATIVOS) ===================
 window.ORDEM_ALFABETICA_HOSPITAIS = ['H5', 'H2', 'H1', 'H4', 'H6', 'H3', 'H7', 'H8', 'H9'];
@@ -132,7 +174,7 @@ window.ORDEM_ALFABETICA_HOSPITAIS = ['H5', 'H2', 'H1', 'H4', 'H6', 'H3', 'H7', '
 window.HOSPITAIS_HIBRIDOS = ['H1', 'H3', 'H5', 'H6', 'H7', 'H8', 'H9'];
 window.HOSPITAIS_TIPOS_FIXOS = ['H2', 'H4'];
 
-// =================== ✅ CRUZ AZUL - LEITOS IRMÃOS (13 PARES) - ATUALIZADO V6.1 ===================
+// =================== ✅ CRUZ AZUL - LEITOS IRMÃOS (13 PARES) ===================
 // 8 pares contratuais (21-36) + 5 pares extras (37-46)
 window.CRUZ_AZUL_IRMAOS = {
     // PARES CONTRATUAIS (8 pares - leitos 21-36)
@@ -145,7 +187,7 @@ window.CRUZ_AZUL_IRMAOS = {
     33: 34, 34: 33, // Par 7
     35: 36, 36: 35, // Par 8
     
-    // PARES EXTRAS (5 pares - leitos 37-46) - NOVO V6.1
+    // PARES EXTRAS (5 pares - leitos 37-46)
     37: 38, 38: 37, // Par 9
     39: 40, 40: 39, // Par 10
     41: 42, 42: 41, // Par 11
@@ -155,7 +197,7 @@ window.CRUZ_AZUL_IRMAOS = {
 
 console.log('✅ CRUZ_AZUL_IRMAOS carregado:', Object.keys(window.CRUZ_AZUL_IRMAOS).length / 2, 'pares (8 contratuais + 5 extras)');
 
-// =================== ✅ SANTA CLARA - LEITOS IRMÃOS (9 PARES) - ATUALIZADO V6.1 ===================
+// =================== ✅ SANTA CLARA - LEITOS IRMÃOS (9 PARES) ===================
 // 4 pares contratuais (10-17) + 5 pares extras (18-27)
 window.SANTA_CLARA_IRMAOS = {
     // PARES CONTRATUAIS (4 pares - leitos 10-17)
@@ -164,7 +206,7 @@ window.SANTA_CLARA_IRMAOS = {
     14: 15, 15: 14, // Par 3
     16: 17, 17: 16, // Par 4
     
-    // PARES EXTRAS (5 pares - leitos 18-27) - NOVO V6.1
+    // PARES EXTRAS (5 pares - leitos 18-27)
     18: 19, 19: 18, // Par 5
     20: 21, 21: 20, // Par 6
     22: 23, 23: 22, // Par 7
@@ -174,7 +216,7 @@ window.SANTA_CLARA_IRMAOS = {
 
 console.log('✅ SANTA_CLARA_IRMAOS carregado:', Object.keys(window.SANTA_CLARA_IRMAOS).length / 2, 'pares (4 contratuais + 5 extras)');
 
-// =================== ✅ ESTRUTURA DE ENFERMARIAS POR HOSPITAL V6.1 ===================
+// =================== ✅ ESTRUTURA DE ENFERMARIAS POR HOSPITAL ===================
 // Cruz Azul: 26 enfermarias (16 contratuais + 10 extras)
 window.CRUZ_AZUL_ENFERMARIAS = {
     contratuais: [21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36], // 16 leitos
@@ -302,7 +344,7 @@ window.selectedLeito = null;
 window.currentHospital = 'H1';
 window.fundoBranco = false;
 
-// =================== ✅ FUNÇÕES AUXILIARES V6.1 ===================
+// =================== ✅ FUNÇÕES AUXILIARES ===================
 window.getHospitalNome = function(hospitalId) {
     return window.HOSPITAL_MAPPING[hospitalId]?.nome || hospitalId;
 };
@@ -333,7 +375,7 @@ window.getLeitoIrmao = function(hospitalId, leitoNum) {
     return null;
 };
 
-// =================== ✅ VERIFICAÇÃO DE ENFERMARIA COM IRMÃO V6.1 ===================
+// =================== ✅ VERIFICAÇÃO DE ENFERMARIA COM IRMÃO ===================
 window.isEnfermariaComIrmao = function(hospitalId, leitoNum) {
     if (hospitalId === 'H2') {
         return window.CRUZ_AZUL_IRMAOS.hasOwnProperty(leitoNum);
@@ -344,7 +386,7 @@ window.isEnfermariaComIrmao = function(hospitalId, leitoNum) {
     return false;
 };
 
-// =================== ✅ OBTER SUFIXO DO LEITO V6.1 ===================
+// =================== ✅ OBTER SUFIXO DO LEITO ===================
 window.getSufixoLeito = function(hospitalId, leitoNum) {
     if (hospitalId === 'H2') {
         return (leitoNum % 2 === 0) ? window.CRUZ_AZUL_SUFIXOS.par : window.CRUZ_AZUL_SUFIXOS.impar;
@@ -355,7 +397,7 @@ window.getSufixoLeito = function(hospitalId, leitoNum) {
     return '';
 };
 
-// =================== ✅ OBTER OPÇÕES DE SUFIXO V6.1 ===================
+// =================== ✅ OBTER OPÇÕES DE SUFIXO ===================
 window.getSufixoOptions = function(hospitalId) {
     if (hospitalId === 'H2') {
         return [window.CRUZ_AZUL_SUFIXOS.impar, window.CRUZ_AZUL_SUFIXOS.par];
@@ -366,7 +408,7 @@ window.getSufixoOptions = function(hospitalId) {
     return [];
 };
 
-// =================== ✅ CÁLCULO DE LEITOS EXTRAS V6.0 ===================
+// =================== ✅ CÁLCULO DE LEITOS EXTRAS - ENFERMARIA ===================
 window.calcularLeitosExtras = function(hospitalId, leitosOcupados) {
     const capacidade = window.getCapacidade(hospitalId);
     
@@ -395,20 +437,137 @@ window.isLeitoExtra = function(hospitalId, posicaoOcupacao) {
     return posicaoOcupacao > capacidade.contratuais;
 };
 
-// =================== ✅ CORES LEITOS EXTRAS V6.0 ===================
+// =================== ✅ NOVO V7.0: FUNÇÕES UTI ===================
+
+/**
+ * Retorna capacidade UTI de um hospital
+ */
+window.getCapacidadeUTI = function(hospitalId) {
+    return window.UTI_CAPACIDADE[hospitalId] || { contratuais: 0, extras: 0, total: 0 };
+};
+
+/**
+ * Verifica se hospital tem UTI
+ */
+window.hospitalTemUTI = function(hospitalId) {
+    const capacidade = window.UTI_CAPACIDADE[hospitalId];
+    return capacidade && capacidade.total > 0;
+};
+
+/**
+ * Verifica se um campo está bloqueado para UTI
+ */
+window.isCampoBloqueadoUTI = function(campo) {
+    return window.CAMPOS_BLOQUEADOS_UTI.includes(campo);
+};
+
+/**
+ * Verifica se leito é UTI
+ */
+window.isLeitoUTI = function(leito) {
+    return leito && leito.tipo === 'UTI';
+};
+
+/**
+ * Calcula leitos extras de UTI
+ */
+window.calcularLeitosExtrasUTI = function(hospitalId, leitosOcupados) {
+    const capacidade = window.getCapacidadeUTI(hospitalId);
+    
+    if (!capacidade || capacidade.contratuais === 0) {
+        return { contratuais: 0, extras: 0 };
+    }
+    
+    const ocupadosNum = Array.isArray(leitosOcupados) ? leitosOcupados.length : leitosOcupados;
+    
+    if (ocupadosNum <= capacidade.contratuais) {
+        return {
+            contratuais: ocupadosNum,
+            extras: 0
+        };
+    } else {
+        return {
+            contratuais: capacidade.contratuais,
+            extras: ocupadosNum - capacidade.contratuais
+        };
+    }
+};
+
+/**
+ * Retorna opções de previsão de alta baseado no tipo de leito
+ */
+window.getPrevisaoAltaOptions = function(isUTI) {
+    return isUTI ? window.PREVISAO_ALTA_UTI : window.PREVISAO_ALTA_OPTIONS;
+};
+
+// =================== ✅ NOVO V7.0: FUNÇÕES DE TOTAIS ===================
+
+/**
+ * Calcula totais de enfermaria (9 hospitais ativos)
+ */
+window.getTotaisEnfermaria = function() {
+    let total = 0, contratuais = 0, extras = 0;
+    
+    Object.values(window.HOSPITAL_CAPACIDADE).forEach(function(h) {
+        total += h.total;
+        contratuais += h.contratuais;
+        extras += h.extras;
+    });
+    
+    return { total, contratuais, extras };
+};
+
+/**
+ * Calcula totais de UTI (8 hospitais com UTI)
+ */
+window.getTotaisUTI = function() {
+    let total = 0, contratuais = 0, extras = 0;
+    
+    Object.values(window.UTI_CAPACIDADE).forEach(function(h) {
+        total += h.total;
+        contratuais += h.contratuais;
+        extras += h.extras;
+    });
+    
+    return { total, contratuais, extras };
+};
+
+/**
+ * Calcula totais gerais (Enfermaria + UTI)
+ */
+window.getTotaisGerais = function() {
+    const enf = window.getTotaisEnfermaria();
+    const uti = window.getTotaisUTI();
+    
+    return {
+        total: enf.total + uti.total,
+        contratuais: enf.contratuais + uti.contratuais,
+        extras: enf.extras + uti.extras
+    };
+};
+
+// =================== ✅ CORES LEITOS ===================
 window.COR_FLAG_CONTRATUAL = '#60a5fa';
 window.COR_FLAG_EXTRA = '#f59a1d';
 window.COR_BORDA_EXTRA = '#f59a1d';
 
 // =================== ✅ LOG FINAL ===================
-console.log('✅ CARDS-CONFIG.JS v6.1 - Carregado com sucesso!');
-console.log('✅ Concessões:', window.CONCESSOES_LIST.length, 'itens');
-console.log('✅ Linhas:', window.LINHAS_CUIDADO_LIST.length, 'itens');
+const totaisEnf = window.getTotaisEnfermaria();
+const totaisUTI = window.getTotaisUTI();
+const totaisGerais = window.getTotaisGerais();
+
+console.log('═══════════════════════════════════════════════════');
+console.log('✅ CARDS-CONFIG.JS v7.0 - Carregado com sucesso!');
+console.log('═══════════════════════════════════════════════════');
+console.log('🏥 ENFERMARIA:', totaisEnf.total, 'leitos (' + totaisEnf.contratuais + ' contr. + ' + totaisEnf.extras + ' extras)');
+console.log('🏥 UTI:', totaisUTI.total, 'leitos (' + totaisUTI.contratuais + ' contr. + ' + totaisUTI.extras + ' extras)');
+console.log('🏥 TOTAL GERAL:', totaisGerais.total, 'leitos');
+console.log('───────────────────────────────────────────────────');
 console.log('✅ Hospitais ativos:', Object.keys(window.HOSPITAL_MAPPING).length);
-console.log('✅ Total de leitos:', Object.values(window.HOSPITAL_CAPACIDADE).reduce((acc, h) => acc + h.total, 0));
-console.log('✅ Contratuais:', Object.values(window.HOSPITAL_CAPACIDADE).reduce((acc, h) => acc + h.contratuais, 0));
-console.log('✅ Extras:', Object.values(window.HOSPITAL_CAPACIDADE).reduce((acc, h) => acc + h.extras, 0));
-console.log('✅ Cruz Azul: 13 pares de irmãos (leitos 21-46)');
-console.log('✅ Santa Clara: 9 pares de irmãos (leitos 10-27)');
-console.log('✅ Sistema de leitos extras: ATIVO');
+console.log('✅ Hospitais com UTI:', Object.keys(window.UTI_CAPACIDADE).filter(h => window.UTI_CAPACIDADE[h].total > 0).length);
+console.log('✅ H7 Santa Virgínia: SEM UTI');
+console.log('✅ Cruz Azul: 13 pares de irmãos');
+console.log('✅ Santa Clara: 9 pares de irmãos');
+console.log('✅ Campos bloqueados UTI:', window.CAMPOS_BLOQUEADOS_UTI.length);
+console.log('═══════════════════════════════════════════════════');
 console.log('✅ PRONTO para uso!');
