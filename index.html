@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Archipelago Dashboard V6.0</title>
+    <title>Archipelago Dashboard V7.0</title>
     
     <!-- Google Fonts - Poppins Bold -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -63,18 +63,26 @@
                 Dashboard Executivo
             </a>
             <a href="#" class="side-menu-item" data-tab="dash1" onclick="setActiveTabAndCloseMenu('dash1'); return false;">
-                Dashboard Hospitalar
+                Dashboard Enfermarias
+            </a>
+            <a href="#" class="side-menu-item" data-tab="dash3" onclick="setActiveTabAndCloseMenu('dash3'); return false;">
+                Dashboard UTIs
             </a>
             <a href="#" class="side-menu-item" data-tab="leitos" onclick="setActiveTabAndCloseMenu('leitos'); return false;">
-                Gestão de Leitos
+                Mapa de Leitos
+            </a>
+            <a href="#" class="side-menu-item" data-tab="leitosUTI" onclick="setActiveTabAndCloseMenu('leitosUTI'); return false;">
+                Mapa de Leitos UTI
             </a>
         </nav>
         
         <div class="menu-footer">
             <div class="menu-divider"></div>
-            <a href="#" class="side-menu-item" onclick="openSimuladorAndCloseMenu(); return false;" style="display: none;">
-                Simulador
+            <!-- Simulador oculto - desativado para producao
+            <a href="#" class="side-menu-item" onclick="openSimuladorAndCloseMenu(); return false;">
+                Simulador QR Code
             </a>
+            -->
             <a href="#" class="side-menu-item" onclick="openQRCodesAndCloseMenu(); return false;">
                 Gerar QR Codes
             </a>
@@ -92,29 +100,34 @@
             <div id="dashExecutivoContent"></div>
         </section>
 
-        <!-- DASHBOARD HOSPITALAR -->
+        <!-- DASHBOARD ENFERMARIAS (antigo Hospitalar) -->
         <section id="dash1" class="hidden">
             <div id="dashHospitalarContent"></div>
         </section>
         
-        <!-- SEÇÃO DE LEITOS -->
+        <!-- DASHBOARD UTIs (NOVO V7.0) -->
+        <section id="dash3" class="hidden">
+            <div id="dashUTIContent"></div>
+        </section>
+        
+        <!-- SEÇÃO DE LEITOS (ENFERMARIAS) -->
         <section id="leitosView" class="section-leitos hidden">
             <div class="leitos-header">
                 <!-- BOX ÚNICO COM TÍTULO E DROPDOWN -->
                 <div class="hospital-selector-container">
-                    <h2>Gestão de Leitos Hospitalares</h2>
+                    <h2>Mapa de Leitos - Enfermarias</h2>
                     
                     <div class="hospital-selector" id="hospitalSelector">
                         <select id="hospitalDropdown" class="hospital-select" onchange="selectHospital(this.value)">
-                            <option value="H5" selected>Adventista</option>
+                            <option value="H5">Adventista</option>
                             <option value="H2">Cruz Azul</option>
-                            <option value="H1">Neomater</option>
+                            <option value="H1" selected>Neomater</option>
                             <option value="H4">Santa Clara</option>
                             <option value="H6">Santa Cruz</option>
                             <option value="H3">Santa Marcelina</option>
-                            <option value="H7">Santa Virgínia</option>
-                            <option value="H8">São Camilo Ipiranga</option>
-                            <option value="H9">São Camilo Pompeia</option>
+                            <option value="H7">Santa Virginia</option>
+                            <option value="H8">Sao Camilo Ipiranga</option>
+                            <option value="H9">Sao Camilo Pompeia</option>
                         </select>
                     </div>
                 </div>
@@ -137,13 +150,46 @@
             <div id="cardsContainer" class="cards-grid"></div>
         </section>
         
+        <!-- SEÇÃO DE LEITOS UTI (NOVO V7.0) -->
+        <section id="leitosUTIView" class="section-leitos hidden">
+            <div class="leitos-header">
+                <!-- BOX COM TÍTULO E DROPDOWN UTI -->
+                <div class="hospital-selector-container">
+                    <h2 style="color: #f59e0b;">Mapa de Leitos - UTI</h2>
+                    
+                    <div class="hospital-selector" id="hospitalSelectorUTI">
+                        <select id="hospitalDropdownUTI" class="hospital-select" style="background-color: #f59e0b;" onchange="selectHospitalUTI(this.value)">
+                            <option value="H2" selected>Cruz Azul (30 UTI)</option>
+                        </select>
+                    </div>
+                    <p style="color: #9ca3af; font-size: 12px; text-align: center; margin-top: 15px; font-style: italic;">* H7 Santa Virgínia não possui leitos UTI</p>
+                </div>
+                
+                <!-- CAMPO DE BUSCA UTI -->
+                <div class="search-container">
+                    <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="11" cy="11" r="8"></circle>
+                        <path d="m21 21-4.35-4.35"></path>
+                    </svg>
+                    <input 
+                        type="text" 
+                        id="searchLeitosUTIInput" 
+                        placeholder="Buscar por matrícula, leito ou iniciais..." 
+                        oninput="window.searchLeitosUTI()">
+                </div>
+            </div>
+            
+            <!-- CONTAINER DOS CARDS UTI -->
+            <div id="cardsContainerUTI" class="cards-grid"></div>
+        </section>
+        
     </main>
 
-    <!-- =================== FOOTER V4.0 =================== -->
+    <!-- =================== FOOTER V7.0 =================== -->
     <footer id="mainFooter" class="footer hidden">
         <p>Sistema em versão BETA - não pode ser usado como única fonte de referência</p>
         <p>Para decisões críticas, consulte sempre fontes adicionais e profissionais qualificados</p>
-        <p><strong>Archipelago Dashboard V6.0 - Novembro/2025</strong></p>
+        <p><strong>Archipelago Dashboard V7.0 - Dezembro/2025</strong></p>
     </footer>
 
     <!-- =================== MODAL DE PACIENTE =================== -->
@@ -166,7 +212,7 @@
         </div>
     </div>
 
-    <!-- =================== SCRIPTS MODULARES V4.0 - ORDEM CORRETA! =================== -->
+    <!-- =================== SCRIPTS MODULARES V7.0 - ORDEM CORRETA! =================== -->
     
     <!-- 1. SCRIPTS CORE (Base do sistema) -->
     <script src="js/app.js"></script>
@@ -181,6 +227,8 @@
     <!-- 4. DASHBOARDS (Dependem de cards-config.js) -->
     <script src="js/dashboards/dashboard-hospital.js"></script>
     <script src="js/dashboards/dashboard-executive.js"></script>
+    <script src="js/dashboards/dashboard-uti.js"></script>
+    <script src="js/cards-uti.js"></script>
     
     <!-- 5. FUNCIONALIDADES -->
     <script src="js/qrcode.js"></script>
@@ -188,21 +236,17 @@
     <!-- 6. INICIALIZAÇÃO (Último a carregar) -->
     <script src="js/main.js"></script>
     
-    <!-- =================== FUNÇÕES AUXILIARES MENU V4.0 =================== -->
+    <!-- =================== FUNÇÕES AUXILIARES MENU V7.0 =================== -->
     <script>
-        console.log('Archipelago Dashboard V6.0 - Inicializando...');
-        console.log('Novembro/2025 - Versao V6.0');
+        console.log('Archipelago Dashboard V7.0 - Inicializando...');
+        console.log('Dezembro/2025 - Versao V7.0');
         console.log('');
-        console.log('NOVIDADES V6.0:');
-        console.log('   • 11 Hospitais (9 ativos + 2 reservas) - Total: 341 leitos');
-        console.log('   • H8: Sao Camilo Ipiranga (22 leitos)');
-        console.log('   • H9: Sao Camilo Pompeia (22 leitos)');
-        console.log('   • Sistema de leitos extras dinamico');
-        console.log('   • Campo anotacoes (800 caracteres)');
-        console.log('   • Santa Clara expandido (57 leitos)');
-        console.log('   • Cruz Azul expandido (67 leitos)');
-        console.log('   • Santa Marcelina expandido (28 leitos)');
-        console.log('   • Dropdown de selecao de hospitais');
+        console.log('NOVIDADES V7.0:');
+        console.log('   • Dashboard Enfermarias (antigo Hospitalar)');
+        console.log('   • Dashboard UTIs (NOVO)');
+        console.log('   • Mapa de Leitos separado para Enfermarias e UTI');
+        console.log('   • Sistema de Reservas');
+        console.log('   • Filtro UTI em todos os dashboards');
         console.log('');
         console.log('📦 ORDEM DE CARREGAMENTO DOS SCRIPTS:');
         console.log('   1. app.js (autenticação)');
@@ -211,12 +255,14 @@
         console.log('   4. cards.js (interface de leitos)');
         console.log('   5. dashboard-hospital.js');
         console.log('   6. dashboard-executive.js');
-        console.log('   7. qrcode.js');
-        console.log('   8. main.js (inicialização)');
+        console.log('   7. dashboard-uti.js (NOVO)');
+        console.log('   8. qrcode.js');
+        console.log('   9. main.js (inicialização)');
         console.log('');
         
         /**
          * Função que combina mudança de aba + fechamento do menu
+         * V7.0: Adicionado suporte para dash3 e leitosUTI
          */
         function setActiveTabAndCloseMenu(tabName) {
             // Primeiro fecha o menu
@@ -304,6 +350,19 @@
                 }
             }, 100);
         }
+        
+        /**
+         * V7.0: Função para selecionar hospital UTI
+         */
+        function selectHospitalUTI(hospitalId) {
+            console.log('[V7.0] Hospital UTI selecionado:', hospitalId);
+            if (window.renderCardsUTI) {
+                window.renderCardsUTI(hospitalId);
+            }
+        }
+        
+        // Expor função globalmente
+        window.selectHospitalUTI = selectHospitalUTI;
     </script>
     
     <!-- =================== ESTILOS INLINE V4.0 =================== -->
@@ -677,7 +736,8 @@
             pointer-events: none;
         }
         
-        #searchLeitosInput {
+        #searchLeitosInput,
+        #searchLeitosUTIInput {
             width: 100%;
             padding: 14px 14px 14px 46px;
             background: #374151;
@@ -690,14 +750,16 @@
             transition: all 0.3s ease;
         }
         
-        #searchLeitosInput:focus {
+        #searchLeitosInput:focus,
+        #searchLeitosUTIInput:focus {
             outline: none;
             border-color: #60a5fa;
             box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.2);
             background: #475569;
         }
         
-        #searchLeitosInput::placeholder {
+        #searchLeitosInput::placeholder,
+        #searchLeitosUTIInput::placeholder {
             color: rgba(255, 255, 255, 0.5);
         }
         
