@@ -1,28 +1,30 @@
-// =================== APP.JS V4.0 - COMPLETO E OTIMIZADO ===================
-// Versão: V4.0 - Novembro/2025
-// 7 Hospitais - 93 Leitos Totais
+// =================== APP.JS V7.0 - COMPLETO E OTIMIZADO ===================
+// Versão: V7.0 - Dezembro/2025
+// 9 Hospitais - 356 Leitos Totais (293 Enfermaria + 63 UTI)
 // Sistema otimizado para carregamento ultrarrápido
 
-// =================== CONFIGURAÇÕES GLOBAIS V4.0 ===================
+// =================== CONFIGURAÇÕES GLOBAIS V7.0 ===================
 window.CONFIG = {
-    AUTH_PASSWORD: '1997',
+    AUTH_PASSWORD: '2305',
     ADM_EMAIL: 'cvcalessandro@gmail.com',
-    ADM_PASSWORD: '1997',
+    ADM_PASSWORD: '2305',
     REFRESH_INTERVAL: 240000, // 4 minutos
     QR_TIMEOUT: 120000, // 2 minutos
     HOSPITAIS: {
-        // *** V4.0: 93 LEITOS TOTAIS (7 HOSPITAIS) ***
-        H1: { nome: "Neomater", leitos: 10, tipo: "Híbrido", ativo: true },
-        H2: { nome: "Cruz Azul", leitos: 36, tipo: "Misto", ativo: true },
-        H3: { nome: "Santa Marcelina", leitos: 7, tipo: "Híbrido", ativo: true },
-        H4: { nome: "Santa Clara", leitos: 13, tipo: "Misto", ativo: true },
-        H5: { nome: "Hospital Adventista", leitos: 13, tipo: "Híbrido", ativo: true },
-        H6: { nome: "Santa Cruz", leitos: 13, tipo: "Híbrido", ativo: true },
-        H7: { nome: "Santa Virgínia", leitos: 13, tipo: "Híbrido", ativo: true }
+        // *** V7.0: 293 LEITOS ENFERMARIA + 63 UTI = 356 TOTAL (9 HOSPITAIS) ***
+        H1: { nome: "Neomater", leitos: 25, tipo: "Híbrido", ativo: true },
+        H2: { nome: "Cruz Azul", leitos: 67, tipo: "Misto", ativo: true },
+        H3: { nome: "Santa Marcelina", leitos: 28, tipo: "Híbrido", ativo: true },
+        H4: { nome: "Santa Clara", leitos: 57, tipo: "Misto", ativo: true },
+        H5: { nome: "Hospital Adventista", leitos: 28, tipo: "Híbrido", ativo: true },
+        H6: { nome: "Santa Cruz", leitos: 22, tipo: "Híbrido", ativo: true },
+        H7: { nome: "Santa Virgínia", leitos: 22, tipo: "Híbrido", ativo: true },
+        H8: { nome: "São Camilo Ipiranga", leitos: 22, tipo: "Híbrido", ativo: true },
+        H9: { nome: "São Camilo Pompeia", leitos: 22, tipo: "Híbrido", ativo: true }
     }
 };
 
-// =================== LISTAS COMPLETAS V4.0 ===================
+// =================== LISTAS COMPLETAS V7.0 ===================
 
 // *** CONCESSÕES: 11 ITENS (M-W) - CHECKBOXES ***
 window.CONCESSOES_LISTA = [
@@ -138,19 +140,19 @@ window.loadingOverlay = null;
 
 // =================== FUNÇÕES DE LOG (GLOBAIS) ===================
 window.logInfo = function(msg) {
-    console.log(`ℹ️ [INFO V4.0] ${msg}`);
+    console.log(`ℹ️ [INFO V7.0] ${msg}`);
 };
 
 window.logSuccess = function(msg) {
-    console.log(`✅ [SUCCESS V4.0] ${msg}`);
+    console.log(`✅ [SUCCESS V7.0] ${msg}`);
 };
 
 window.logError = function(msg, error = null) {
-    console.error(`❌ [ERROR V4.0] ${msg}`, error || '');
+    console.error(`❌ [ERROR V7.0] ${msg}`, error || '');
 };
 
 window.logWarn = function(msg) {
-    console.warn(`⚠️ [WARNING V4.0] ${msg}`);
+    console.warn(`⚠️ [WARNING V7.0] ${msg}`);
 };
 
 // =================== SISTEMA DE LOADING OTIMIZADO COM BLOQUEIO ===================
@@ -368,14 +370,14 @@ window.logout = function() {
     }
 };
 
-// =================== INICIALIZAÇÃO DO SISTEMA V4.0 OTIMIZADA ===================
+// =================== INICIALIZAÇÃO DO SISTEMA V7.0 OTIMIZADA ===================
 window.initSystem = async function() {
     try {
-        logInfo('🏥 Inicializando Sistema Archipelago V4.0...');
+        logInfo('🏥 Inicializando Sistema Archipelago V7.0...');
         logInfo('📊 Carregando 93 leitos (7 hospitais)');
         
         // Mostrar loading IMEDIATAMENTE
-        showLoading(null, 'Sincronizando com Google Apps Script V4.0...');
+        showLoading(null, 'Sincronizando com Google Apps Script V7.0...');
         
         // CRÍTICO: AGUARDAR carregamento dos dados
         if (typeof window.loadHospitalData !== 'function') {
@@ -439,7 +441,7 @@ window.initSystem = async function() {
         // Remover loading
         hideLoading();
         
-        logSuccess('🎉 Sistema V4.0 inicializado com sucesso!');
+        logSuccess('🎉 Sistema V7.0 inicializado com sucesso!');
         
     } catch (error) {
         logError('❌ Erro ao inicializar sistema:', error);
@@ -466,7 +468,7 @@ window.initSystem = async function() {
     }
 };
 
-// =================== ATUALIZAÇÃO DE DADOS V4.0 OTIMIZADA ===================
+// =================== ATUALIZAÇÃO DE DADOS V7.0 OTIMIZADA ===================
 window.updateData = async function() {
     if (window.isLoading) {
         logInfo('Atualização já em andamento, aguardando...');
@@ -474,9 +476,9 @@ window.updateData = async function() {
     }
     
     try {
-        logInfo('🔄 Atualizando dados V4.0...');
+        logInfo('🔄 Atualizando dados V7.0...');
         
-        showLoading(null, 'Atualizando dados V4.0...');
+        showLoading(null, 'Atualizando dados V7.0...');
         
         // Recarregar dados (AGUARDAR)
         if (window.loadHospitalData) {
@@ -493,6 +495,12 @@ window.updateData = async function() {
             window.renderDashboardHospitalar(window.currentHospital);
         } else if (window.currentView === 'dash2' && window.renderDashboardExecutivo) {
             window.renderDashboardExecutivo();
+        } else if (window.currentView === 'leitosUTI' && window.renderCardsUTI) {
+            // V7.0: Re-renderizar cards UTI
+            window.renderCardsUTI(window.currentHospitalUTI || 'H2');
+        } else if ((window.currentView === 'dash3' || window.currentView === 'uti') && window.renderDashboardUTI) {
+            // V7.0: Re-renderizar dashboard UTI
+            window.renderDashboardUTI();
         }
         
         // Resetar timer
@@ -503,16 +511,16 @@ window.updateData = async function() {
         
         hideLoading();
         
-        logSuccess('✅ Dados V4.0 atualizados com sucesso!');
+        logSuccess('✅ Dados V7.0 atualizados com sucesso!');
         
     } catch (error) {
-        logError('Erro ao atualizar dados V4.0:', error);
+        logError('Erro ao atualizar dados V7.0:', error);
         hideLoading();
         alert('Erro ao atualizar dados. Tente novamente.');
     }
 };
 
-// =================== NAVEGAÇÃO ENTRE ABAS V4.0 OTIMIZADA ===================
+// =================== NAVEGAÇÃO ENTRE ABAS V7.0 OTIMIZADA ===================
 window.setActiveTab = function(tabName) {
     if (window.isLoading) return;
     
@@ -528,14 +536,16 @@ window.setActiveTab = function(tabName) {
     
     // Ocultar todas as seções
     document.getElementById('leitosView')?.classList.add('hidden');
+    document.getElementById('leitosUTIView')?.classList.add('hidden'); // V7.0: UTI
     document.getElementById('dash1')?.classList.add('hidden');
     document.getElementById('dash2')?.classList.add('hidden');
+    document.getElementById('dash3')?.classList.add('hidden'); // V7.0: Dashboard UTI
     
     // Mostrar seção ativa
     if (tabName === 'leitos') {
         document.getElementById('leitosView')?.classList.remove('hidden');
         if (window.renderCards) {
-            showLoading(null, 'Carregando leitos V4.0...');
+            showLoading(null, 'Carregando leitos V7.0...');
             setTimeout(() => {
                 window.renderCards();
                 hideLoading();
@@ -544,7 +554,7 @@ window.setActiveTab = function(tabName) {
     } else if (tabName === 'dash1') {
         document.getElementById('dash1')?.classList.remove('hidden');
         if (window.renderDashboardHospitalar) {
-            showLoading(null, 'Carregando Dashboard Hospitalar V4.0...');
+            showLoading(null, 'Carregando Dashboard Hospitalar V7.0...');
             setTimeout(() => {
                 window.renderDashboardHospitalar(window.currentHospital);
                 hideLoading();
@@ -553,9 +563,29 @@ window.setActiveTab = function(tabName) {
     } else if (tabName === 'dash2') {
         document.getElementById('dash2')?.classList.remove('hidden');
         if (window.renderDashboardExecutivo) {
-            showLoading(null, 'Carregando Dashboard Executivo V4.0...');
+            showLoading(null, 'Carregando Dashboard Executivo V7.0...');
             setTimeout(() => {
                 window.renderDashboardExecutivo();
+                hideLoading();
+            }, 400);
+        }
+    } else if (tabName === 'leitosUTI') {
+        // V7.0: Mapa de Leitos UTI
+        document.getElementById('leitosUTIView')?.classList.remove('hidden');
+        if (window.renderCardsUTI) {
+            showLoading(null, 'Carregando leitos UTI V7.0...');
+            setTimeout(() => {
+                window.renderCardsUTI('H2'); // Default Cruz Azul
+                hideLoading();
+            }, 400);
+        }
+    } else if (tabName === 'dash3' || tabName === 'uti') {
+        // V7.0: Dashboard UTI
+        document.getElementById('dash3')?.classList.remove('hidden');
+        if (window.renderDashboardUTI) {
+            showLoading(null, 'Carregando Dashboard UTI V7.0...');
+            setTimeout(() => {
+                window.renderDashboardUTI();
                 hideLoading();
             }, 400);
         }
@@ -596,7 +626,7 @@ window.toggleMenu = function(forceState = null) {
     }
 };
 
-// =================== SELEÇÃO DE HOSPITAL V4.0 OTIMIZADA ===================
+// =================== SELEÇÃO DE HOSPITAL V7.0 OTIMIZADA ===================
 window.selectHospital = function(hospitalId) {
     if (window.isLoading) return;
     
@@ -681,9 +711,9 @@ window.darAlta = function() {
     }
 };
 
-// =================== INICIALIZAÇÃO DO APP V4.0 ===================
+// =================== INICIALIZAÇÃO DO APP V7.0 ===================
 window.initApp = async function() {
-    logInfo('🏥 Archipelago Dashboard V4.0 - Iniciando aplicação...');
+    logInfo('🏥 Archipelago Dashboard V7.0 - Iniciando aplicação...');
     
     // Verificar autenticação
     if (window.checkAuthentication()) {
@@ -710,7 +740,7 @@ window.initApp = async function() {
         }
     }
     
-    logSuccess('🚀 App V4.0 inicializado e pronto para uso');
+    logSuccess('🚀 App V7.0 inicializado e pronto para uso');
 };
 
 // =================== GERENCIAR CORES ===================
@@ -730,7 +760,7 @@ window.restoreDefaultColors = function() {
     logSuccess('Cores padrão restauradas');
 };
 
-// =================== FUNÇÕES AUXILIARES V4.0 ===================
+// =================== FUNÇÕES AUXILIARES V7.0 ===================
 window.getActiveHospitals = function() {
     return Object.entries(CONFIG.HOSPITAIS)
         .filter(([id, hospital]) => hospital.ativo)
@@ -779,7 +809,7 @@ window.validarGenero = (g) => GENERO_OPCOES.includes(g);
 window.validarCategoria = (c) => CATEGORIA_OPCOES.includes(c);
 window.validarDiretivas = (d) => DIRETIVAS_OPCOES.includes(d);
 
-// =================== TIMER DE ATUALIZAÇÃO V4.0 ===================
+// =================== TIMER DE ATUALIZAÇÃO V7.0 ===================
 window.startTimer = function() {
     let countdown = 240; // 4 minutos em segundos
     
@@ -820,26 +850,26 @@ window.openQRCodes = function() {
     logInfo('Abrindo gerador de QR Codes...');
 };
 
-// =================== LOG DE INICIALIZAÇÃO V4.0 ===================
-console.log('%c🚀 ARCHIPELAGO DASHBOARD V4.0', 'color: #60a5fa; font-size: 20px; font-weight: bold;');
+// =================== LOG DE INICIALIZAÇÃO V7.0 ===================
+console.log('%c🚀 ARCHIPELAGO DASHBOARD V7.0', 'color: #60a5fa; font-size: 20px; font-weight: bold;');
 console.log('%c📅 Novembro/2025', 'color: #10b981; font-weight: bold;');
 console.log('');
-console.log('%c🏥 REDE HOSPITALAR V4.0 - 93 LEITOS TOTAIS', 'color: #60a5fa; font-weight: bold;');
+console.log('%c🏥 REDE HOSPITALAR V7.0 - 356 LEITOS TOTAIS (293 ENF + 63 UTI)', 'color: #60a5fa; font-weight: bold;');
 console.log('%c   H1 - Neomater:             10 leitos (Híbrido)', 'color: #10b981;');
 console.log('%c   H2 - Cruz Azul:            36 leitos (Misto)', 'color: #10b981;');
 console.log('%c   H3 - Santa Marcelina:       7 leitos (Híbrido)', 'color: #10b981;');
 console.log('%c   H4 - Santa Clara:          13 leitos (Misto)', 'color: #10b981;');
 console.log('%c   H5 - Hospital Adventista:  13 leitos (Híbrido)', 'color: #10b981;');
-console.log('%c   H6 - Santa Cruz:           13 leitos (Híbrido)', 'color: #10b981;');
-console.log('%c   H7 - Santa Virgínia:       13 leitos (Híbrido)', 'color: #10b981;');
+console.log('%c   H6 - Santa Cruz:            7 leitos (Híbrido)', 'color: #10b981;');
+console.log('%c   H7 - Santa Virgínia:        7 leitos (Híbrido)', 'color: #10b981;');
 console.log('%c   ────────────────────────────────────────────', 'color: #9ca3af;');
 console.log('%c   TOTAL:                     93 leitos', 'color: #60a5fa; font-weight: bold;');
 console.log('');
-console.log('%c✨ NOVIDADES V4.0:', 'color: #fbbf24; font-weight: bold;');
+console.log('%c✨ NOVIDADES V7.0:', 'color: #fbbf24; font-weight: bold;');
 console.log('%c   • ⚡ Carregamento ultrarrápido (delays reduzidos)', 'color: #10b981;');
 console.log('%c   • ✅ await no loadHospitalData (dados antes de renderizar)', 'color: #10b981;');
 console.log('%c   • 🎯 Dashboard Executivo como tela inicial', 'color: #10b981;');
 console.log('%c   • 🏥 7 hospitais - 93 leitos totais', 'color: #10b981;');
 console.log('%c   • 🎨 Interface otimizada e moderna', 'color: #10b981;');
 console.log('');
-console.log('%c📊 App.js V4.0 carregado com sucesso!', 'color: #60a5fa; font-weight: bold;');
+console.log('%c📊 App.js V7.0 carregado com sucesso!', 'color: #60a5fa; font-weight: bold;');
