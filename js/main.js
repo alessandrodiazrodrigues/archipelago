@@ -1,16 +1,24 @@
-// =================== MAIN.JS - CONTROLADOR PRINCIPAL V4.0 OTIMIZADO ===================
+// =================== MAIN.JS - CONTROLADOR PRINCIPAL V7.0 ===================
+// Sistema Archipelago Dashboard
+// Versao: 7.0 - Dezembro/2025
+// Alteracoes V7.0:
+// - Sistema de Reservas integrado
+// - Suporte a Dashboard UTI
+// - Nomenclatura atualizada (Enfermarias, Mapa de Leitos)
+// - Carregamento de reservas no init
+// - 356 leitos (293 enfermaria + 63 UTI)
 
-// =================== INICIALIZAÇÃO GLOBAL ===================
+// =================== INICIALIZACAO GLOBAL ===================
 document.addEventListener('DOMContentLoaded', function() {
-    logInfo('🚀 Archipelago Dashboard V4.0 - Inicializando...');
+    logInfo('Archipelago Dashboard V7.0 - Inicializando...');
     
     // REDUZIDO: de 200ms para 100ms
     setTimeout(() => {
         if (typeof window.initApp === 'function') {
-            logSuccess('✅ Todos os módulos carregados, inicializando sistema...');
+            logSuccess('Todos os modulos carregados, inicializando sistema...');
             window.initApp();
         } else {
-            logError('❌ initApp não encontrada - tentando inicialização manual');
+            logError('initApp nao encontrada - tentando inicializacao manual');
             setTimeout(() => {
                 tryManualInit();
             }, 500); // REDUZIDO: de 1000ms para 500ms
@@ -18,75 +26,76 @@ document.addEventListener('DOMContentLoaded', function() {
     }, 100);
 });
 
-// =================== INICIALIZAÇÃO MANUAL (FALLBACK MELHORADO) ===================
+// =================== INICIALIZACAO MANUAL (FALLBACK MELHORADO) ===================
 function tryManualInit() {
-    logInfo('🔄 Tentando inicialização manual...');
+    logInfo('Tentando inicializacao manual...');
     
     const criticalFunctions = [
         'authenticate', 'logInfo', 'logSuccess', 'logError',
         'loadHospitalData', 'renderCards', 'CONFIG',
         'renderDashboardHospitalar', 'renderDashboardExecutivo',
-        'renderChartByType', 'showLoading', 'hideLoading'
+        'renderChartByType', 'showLoading', 'hideLoading',
+        'carregarReservas' // V7.0: Funcao de reservas
     ];
     
     const missing = criticalFunctions.filter(fn => typeof window[fn] === 'undefined');
     
     if (missing.length > 0) {
-        logError('❌ Funções críticas não encontradas:', missing);
+        logError('Funcoes criticas nao encontradas:', missing);
         showInitError(missing);
         return;
     }
     
-    logSuccess('✅ Inicialização manual bem-sucedida');
+    logSuccess('Inicializacao manual bem-sucedida');
     window.initApp();
 }
 
-// =================== MOSTRAR ERRO DE INICIALIZAÇÃO ===================
+// =================== MOSTRAR ERRO DE INICIALIZACAO ===================
 function showInitError(missingFunctions) {
     document.body.innerHTML = `
         <div style="display: flex; align-items: center; justify-content: center; height: 100vh; background: linear-gradient(135deg, #1a1f2e 0%, #2d3748 100%); color: white; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">
             <div style="text-align: center; padding: 40px; background: rgba(255,255,255,0.1); border-radius: 16px; max-width: 600px; backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.2);">
-                <div style="font-size: 64px; margin-bottom: 20px;">⚠️</div>
+                <div style="font-size: 64px; margin-bottom: 20px;">!</div>
                 <h1 style="color: #ef4444; margin-bottom: 20px; font-size: 24px; font-weight: 700;">Erro de Carregamento do Sistema</h1>
-                <p style="margin-bottom: 20px; color: rgba(255, 255, 255, 0.8);">Algumas funções críticas não foram carregadas corretamente:</p>
+                <p style="margin-bottom: 20px; color: rgba(255, 255, 255, 0.8);">Algumas funcoes criticas nao foram carregadas corretamente:</p>
                 <div style="background: rgba(239, 68, 68, 0.1); border: 1px solid #ef4444; border-radius: 8px; padding: 16px; margin: 20px 0;">
                     <ul style="text-align: left; color: #fbbf24; margin: 0; padding: 0; list-style: none;">
-                        ${missingFunctions.map(fn => `<li style="margin: 4px 0;">• ${fn}</li>`).join('')}
+                        ${missingFunctions.map(fn => `<li style="margin: 4px 0;">- ${fn}</li>`).join('')}
                     </ul>
                 </div>
                 <div style="display: flex; gap: 16px; justify-content: center; margin-top: 30px;">
                     <button onclick="location.reload()" style="padding: 12px 24px; background: #3b82f6; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; transition: background 0.3s ease;">
-                        🔄 Recarregar Página
+                        Recarregar Pagina
                     </button>
                     <button onclick="tryForceInit()" style="padding: 12px 24px; background: #059669; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; transition: background 0.3s ease;">
-                        🚀 Tentar Novamente
+                        Tentar Novamente
                     </button>
                 </div>
                 <div style="margin-top: 20px; font-size: 12px; color: rgba(255, 255, 255, 0.6);">
-                    Sistema: Archipelago Dashboard V4.0<br>
-                    Versão: Novembro/2025
+                    Sistema: Archipelago Dashboard V7.0<br>
+                    Versao: Dezembro/2025
                 </div>
             </div>
         </div>
     `;
 }
 
-// =================== FORÇAR INICIALIZAÇÃO ===================
+// =================== FORCAR INICIALIZACAO ===================
 window.tryForceInit = function() {
-    logInfo('🔧 Tentando forçar inicialização...');
+    logInfo('Tentando forcar inicializacao...');
     
     if (typeof window.logInfo === 'undefined') {
-        window.logInfo = (msg) => console.log(`ℹ️ [INFO] ${msg}`);
-        window.logSuccess = (msg) => console.log(`✅ [SUCCESS] ${msg}`);
-        window.logError = (msg) => console.error(`❌ [ERROR] ${msg}`);
+        window.logInfo = (msg) => console.log(`[INFO] ${msg}`);
+        window.logSuccess = (msg) => console.log(`[SUCCESS] ${msg}`);
+        window.logError = (msg) => console.error(`[ERROR] ${msg}`);
     }
     
     if (typeof window.showLoading === 'undefined') {
         window.showLoading = (container, message) => {
-            console.log(`🔄 Loading: ${message}`);
+            console.log(`Loading: ${message}`);
         };
         window.hideLoading = () => {
-            console.log('✅ Loading removido');
+            console.log('Loading removido');
         };
     }
     
@@ -100,7 +109,7 @@ window.tryForceInit = function() {
     }, 500);
 };
 
-// =================== FUNÇÕES DE UTILIDADE ===================
+// =================== FUNCOES DE UTILIDADE ===================
 window.formatarData = function(data) {
     if (!data) return '';
     const d = new Date(data);
@@ -134,6 +143,7 @@ window.getSystemState = function() {
         currentView: window.currentView || 'leitos',
         currentHospital: window.currentHospital || 'H1',
         hospitalsData: window.hospitalData || {},
+        reservasData: window.reservasData || [], // V7.0: Estado das reservas
         apiConnected: typeof window.API_URL !== 'undefined',
         chartsLoaded: typeof Chart !== 'undefined',
         loadingActive: window.isLoading || false,
@@ -173,16 +183,123 @@ window.loadSystemState = function() {
     return null;
 };
 
+// =================== V7.0: CARREGAMENTO DE RESERVAS ===================
+window.carregarReservas = async function() {
+    try {
+        // V7.0: Se reservas ja foram carregadas pelo api.js, nao sobrescrever
+        if (window.reservasData && window.reservasData.length > 0) {
+            logSuccess('Reservas ja carregadas pelo api.js: ' + window.reservasData.length);
+            return window.reservasData;
+        }
+        
+        logInfo('Carregando reservas...');
+        
+        if (!window.API_URL) {
+            logError('API_URL nao definida');
+            window.reservasData = [];
+            return [];
+        }
+        
+        const url = window.API_URL + '?action=reservas&callback=?';
+        
+        // Tentar fetch direto primeiro
+        try {
+            const response = await fetch(window.API_URL + '?action=reservas');
+            if (response.ok) {
+                const data = await response.json();
+                if (data.ok && data.reservas) {
+                    window.reservasData = data.reservas || [];
+                    logSuccess('Reservas carregadas: ' + window.reservasData.length);
+                    return window.reservasData;
+                }
+            }
+        } catch (fetchError) {
+            // Se fetch falhar, tentar JSONP
+            logInfo('Tentando JSONP para reservas...');
+        }
+        
+        // Fallback JSONP
+        return new Promise((resolve, reject) => {
+            const callbackName = 'reservasCallback_' + Date.now();
+            
+            window[callbackName] = function(data) {
+                window.reservasData = data.reservas || [];
+                logSuccess('Reservas carregadas via JSONP: ' + window.reservasData.length);
+                delete window[callbackName];
+                resolve(window.reservasData);
+            };
+            
+            const script = document.createElement('script');
+            script.src = window.API_URL + '?action=reservas&callback=' + callbackName;
+            script.onerror = function() {
+                logError('Erro ao carregar reservas via JSONP');
+                window.reservasData = [];
+                delete window[callbackName];
+                resolve([]);
+            };
+            
+            document.head.appendChild(script);
+            
+            // Timeout de 10 segundos
+            setTimeout(() => {
+                if (window[callbackName]) {
+                    logError('Timeout ao carregar reservas');
+                    window.reservasData = [];
+                    delete window[callbackName];
+                    resolve([]);
+                }
+            }, 10000);
+        });
+        
+    } catch (error) {
+        logError('Erro ao carregar reservas:', error);
+        window.reservasData = [];
+        return [];
+    }
+};
+
+// =================== V7.0: REFRESH APOS ACAO DE RESERVA ===================
+window.refreshAfterAction = async function() {
+    try {
+        logInfo('Atualizando dados apos acao...');
+        
+        // Recarregar dados dos hospitais
+        if (window.loadHospitalData) {
+            await window.loadHospitalData();
+        }
+        
+        // Recarregar reservas
+        await window.carregarReservas();
+        
+        // Re-renderizar view atual
+        if (window.currentView === 'leitos' && window.renderCards) {
+            window.renderCards(window.currentHospital);
+        } else if (window.currentView === 'dash1' && window.renderDashboardHospitalar) {
+            window.renderDashboardHospitalar();
+        } else if (window.currentView === 'dash2' && window.renderDashboardExecutivo) {
+            window.renderDashboardExecutivo();
+        } else if (window.currentView === 'uti' && window.renderDashboardUTI) {
+            window.renderDashboardUTI();
+        } else if (window.currentView === 'leitosUTI' && window.renderCardsUTI) { // V7.0: Mapa UTI
+            window.renderCardsUTI(window.currentHospitalUTI || 'H2');
+        }
+        
+        logSuccess('Dados atualizados com sucesso');
+    } catch (error) {
+        logError('Erro ao atualizar dados:', error);
+    }
+};
+
 // =================== TRATAMENTO DE ERROS GLOBAIS ===================
 window.addEventListener('error', function(event) {
     if (typeof window.logError === 'function') {
         logError('Erro JavaScript:', event.error);
     } else {
-        console.error('❌ Erro JavaScript:', event.error);
+        console.error('Erro JavaScript:', event.error);
     }
     
     if (event.error && event.error.stack) {
-        console.group('🔍 Detalhes do Erro:');
+        console.group('Detalhes do Erro:');
         console.error('Mensagem:', event.error.message);
         console.error('Arquivo:', event.filename);
         console.error('Linha:', event.lineno);
@@ -195,7 +312,7 @@ window.addEventListener('error', function(event) {
         if (errorMsg.includes('chart') || errorMsg.includes('canvas')) {
             setTimeout(() => {
                 garantirChartJS().then(() => {
-                    logSuccess('Chart.js recarregado após erro');
+                    logSuccess('Chart.js recarregado apos erro');
                 });
             }, 500); // REDUZIDO: de 1000ms para 500ms
         }
@@ -206,7 +323,7 @@ window.addEventListener('unhandledrejection', function(event) {
     if (typeof window.logError === 'function') {
         logError('Promise rejeitada:', event.reason);
     } else {
-        console.error('❌ Promise rejeitada:', event.reason);
+        console.error('Promise rejeitada:', event.reason);
     }
     event.preventDefault();
 });
@@ -232,7 +349,7 @@ window.addEventListener('resize', function() {
                     try {
                         chart.resize();
                     } catch (error) {
-                        console.warn('Erro ao redimensionar gráfico:', error);
+                        console.warn('Erro ao redimensionar grafico:', error);
                     }
                 }
             });
@@ -259,6 +376,10 @@ document.addEventListener('keydown', function(event) {
             case '3':
                 event.preventDefault();
                 if (window.setActiveTab) window.setActiveTab('dash2');
+                break;
+            case '4': // V7.0: Atalho para Dashboard UTI
+                event.preventDefault();
+                if (window.setActiveTab) window.setActiveTab('uti');
                 break;
             case 'u':
             case 'U':
@@ -328,25 +449,25 @@ window.addEventListener('beforeunload', function(event) {
                 try {
                     chart.destroy();
                 } catch (error) {
-                    console.warn('Erro ao destruir gráfico:', error);
+                    console.warn('Erro ao destruir grafico:', error);
                 }
             }
         });
     }
     
-    logInfo('🧹 Recursos limpos antes do unload');
+    logInfo('Recursos limpos antes do unload');
 });
 
-// =================== DETECÇÃO DE CONECTIVIDADE ===================
+// =================== DETECCAO DE CONECTIVIDADE ===================
 window.addEventListener('online', function() {
     if (typeof window.logSuccess === 'function') {
-        logSuccess('🌐 Conexão restaurada');
+        logSuccess('Conexao restaurada');
     }
     
     if (window.isAuthenticated && window.testAPI) {
         setTimeout(() => {
             window.testAPI().catch(error => {
-                logError('Erro ao testar API após reconexão:', error);
+                logError('Erro ao testar API apos reconexao:', error);
             });
         }, 1000); // REDUZIDO: de 2000ms para 1000ms
     }
@@ -362,7 +483,7 @@ window.addEventListener('online', function() {
 
 window.addEventListener('offline', function() {
     if (typeof window.logInfo === 'function') {
-        logInfo('📡 Sem conexão - sistema funcionando em modo offline');
+        logInfo('Sem conexao - sistema funcionando em modo offline');
     }
 });
 
@@ -370,7 +491,7 @@ window.addEventListener('offline', function() {
 window.addEventListener('load', function() {
     if (performance && performance.timing) {
         const loadTime = performance.timing.loadEventEnd - performance.timing.navigationStart;
-        console.log(`📊 Página carregada em ${loadTime}ms`);
+        console.log('Pagina carregada em ' + loadTime + 'ms');
         
         const perfData = {
             'DNS Lookup': performance.timing.domainLookupEnd - performance.timing.domainLookupStart,
@@ -387,34 +508,36 @@ window.addEventListener('load', function() {
         'CONFIG', 'loadHospitalData', 'renderCards', 
         'renderDashboardHospitalar', 'renderDashboardExecutivo',
         'authenticate', 'setActiveTab', 'API_URL',
-        'renderChartByType', 'showLoading', 'hideLoading'
+        'renderChartByType', 'showLoading', 'hideLoading',
+        'carregarReservas' // V7.0: Modulo de reservas
     ];
     
     const missingModules = requiredModules.filter(module => typeof window[module] === 'undefined');
     
     if (missingModules.length > 0) {
-        logError('❌ Módulos não carregados:', missingModules.join(', '));
+        logError('Modulos nao carregados:', missingModules.join(', '));
         
         // REDUZIDO: de 3000ms para 1500ms
         setTimeout(() => {
             const stillMissing = requiredModules.filter(module => typeof window[module] === 'undefined');
             if (stillMissing.length === 0) {
-                logSuccess('✅ Todos os módulos carregados após retry');
+                logSuccess('Todos os modulos carregados apos retry');
             } else {
-                logError('⚠️  Módulos ainda faltando:', stillMissing.join(', '));
+                logError('Modulos ainda faltando:', stillMissing.join(', '));
             }
         }, 1500);
     } else {
-        logSuccess('✅ Todos os módulos críticos carregados');
+        logSuccess('Todos os modulos criticos carregados');
     }
     
-    console.log('📁 Estrutura do sistema:', {
+    console.log('Estrutura do sistema:', {
         hospitais: window.CONFIG?.HOSPITAIS ? Object.keys(window.CONFIG.HOSPITAIS).length : 0,
-        apiUrl: window.API_URL ? 'Configurada' : 'Não configurada',
+        apiUrl: window.API_URL ? 'Configurada' : 'Nao configurada',
         cores: window.CHART_COLORS ? Object.keys(window.CHART_COLORS).length : 0,
-        autenticacao: window.isAuthenticated ? 'Logado' : 'Não logado',
+        autenticacao: window.isAuthenticated ? 'Logado' : 'Nao logado',
         graficos: window.chartInstances ? Object.keys(window.chartInstances).length : 0,
-        loading: window.loadingOverlay ? 'Sistema ativo' : 'Não inicializado',
+        reservas: window.reservasData ? window.reservasData.length : 0, // V7.0
+        loading: window.loadingOverlay ? 'Sistema ativo' : 'Nao inicializado',
         funcoesCriticas: requiredModules.filter(module => typeof window[module] !== 'undefined').length
     });
 });
@@ -434,11 +557,11 @@ window.monitorAPI = function() {
                 const responseTime = Math.round(endTime - startTime);
                 
                 if (responseTime > 5000) {
-                    logError(`API lenta: ${responseTime}ms`);
+                    logError('API lenta: ' + responseTime + 'ms');
                 }
             } catch (error) {
                 if (typeof window.logError === 'function') {
-                    logError('API não responsiva:', error);
+                    logError('API nao responsiva:', error);
                 }
             }
         }
@@ -454,6 +577,7 @@ window.systemHealthCheck = function() {
         colors: typeof window.CHART_COLORS !== 'undefined',
         authentication: typeof window.authenticate !== 'undefined',
         data: typeof window.hospitalData !== 'undefined',
+        reservas: typeof window.reservasData !== 'undefined', // V7.0
         loading: typeof window.showLoading !== 'undefined',
         dashboards: typeof window.renderDashboardHospitalar !== 'undefined' && 
                    typeof window.renderDashboardExecutivo !== 'undefined',
@@ -464,25 +588,26 @@ window.systemHealthCheck = function() {
     const total = Object.keys(checks).length;
     const percentage = Math.round((passed / total) * 100);
     
-    console.log(`🏥 System Health: ${passed}/${total} checks passed (${percentage}%)`);
+    console.log('System Health: ' + passed + '/' + total + ' checks passed (' + percentage + '%)');
     console.table(checks);
     
     if (percentage >= 100) {
-        console.log('%c✅ Sistema 100% operacional', 'color: #10b981; font-weight: bold; font-size: 16px;');
+        console.log('%cSistema 100% operacional', 'color: #10b981; font-weight: bold; font-size: 16px;');
     } else if (percentage >= 80) {
-        console.log('%c⚠️  Sistema parcialmente operacional', 'color: #f59e0b; font-weight: bold; font-size: 16px;');
+        console.log('%cSistema parcialmente operacional', 'color: #f59e0b; font-weight: bold; font-size: 16px;');
     } else {
-        console.log('%c❌ Sistema com problemas críticos', 'color: #ef4444; font-weight: bold; font-size: 16px;');
+        console.log('%cSistema com problemas criticos', 'color: #ef4444; font-weight: bold; font-size: 16px;');
     }
     
     return { passed, total, percentage, checks };
 };
 
-// =================== AUTO-CORREÇÃO DE CONTAINERS ===================
+// =================== AUTO-CORRECAO DE CONTAINERS ===================
 function verificarContainersDashboard() {
     const containers = [
         { id: 'dashExecutivoContent', section: 'dash2' },
-        { id: 'dashHospitalarContent', section: 'dash1' }
+        { id: 'dashHospitalarContent', section: 'dash1' },
+        { id: 'dashUTIContent', section: 'uti' } // V7.0: Container UTI
     ];
     
     containers.forEach(({ id, section }) => {
@@ -493,26 +618,31 @@ function verificarContainersDashboard() {
                 container = document.createElement('div');
                 container.id = id;
                 section_element.appendChild(container);
-                logInfo(`✅ Container ${id} criado automaticamente`);
+                logInfo('Container ' + id + ' criado automaticamente');
             }
         }
     });
 }
 
-// =================== DIAGNÓSTICO AUTOMÁTICO ===================
+// =================== DIAGNOSTICO AUTOMATICO ===================
 window.diagnosticoSistema = function() {
     const diagnostico = {
         hospitalData: !!window.hospitalData,
         hospitalDataCount: window.hospitalData ? Object.keys(window.hospitalData).length : 0,
+        reservasData: !!window.reservasData, // V7.0
+        reservasCount: window.reservasData ? window.reservasData.length : 0, // V7.0
         chartJS: typeof Chart !== 'undefined',
         containers: {
             dashExecutivoContent: !!document.getElementById('dashExecutivoContent'),
-            dashHospitalarContent: !!document.getElementById('dashHospitalarContent')
+            dashHospitalarContent: !!document.getElementById('dashHospitalarContent'),
+            dashUTIContent: !!document.getElementById('dashUTIContent') // V7.0
         },
         functions: {
             renderDashboardExecutivo: typeof window.renderDashboardExecutivo === 'function',
             renderDashboardHospitalar: typeof window.renderDashboardHospitalar === 'function',
+            renderDashboardUTI: typeof window.renderDashboardUTI === 'function', // V7.0
             loadHospitalData: typeof window.loadHospitalData === 'function',
+            carregarReservas: typeof window.carregarReservas === 'function', // V7.0
             renderChartByType: typeof window.renderChartByType === 'function'
         },
         api: !!window.API_URL,
@@ -520,36 +650,41 @@ window.diagnosticoSistema = function() {
         authentication: window.isAuthenticated || false
     };
     
-    console.log('🔍 DIAGNÓSTICO DO SISTEMA:', diagnostico);
+    console.log('DIAGNOSTICO DO SISTEMA:', diagnostico);
     
     const problemas = [];
     const solucoes = [];
     
     if (!diagnostico.hospitalData) {
-        problemas.push('❌ Dados dos hospitais não carregados');
+        problemas.push('Dados dos hospitais nao carregados');
         solucoes.push('window.loadHospitalData()');
     }
     
+    if (!diagnostico.reservasData) {
+        problemas.push('Dados das reservas nao carregados');
+        solucoes.push('window.carregarReservas()');
+    }
+    
     if (!diagnostico.chartJS) {
-        problemas.push('❌ Chart.js não disponível');
+        problemas.push('Chart.js nao disponivel');
         solucoes.push('garantirChartJS()');
     }
     
     if (!diagnostico.containers.dashExecutivoContent || !diagnostico.containers.dashHospitalarContent) {
-        problemas.push('❌ Containers dos dashboards faltando');
+        problemas.push('Containers dos dashboards faltando');
         solucoes.push('verificarContainersDashboard()');
     }
     
     if (!diagnostico.functions.renderChartByType) {
-        problemas.push('❌ Sistema de gráficos corrigido não carregado');
+        problemas.push('Sistema de graficos corrigido nao carregado');
         solucoes.push('Recarregar charts.js');
     }
     
     if (problemas.length === 0) {
-        console.log('✅ Sistema funcionando corretamente!');
+        console.log('Sistema funcionando corretamente!');
     } else {
-        console.log('⚠️ PROBLEMAS ENCONTRADOS:', problemas);
-        console.log('🔧 SOLUÇÕES:', solucoes);
+        console.log('PROBLEMAS ENCONTRADOS:', problemas);
+        console.log('SOLUCOES:', solucoes);
     }
     
     return { diagnostico, problemas, solucoes };
@@ -563,12 +698,12 @@ function garantirChartJS() {
             return;
         }
         
-        logInfo('📊 Carregando Chart.js dinamicamente...');
+        logInfo('Carregando Chart.js dinamicamente...');
         const script = document.createElement('script');
         script.src = 'https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js';
         script.onload = () => {
             if (typeof Chart !== 'undefined') {
-                logSuccess('✅ Chart.js carregado com sucesso');
+                logSuccess('Chart.js carregado com sucesso');
                 resolve(Chart);
             } else {
                 reject(new Error('Falha ao carregar Chart.js'));
@@ -579,9 +714,9 @@ function garantirChartJS() {
     });
 }
 
-// =================== FORÇAR RENDERIZAÇÃO DOS DASHBOARDS ===================
+// =================== FORCAR RENDERIZACAO DOS DASHBOARDS ===================
 window.forcarRenderizacao = function() {
-    logInfo('🔄 Forçando renderização dos dashboards...');
+    logInfo('Forcando renderizacao dos dashboards...');
     
     verificarContainersDashboard();
     
@@ -590,42 +725,69 @@ window.forcarRenderizacao = function() {
         try {
             if (window.renderDashboardExecutivo) {
                 window.renderDashboardExecutivo();
-                logSuccess('✅ Dashboard Executivo forçado');
+                logSuccess('Dashboard Executivo forcado');
             }
         } catch (error) {
-            logError('❌ Erro no Dashboard Executivo:', error);
+            logError('Erro no Dashboard Executivo:', error);
         }
         
         try {
             if (window.renderDashboardHospitalar) {
                 window.renderDashboardHospitalar();
-                logSuccess('✅ Dashboard Hospitalar forçado');
+                logSuccess('Dashboard Enfermarias forcado'); // V7.0: Nome atualizado
             }
         } catch (error) {
-            logError('❌ Erro no Dashboard Hospitalar:', error);
+            logError('Erro no Dashboard Enfermarias:', error);
+        }
+        
+        // V7.0: Dashboard UTI
+        try {
+            if (window.renderDashboardUTI) {
+                window.renderDashboardUTI();
+                logSuccess('Dashboard UTI forcado');
+            }
+        } catch (error) {
+            // Dashboard UTI pode nao estar carregado ainda
+            console.log('Dashboard UTI nao disponivel (esperado se nao estiver na aba)');
+        }
+        
+        // V7.0: Mapa de Leitos UTI (Cards)
+        try {
+            if (window.renderCardsUTI && window.currentView === 'leitosUTI') {
+                window.renderCardsUTI(window.currentHospitalUTI || 'H2');
+                logSuccess('Mapa de Leitos UTI forcado');
+            }
+        } catch (error) {
+            console.log('Mapa de Leitos UTI nao disponivel');
         }
     }, 200);
 };
 
-// =================== TESTE RÁPIDO ===================
+// =================== TESTE RAPIDO ===================
 window.testeRapido = function() {
-    console.log('🧪 EXECUTANDO TESTE RÁPIDO...');
+    console.log('EXECUTANDO TESTE RAPIDO...');
     
     const resultado = window.diagnosticoSistema();
     
     if (resultado.problemas.length > 0) {
-        console.log('🔧 Aplicando correções automáticas...');
+        console.log('Aplicando correcoes automaticas...');
         
         if (!window.hospitalData && window.loadHospitalData) {
             window.loadHospitalData().then(() => {
-                logSuccess('✅ Dados carregados automaticamente');
+                logSuccess('Dados carregados automaticamente');
+                // V7.0: Carregar reservas apos dados
+                if (window.carregarReservas) {
+                    window.carregarReservas().then(() => {
+                        logSuccess('Reservas carregadas automaticamente');
+                    });
+                }
                 // REDUZIDO: de 1000ms para 500ms
                 setTimeout(() => window.forcarRenderizacao(), 500);
             });
         }
         
         garantirChartJS().then(() => {
-            logSuccess('✅ Chart.js disponível');
+            logSuccess('Chart.js disponivel');
         });
         
         verificarContainersDashboard();
@@ -639,11 +801,11 @@ window.testeRapido = function() {
     return resultado;
 };
 
-// =================== HOOK NO SISTEMA DE NAVEGAÇÃO ===================
+// =================== HOOK NO SISTEMA DE NAVEGACAO ===================
 const setActiveTabOriginal = window.setActiveTab;
 window.setActiveTab = function(tab) {
     if (window.isLoading) {
-        logInfo('Navegação bloqueada durante carregamento');
+        logInfo('Navegacao bloqueada durante carregamento');
         return;
     }
     
@@ -659,6 +821,10 @@ window.setActiveTab = function(tab) {
             window.renderDashboardHospitalar();
         } else if (tab === 'dash2' && window.renderDashboardExecutivo) {
             window.renderDashboardExecutivo();
+        } else if (tab === 'uti' && window.renderDashboardUTI) { // V7.0: Dashboard UTI
+            window.renderDashboardUTI();
+        } else if (tab === 'leitosUTI' && window.renderCardsUTI) { // V7.0: Mapa de Leitos UTI
+            window.renderCardsUTI(window.currentHospitalUTI || 'H2');
         }
     }, 200);
 };
@@ -670,15 +836,20 @@ Object.assign(window.debug, {
     forcar: window.forcarRenderizacao,
     teste: window.testeRapido,
     dados: () => window.hospitalData,
+    reservas: () => window.reservasData, // V7.0
     graficos: () => window.chartInstances,
     estado: window.getSystemState,
     saude: window.systemHealthCheck,
     recarregar: async () => {
         if (window.loadHospitalData) {
             await window.loadHospitalData();
+            // V7.0: Recarregar reservas tambem
+            if (window.carregarReservas) {
+                await window.carregarReservas();
+            }
             // REDUZIDO: de 1000ms para 500ms
             setTimeout(() => window.forcarRenderizacao(), 500);
-            return window.hospitalData;
+            return { hospitalData: window.hospitalData, reservasData: window.reservasData };
         }
     },
     limpar: () => {
@@ -696,7 +867,7 @@ Object.assign(window.debug, {
     }
 });
 
-// =================== OBSERVER PARA MUDANÇAS DE TAB ===================
+// =================== OBSERVER PARA MUDANCAS DE TAB ===================
 const observarMudancasTab = () => {
     const observer = new MutationObserver((mutations) => {
         mutations.forEach((mutation) => {
@@ -718,6 +889,19 @@ const observarMudancasTab = () => {
                             window.renderDashboardExecutivo();
                         }
                     }, 150);
+                } else if (target.id === 'uti' && !target.classList.contains('hidden')) { // V7.0
+                    setTimeout(() => {
+                        verificarContainersDashboard();
+                        if (window.renderDashboardUTI) {
+                            window.renderDashboardUTI();
+                        }
+                    }, 150);
+                } else if (target.id === 'leitosUTIView' && !target.classList.contains('hidden')) { // V7.0: Mapa UTI
+                    setTimeout(() => {
+                        if (window.renderCardsUTI) {
+                            window.renderCardsUTI(window.currentHospitalUTI || 'H2');
+                        }
+                    }, 150);
                 }
             }
         });
@@ -725,34 +909,52 @@ const observarMudancasTab = () => {
     
     const dash1 = document.getElementById('dash1');
     const dash2 = document.getElementById('dash2');
+    const dashUTI = document.getElementById('uti'); // V7.0
+    const leitosUTIView = document.getElementById('leitosUTIView'); // V7.0: Mapa UTI
     
     if (dash1) observer.observe(dash1, { attributes: true });
     if (dash2) observer.observe(dash2, { attributes: true });
+    if (dashUTI) observer.observe(dashUTI, { attributes: true }); // V7.0
+    if (leitosUTIView) observer.observe(leitosUTIView, { attributes: true }); // V7.0: Mapa UTI
 };
 
-// =================== INICIALIZAÇÃO AUTOMÁTICA OTIMIZADA ===================
+// =================== INICIALIZACAO AUTOMATICA OTIMIZADA ===================
 // REDUZIDO: de 4000ms para 800ms
 setTimeout(() => {
-    logInfo('🚀 Iniciando correções automáticas...');
+    logInfo('Iniciando correcoes automaticas...');
     
     window.loadSystemState();
     
     garantirChartJS().catch(() => {
-        logError('Erro ao carregar Chart.js - alguns gráficos podem não funcionar');
+        logError('Erro ao carregar Chart.js - alguns graficos podem nao funcionar');
     });
     
     verificarContainersDashboard();
     
     if (!window.hospitalData && window.loadHospitalData) {
-        logInfo('📊 Carregando dados dos hospitais...');
+        logInfo('Carregando dados dos hospitais...');
         window.loadHospitalData().then(() => {
-            logSuccess('✅ Dados carregados automaticamente');
+            logSuccess('Dados carregados automaticamente');
+            
+            // V7.0: Carregar reservas apos dados dos hospitais
+            if (window.carregarReservas) {
+                window.carregarReservas().then(() => {
+                    logSuccess('Reservas carregadas automaticamente');
+                }).catch(err => {
+                    logError('Erro ao carregar reservas:', err);
+                });
+            }
+            
             // REDUZIDO: de 1000ms para 300ms
             setTimeout(() => {
                 if (window.currentView === 'dash1') {
                     window.renderDashboardHospitalar();
                 } else if (window.currentView === 'dash2') {
                     window.renderDashboardExecutivo();
+                } else if (window.currentView === 'uti') { // V7.0
+                    window.renderDashboardUTI();
+                } else if (window.currentView === 'leitosUTI' && window.renderCardsUTI) { // V7.0: Mapa UTI
+                    window.renderCardsUTI(window.currentHospitalUTI || 'H2');
                 }
             }, 300);
         }).catch(error => {
@@ -770,10 +972,10 @@ setTimeout(() => {
         const diagnostico = window.diagnosticoSistema();
         
         if (diagnostico.problemas.length > 0) {
-            console.log('🔧 Executando correções finais...');
+            console.log('Executando correcoes finais...');
             window.testeRapido();
         } else {
-            logSuccess('✅ Sistema inicializado corretamente');
+            logSuccess('Sistema inicializado corretamente');
         }
     }, 1500);
     
@@ -784,22 +986,29 @@ setTimeout(() => {
 setTimeout(observarMudancasTab, 1000);
 
 // =================== LOGS FINAIS ===================
-console.log('%c🚀 ARCHIPELAGO DASHBOARD V4.0 - SISTEMA OTIMIZADO', 'color: #60a5fa; font-size: 16px; font-weight: bold;');
-console.log('%c✅ Novembro/2025', 'color: #10b981; font-weight: bold;');
-console.log('%c📊 Carregamento ultrarrápido ativado', 'color: #10b981;');
-console.log('%c🏥 7 Hospitais - 93 Leitos', 'color: #10b981;');
+console.log('%cARCHIPELAGO DASHBOARD V7.0 - SISTEMA COM RESERVAS E UTI', 'color: #60a5fa; font-size: 16px; font-weight: bold;');
+console.log('%cDezembro/2025', 'color: #10b981; font-weight: bold;');
+console.log('%cCarregamento ultrarapido ativado', 'color: #10b981;');
+console.log('%c9 Hospitais - 356 Leitos (293 Enfermaria + 63 UTI)', 'color: #10b981;');
 
 console.log(`
-🔧 COMANDOS DISPONÍVEIS:
+COMANDOS DISPONIVEIS:
 
-• window.debug.teste() - Teste rápido + correções
-• window.debug.diagnostico() - Diagnóstico completo  
-• window.debug.forcar() - Forçar renderização
-• window.debug.recarregar() - Recarregar dados da API
-• window.debug.dados() - Ver dados carregados
-• window.debug.limpar() - Limpar gráficos
-• window.debug.estado() - Estado do sistema
-• window.debug.saude() - Health check completo
+- window.debug.teste() - Teste rapido + correcoes
+- window.debug.diagnostico() - Diagnostico completo  
+- window.debug.forcar() - Forcar renderizacao
+- window.debug.recarregar() - Recarregar dados da API
+- window.debug.dados() - Ver dados carregados
+- window.debug.reservas() - Ver reservas carregadas (V7.0)
+- window.debug.limpar() - Limpar graficos
+- window.debug.estado() - Estado do sistema
+- window.debug.saude() - Health check completo
 
-📊 Sistema V4.0 pronto com carregamento otimizado!
+Sistema V7.0 pronto com Reservas e Dashboard UTI!
 `);
+
+// =================== EXPORTS V7.0 ===================
+window.carregarReservas = window.carregarReservas;
+window.refreshAfterAction = window.refreshAfterAction;
+window.verificarContainersDashboard = verificarContainersDashboard;
+window.garantirChartJS = garantirChartJS;
