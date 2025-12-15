@@ -1,8 +1,9 @@
-// =================== DASHBOARD EXECUTIVO V6.0 - CORRIGIDO COMPLETO ===================
+// =================== DASHBOARD EXECUTIVO V7.0 - COM RESERVADOS E FILTRO UTI ===================
 // =================== 9 HOSPITAIS | 293 LEITOS (126 CONTRATUAIS) ===================
+// =================== V7.0: + Coluna Reservados + Filtro UTI ===================
 
-// =================== CONSTANTES GLOBAIS V6.0 ===================
-const TOTAL_CONTRATUAIS = 126; // 9 hospitais ativos (H1-H9)
+// =================== CONSTANTES GLOBAIS V7.0 ===================
+const TOTAL_CONTRATUAIS = 138; // 9 hospitais ativos (H1-H9): 10+36+13+26+13+13+13+7+7
 const TOTAL_LEITOS = 293; // 126 contratuais + 167 extras
 
 // Estado global para fundo branco (compartilhado com dashboard hospitalar)
@@ -91,6 +92,24 @@ function isVagoExecutivo(leito) {
     if (!leito || !leito.status) return false;
     const s = (leito.status || '').toString().toLowerCase().trim();
     return s === 'vago' || s === 'disponivel' || s === 'disponível' || s === 'livre';
+}
+
+// =================== V7.0: FILTRO UTI ===================
+function filtrarLeitosSemUTI(leitos) {
+    if (!Array.isArray(leitos)) return [];
+    return leitos.filter(l => l.tipo !== 'UTI');
+}
+
+// =================== V7.0: BUSCAR RESERVAS POR HOSPITAL ===================
+function getReservasHospitalExec(hospitalId) {
+    const reservas = window.reservasData || [];
+    // Filtrar por hospital, excluir UTI, e só contar se tiver matricula
+    // V7.4: Converter para string antes de trim (matricula pode ser numero)
+    return reservas.filter(r => 
+        r.hospital === hospitalId && 
+        r.tipo !== 'UTI' &&
+        r.matricula && String(r.matricula).trim() !== ''
+    );
 }
 
 // =================== FUNÇÃO: RENDER BARRA DE OCUPAÇÃO ===================
@@ -260,7 +279,7 @@ function calcularModalidadesVagosExecutivo(leitos, hospitalId) {
 
     // Híbridos Puros: H1, H3, H5, H6, H7, H8, H9
     if (hospitalId === 'H1' || hospitalId === 'H3' || hospitalId === 'H5' || hospitalId === 'H6' || hospitalId === 'H7' || hospitalId === 'H8' || hospitalId === 'H9') {
-        // V6.0: Usar contratuais (não conta extras)
+        // V7.0: Usar contratuais (não conta extras)
         const capacidadeInfo = window.HOSPITAL_CAPACIDADE ? window.HOSPITAL_CAPACIDADE[hospitalId] : null;
         const contratuais = capacidadeInfo ? capacidadeInfo.contratuais : leitos.length;
         const ocupados = leitos.filter(l => isOcupadoExecutivo(l)).length;
@@ -430,6 +449,12 @@ function processarDadosHospitalExecutivo(hospitalId) {
     if (!Array.isArray(leitos)) {
         leitos = [];
     }
+    
+    // V7.0: Filtrar UTI dos leitos
+    leitos = filtrarLeitosSemUTI(leitos);
+    
+    // V7.0: Buscar reservas do hospital (excluindo UTI)
+    const reservas = getReservasHospitalExec(hospitalId);
     
     const ocupados = leitos.filter(l => isOcupadoExecutivo(l));
     
@@ -637,10 +662,10 @@ function processarDadosHospitalExecutivo(hospitalId) {
         l.spict && l.spict.toLowerCase() === 'elegivel'
     );
     
-    // =================== DIRETIVAS CORRIGIDA: SÓ "Não" ===================
+    // =================== DIRETIVAS CORRIGIDA: "Não" ou "Nao" ===================
     const diretivasPendentes = ocupados.filter(l => 
         l.spict && l.spict.toLowerCase() === 'elegivel' && 
-        l.diretivas === 'Não'
+        (l.diretivas === 'Não' || l.diretivas === 'Nao')
     );
     
     const totalLeitos = leitos.length;
@@ -651,6 +676,26 @@ function processarDadosHospitalExecutivo(hospitalId) {
     const modalidadePrevisao = calcularModalidadePorTipoExecutivo(previsaoAlta, hospitalId);
     const modalidadeDisponiveis = calcularModalidadesVagosExecutivo(leitos, hospitalId);
     
+    // =================== V7.0: CALCULAR RESERVADOS POR TIPO ===================
+    let reservadosApto = 0;
+    let reservadosEnfFem = 0;
+    let reservadosEnfMasc = 0;
+    
+    reservas.forEach(r => {
+        const tipo = (r.tipo || '').toLowerCase();
+        const genero = r.genero || '';
+        
+        if (tipo === 'apartamento' || tipo === 'apto') {
+            reservadosApto++;
+        } else if (tipo === 'enfermaria' || tipo === 'enf') {
+            if (genero === 'Feminino') {
+                reservadosEnfFem++;
+            } else if (genero === 'Masculino') {
+                reservadosEnfMasc++;
+            }
+        }
+    });
+    
     const nomeHospital = window.HOSPITAL_MAPPING?.[hospitalId]?.nome || 
                         (hospitalId === 'H1' ? 'Neomater' :
                          hospitalId === 'H2' ? 'Cruz Azul' :
@@ -659,6 +704,9 @@ function processarDadosHospitalExecutivo(hospitalId) {
                          hospitalId === 'H5' ? 'Adventista' :
                          hospitalId === 'H6' ? 'Santa Cruz' :
                          'Santa Virgínia');
+    
+    // V7.0: Disponíveis = contratuais - ocupados - reservados
+    const disponiveisTotal = Math.max(capacidade.contratuais - ocupados.length - reservas.length, 0);
     
     return {
         id: hospitalId,
@@ -673,6 +721,13 @@ function processarDadosHospitalExecutivo(hospitalId) {
             enf_masculina: ocupadosEnfMasc,
             modalidade: modalidadeOcupados
         },
+        // V7.0: Adicionar reservados
+        reservados: {
+            total: reservas.length,
+            apartamento: reservadosApto,
+            enf_feminina: reservadosEnfFem,
+            enf_masculina: reservadosEnfMasc
+        },
         previsao: {
             total: previsaoAlta.length,
             apartamento: previsaoApto,
@@ -681,10 +736,10 @@ function processarDadosHospitalExecutivo(hospitalId) {
             modalidade: modalidadePrevisao
         },
         disponiveis: {
-            total: Math.max(capacidade.contratuais - ocupados.length, 0),
-            apartamento: vagosAptoFinal,
-            enf_feminina: vagosEnfFemFinal,
-            enf_masculina: vagosEnfMascFinal,
+            total: disponiveisTotal,
+            apartamento: Math.max(vagosAptoFinal - reservadosApto, 0),
+            enf_feminina: Math.max(vagosEnfFemFinal - reservadosEnfFem, 0),
+            enf_masculina: Math.max(vagosEnfMascFinal - reservadosEnfMasc, 0),
             modalidade: modalidadeDisponiveis
         },
         tph: {
@@ -707,6 +762,7 @@ function copiarParaWhatsAppExecutivo() {
     
     const totalLeitos = hospitais.reduce((sum, h) => sum + h.totalLeitos, 0);
     const totalOcupados = hospitais.reduce((sum, h) => sum + h.ocupados.total, 0);
+    const totalReservados = hospitais.reduce((sum, h) => sum + h.reservados.total, 0);
     const baseGeral = Math.max(TOTAL_CONTRATUAIS, totalOcupados);
     const taxaOcupacao = Math.min((totalOcupados / baseGeral) * 100, 100);
     
@@ -724,14 +780,16 @@ function copiarParaWhatsAppExecutivo() {
     texto += `━━━━━━━━━━━━━━━━━\n`;
     texto += `*REDE EXTERNA (9 HOSPITAIS)*\n`;
     texto += `━━━━━━━━━━━━━━━━━\n`;
-    texto += `Taxa de Ocupação: *${taxaOcupacao}%*\n`;
-    texto += `Leitos Ocupados: *${totalOcupados}/${totalLeitos}*\n\n`;
+    texto += `Taxa de Ocupação: *${taxaOcupacao.toFixed(1)}%*\n`;
+    texto += `Leitos Ocupados: *${totalOcupados}*\n`;
+    texto += `Leitos Reservados: *${totalReservados}*\n\n`;
     
     hospitais.forEach((h, index) => {
         texto += `*${index + 1}. ${h.nome}*\n`;
         texto += `━━━━━━━━━━━━━━━━━\n`;
         texto += `• Taxa: ${h.taxaOcupacao.toFixed(1)}%\n`;
-        texto += `• Ocupados: ${h.ocupados.total}/${h.totalLeitos}\n`;
+        texto += `• Ocupados: ${h.ocupados.total}\n`;
+        texto += `• Reservados: ${h.reservados.total}\n`;
         texto += `• Previsão Alta: ${h.previsao.total}\n`;
         texto += `• Disponíveis: ${h.disponiveis.total}\n`;
         texto += `• TPH: ${h.tph.medio} dias\n`;
@@ -827,6 +885,9 @@ window.renderDashboardExecutivo = function() {
     const totalLeitos = hospitais.reduce((sum, h) => sum + h.totalLeitos, 0);
     const totalOcupados = hospitais.reduce((sum, h) => sum + h.ocupados.total, 0);
     const totalPrevisao = hospitais.reduce((sum, h) => sum + h.previsao.total, 0);
+    // V7.0: Calcular total de reservados
+    const totalReservados = hospitais.reduce((sum, h) => sum + h.reservados.total, 0);
+    // V7.0: Disponíveis = soma dos disponíveis (já descontam reservados)
     const totalDisponiveis = hospitais.reduce((sum, h) => sum + h.disponiveis.total, 0);
     const baseGeral = Math.max(TOTAL_CONTRATUAIS, totalOcupados);
     const taxaOcupacao = Math.min((totalOcupados / baseGeral) * 100, 100);
@@ -835,34 +896,38 @@ window.renderDashboardExecutivo = function() {
     const previsaoEnfFem = hospitais.reduce((sum, h) => sum + h.previsao.enf_feminina, 0);
     const previsaoEnfMasc = hospitais.reduce((sum, h) => sum + h.previsao.enf_masculina, 0);
     
-    // Calcular capacidade de apartamentos corretamente
+    // V7.0: Calcular reservados por tipo
+    const reservadosApto = hospitais.reduce((sum, h) => sum + h.reservados.apartamento, 0);
+    const reservadosEnfFem = hospitais.reduce((sum, h) => sum + h.reservados.enf_feminina, 0);
+    const reservadosEnfMasc = hospitais.reduce((sum, h) => sum + h.reservados.enf_masculina, 0);
+    
+    // Calcular capacidade de apartamentos corretamente (V7.0: desconta reservados)
     let disponiveisApto = 0;
     hospitais.forEach(h => {
         const hospitalId = h.id;
         if (hospitalId === 'H1' || hospitalId === 'H3' || hospitalId === 'H5' || hospitalId === 'H6' || hospitalId === 'H7' || hospitalId === 'H8' || hospitalId === 'H9') {
-            // Híbridos: cada vago PODE ser apartamento
-            disponiveisApto += Math.max(0, h.contratuais - h.ocupados.total);
+            // Híbridos: cada vago PODE ser apartamento (já desconta reservados no h.disponiveis)
+            disponiveisApto += h.disponiveis.apartamento;
         } else if (hospitalId === 'H2') {
-            // Cruz Azul: apartamentos contratuais - ocupados
-            disponiveisApto += Math.max(0, 20 - h.ocupados.apartamento);
+            // Cruz Azul: apartamentos contratuais - ocupados - reservados
+            disponiveisApto += Math.max(0, 20 - h.ocupados.apartamento - h.reservados.apartamento);
         } else if (hospitalId === 'H4') {
-            // Santa Clara: apartamentos contratuais - ocupados
-            disponiveisApto += Math.max(0, 18 - h.ocupados.apartamento);
+            // Santa Clara: apartamentos contratuais - ocupados - reservados
+            disponiveisApto += Math.max(0, 18 - h.ocupados.apartamento - h.reservados.apartamento);
         }
     });
-    // Calcular capacidade de enfermarias corretamente
+    // Calcular capacidade de enfermarias corretamente (V7.0: desconta reservados)
     let disponiveisEnfFem = 0;
     let disponiveisEnfMasc = 0;
     
     hospitais.forEach(h => {
         const hospitalId = h.id;
         if (hospitalId === 'H1' || hospitalId === 'H3' || hospitalId === 'H5' || hospitalId === 'H6' || hospitalId === 'H7' || hospitalId === 'H8' || hospitalId === 'H9') {
-            // Híbridos: cada vago PODE ser enfermaria (qualquer gênero)
-            const vagosContratuais = Math.max(0, h.contratuais - h.ocupados.total);
-            disponiveisEnfFem += vagosContratuais;
-            disponiveisEnfMasc += vagosContratuais;
+            // Híbridos: usa valores já calculados (descontam reservados)
+            disponiveisEnfFem += h.disponiveis.enf_feminina;
+            disponiveisEnfMasc += h.disponiveis.enf_masculina;
         } else {
-            // H2 e H4: somar todas as possibilidades
+            // H2 e H4: somar todas as possibilidades (já descontam reservados)
             disponiveisEnfFem += h.disponiveis.enf_feminina;
             disponiveisEnfMasc += h.disponiveis.enf_masculina;
         }
@@ -876,7 +941,7 @@ window.renderDashboardExecutivo = function() {
         exclusivo_enf_masc: hospitais.reduce((sum, h) => sum + h.previsao.modalidade.exclusivo_enf_masc, 0)
     };
     
-    // Calcular modalidade contratual corretamente
+    // Calcular modalidade contratual corretamente (V7.0: desconta reservados)
     const modalidadeDisponiveis = {
         flexiveis: 0,
         exclusivo_apto: 0,
@@ -889,8 +954,8 @@ window.renderDashboardExecutivo = function() {
         const hospitalId = h.id;
         
         if (hospitalId === 'H1' || hospitalId === 'H3' || hospitalId === 'H5' || hospitalId === 'H6' || hospitalId === 'H7' || hospitalId === 'H8' || hospitalId === 'H9') {
-            // Híbridos: apenas flexíveis (contratuais - ocupados)
-            modalidadeDisponiveis.flexiveis += Math.max(0, h.contratuais - h.ocupados.total);
+            // Híbridos: apenas flexíveis (contratuais - ocupados - reservados)
+            modalidadeDisponiveis.flexiveis += Math.max(0, h.contratuais - h.ocupados.total - h.reservados.total);
         } else if (hospitalId === 'H2' || hospitalId === 'H4') {
             // H2 e H4: somar cada categoria
             modalidadeDisponiveis.exclusivo_apto += h.disponiveis.modalidade.exclusivo_apto || 0;
@@ -907,7 +972,9 @@ window.renderDashboardExecutivo = function() {
     hospitaisComDados.forEach(hospitalId => {
         const hospital = window.hospitalData[hospitalId];
         if (hospital && hospital.leitos) {
-            hospital.leitos.forEach(l => {
+            // V7.0: Filtrar UTI
+            const leitosSemUTI = filtrarLeitosSemUTI(hospital.leitos);
+            leitosSemUTI.forEach(l => {
                 if (isOcupadoExecutivo(l) && l.admAt) {
                     const admData = parseAdmDate(l.admAt);
                     if (admData) {
@@ -959,7 +1026,7 @@ window.renderDashboardExecutivo = function() {
                     <h2 style="margin: 0; color: #60a5fa; font-size: 24px; font-weight: 700; text-align: center; text-transform: none !important;">Rede Hospitalar Externa - Dashboard Geral</h2>
                 </div>
                 <div style="display: flex; justify-content: center; gap: 15px; flex-wrap: wrap;">
-                    <button id="btnWhatsAppExec" style="padding: 8px 16px; background: #25D366; border: 1px solid #25D366; border-radius: 8px; color: white; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.3s ease; display: flex; align-items: center; gap: 8px; text-transform: none !important;">
+                    <button id="btnWhatsAppExec" style="padding: 8px 16px; background: #60a5fa; border: 1px solid #60a5fa; border-radius: 8px; color: white; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.3s ease; display: flex; align-items: center; gap: 8px; text-transform: none !important;">
                         Copiar para WhatsApp
                     </button>
                     <button id="toggleFundoBtnExec" class="toggle-fundo-btn" style="padding: 8px 16px; background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 8px; color: #e2e8f0; font-size: 14px; cursor: pointer; transition: all 0.3s ease; display: none; align-items: center; gap: 8px; text-transform: none !important;">
@@ -981,22 +1048,24 @@ window.renderDashboardExecutivo = function() {
                         <table class="hospitais-table-ocupacao">
                             <thead>
                                 <tr>
-                                    <th></th>
+                                    <th style="text-align: left;"></th>
                                     <th>Leitos Fixos</th>
                                     <th>Leitos Ocupados</th>
+                                    <th style="color: #60a5fa;">Reservados</th>
                                     <th>Taxa Ocupação</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 ${hospitais.map(h => `
                                     <tr>
-                                        <td><strong>${h.nome}</strong></td>
+                                        <td style="text-align: left;"><strong>${h.nome}</strong></td>
                                         <td>${window.HOSPITAL_CAPACIDADE[h.id]?.contratuais || h.totalLeitos}</td>
                                         <td>${h.ocupados.total}</td>
+                                        <td>${h.reservados.total}</td>
                                         <td>${h.taxaOcupacao.toFixed(1)}%</td>
                                     </tr>
                                     <tr class="regua-row">
-                                        <td colspan="4" style="padding: 4px 8px;">
+                                        <td colspan="5" style="padding: 4px 8px;">
                                             ${renderBarraOcupacao(h.taxaOcupacao)}
                                         </td>
                                     </tr>
@@ -1078,14 +1147,14 @@ window.renderDashboardExecutivo = function() {
                         <table class="hospitais-table-alinhada">
                             <thead>
                                 <tr>
-                                    <th style="text-align: center;">Hospital</th>
+                                    <th style="text-align: left;">Hospital</th>
                                     <th style="text-align: center;">TPH (dias)</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 ${hospitais.map(h => `
                                     <tr>
-                                        <td style="text-align: center;">${h.nome}</td>
+                                        <td style="text-align: left;">${h.nome}</td>
                                         <td style="text-align: center;">${h.tph.medio}</td>
                                     </tr>
                                 `).join('')}
@@ -1114,14 +1183,14 @@ window.renderDashboardExecutivo = function() {
                         <table class="hospitais-table-alinhada">
                             <thead>
                                 <tr>
-                                    <th style="text-align: center;">Hospital</th>
+                                    <th style="text-align: left;">Hospital</th>
                                     <th style="text-align: center;">PPS < 40%</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 ${hospitais.map(h => `
                                     <tr>
-                                        <td style="text-align: center;">${h.nome}</td>
+                                        <td style="text-align: left;">${h.nome}</td>
                                         <td style="text-align: center;">${h.pps.menor40.length}</td>
                                     </tr>
                                 `).join('')}
@@ -1150,14 +1219,14 @@ window.renderDashboardExecutivo = function() {
                         <table class="hospitais-table-alinhada">
                             <thead>
                                 <tr>
-                                    <th style="text-align: center;">Hospital</th>
+                                    <th style="text-align: left;">Hospital</th>
                                     <th style="text-align: center;">Diretivas Pendentes</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 ${hospitais.map(h => `
                                     <tr>
-                                        <td style="text-align: center;">${h.nome}</td>
+                                        <td style="text-align: left;">${h.nome}</td>
                                         <td style="text-align: center;">${h.spict.diretivas}</td>
                                     </tr>
                                 `).join('')}
@@ -1452,7 +1521,7 @@ function renderHeatmapLinhas() {
     container.innerHTML = html;
 }
 
-// =================== CALCULAR DADOS CONCESSÕES (COM DESNORMALIZAÇÃO) ===================
+// =================== CALCULAR DADOS CONCESSÕES (COM DESNORMALIZAÇÃO E FILTRO UTI) ===================
 function calcularDadosConcessoesReais(hospitaisComDados) {
     const concessoesPorItem = {};
     
@@ -1460,7 +1529,10 @@ function calcularDadosConcessoesReais(hospitaisComDados) {
         const hospital = window.hospitalData[hospitalId];
         if (!hospital || !hospital.leitos) return;
         
-        hospital.leitos.forEach(leito => {
+        // V7.0: Filtrar UTI
+        const leitosSemUTI = filtrarLeitosSemUTI(hospital.leitos);
+        
+        leitosSemUTI.forEach(leito => {
             if (!isOcupadoExecutivo(leito)) return;
             
             const concessoes = leito.concessoes || (leito.paciente && leito.paciente.concessoes);
@@ -1504,7 +1576,7 @@ function calcularDadosConcessoesReais(hospitaisComDados) {
     return concessoesPorItem;
 }
 
-// =================== CALCULAR DADOS LINHAS (COM DESNORMALIZAÇÃO) ===================
+// =================== CALCULAR DADOS LINHAS (COM DESNORMALIZAÇÃO E FILTRO UTI) ===================
 function calcularDadosLinhasReais(hospitaisComDados) {
     const linhasPorItem = {};
     
@@ -1512,7 +1584,10 @@ function calcularDadosLinhasReais(hospitaisComDados) {
         const hospital = window.hospitalData[hospitalId];
         if (!hospital || !hospital.leitos) return;
         
-        hospital.leitos.forEach(leito => {
+        // V7.0: Filtrar UTI
+        const leitosSemUTI = filtrarLeitosSemUTI(hospital.leitos);
+        
+        leitosSemUTI.forEach(leito => {
             if (!isOcupadoExecutivo(leito)) return;
             
             const linhas = leito.linhas || (leito.paciente && leito.paciente.linhas);
@@ -2578,27 +2653,30 @@ function getExecutiveCSS() {
 }
 
 function logInfo(message) {
-    console.log('[DASHBOARD EXECUTIVO V6.0] ' + message);
+    console.log('[DASHBOARD EXECUTIVO V7.0] ' + message);
 }
 
 function logSuccess(message) {
-    console.log('[DASHBOARD EXECUTIVO V6.0] ✅ ' + message);
+    console.log('[DASHBOARD EXECUTIVO V7.0] ' + message);
 }
 
 function logError(message) {
-    console.error('[DASHBOARD EXECUTIVO V6.0] ❌ ' + message);
+    console.error('[DASHBOARD EXECUTIVO V7.0] ' + message);
 }
 
-console.log('Dashboard Executivo V6.0 - CORRIGIDO COMPLETO + ACENTOS UTF-8');
-console.log('✅ 9 Hospitais (H1-H9) | 293 Leitos (126 Contratuais + 167 Extras)');
-console.log('✅ Diretivas: SPICT elegível + Diretivas = "Não"');
-console.log('✅ text-transform: none !important em TUDO');
-console.log('✅ Bordas brancas sempre visíveis');
-console.log('✅ Ordem alfabética: Adventista → Sao Camilo Pompeia');
-console.log('✅ Gauge Leitos Disponíveis fixo em azul (#3b82f6)');
-console.log('✅ Tabelas TPH, PPS e SPICT com títulos centralizados');
-console.log('✅ Linhas de Cuidado reativadas com borda branca');
-console.log('✅ Títulos e subtítulos centralizados nos heatmaps');
-console.log('✅ CORREÇÃO UTF-8: Acentos (ç, ~, ^, ´) aplicados nos heatmaps');
-console.log('✅ Taxa de ocupação máxima: 100% (base dinâmica)');
-console.log('✅ Disponíveis baseados em contratuais (não total)');
+console.log('Dashboard Executivo V7.0 - CORRIGIDO COMPLETO + RESERVADOS + FILTRO UTI');
+console.log('V7.0 9 Hospitais (H1-H9) | 293 Leitos (126 Contratuais + 167 Extras)');
+console.log('V7.0 Coluna Reservados adicionada na tabela de ocupacao');
+console.log('V7.0 Filtro UTI aplicado em todos os calculos');
+console.log('V7.0 Disponíveis = contratuais - ocupados - reservados');
+console.log('V7.0 Diretivas: SPICT elegível + Diretivas = "Não"');
+console.log('V7.0 text-transform: none !important em TUDO');
+console.log('V7.0 Bordas brancas sempre visíveis');
+console.log('V7.0 Ordem alfabética: Adventista → Sao Camilo Pompeia');
+console.log('V7.0 Gauge Leitos Disponíveis fixo em azul (#3b82f6)');
+console.log('V7.0 Tabelas TPH, PPS e SPICT com títulos centralizados');
+console.log('V7.0 Linhas de Cuidado reativadas com borda branca');
+console.log('V7.0 Títulos e subtítulos centralizados nos heatmaps');
+console.log('V7.0 CORREÇÃO UTF-8: Acentos (ç, ~, ^, ´) aplicados nos heatmaps');
+console.log('V7.0 Taxa de ocupação máxima: 100% (base dinâmica)');
+console.log('V7.0 Disponíveis baseados em contratuais (não total)');
