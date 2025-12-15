@@ -1,14 +1,20 @@
 // js/dashboards/dashboard-hospital.js
-// Dashboard Hospitalar - Archipelago V6.0
+// Dashboard Enfermarias - Archipelago V7.0
+// Versao: 7.0 - Dezembro/2025
+// Alteracoes V7.0:
+// - Renomeado de "Dashboard Hospitalar" para "Dashboard Enfermarias"
+// - Filtro UTI (leitos UTI nao aparecem neste dashboard)
+// - Sistema de reservas integrado
+// - Box "Ocupacao" com dois gauges (Reservados | Ocupados)
+// - Tabela por tipo com colunas Ocupados | Reservados
+// - Calculo de disponiveis desconta reservas
 
-
-// =================== DASHBOARD HOSPITALAR V6.0 ===================
-// Versão: 6.0
+// =================== DASHBOARD ENFERMARIAS V7.0 ===================
 // Depende de: cards-config.js (carregar ANTES)
 
-console.log('Dashboard Hospitalar V6.0 - Carregando...');
+console.log('Dashboard Enfermarias V7.0 - Carregando...');
 
-// =================== VALIDAR DEPENDÊNCIAS ===================
+// =================== VALIDAR DEPENDENCIAS ===================
 if (typeof window.desnormalizarTexto === 'undefined') {
     console.error('ERRO CRITICO: cards-config.js NAO foi carregado!');
     throw new Error('cards-config.js deve ser carregado ANTES de dashboard-hospital.js');
@@ -16,11 +22,11 @@ if (typeof window.desnormalizarTexto === 'undefined') {
 
 console.log('Dependencias validadas - cards-config.js OK');
 
-// =================== CONTINUACAO DO DASHBOARD HOSPITALAR ===================
+// =================== CONTINUACAO DO DASHBOARD ENFERMARIAS ===================
 
-console.log('Dashboard Hospitalar V6.0 - Inicializando...');
+console.log('Dashboard Enfermarias V7.0 - Inicializando...');
 
-// Variável global para controlar o filtro atual
+// Variavel global para controlar o filtro atual
 window.hospitalFiltroAtual = 'todos';
 
 const CORES_ARCHIPELAGO = {
@@ -39,6 +45,7 @@ const CORES_ARCHIPELAGO = {
     ocupados: '#60a5fa',
     previsao: '#60a5fa',
     disponiveis: '#60a5fa',
+    reservados: '#60a5fa',
     tph: '#577a97',
     pps: '#1c5083',
     spict: '#172945'
@@ -53,7 +60,7 @@ window.fundoBranco = false;
 
 const hasDataLabels = typeof ChartDataLabels !== 'undefined';
 if (!hasDataLabels) {
-    console.warn('ChartDataLabels não carregado. Números nas pizzas via legenda.');
+    console.warn('ChartDataLabels nao carregado. Numeros nas pizzas via legenda.');
 }
 
 function normStr(s) {
@@ -94,6 +101,25 @@ function isVago(leito) {
     return s === 'vago' || s === 'disponivel' || s === 'disponível' || s === 'livre';
 }
 
+// =================== V7.0: FUNCAO PARA BUSCAR RESERVAS ===================
+// Retorna apenas RESERVAS REAIS (com matricula) - bloqueios de irmao nao sao contados
+function getReservasHospital(hospitalId) {
+    if (!window.reservasData || !Array.isArray(window.reservasData)) return [];
+    return window.reservasData.filter(r => {
+        if (r.hospital !== hospitalId) return false;
+        if (r.tipo === 'UTI') return false;
+        // V7.0: Apenas reservas COM matricula sao reservas reais
+        const temMatricula = r.matricula && String(r.matricula).trim();
+        return temMatricula;
+    });
+}
+
+// =================== V7.0: FILTRAR LEITOS SEM UTI ===================
+function filtrarLeitosSemUTI(leitos) {
+    if (!Array.isArray(leitos)) return [];
+    return leitos.filter(l => l.tipo !== 'UTI');
+}
+
 function getCorExata(itemName, tipo = 'concessao') {
     if (!itemName || typeof itemName !== 'string') {
         return CORES_ARCHIPELAGO.cinzaMedio;
@@ -104,12 +130,11 @@ function getCorExata(itemName, tipo = 'concessao') {
         window.CORES_LINHAS;
     
     if (!paleta) {
-        console.warn('Paleta de cores não carregada (api.js)');
+        console.warn('Paleta de cores nao carregada (api.js)');
         return CORES_ARCHIPELAGO.cinzaMedio;
     }
     
-    
-    // ✅ USAR A FUNÇÃO DE NORMALIZAÇÃO DO cards-config.js
+    // USAR A FUNCAO DE NORMALIZACAO DO cards-config.js
     const itemNormalizado = window.normalizarTexto(itemName);
     
     // Buscar com nome normalizado (SEM acentos)
@@ -121,8 +146,8 @@ function getCorExata(itemName, tipo = 'concessao') {
     cor = paleta[nomeNorm];
     if (cor) return cor;
     
-    // ⚠️ Se não encontrou, avisar no console
-    console.warn(`[CORES] Não encontrada: "${itemName}" → normalizado: "${itemNormalizado}"`);
+    // Se nao encontrou, avisar no console
+    console.warn('[CORES] Nao encontrada: "' + itemName + '" -> normalizado: "' + itemNormalizado + '"');
     return CORES_ARCHIPELAGO.cinzaMedio;
 }
 
@@ -158,12 +183,11 @@ window.atualizarTodasAsCores = function() {
 /**
  * Filtra hospitais no dashboard
  * @param {string} hospitalId - ID do hospital ou 'todos'
- * @param {HTMLElement} botao - Elemento do botão clicado
  */
 window.filtrarHospitalDashboard = function(hospitalId) {
     console.log('[FILTRO] Filtrando:', hospitalId);
     
-    // Atualizar variável global
+    // Atualizar variavel global
     window.hospitalFiltroAtual = hospitalId;
     
     // Atualizar dropdown
@@ -194,7 +218,7 @@ window.filtrarHospitalDashboard = function(hospitalId) {
         }
     });
     
-    console.log('[FILTRO] Visíveis:', totalVisiveis);
+    console.log('[FILTRO] Visiveis:', totalVisiveis);
 };
 
 window.copiarDashboardParaWhatsApp = function() {
@@ -211,42 +235,55 @@ window.copiarDashboardParaWhatsApp = function() {
         'H9': 'SAO CAMILO POMPEIA'
     };
     
-    // Verificar qual hospital está selecionado
+    // Verificar qual hospital esta selecionado
     const filtroAtual = window.hospitalFiltroAtual || 'todos';
     const hospitaisParaRelatorio = filtroAtual === 'todos' ? hospitaisIds : [filtroAtual];
     
     let texto = filtroAtual === 'todos' ? 
-        `*DASHBOARD HOSPITALAR*\n` : 
-        `*DASHBOARD HOSPITALAR - ${hospitaisNomes[filtroAtual]}*\n`;
+        '*DASHBOARD ENFERMARIAS*\n' : 
+        '*DASHBOARD ENFERMARIAS - ' + hospitaisNomes[filtroAtual] + '*\n';
     
-    texto += `${new Date().toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })}\n\n`;
+    texto += new Date().toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }) + '\n\n';
     
-    hospitaisParaRelatorio.forEach((hospitalId, index) => {
+    hospitaisParaRelatorio.forEach(function(hospitalId, index) {
         const hospital = window.hospitalData[hospitalId];
         if (!hospital || !hospital.leitos) return;
         
         const nome = hospitaisNomes[hospitalId];
         
+        // V7.0: Filtrar UTI
+        const leitos = filtrarLeitosSemUTI(hospital.leitos);
+        
+        // V7.0: Buscar reservas
+        const reservas = getReservasHospital(hospitalId);
+        
         if (filtroAtual === 'todos') {
-            texto += `━━━━━━━━━━━━━━━━━\n`;
-            texto += `*${index + 1}. ${nome}*\n`;
-            texto += `━━━━━━━━━━━━━━━━━\n\n`;
+            texto += '━━━━━━━━━━━━━━━━━\n';
+            texto += '*' + (index + 1) + '. ' + nome + '*\n';
+            texto += '━━━━━━━━━━━━━━━━━\n\n';
+        }
+        
+        // V7.0: Adicionar info de reservas
+        const ocupados = leitos.filter(function(l) { return isOcupado(l); }).length;
+        const totalReservados = reservas.length;
+        if (totalReservados > 0) {
+            texto += '*Ocupados:* ' + ocupados + ' | *Reservados:* ' + totalReservados + '\n\n';
         }
         
         // ========== ALTAS PREVISTAS ==========
-        const altasTimeline = {
+        var altasTimeline = {
             'HOJE': { 'Ouro': [], '2R': [], '3R': [] },
             '24H': { 'Ouro': [], '2R': [], '3R': [] },
             '48H': []
         };
         
-        hospital.leitos.forEach(leito => {
+        leitos.forEach(function(leito) {
             if (isOcupado(leito)) {
-                const prevAlta = leito.prevAlta || (leito.paciente && leito.paciente.prevAlta);
-                const matricula = leito.matricula || 'S/N';
+                var prevAlta = leito.prevAlta || (leito.paciente && leito.paciente.prevAlta);
+                var matricula = leito.matricula || 'S/N';
                 
                 if (prevAlta) {
-                    const prev = normStr(prevAlta).replace(/\s+/g, ' ');
+                    var prev = normStr(prevAlta).replace(/\s+/g, ' ');
                     
                     if (prev.includes('hoje') && prev.includes('ouro')) altasTimeline['HOJE']['Ouro'].push(matricula);
                     else if (prev.includes('hoje') && prev.includes('2r')) altasTimeline['HOJE']['2R'].push(matricula);
@@ -259,75 +296,74 @@ window.copiarDashboardParaWhatsApp = function() {
             }
         });
         
-        const temAltasHoje = altasTimeline['HOJE']['Ouro'].length > 0 || altasTimeline['HOJE']['2R'].length > 0 || altasTimeline['HOJE']['3R'].length > 0;
-        const temAltas24h = altasTimeline['24H']['Ouro'].length > 0 || altasTimeline['24H']['2R'].length > 0 || altasTimeline['24H']['3R'].length > 0;
-        const temAltas48h = altasTimeline['48H'].length > 0;
+        var temAltasHoje = altasTimeline['HOJE']['Ouro'].length > 0 || altasTimeline['HOJE']['2R'].length > 0 || altasTimeline['HOJE']['3R'].length > 0;
+        var temAltas24h = altasTimeline['24H']['Ouro'].length > 0 || altasTimeline['24H']['2R'].length > 0 || altasTimeline['24H']['3R'].length > 0;
+        var temAltas48h = altasTimeline['48H'].length > 0;
         
         if (temAltasHoje) {
-            texto += `*Altas Previstas HOJE:*\n`;
+            texto += '*Altas Previstas HOJE:*\n';
             if (altasTimeline['HOJE']['Ouro'].length > 0) {
-                texto += `Hoje Ouro: ${altasTimeline['HOJE']['Ouro'].join(', ')}\n`;
+                texto += 'Hoje Ouro: ' + altasTimeline['HOJE']['Ouro'].join(', ') + '\n';
             }
             if (altasTimeline['HOJE']['2R'].length > 0) {
-                texto += `Hoje 2R: ${altasTimeline['HOJE']['2R'].join(', ')}\n`;
+                texto += 'Hoje 2R: ' + altasTimeline['HOJE']['2R'].join(', ') + '\n';
             }
             if (altasTimeline['HOJE']['3R'].length > 0) {
-                texto += `Hoje 3R: ${altasTimeline['HOJE']['3R'].join(', ')}\n`;
+                texto += 'Hoje 3R: ' + altasTimeline['HOJE']['3R'].join(', ') + '\n';
             }
-            texto += `\n`;
+            texto += '\n';
         }
         
         if (temAltas24h) {
-            texto += `*Altas Previstas 24H:*\n`;
+            texto += '*Altas Previstas 24H:*\n';
             if (altasTimeline['24H']['Ouro'].length > 0) {
-                texto += `24h Ouro: ${altasTimeline['24H']['Ouro'].join(', ')}\n`;
+                texto += '24h Ouro: ' + altasTimeline['24H']['Ouro'].join(', ') + '\n';
             }
             if (altasTimeline['24H']['2R'].length > 0) {
-                texto += `24h 2R: ${altasTimeline['24H']['2R'].join(', ')}\n`;
+                texto += '24h 2R: ' + altasTimeline['24H']['2R'].join(', ') + '\n';
             }
             if (altasTimeline['24H']['3R'].length > 0) {
-                texto += `24h 3R: ${altasTimeline['24H']['3R'].join(', ')}\n`;
+                texto += '24h 3R: ' + altasTimeline['24H']['3R'].join(', ') + '\n';
             }
-            texto += `\n`;
+            texto += '\n';
         }
         
         if (temAltas48h) {
-            texto += `*Altas Previstas 48H:*\n`;
-            texto += `48h: ${altasTimeline['48H'].join(', ')}\n\n`;
+            texto += '*Altas Previstas 48H:*\n';
+            texto += '48h: ' + altasTimeline['48H'].join(', ') + '\n\n';
         }
         
-        // ========== CONCESSÕES PREVISTAS (✅ COM DESNORMALIZAÇÃO) ==========
-        const concessoesTimeline = {
+        // ========== CONCESSOES PREVISTAS ==========
+        var concessoesTimeline = {
             'HOJE': {},
             '24H': {}
         };
         
-        hospital.leitos.forEach(leito => {
+        leitos.forEach(function(leito) {
             if (isOcupado(leito)) {
-                const concessoes = leito.concessoes || (leito.paciente && leito.paciente.concessoes);
-                const prevAlta = leito.prevAlta || (leito.paciente && leito.paciente.prevAlta);
-                const matricula = leito.matricula || 'S/N';
+                var concessoes = leito.concessoes || (leito.paciente && leito.paciente.concessoes);
+                var prevAlta = leito.prevAlta || (leito.paciente && leito.paciente.prevAlta);
+                var matricula = leito.matricula || 'S/N';
                 
                 if (concessoes && prevAlta) {
-                    const concessoesList = Array.isArray(concessoes) ? 
+                    var concessoesList = Array.isArray(concessoes) ? 
                         concessoes : 
                         String(concessoes).split('|');
                     
-                    const prev = normStr(prevAlta).replace(/\s+/g, ' ');
-                    let timeline = null;
+                    var prev = normStr(prevAlta).replace(/\s+/g, ' ');
+                    var timeline = null;
                     
                     if (prev.includes('hoje')) timeline = 'HOJE';
                     else if (prev.includes('24h') || prev.includes('24 h')) timeline = '24H';
                     
                     if (timeline) {
-                        concessoesList.forEach(concessao => {
+                        concessoesList.forEach(function(concessao) {
                             if (concessao && concessao.trim()) {
-                                // ✅ APLICAR DESNORMALIZAÇÃO AQUI
-                                const nome = desnormalizarTexto(concessao.trim());
-                                if (!concessoesTimeline[timeline][nome]) {
-                                    concessoesTimeline[timeline][nome] = [];
+                                var nomeConc = window.desnormalizarTexto ? window.desnormalizarTexto(concessao.trim()) : concessao.trim();
+                                if (!concessoesTimeline[timeline][nomeConc]) {
+                                    concessoesTimeline[timeline][nomeConc] = [];
                                 }
-                                concessoesTimeline[timeline][nome].push(matricula);
+                                concessoesTimeline[timeline][nomeConc].push(matricula);
                             }
                         });
                     }
@@ -335,73 +371,83 @@ window.copiarDashboardParaWhatsApp = function() {
             }
         });
         
-        const temConcessoesHoje = Object.keys(concessoesTimeline['HOJE']).length > 0;
-        const temConcessoes24h = Object.keys(concessoesTimeline['24H']).length > 0;
+        var temConcessoesHoje = Object.keys(concessoesTimeline['HOJE']).length > 0;
+        var temConcessoes24h = Object.keys(concessoesTimeline['24H']).length > 0;
         
         if (temConcessoesHoje) {
-            texto += `*Concessões Previstas HOJE:*\n`;
-            Object.entries(concessoesTimeline['HOJE']).forEach(([nome, mats]) => {
-                // ✅ APLICAR DESNORMALIZAÇÃO AQUI TAMBÉM
-                texto += `${desnormalizarTexto(nome)}: ${mats.join(', ')}\n`;
+            texto += '*Concessoes Previstas HOJE:*\n';
+            Object.entries(concessoesTimeline['HOJE']).forEach(function(entry) {
+                var nomeC = entry[0];
+                var matsC = entry[1];
+                var nomeFinal = window.desnormalizarTexto ? window.desnormalizarTexto(nomeC) : nomeC;
+                texto += nomeFinal + ': ' + matsC.join(', ') + '\n';
             });
-            texto += `\n`;
+            texto += '\n';
         }
         
         if (temConcessoes24h) {
-            texto += `*Concessões Previstas 24H:*\n`;
-            Object.entries(concessoesTimeline['24H']).forEach(([nome, mats]) => {
-                // ✅ APLICAR DESNORMALIZAÇÃO AQUI TAMBÉM
-                texto += `${desnormalizarTexto(nome)}: ${mats.join(', ')}\n`;
+            texto += '*Concessoes Previstas 24H:*\n';
+            Object.entries(concessoesTimeline['24H']).forEach(function(entry) {
+                var nomeC = entry[0];
+                var matsC = entry[1];
+                var nomeFinal = window.desnormalizarTexto ? window.desnormalizarTexto(nomeC) : nomeC;
+                texto += nomeFinal + ': ' + matsC.join(', ') + '\n';
             });
-            texto += `\n`;
+            texto += '\n';
         }
         
         // ========== DIRETIVAS PENDENTES ==========
-        const diretivasPendentes = hospital.leitos.filter(l => {
+        var diretivasPendentes = leitos.filter(function(l) {
             if (!isOcupado(l)) return false;
             
-            const spict = l.spict;
+            var spict = l.spict;
             if (!spict) return false;
             
-            const spictNorm = normStr(spict);
-            const spictElegivel = spictNorm === 'elegivel' || spictNorm === 'elegível';
+            var spictNorm = normStr(spict);
+            var spictElegivel = spictNorm === 'elegivel' || spictNorm === 'elegível';
             
             if (!spictElegivel) return false;
             
-            const diretivas = l.diretivas;
-            const dirNorm = normStr(diretivas);
+            var diretivas = l.diretivas;
+            var dirNorm = normStr(diretivas);
             
-            const valoresPendentes = ['', 'não', 'nao', 'n/a', 'pendente', 'não se aplica'];
+            var valoresPendentes = ['', 'não', 'nao', 'n/a', 'pendente', 'não se aplica'];
             
             return valoresPendentes.includes(dirNorm);
         });
         
         if (diretivasPendentes.length > 0) {
-            texto += `*Diretivas Pendentes:*\n`;
-            diretivasPendentes.forEach(l => {
-                const leito = l.identificacaoLeito || l.leito || '---';
-                const matricula = l.matricula || '---';
-                texto += `Leito ${leito} - Mat. ${matricula}\n`;
+            texto += '*Diretivas Pendentes:*\n';
+            diretivasPendentes.forEach(function(l) {
+                var leitoId = l.identificacaoLeito || l.leito || '---';
+                var mat = l.matricula || '---';
+                texto += 'Leito ' + leitoId + ' - Mat. ' + mat + '\n';
             });
-            texto += `\n`;
+            texto += '\n';
         }
         
-        // Se não tem nada
+        // Se nao tem nada
         if (!temAltasHoje && !temAltas24h && !temAltas48h && !temConcessoesHoje && !temConcessoes24h && diretivasPendentes.length === 0) {
-            texto += `_Nenhuma atividade prevista_\n\n`;
+            texto += '_Nenhuma atividade prevista_\n\n';
         }
     });
     
-    navigator.clipboard.writeText(texto).then(() => {
+    navigator.clipboard.writeText(texto).then(function() {
         alert('Dados copiados para o WhatsApp!\n\nCole e envie.');
-    }).catch(err => {
+    }).catch(function(err) {
         console.error('Erro ao copiar:', err);
         alert('Erro ao copiar. Tente novamente.');
     });
 };
 
-function calcularModalidadesVagos(leitos, hospitalId) {
-    const modalidade = {
+function calcularModalidadesVagos(leitos, hospitalId, reservas) {
+    // V7.0: Filtrar UTI
+    var leitosFiltrados = filtrarLeitosSemUTI(leitos);
+    
+    // V7.4: Garantir que reservas seja um array
+    var reservasArray = reservas || [];
+    
+    var modalidade = {
         flexiveis: 0,
         exclusivo_apto: 0,
         exclusivo_enf_sem_restricao: 0,
@@ -409,52 +455,56 @@ function calcularModalidadesVagos(leitos, hospitalId) {
         exclusivo_enf_masc: 0
     };
 
-    const vagos = leitos.filter(l => isVago(l));
+    var vagos = leitosFiltrados.filter(function(l) { return isVago(l); });
 
     if (hospitalId === 'H1' || hospitalId === 'H3' || hospitalId === 'H5' || hospitalId === 'H6' || hospitalId === 'H7' || hospitalId === 'H8' || hospitalId === 'H9') {
-        // V6.0: Usar contratuais (não conta extras)
-        const capacidadeInfo = window.HOSPITAL_CAPACIDADE ? window.HOSPITAL_CAPACIDADE[hospitalId] : null;
-        const contratuais = capacidadeInfo ? capacidadeInfo.contratuais : leitos.length;
-        const ocupados = leitos.filter(l => isOcupado(l)).length;
-        modalidade.flexiveis = Math.max(0, contratuais - ocupados);
+        // V6.0: Usar contratuais (nao conta extras)
+        var capacidadeInfo = window.HOSPITAL_CAPACIDADE ? window.HOSPITAL_CAPACIDADE[hospitalId] : null;
+        var contratuais = capacidadeInfo ? capacidadeInfo.contratuais : leitosFiltrados.length;
+        var ocupados = leitosFiltrados.filter(function(l) { return isOcupado(l); }).length;
+        // V7.4: Descontar reservas no calculo de flexiveis
+        var totalReservados = reservasArray.length;
+        modalidade.flexiveis = Math.max(0, contratuais - ocupados - totalReservados);
         return modalidade;
     }
 
     // =================== H2 - CRUZ AZUL ===================
     if (hospitalId === 'H2') {
-        // APARTAMENTOS: contratuais - ocupados
-        const aptosContratuais = 20;
-        const aptosOcupados = leitos.filter(l => 
-            isOcupado(l) && (l.tipo === 'APTO' || l.tipo === 'Apartamento')
-        ).length;
-        modalidade.exclusivo_apto = Math.max(0, aptosContratuais - aptosOcupados);
+        // APARTAMENTOS: contratuais - ocupados - reservados
+        var aptosContratuais = 20;
+        var aptosOcupados = leitosFiltrados.filter(function(l) {
+            return isOcupado(l) && (l.tipo === 'APTO' || l.tipo === 'Apartamento');
+        }).length;
+        // V7.4: Descontar reservas de apartamento
+        var aptosReservados = reservasArray.filter(function(r) { return r.tipo === 'Apartamento'; }).length;
+        modalidade.exclusivo_apto = Math.max(0, aptosContratuais - aptosOcupados - aptosReservados);
         
         // ENFERMARIAS: apenas leitos contratuais (21-36)
-        const vagosContratuais = vagos.filter(l => {
-            const tipo = l.tipo || '';
+        var vagosContratuais = vagos.filter(function(l) {
+            var tipo = l.tipo || '';
             if (tipo !== 'ENFERMARIA' && tipo !== 'Enfermaria') return false;
-            const numeroLeito = getLeitoNumero(l.leito);
+            var numeroLeito = getLeitoNumero(l.leito);
             return numeroLeito && numeroLeito >= 21 && numeroLeito <= 36;
         });
         
-        vagosContratuais.forEach(leitoVago => {
-            const numeroLeito = getLeitoNumero(leitoVago.leito);
+        vagosContratuais.forEach(function(leitoVago) {
+            var numeroLeito = getLeitoNumero(leitoVago.leito);
             
-            // Buscar irmão usando CRUZ_AZUL_IRMAOS
-            const irmaosMap = window.CRUZ_AZUL_IRMAOS || {};
-            const numeroIrmao = irmaosMap[numeroLeito];
+            // Buscar irmao usando CRUZ_AZUL_IRMAOS
+            var irmaosMap = window.CRUZ_AZUL_IRMAOS || {};
+            var numeroIrmao = irmaosMap[numeroLeito];
             
             if (!numeroIrmao) {
                 modalidade.exclusivo_enf_sem_restricao++;
                 return;
             }
             
-            const irmao = leitos.find(l => getLeitoNumero(l.leito) === numeroIrmao);
+            var irmao = leitosFiltrados.find(function(l) { return getLeitoNumero(l.leito) === numeroIrmao; });
             
             if (!irmao || isVago(irmao)) {
                 modalidade.exclusivo_enf_sem_restricao++;
-            } else if (irmao.isolamento && irmao.isolamento !== 'Não Isolamento') {
-                // Isolamento: leito não disponível (não conta)
+            } else if (irmao.isolamento && irmao.isolamento !== 'Nao Isolamento' && irmao.isolamento !== 'Não Isolamento') {
+                // Isolamento: leito nao disponivel (nao conta)
             } else {
                 if (irmao.genero === 'Feminino') {
                     modalidade.exclusivo_enf_fem++;
@@ -471,45 +521,47 @@ function calcularModalidadesVagos(leitos, hospitalId) {
     
     // =================== H4 - SANTA CLARA ===================
     if (hospitalId === 'H4') {
-        // APARTAMENTOS: contratuais - ocupados
-        const aptosContratuais = 18;
-        const aptosOcupados = leitos.filter(l => 
-            isOcupado(l) && (l.tipo === 'APTO' || l.tipo === 'Apartamento')
-        ).length;
-        modalidade.exclusivo_apto = Math.max(0, aptosContratuais - aptosOcupados);
+        // APARTAMENTOS: contratuais - ocupados - reservados
+        var aptosContratuaisH4 = 18;
+        var aptosOcupadosH4 = leitosFiltrados.filter(function(l) {
+            return isOcupado(l) && (l.tipo === 'APTO' || l.tipo === 'Apartamento');
+        }).length;
+        // V7.4: Descontar reservas de apartamento
+        var aptosReservadosH4 = reservasArray.filter(function(r) { return r.tipo === 'Apartamento'; }).length;
+        modalidade.exclusivo_apto = Math.max(0, aptosContratuaisH4 - aptosOcupadosH4 - aptosReservadosH4);
         
         // ENFERMARIAS: apenas leitos contratuais (10-17)
-        const vagosContratuais = vagos.filter(l => {
-            const tipo = l.tipo || '';
+        var vagosContratuaisH4 = vagos.filter(function(l) {
+            var tipo = l.tipo || '';
             if (tipo !== 'ENFERMARIA' && tipo !== 'Enfermaria') return false;
-            const numeroLeito = getLeitoNumero(l.leito);
+            var numeroLeito = getLeitoNumero(l.leito);
             return numeroLeito && numeroLeito >= 10 && numeroLeito <= 17;
         });
         
-        vagosContratuais.forEach(leitoVago => {
-            const numeroLeito = getLeitoNumero(leitoVago.leito);
+        vagosContratuaisH4.forEach(function(leitoVago) {
+            var numeroLeito = getLeitoNumero(leitoVago.leito);
             
-            // Determinar irmão usando SANTA_CLARA_IRMAOS
-            const irmaosMap = window.SANTA_CLARA_IRMAOS || {
+            // Determinar irmao usando SANTA_CLARA_IRMAOS
+            var irmaosMap = window.SANTA_CLARA_IRMAOS || {
                 10: 11, 11: 10,
                 12: 13, 13: 12,
                 14: 15, 15: 14,
                 16: 17, 17: 16
             };
             
-            const numeroIrmao = irmaosMap[numeroLeito];
+            var numeroIrmao = irmaosMap[numeroLeito];
             
             if (!numeroIrmao) {
                 modalidade.exclusivo_enf_sem_restricao++;
                 return;
             }
             
-            const irmao = leitos.find(l => getLeitoNumero(l.leito) === numeroIrmao);
+            var irmao = leitosFiltrados.find(function(l) { return getLeitoNumero(l.leito) === numeroIrmao; });
             
             if (!irmao || isVago(irmao)) {
                 modalidade.exclusivo_enf_sem_restricao++;
-            } else if (irmao.isolamento && irmao.isolamento !== 'Não Isolamento') {
-                // Isolamento: leito não disponível (não conta)
+            } else if (irmao.isolamento && irmao.isolamento !== 'Nao Isolamento' && irmao.isolamento !== 'Não Isolamento') {
+                // Isolamento: leito nao disponivel (nao conta)
             } else {
                 if (irmao.genero === 'Feminino') {
                     modalidade.exclusivo_enf_fem++;
@@ -524,12 +576,14 @@ function calcularModalidadesVagos(leitos, hospitalId) {
         return modalidade;
     }
 
-
     return modalidade;
 }
 
 function calcularModalidadePorTipo(leitos, hospitalId) {
-    const modalidade = {
+    // V7.0: Filtrar UTI
+    var leitosFiltrados = filtrarLeitosSemUTI(leitos);
+    
+    var modalidade = {
         flexiveis: 0,
         exclusivo_apto: 0,
         exclusivo_enf_sem_restricao: 0,
@@ -538,16 +592,16 @@ function calcularModalidadePorTipo(leitos, hospitalId) {
     };
 
     if (hospitalId === 'H1' || hospitalId === 'H3' || hospitalId === 'H5' || hospitalId === 'H6' || hospitalId === 'H7' || hospitalId === 'H8' || hospitalId === 'H9') {
-        modalidade.flexiveis = leitos.length;
+        modalidade.flexiveis = leitosFiltrados.length;
         return modalidade;
     }
 
-    leitos.forEach(leito => {
-        const genero = leito.genero || '';
+    leitosFiltrados.forEach(function(leito) {
+        var genero = leito.genero || '';
         
         // Para H2 e H4: usar TIPO estrutural
         if (hospitalId === 'H2' || hospitalId === 'H4') {
-            const tipo = leito.tipo || '';
+            var tipo = leito.tipo || '';
             if (tipo === 'APTO' || tipo === 'Apartamento') {
                 modalidade.exclusivo_apto++;
             } else if (tipo === 'ENFERMARIA' || tipo === 'Enfermaria') {
@@ -562,8 +616,8 @@ function calcularModalidadePorTipo(leitos, hospitalId) {
             return;
         }
         
-        // Para híbridos: usar categoriaEscolhida
-        const catEscolhida = leito.categoriaEscolhida || leito.categoria || '';
+        // Para hibridos: usar categoriaEscolhida
+        var catEscolhida = leito.categoriaEscolhida || leito.categoria || '';
         
         if (catEscolhida === 'Apartamento') {
             modalidade.exclusivo_apto++;
@@ -587,80 +641,93 @@ function calcularModalidadePorTipo(leitos, hospitalId) {
     return modalidade;
 }
 
+// =================== V7.0: PROCESSAR DADOS HOSPITAL (COM RESERVAS E FILTRO UTI) ===================
 window.processarDadosHospital = function(hospitalId) {
-    const hospitalObj = window.hospitalData[hospitalId] || {};
+    var hospitalObj = window.hospitalData[hospitalId] || {};
     
-    let leitos = hospitalObj.leitos || hospitalObj || [];
-    if (!Array.isArray(leitos)) {
-        leitos = [];
+    var leitosRaw = hospitalObj.leitos || hospitalObj || [];
+    if (!Array.isArray(leitosRaw)) {
+        leitosRaw = [];
     }
     
-    const ocupados = leitos.filter(l => isOcupado(l));
+    // V7.0: Filtrar leitos UTI
+    var leitos = filtrarLeitosSemUTI(leitosRaw);
     
-    let ocupadosApto, ocupadosEnfFem, ocupadosEnfMasc;
+    var ocupados = leitos.filter(function(l) { return isOcupado(l); });
+    
+    // V7.0: Buscar reservas do hospital (ja vem filtrada sem UTI)
+    var reservas = getReservasHospital(hospitalId);
+    
+    var ocupadosApto, ocupadosEnfFem, ocupadosEnfMasc;
     
     if (hospitalId === 'H1' || hospitalId === 'H3' || hospitalId === 'H5' || hospitalId === 'H6' || hospitalId === 'H7' || hospitalId === 'H8' || hospitalId === 'H9') {
-        ocupadosApto = ocupados.filter(l => 
-            l.categoriaEscolhida === 'Apartamento'
-        ).length;
-        ocupadosEnfFem = ocupados.filter(l => 
-            l.categoriaEscolhida === 'Enfermaria' && l.genero === 'Feminino'
-        ).length;
-        ocupadosEnfMasc = ocupados.filter(l => 
-            l.categoriaEscolhida === 'Enfermaria' && l.genero === 'Masculino'
-        ).length;
+        ocupadosApto = ocupados.filter(function(l) {
+            return l.categoriaEscolhida === 'Apartamento';
+        }).length;
+        ocupadosEnfFem = ocupados.filter(function(l) {
+            return l.categoriaEscolhida === 'Enfermaria' && l.genero === 'Feminino';
+        }).length;
+        ocupadosEnfMasc = ocupados.filter(function(l) {
+            return l.categoriaEscolhida === 'Enfermaria' && l.genero === 'Masculino';
+        }).length;
     } else {
-        ocupadosApto = ocupados.filter(l => 
-            l.tipo === 'Apartamento' || l.tipo === 'APTO'
-        ).length;
-        ocupadosEnfFem = ocupados.filter(l => 
-            (l.tipo === 'ENFERMARIA' || l.tipo === 'Enfermaria') && l.genero === 'Feminino'
-        ).length;
-        ocupadosEnfMasc = ocupados.filter(l => 
-            (l.tipo === 'ENFERMARIA' || l.tipo === 'Enfermaria') && l.genero === 'Masculino'
-        ).length;
+        ocupadosApto = ocupados.filter(function(l) {
+            return l.tipo === 'Apartamento' || l.tipo === 'APTO';
+        }).length;
+        ocupadosEnfFem = ocupados.filter(function(l) {
+            return (l.tipo === 'ENFERMARIA' || l.tipo === 'Enfermaria') && l.genero === 'Feminino';
+        }).length;
+        ocupadosEnfMasc = ocupados.filter(function(l) {
+            return (l.tipo === 'ENFERMARIA' || l.tipo === 'Enfermaria') && l.genero === 'Masculino';
+        }).length;
     }
     
-    const previsaoAlta = leitos.filter(l => {
+    // V7.0: Calcular reservas por tipo
+    var reservadosApto = reservas.filter(function(r) { return r.tipo === 'Apartamento'; }).length;
+    var reservadosEnfFem = reservas.filter(function(r) { return r.tipo === 'Enfermaria' && r.genero === 'Feminino'; }).length;
+    var reservadosEnfMasc = reservas.filter(function(r) { return r.tipo === 'Enfermaria' && r.genero === 'Masculino'; }).length;
+    
+    var previsaoAlta = leitos.filter(function(l) {
         if (!l.prevAlta || l.prevAlta.trim() === '') return false;
-        const prev = normStr(l.prevAlta);
+        var prev = normStr(l.prevAlta);
         return prev.includes('hoje');
     });
     
-    let previsaoApto, previsaoEnfFem, previsaoEnfMasc;
+    var previsaoApto, previsaoEnfFem, previsaoEnfMasc;
     
     if (hospitalId === 'H1' || hospitalId === 'H3' || hospitalId === 'H5' || hospitalId === 'H6' || hospitalId === 'H7' || hospitalId === 'H8' || hospitalId === 'H9') {
-        previsaoApto = previsaoAlta.filter(l => 
-            l.categoriaEscolhida === 'Apartamento'
-        ).length;
-        previsaoEnfFem = previsaoAlta.filter(l => 
-            l.categoriaEscolhida === 'Enfermaria' && l.genero === 'Feminino'
-        ).length;
-        previsaoEnfMasc = previsaoAlta.filter(l => 
-            l.categoriaEscolhida === 'Enfermaria' && l.genero === 'Masculino'
-        ).length;
+        previsaoApto = previsaoAlta.filter(function(l) {
+            return l.categoriaEscolhida === 'Apartamento';
+        }).length;
+        previsaoEnfFem = previsaoAlta.filter(function(l) {
+            return l.categoriaEscolhida === 'Enfermaria' && l.genero === 'Feminino';
+        }).length;
+        previsaoEnfMasc = previsaoAlta.filter(function(l) {
+            return l.categoriaEscolhida === 'Enfermaria' && l.genero === 'Masculino';
+        }).length;
     } else {
-        previsaoApto = previsaoAlta.filter(l => 
-            l.tipo === 'Apartamento' || l.tipo === 'APTO'
-        ).length;
-        previsaoEnfFem = previsaoAlta.filter(l => 
-            (l.tipo === 'ENFERMARIA' || l.tipo === 'Enfermaria') && l.genero === 'Feminino'
-        ).length;
-        previsaoEnfMasc = previsaoAlta.filter(l => 
-            (l.tipo === 'ENFERMARIA' || l.tipo === 'Enfermaria') && l.genero === 'Masculino'
-        ).length;
+        previsaoApto = previsaoAlta.filter(function(l) {
+            return l.tipo === 'Apartamento' || l.tipo === 'APTO';
+        }).length;
+        previsaoEnfFem = previsaoAlta.filter(function(l) {
+            return (l.tipo === 'ENFERMARIA' || l.tipo === 'Enfermaria') && l.genero === 'Feminino';
+        }).length;
+        previsaoEnfMasc = previsaoAlta.filter(function(l) {
+            return (l.tipo === 'ENFERMARIA' || l.tipo === 'Enfermaria') && l.genero === 'Masculino';
+        }).length;
     }
     
-    const vagos = leitos.filter(l => isVago(l));
+    var vagos = leitos.filter(function(l) { return isVago(l); });
     
-    let vagosApto, vagosEnfFem, vagosEnfMasc;
+    var vagosApto = 0, vagosEnfFem = 0, vagosEnfMasc = 0;
+    var vagosEnfSemRestricao = 0, vagosEnfFemRestrita = 0, vagosEnfMascRestrita = 0;
     
     if (hospitalId === 'H2' || hospitalId === 'H4') {
-        // =================== LÓGICA APENAS PARA CONTRATUAIS ===================
-        const capacidadeInfo = window.HOSPITAL_CAPACIDADE ? window.HOSPITAL_CAPACIDADE[hospitalId] : null;
+        // =================== LOGICA APENAS PARA CONTRATUAIS ===================
+        var capacidadeInfo = window.HOSPITAL_CAPACIDADE ? window.HOSPITAL_CAPACIDADE[hospitalId] : null;
         
         // Definir estrutura de contratuais
-        let aptosContratuais, enfsContratuais;
+        var aptosContratuais, enfsContratuais;
         if (hospitalId === 'H2') {
             aptosContratuais = 20; // leitos 1-20
             enfsContratuais = 16;  // leitos 21-36 (8 pares)
@@ -669,16 +736,11 @@ window.processarDadosHospital = function(hospitalId) {
             enfsContratuais = 8;   // leitos 10-17 (4 pares)
         }
         
-        // APARTAMENTOS: contratuais - ocupados (se ocupados >= contratuais, então 0)
-        vagosApto = Math.max(0, aptosContratuais - ocupadosApto);
+        // APARTAMENTOS: contratuais - ocupados - reservados
+        vagosApto = Math.max(0, aptosContratuais - ocupadosApto - reservadosApto);
         
-        // ENFERMARIAS: processar apenas leitos CONTRATUAIS com sistema de irmãos
-        let vagosEnfSemRestricao = 0;
-        let vagosEnfFemRestrita = 0;
-        let vagosEnfMascRestrita = 0;
-        
-        // Determinar mapa de irmãos e range de contratuais
-        let irmaosMap, rangeMin, rangeMax;
+        // ENFERMARIAS: processar apenas leitos CONTRATUAIS com sistema de irmaos
+        var irmaosMap, rangeMin, rangeMax;
         if (hospitalId === 'H2') {
             irmaosMap = window.CRUZ_AZUL_IRMAOS || {
                 21: 22, 22: 21,
@@ -704,34 +766,34 @@ window.processarDadosHospital = function(hospitalId) {
         }
         
         // Processar APENAS leitos vagos DENTRO DO RANGE CONTRATUAL
-        const vagosContratuais = vagos.filter(l => {
-            const tipo = l.tipo || '';
+        var vagosContratuais = vagos.filter(function(l) {
+            var tipo = l.tipo || '';
             if (tipo !== 'ENFERMARIA' && tipo !== 'Enfermaria') return false;
             
-            const numeroLeito = getLeitoNumero(l.leito);
+            var numeroLeito = getLeitoNumero(l.leito);
             return numeroLeito && numeroLeito >= rangeMin && numeroLeito <= rangeMax;
         });
         
-        vagosContratuais.forEach(leitoVago => {
-            const numeroLeito = getLeitoNumero(leitoVago.leito);
-            const numeroIrmao = irmaosMap[numeroLeito];
+        vagosContratuais.forEach(function(leitoVago) {
+            var numeroLeito = getLeitoNumero(leitoVago.leito);
+            var numeroIrmao = irmaosMap[numeroLeito];
             
             if (!numeroIrmao) {
                 vagosEnfSemRestricao++;
                 return;
             }
             
-            const irmao = leitos.find(l => getLeitoNumero(l.leito) === numeroIrmao);
+            var irmao = leitos.find(function(l) { return getLeitoNumero(l.leito) === numeroIrmao; });
             
-            // Irmão vago: sem restrição
+            // Irmao vago: sem restricao
             if (!irmao || isVago(irmao)) {
                 vagosEnfSemRestricao++;
             }
-            // Irmão com isolamento: NÃO conta (leito bloqueado)
-            else if (irmao.isolamento && irmao.isolamento !== 'Não Isolamento') {
-                // Não conta nada - leito bloqueado
+            // Irmao com isolamento: NAO conta (leito bloqueado)
+            else if (irmao.isolamento && irmao.isolamento !== 'Nao Isolamento' && irmao.isolamento !== 'Não Isolamento') {
+                // Nao conta nada - leito bloqueado
             }
-            // Irmão ocupado: contar por gênero
+            // Irmao ocupado: contar por genero
             else {
                 if (irmao.genero === 'Feminino') {
                     vagosEnfFemRestrita++;
@@ -748,142 +810,152 @@ window.processarDadosHospital = function(hospitalId) {
         vagosEnfMasc = vagosEnfSemRestricao + vagosEnfMascRestrita;
     }
 
-    // Para híbridos, as variáveis serão definidas abaixo no bloco específico
-    let vagosAptoFinal = vagosApto || 0;
-    let vagosEnfFemFinal = vagosEnfFem || 0;
-    let vagosEnfMascFinal = vagosEnfMasc || 0;
+    // Para hibridos, as variaveis serao definidas abaixo no bloco especifico
+    var vagosAptoFinal = vagosApto || 0;
+    var vagosEnfFemFinal = vagosEnfFem || 0;
+    var vagosEnfMascFinal = vagosEnfMasc || 0;
     
     if (hospitalId === 'H1' || hospitalId === 'H3' || hospitalId === 'H5' || hospitalId === 'H6' || hospitalId === 'H7' || hospitalId === 'H8' || hospitalId === 'H9') {
-        // V6.0: Híbridos - leitos são 100% flexíveis
-        const capacidadeInfo = window.HOSPITAL_CAPACIDADE ? window.HOSPITAL_CAPACIDADE[hospitalId] : null;
-        const contratuais = capacidadeInfo ? capacidadeInfo.contratuais : leitos.length;
+        // V7.0: Hibridos - leitos sao 100% flexiveis
+        var capacidadeInfoHib = window.HOSPITAL_CAPACIDADE ? window.HOSPITAL_CAPACIDADE[hospitalId] : null;
+        var contratuaisHib = capacidadeInfoHib ? capacidadeInfoHib.contratuais : leitos.length;
         
-        // Calcular total de disponíveis contratuais
-        const disponiveisTotais = Math.max(0, contratuais - ocupados.length);
+        // V7.0: Calcular total de disponiveis contratuais (descontando reservas)
+        var disponiveisTotais = Math.max(0, contratuaisHib - ocupados.length - reservas.length);
         
-        // HÍBRIDOS: Cada vago PODE ser qualquer tipo (não simultâneo)
-        // Exemplo: 1 vago = até 1 apto OU até 1 fem OU até 1 masc
+        // HIBRIDOS: Cada vago PODE ser qualquer tipo (nao simultaneo)
         vagosAptoFinal = disponiveisTotais;
         vagosEnfFemFinal = disponiveisTotais;
         vagosEnfMascFinal = disponiveisTotais;
     }
     
-    const tphValues = ocupados
-        .map(l => {
-            const admAt = l.admAt;
+    var tphValues = ocupados
+        .map(function(l) {
+            var admAt = l.admAt;
             if (!admAt) return null;
             
-            const admData = parseAdmDate_Hosp(admAt);
+            var admData = parseAdmDate_Hosp(admAt);
             if (!admData || isNaN(admData.getTime())) return null;
             
-            const hoje = new Date();
-            const dias = Math.floor((hoje - admData) / (1000 * 60 * 60 * 24));
+            var hoje = new Date();
+            var dias = Math.floor((hoje - admData) / (1000 * 60 * 60 * 24));
             return (dias >= 0 && dias <= 365) ? dias : null;
         })
-        .filter(v => v !== null);
+        .filter(function(v) { return v !== null; });
     
-    const tphMedio = tphValues.length > 0 
-        ? (tphValues.reduce((a, b) => a + b, 0) / tphValues.length).toFixed(2)
+    var tphMedio = tphValues.length > 0 
+        ? (tphValues.reduce(function(a, b) { return a + b; }, 0) / tphValues.length).toFixed(2)
         : '0.00';
     
-    const leitosMais5Diarias = ocupados.filter(l => {
-        const admAt = l.admAt;
+    var leitosMais5Diarias = ocupados.filter(function(l) {
+        var admAt = l.admAt;
         if (!admAt) return false;
         
-        const admData = parseAdmDate_Hosp(admAt);
+        var admData = parseAdmDate_Hosp(admAt);
         if (!admData || isNaN(admData.getTime())) return false;
         
-        const hoje = new Date();
-        const horas = (hoje - admData) / (1000 * 60 * 60);
+        var hoje = new Date();
+        var horas = (hoje - admData) / (1000 * 60 * 60);
         return horas >= 120;
-    }).map(l => {
-        const admData = parseAdmDate_Hosp(l.admAt);
-        const dias = Math.floor((new Date() - admData) / (1000 * 60 * 60 * 24));
+    }).map(function(l) {
+        var admData = parseAdmDate_Hosp(l.admAt);
+        var dias = Math.floor((new Date() - admData) / (1000 * 60 * 60 * 24));
         
         return { 
             leito: l.identificacaoLeito || l.leito || '---',
             matricula: l.matricula || '---',
             dias: dias
         };
-    }).sort((a, b) => b.dias - a.dias);
+    }).sort(function(a, b) { return b.dias - a.dias; });
     
-    const ppsValues = ocupados
-        .map(l => parseInt(l.pps) || 0)
-        .filter(v => v > 0);
-    const ppsMedio = ppsValues.length > 0
-        ? Math.round(ppsValues.reduce((a, b) => a + b, 0) / ppsValues.length)
+    var ppsValues = ocupados
+        .map(function(l) { return parseInt(l.pps) || 0; })
+        .filter(function(v) { return v > 0; });
+    var ppsMedio = ppsValues.length > 0
+        ? Math.round(ppsValues.reduce(function(a, b) { return a + b; }, 0) / ppsValues.length)
         : 0;
     
-    const ppsMenor40 = ocupados.filter(l => {
-        const pps = parseInt(l.pps) || 0;
+    var ppsMenor40 = ocupados.filter(function(l) {
+        var pps = parseInt(l.pps) || 0;
         return pps > 0 && pps < 40;
-    }).map(l => ({
-        leito: l.identificacaoLeito || l.leito || '---',
-        matricula: l.matricula || '---'
-    }));
+    }).map(function(l) {
+        return {
+            leito: l.identificacaoLeito || l.leito || '---',
+            matricula: l.matricula || '---'
+        };
+    });
     
-    const spictElegiveis = ocupados.filter(l => {
-        const spict = l.spict;
+    var spictElegiveis = ocupados.filter(function(l) {
+        var spict = l.spict;
         if (!spict) return false;
-        const norm = normStr(spict);
+        var norm = normStr(spict);
         return norm === 'elegivel' || norm === 'elegível';
     });
     
-    const diretivasPendentes = ocupados.filter(l => {
-        const spict = l.spict;
+    var diretivasPendentes = ocupados.filter(function(l) {
+        var spict = l.spict;
         if (!spict) return false;
         
-        const spictNorm = normStr(spict);
-        const spictElegivel = spictNorm === 'elegivel' || spictNorm === 'elegível';
+        var spictNorm = normStr(spict);
+        var spictElegivel = spictNorm === 'elegivel' || spictNorm === 'elegível';
         
         if (!spictElegivel) return false;
         
-        const diretivas = l.diretivas;
-        const dirNorm = normStr(diretivas);
+        var diretivas = l.diretivas;
+        var dirNorm = normStr(diretivas);
         
-        const valoresPendentes = ['', 'não', 'nao', 'n/a', 'pendente', 'não se aplica'];
+        var valoresPendentes = ['', 'não', 'nao', 'n/a', 'pendente', 'não se aplica'];
         
         return valoresPendentes.includes(dirNorm);
-    }).map(l => ({
-        leito: l.identificacaoLeito || l.leito || '---',
-        matricula: l.matricula || '---'
-    }));
+    }).map(function(l) {
+        return {
+            leito: l.identificacaoLeito || l.leito || '---',
+            matricula: l.matricula || '---'
+        };
+    });
     
-    const totalLeitos = leitos.length;
+    var totalLeitos = leitos.length;
     
-    // V6.0: Usar HOSPITAL_CAPACIDADE para base de cálculo
-    const capacidadeInfo = window.HOSPITAL_CAPACIDADE ? window.HOSPITAL_CAPACIDADE[hospitalId] : null;
-    const contratuais = capacidadeInfo ? capacidadeInfo.contratuais : totalLeitos;
-    const base = Math.max(contratuais, ocupados.length);
-    const taxaOcupacao = totalLeitos > 0 ? Math.min((ocupados.length / base * 100), 100) : 0;
+    // V7.0: Usar HOSPITAL_CAPACIDADE para base de calculo
+    var capacidadeInfoFinal = window.HOSPITAL_CAPACIDADE ? window.HOSPITAL_CAPACIDADE[hospitalId] : null;
+    var contratuais = capacidadeInfoFinal ? capacidadeInfoFinal.contratuais : totalLeitos;
+    var base = Math.max(contratuais, ocupados.length);
+    var taxaOcupacao = totalLeitos > 0 ? Math.min((ocupados.length / base * 100), 100) : 0;
     
-    const modalidadeOcupados = calcularModalidadePorTipo(ocupados, hospitalId);
-    const modalidadePrevisao = calcularModalidadePorTipo(previsaoAlta, hospitalId);
-    const modalidadeDisponiveis = calcularModalidadesVagos(leitos, hospitalId);
+    var modalidadeOcupados = calcularModalidadePorTipo(ocupados, hospitalId);
+    var modalidadePrevisao = calcularModalidadePorTipo(previsaoAlta, hospitalId);
+    var modalidadeDisponiveis = calcularModalidadesVagos(leitos, hospitalId, reservas);
     
-    const nomeHospital = {
+    var nomeHospital = {
         'H1': 'Neomater',
         'H2': 'Cruz Azul',
         'H3': 'Santa Marcelina',
         'H4': 'Santa Clara',
         'H5': 'Adventista',
         'H6': 'Santa Cruz',
-        'H7': 'Santa Virgínia',
-        'H8': 'São Camilo Ipiranga',
-        'H9': 'São Camilo Pompeia'
+        'H7': 'Santa Virginia',
+        'H8': 'Sao Camilo Ipiranga',
+        'H9': 'Sao Camilo Pompeia'
     };
     
     return {
         nome: nomeHospital[hospitalId] || hospitalId,
-        totalLeitos,
-        contratuais,
-        taxaOcupacao,
+        totalLeitos: totalLeitos,
+        contratuais: contratuais,
+        taxaOcupacao: taxaOcupacao,
         ocupados: {
             total: ocupados.length,
             apartamento: ocupadosApto,
             enf_feminina: ocupadosEnfFem,
             enf_masculina: ocupadosEnfMasc,
             modalidade: modalidadeOcupados
+        },
+        // V7.0: Novo objeto de reservados
+        reservados: {
+            total: reservas.length,
+            apartamento: reservadosApto,
+            enf_feminina: reservadosEnfFem,
+            enf_masculina: reservadosEnfMasc
         },
         previsao: {
             total: previsaoAlta.length,
@@ -893,7 +965,8 @@ window.processarDadosHospital = function(hospitalId) {
             modalidade: modalidadePrevisao
         },
         disponiveis: {
-            total: Math.max(contratuais - ocupados.length, 0),
+            // V7.0: Disponiveis = Contratuais - Ocupados - Reservados
+            total: Math.max(contratuais - ocupados.length - reservas.length, 0),
             apartamento: vagosAptoFinal,
             enf_feminina: vagosEnfFemFinal,
             enf_masculina: vagosEnfMascFinal,
@@ -915,102 +988,103 @@ window.processarDadosHospital = function(hospitalId) {
     };
 };
 
+// =================== FUNCOES DE GAUGE E MODALIDADE ===================
 function calcularGaugeOffset_Hosp(porcentagem) {
-    const circunferencia = Math.PI * 55;
-    const progresso = (porcentagem / 100) * circunferencia;
+    var circunferencia = Math.PI * 66; // Raio 66 (20% maior que 55)
+    var progresso = (porcentagem / 100) * circunferencia;
     return circunferencia - progresso;
 }
 
 function renderGaugeV5_Hosp(porcentagem, cor, numero) {
-    const offset = calcularGaugeOffset_Hosp(porcentagem);
-    const badgeClass = 'blue';
+    var offset = calcularGaugeOffset_Hosp(porcentagem);
+    var badgeClass = 'blue';
     cor = CORES_ARCHIPELAGO.azulPrincipal; 
     
-    return `
-        <div class="v5-gauge-container">
-            <div style="position: relative;">
-                <svg class="v5-gauge" viewBox="0 0 140 80">
-                    <path d="M 15 70 A 55 55 0 0 1 125 70" 
-                          fill="none" 
-                          stroke="rgba(255,255,255,0.1)" 
-                          stroke-width="14" 
-                          stroke-linecap="round"/>
-                    <path d="M 15 70 A 55 55 0 0 1 125 70" 
-                          fill="none" 
-                          stroke="${cor}" 
-                          stroke-width="14" 
-                          stroke-linecap="round"
-                          stroke-dasharray="172.8"
-                          stroke-dashoffset="${offset}"/>
-                </svg>
-                <div class="v5-number-inside">${numero.toString().padStart(2, '0')}</div>
-            </div>
-            <div class="v5-badge-below ${badgeClass}">${porcentagem.toFixed(0)}%</div>
-        </div>
-    `;
+    return '\
+        <div class="v5-gauge-container">\
+            <div style="position: relative;">\
+                <svg class="v5-gauge" viewBox="0 0 168 96">\
+                    <path d="M 18 84 A 66 66 0 0 1 150 84" \
+                          fill="none" \
+                          stroke="rgba(255,255,255,0.1)" \
+                          stroke-width="17" \
+                          stroke-linecap="round"/>\
+                    <path d="M 18 84 A 66 66 0 0 1 150 84" \
+                          fill="none" \
+                          stroke="' + cor + '" \
+                          stroke-width="17" \
+                          stroke-linecap="round"\
+                          stroke-dasharray="207.3"\
+                          stroke-dashoffset="' + offset + '"/>\
+                </svg>\
+                <div class="v5-number-inside">' + numero.toString().padStart(2, '0') + '</div>\
+            </div>\
+            <div class="v5-badge-below ' + badgeClass + '">' + porcentagem.toFixed(0) + '%</div>\
+        </div>\
+    ';
 }
 
 function renderModalidadeContratual_Hosp(modalidade) {
-    return `
-        <div class="lista-simples-compacta">
-            <div class="lista-item-compacto">
-                <span class="label">Flexíveis Quanto ao Plano</span>
-                <span class="valor">${modalidade.flexiveis || 0}</span>
-            </div>
-            <div class="lista-item-compacto">
-                <span class="label">Exclusivamente Apartamentos</span>
-                <span class="valor">${modalidade.exclusivo_apto || 0}</span>
-            </div>
-            <div class="lista-item-compacto">
-                <span class="label">Exclus. Enf Sem Restrição</span>
-                <span class="valor">${modalidade.exclusivo_enf_sem_restricao || 0}</span>
-            </div>
-            <div class="lista-item-compacto">
-                <span class="label">Exclus. Enf Feminina</span>
-                <span class="valor">${modalidade.exclusivo_enf_fem || 0}</span>
-            </div>
-            <div class="lista-item-compacto">
-                <span class="label">Exclus. Enf Masculina</span>
-                <span class="valor">${modalidade.exclusivo_enf_masc || 0}</span>
-            </div>
-        </div>
-    `;
+    return '\
+        <div class="lista-simples-compacta">\
+            <div class="lista-item-compacto">\
+                <span class="label">Flexiveis Quanto ao Plano</span>\
+                <span class="valor">' + (modalidade.flexiveis || 0) + '</span>\
+            </div>\
+            <div class="lista-item-compacto">\
+                <span class="label">Exclusivamente Apartamentos</span>\
+                <span class="valor">' + (modalidade.exclusivo_apto || 0) + '</span>\
+            </div>\
+            <div class="lista-item-compacto">\
+                <span class="label">Exclus. Enf Sem Restricao</span>\
+                <span class="valor">' + (modalidade.exclusivo_enf_sem_restricao || 0) + '</span>\
+            </div>\
+            <div class="lista-item-compacto">\
+                <span class="label">Exclus. Enf Feminina</span>\
+                <span class="valor">' + (modalidade.exclusivo_enf_fem || 0) + '</span>\
+            </div>\
+            <div class="lista-item-compacto">\
+                <span class="label">Exclus. Enf Masculina</span>\
+                <span class="valor">' + (modalidade.exclusivo_enf_masc || 0) + '</span>\
+            </div>\
+        </div>\
+    ';
 }
 
 function renderMiniGaugeTPH_Hosp(dias) {
-    const diasNum = typeof dias === 'string' ? parseFloat(dias) : dias;
+    var diasNum = typeof dias === 'string' ? parseFloat(dias) : dias;
     
-    const maxDias = 10;
-    const porcentagem = (diasNum / maxDias) * 100;
+    var maxDias = 10;
+    var porcentagem = (diasNum / maxDias) * 100;
     
-    let corClass = 'green';
+    var corClass = 'green';
     if (diasNum >= 9) corClass = 'red';
     else if (diasNum >= 6) corClass = 'yellow';
     
-    const totalBlocos = 20;
-    const blocosCheios = Math.round((diasNum / maxDias) * totalBlocos);
+    var totalBlocos = 20;
+    var blocosCheios = Math.round((diasNum / maxDias) * totalBlocos);
     
-    let blocos = '';
-    for (let i = 0; i < totalBlocos; i++) {
-        blocos += `<div class="tph-gauge-block ${i < blocosCheios ? 'filled' : 'empty'}"></div>`;
+    var blocos = '';
+    for (var i = 0; i < totalBlocos; i++) {
+        blocos += '<div class="tph-gauge-block ' + (i < blocosCheios ? 'filled' : 'empty') + '"></div>';
     }
     
-    return `
-        <div class="tph-mini-gauge">
-            <div class="tph-gauge-bar ${corClass}">
-                ${blocos}
-            </div>
-            <span class="tph-gauge-label">${diasNum.toFixed(2)}/${maxDias}</span>
-        </div>
-    `;
+    return '\
+        <div class="tph-mini-gauge">\
+            <div class="tph-gauge-bar ' + corClass + '">\
+                ' + blocos + '\
+            </div>\
+            <span class="tph-gauge-label">' + diasNum.toFixed(2) + '/' + maxDias + '</span>\
+        </div>\
+    ';
 }
 
 window.renderDashboardHospitalar = function() {
-    console.log('Renderizando Dashboard Hospitalar V6.0');
+    console.log('Renderizando Dashboard Enfermarias V7.0');
     
-    let container = document.getElementById('dashHospitalarContent');
+    var container = document.getElementById('dashHospitalarContent');
     if (!container) {
-        const dash1Section = document.getElementById('dash1');
+        var dash1Section = document.getElementById('dash1');
         if (dash1Section) {
             container = document.createElement('div');
             container.id = 'dashHospitalarContent';
@@ -1027,21 +1101,21 @@ window.renderDashboardHospitalar = function() {
     }
     
     if (!window.hospitalData || Object.keys(window.hospitalData).length === 0) {
-        container.innerHTML = `
-            <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 400px; text-align: center; color: white; background: linear-gradient(135deg, ${CORES_ARCHIPELAGO.azulMarinhoEscuro} 0%, ${CORES_ARCHIPELAGO.azulEscuro} 100%); border-radius: 12px; margin: 20px; padding: 40px;">
-                <div style="width: 60px; height: 60px; border: 3px solid ${CORES_ARCHIPELAGO.azulPrincipal}; border-top-color: transparent; border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 20px;"></div>
-                <h2 style="color: ${CORES_ARCHIPELAGO.azulPrincipal}; margin-bottom: 10px; font-size: 20px;">Aguardando Dados</h2>
-                <p style="color: ${CORES_ARCHIPELAGO.cinzaMedio}; font-size: 14px;">Conectando com Google Apps Script...</p>
-            </div>
-            <style>
-                @keyframes spin {
-                    from { transform: rotate(0deg); }
-                    to { transform: rotate(360deg); }
-                }
-            </style>
-        `;
+        container.innerHTML = '\
+            <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 400px; text-align: center; color: white; background: linear-gradient(135deg, ' + CORES_ARCHIPELAGO.azulMarinhoEscuro + ' 0%, ' + CORES_ARCHIPELAGO.azulEscuro + ' 100%); border-radius: 12px; margin: 20px; padding: 40px;">\
+                <div style="width: 60px; height: 60px; border: 3px solid ' + CORES_ARCHIPELAGO.azulPrincipal + '; border-top-color: transparent; border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 20px;"></div>\
+                <h2 style="color: ' + CORES_ARCHIPELAGO.azulPrincipal + '; margin-bottom: 10px; font-size: 20px;">Aguardando Dados</h2>\
+                <p style="color: ' + CORES_ARCHIPELAGO.cinzaMedio + '; font-size: 14px;">Conectando com Google Apps Script...</p>\
+            </div>\
+            <style>\
+                @keyframes spin {\
+                    from { transform: rotate(0deg); }\
+                    to { transform: rotate(360deg); }\
+                }\
+            </style>\
+        ';
         
-        setTimeout(() => {
+        setTimeout(function() {
             if (window.hospitalData && Object.keys(window.hospitalData).length > 0) {
                 window.renderDashboardHospitalar();
             }
@@ -1049,72 +1123,77 @@ window.renderDashboardHospitalar = function() {
         return;
     }
     
-    const ordemAlfabetica = ['H5', 'H2', 'H1', 'H4', 'H3', 'H6', 'H7', 'H8', 'H9'];
+    var ordemAlfabetica = ['H5', 'H2', 'H1', 'H4', 'H3', 'H6', 'H7', 'H8', 'H9'];
     
-    const hospitaisComDados = ordemAlfabetica.filter(hospitalId => {
-        const hospital = window.hospitalData[hospitalId];
-        return hospital && hospital.leitos && hospital.leitos.some(l => isOcupado(l) || isVago(l));
+    var hospitaisComDados = ordemAlfabetica.filter(function(hospitalId) {
+        var hospital = window.hospitalData[hospitalId];
+        return hospital && hospital.leitos && hospital.leitos.some(function(l) { return isOcupado(l) || isVago(l); });
     });
     
     if (hospitaisComDados.length === 0) {
-        container.innerHTML = `
-            <div style="text-align: center; padding: 50px; color: white; background: ${CORES_ARCHIPELAGO.azulMarinhoEscuro}; border-radius: 12px;">
-                <h3 style="color: ${CORES_ARCHIPELAGO.amarelo}; margin-bottom: 15px;">Nenhum Dado Hospitalar Disponível</h3>
-                <p style="color: ${CORES_ARCHIPELAGO.cinzaMedio}; margin-bottom: 20px;">Aguardando dados reais da planilha Google.</p>
-                <button onclick="window.forceDataRefresh()" style="background: ${CORES_ARCHIPELAGO.azulPrincipal}; color: white; border: none; padding: 12px 24px; border-radius: 6px; cursor: pointer; font-size: 14px;">
-                    Recarregar Dados Reais
-                </button>
-            </div>
-        `;
+        container.innerHTML = '\
+            <div style="text-align: center; padding: 50px; color: white; background: ' + CORES_ARCHIPELAGO.azulMarinhoEscuro + '; border-radius: 12px;">\
+                <h3 style="color: ' + CORES_ARCHIPELAGO.amarelo + '; margin-bottom: 15px;">Nenhum Dado Hospitalar Disponivel</h3>\
+                <p style="color: ' + CORES_ARCHIPELAGO.cinzaMedio + '; margin-bottom: 20px;">Aguardando dados reais da planilha Google.</p>\
+                <button onclick="window.forceDataRefresh()" style="background: ' + CORES_ARCHIPELAGO.azulPrincipal + '; color: white; border: none; padding: 12px 24px; border-radius: 6px; cursor: pointer; font-size: 14px;">\
+                    Recarregar Dados Reais\
+                </button>\
+            </div>\
+        ';
         return;
     }
     
-    const hoje = new Date().toLocaleDateString('pt-BR');
+    var hoje = new Date().toLocaleDateString('pt-BR');
     
-    container.innerHTML = `
-        <div class="dashboard-hospitalar-wrapper" style="background: linear-gradient(135deg, ${CORES_ARCHIPELAGO.azulMarinhoEscuro} 0%, ${CORES_ARCHIPELAGO.azulEscuro} 100%); min-height: 100vh; padding: 20px; color: white; font-family: 'Poppins', sans-serif;">
-            
-            <!-- HEADER COM FILTRO -->
-            <div class="dashboard-header-filtro">
-                <h2 class="dashboard-title-central">Dashboard Hospitalar</h2>
-                
-                <!-- DROPDOWN COM TODOS OS HOSPITAIS -->
-                <div class="hospital-filter-selector">
-                    <select id="hospitalFilterDropdown" class="hospital-filter-select" onchange="window.filtrarHospitalDashboard(this.value)">
-                        <option value="todos" selected>Todos</option>
-                        <option value="H5">Adventista</option>
-                        <option value="H2">Cruz Azul</option>
-                        <option value="H1">Neomater</option>
-                        <option value="H4">Santa Clara</option>
-                        <option value="H6">Santa Cruz</option>
-                        <option value="H3">Santa Marcelina</option>
-                        <option value="H7">Santa Virginia</option>
-                        <option value="H8">Sao Camilo Ipiranga</option>
-                        <option value="H9">Sao Camilo Pompeia</option>
-                    </select>
-                </div>
-                
-                <button onclick="window.copiarDashboardParaWhatsApp()" class="btn-whatsapp-dashboard">
-                    Relatorio Via WhatsApp
-                </button>
-            </div>
-            
-            <div class="hospitais-container">
-                ${hospitaisComDados.map(hospitalId => renderHospitalSection(hospitalId, hoje)).join('')}
-            </div>
-        </div>
-        
-        ${getHospitalConsolidadoCSS()}
-    `;
+    container.innerHTML = '\
+        <div class="dashboard-hospitalar-wrapper" style="background: linear-gradient(135deg, ' + CORES_ARCHIPELAGO.azulMarinhoEscuro + ' 0%, ' + CORES_ARCHIPELAGO.azulEscuro + ' 100%); min-height: 100vh; padding: 20px; color: white; font-family: \'Poppins\', sans-serif;">\
+            \
+            <!-- HEADER STICKY MOBILE - V7.4 -->\
+            <div id="stickyHospitalHeader" class="sticky-hospital-header">\
+                <span id="stickyHospitalName">Dashboard Enfermarias</span>\
+            </div>\
+            \
+            <!-- HEADER COM FILTRO -->\
+            <div class="dashboard-header-filtro">\
+                <h2 class="dashboard-title-central">Dashboard Enfermarias</h2>\
+                \
+                <!-- DROPDOWN COM TODOS OS HOSPITAIS -->\
+                <div class="hospital-filter-selector">\
+                    <select id="hospitalFilterDropdown" class="hospital-filter-select" onchange="window.filtrarHospitalDashboard(this.value)">\
+                        <option value="todos" selected>Todos</option>\
+                        <option value="H5">Adventista</option>\
+                        <option value="H2">Cruz Azul</option>\
+                        <option value="H1">Neomater</option>\
+                        <option value="H4">Santa Clara</option>\
+                        <option value="H6">Santa Cruz</option>\
+                        <option value="H3">Santa Marcelina</option>\
+                        <option value="H7">Santa Virginia</option>\
+                        <option value="H8">Sao Camilo Ipiranga</option>\
+                        <option value="H9">Sao Camilo Pompeia</option>\
+                    </select>\
+                </div>\
+                \
+                <button onclick="window.copiarDashboardParaWhatsApp()" class="btn-whatsapp-dashboard">\
+                    Relatorio Via WhatsApp\
+                </button>\
+            </div>\
+            \
+            <div class="hospitais-container">\
+                ' + hospitaisComDados.map(function(hospitalId) { return renderHospitalSection(hospitalId, hoje); }).join('') + '\
+            </div>\
+        </div>\
+        \
+        ' + getHospitalConsolidadoCSS() + '\
+    ';
     
-    const aguardarChartJS = () => {
+    var aguardarChartJS = function() {
         if (typeof Chart === 'undefined') {
             setTimeout(aguardarChartJS, 100);
             return;
         }
         
-        setTimeout(() => {
-            hospitaisComDados.forEach(hospitalId => {
+        setTimeout(function() {
+            hospitaisComDados.forEach(function(hospitalId) {
                 renderAltasHospital(hospitalId);
                 renderConcessoesHospital(hospitalId);
                 if (CONFIG_DASHBOARD.MOSTRAR_LINHAS_CUIDADO) {
@@ -1122,260 +1201,376 @@ window.renderDashboardHospitalar = function() {
                 }
             });
             
-            console.log('Dashboard renderizado com sucesso!');
+            console.log('Dashboard Enfermarias renderizado com sucesso!');
         }, 100);
     };
     
     aguardarChartJS();
+    
+    // =================== V7.4: HEADER STICKY MOBILE - INTERSECTION OBSERVER ===================
+    setupStickyHospitalHeader();
 };
 
+// V7.4: Setup do header sticky para mobile
+function setupStickyHospitalHeader() {
+    var stickyHeader = document.getElementById('stickyHospitalHeader');
+    var stickyName = document.getElementById('stickyHospitalName');
+    var headerFiltro = document.querySelector('.dashboard-header-filtro');
+    
+    if (!stickyHeader || !stickyName || !headerFiltro) return;
+    
+    // Detectar se é mobile
+    function isMobile() {
+        return window.innerWidth <= 768;
+    }
+    
+    // Mapa de nomes dos hospitais
+    var nomesHospitais = {
+        'H1': 'Neomater',
+        'H2': 'Cruz Azul',
+        'H3': 'Santa Marcelina',
+        'H4': 'Santa Clara',
+        'H5': 'Adventista',
+        'H6': 'Santa Cruz',
+        'H7': 'Santa Virginia',
+        'H8': 'Sao Camilo Ipiranga',
+        'H9': 'Sao Camilo Pompeia'
+    };
+    
+    // Hospital atualmente visível
+    var hospitalAtual = null;
+    
+    // Intersection Observer para detectar qual hospital está visível
+    var observerOptions = {
+        root: null,
+        rootMargin: '-80px 0px -50% 0px',
+        threshold: 0
+    };
+    
+    var hospitalObserver = new IntersectionObserver(function(entries) {
+        if (!isMobile()) return;
+        
+        entries.forEach(function(entry) {
+            if (entry.isIntersecting) {
+                var hospitalId = entry.target.getAttribute('data-hospital');
+                if (hospitalId && nomesHospitais[hospitalId]) {
+                    hospitalAtual = hospitalId;
+                    stickyName.textContent = nomesHospitais[hospitalId];
+                }
+            }
+        });
+    }, observerOptions);
+    
+    // Observar todos os hospital-cards
+    var hospitalCards = document.querySelectorAll('.hospital-card');
+    hospitalCards.forEach(function(card) {
+        hospitalObserver.observe(card);
+    });
+    
+    // Observer para mostrar/esconder o header sticky baseado no scroll
+    var headerObserver = new IntersectionObserver(function(entries) {
+        if (!isMobile()) {
+            stickyHeader.classList.remove('visible');
+            return;
+        }
+        
+        entries.forEach(function(entry) {
+            if (!entry.isIntersecting) {
+                // Header principal saiu da tela - mostrar sticky
+                stickyHeader.classList.add('visible');
+            } else {
+                // Header principal visível - esconder sticky
+                stickyHeader.classList.remove('visible');
+            }
+        });
+    }, { threshold: 0 });
+    
+    headerObserver.observe(headerFiltro);
+    
+    // Atualizar em resize
+    window.addEventListener('resize', function() {
+        if (!isMobile()) {
+            stickyHeader.classList.remove('visible');
+        }
+    });
+}
 function renderHospitalSection(hospitalId, hoje) {
-    const dados = window.processarDadosHospital(hospitalId);
+    var dados = window.processarDadosHospital(hospitalId);
     
     if (!dados || !dados.tph || !dados.pps || !dados.spict) {
-        console.error(`Dados inválidos para ${hospitalId}`);
+        console.error('Dados invalidos para ' + hospitalId);
         return '';
     }
     
-    return `
-        <div class="hospital-card" data-hospital="${hospitalId}">
-            <div class="hospital-header">
-                <h3 class="hospital-title">${dados.nome}</h3>
-            </div>
-            
-            <div class="kpis-grid">
-                <div class="kpi-box box-ocupados">
-                    <div class="kpi-title">Leitos Ocupados</div>
-                    
-                    <div class="kpi-content">
-                        ${renderGaugeV5_Hosp(dados.taxaOcupacao, CORES_ARCHIPELAGO.ocupados, dados.ocupados.total)}
-                        
-                        <div class="kpi-items-lista">
-                            <div class="kpi-subtitle">Total por Tipo de Leito</div>
-                            <div class="item-lista">
-                                <span class="label">Apartamento</span>
-                                <span class="valor">${dados.ocupados.apartamento}</span>
-                            </div>
-                            <div class="item-lista">
-                                <span class="label">Enfermaria Feminina</span>
-                                <span class="valor">${dados.ocupados.enf_feminina}</span>
-                            </div>
-                            <div class="item-lista">
-                                <span class="label">Enfermaria Masculina</span>
-                                <span class="valor">${dados.ocupados.enf_masculina}</span>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="kpi-detalhes">
-                        <div class="detalhe-titulo">Total por Modalidade Contratual</div>
-                        ${renderModalidadeContratual_Hosp(dados.ocupados.modalidade)}
-                    </div>
-                </div>
-
-                <div class="kpi-box box-previsao">
-                    <div class="kpi-title">Leitos em Previsão de Alta</div>
-                    
-                    <div class="kpi-content">
-                        ${renderGaugeV5_Hosp((dados.previsao.total / dados.ocupados.total * 100) || 0, CORES_ARCHIPELAGO.previsao, dados.previsao.total)}
-                        
-                        <div class="kpi-items-lista">
-                            <div class="kpi-subtitle">Total por Tipo de Leito</div>
-                            <div class="item-lista">
-                                <span class="label">Apartamento</span>
-                                <span class="valor">${dados.previsao.apartamento}</span>
-                            </div>
-                            <div class="item-lista">
-                                <span class="label">Enfermaria Feminina</span>
-                                <span class="valor">${dados.previsao.enf_feminina}</span>
-                            </div>
-                            <div class="item-lista">
-                                <span class="label">Enfermaria Masculina</span>
-                                <span class="valor">${dados.previsao.enf_masculina}</span>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="kpi-detalhes">
-                        <div class="detalhe-titulo">Total por Modalidade Contratual</div>
-                        ${renderModalidadeContratual_Hosp(dados.previsao.modalidade)}
-                    </div>
-                </div>
-
-                <div class="kpi-box box-disponiveis">
-                    <div class="kpi-title">Leitos Disponíveis</div>
-                    
-                    <div class="kpi-content">
-                        ${renderGaugeV5_Hosp((dados.disponiveis.total / dados.contratuais * 100) || 0, CORES_ARCHIPELAGO.disponiveis, dados.disponiveis.total)}
-                        
-                        <div class="kpi-items-lista">
-                            <div class="kpi-subtitle">Capacidade Total por Tipo de Leito (não Simultâneo)</div>
-                            <div class="item-lista">
-                                <span class="label">Apartamento</span>
-                                <span class="valor">até ${dados.disponiveis.apartamento}</span>
-                            </div>
-                            <div class="item-lista">
-                                <span class="label">Enfermaria Feminina</span>
-                                <span class="valor">até ${dados.disponiveis.enf_feminina}</span>
-                            </div>
-                            <div class="item-lista">
-                                <span class="label">Enfermaria Masculina</span>
-                                <span class="valor">até ${dados.disponiveis.enf_masculina}</span>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="kpi-detalhes">
-                        <div class="detalhe-titulo">Total por Modalidade Contratual</div>
-                        ${renderModalidadeContratual_Hosp(dados.disponiveis.modalidade)}
-                    </div>
-                </div>
-
-                <div class="kpi-box box-tph">
-                    <div class="kpi-title">TPH Médio</div>
-                    
-                    <div class="kpi-tph-container">
-                        <div class="kpi-tph-numero">${dados.tph.medio}</div>
-                        <div class="kpi-tph-label">Dias</div>
-                        ${renderMiniGaugeTPH_Hosp(dados.tph.medio)}
-                    </div>
-                    
-                    <div class="kpi-detalhes">
-                        <div class="detalhe-titulo">Nº Diárias > 5</div>
-                        ${dados.tph.lista && dados.tph.lista.length > 0 ? `
-                            <table class="hospitais-table">
-                                <thead>
-                                    <tr>
-                                        <th style="text-align: left !important;">Leito</th>
-                                        <th style="text-align: center !important;">Matrícula</th>
-                                        <th style="text-align: right !important;">Dias</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    ${dados.tph.lista.map(l => `
-                                        <tr>
-                                            <td style="text-align: left !important;">${l.leito}</td>
-                                            <td style="text-align: center !important;">${l.matricula}</td>
-                                            <td style="text-align: right !important;">${l.dias}</td>
-                                        </tr>
-                                    `).join('')}
-                                </tbody>
-                            </table>
-                        ` : '<div class="sem-dados">Nenhum Leito com Mais de 5 Diárias</div>'}
-                    </div>
-                </div>
-
-                <div class="kpi-box box-pps">
-                    <div class="kpi-title">PPS</div>
-                    
-                    <div class="kpi-valores-duplos-divididos">
-                        <div class="kpi-valor-metade">
-                            <div class="valor">${dados.pps.medio}</div>
-                            <div class="label">PPS Médio</div>
-                        </div>
-                        <div class="divisor-vertical"></div>
-                        <div class="kpi-valor-metade">
-                            <div class="valor">${(dados.pps.menor40 && dados.pps.menor40.length || 0).toString().padStart(2, '0')}</div>
-                            <div class="label">PPS < 40%</div>
-                        </div>
-                    </div>
-                    
-                    <div class="kpi-detalhes">
-                        <div class="detalhe-titulo">PPS < 40%</div>
-                        ${dados.pps.menor40 && dados.pps.menor40.length > 0 ? `
-                            <table class="hospitais-table">
-                                <thead>
-                                    <tr>
-                                        <th style="text-align: left !important;">Leito</th>
-                                        <th style="text-align: right !important;">Matrícula</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    ${dados.pps.menor40.map(l => `
-                                        <tr>
-                                            <td style="text-align: left !important;">${l.leito}</td>
-                                            <td style="text-align: right !important;">${l.matricula}</td>
-                                        </tr>
-                                    `).join('')}
-                                </tbody>
-                            </table>
-                        ` : '<div class="sem-dados">Nenhum Leito com PPS < 40%</div>'}
-                    </div>
-                </div>
-
-                <div class="kpi-box box-spict">
-                    <div class="kpi-title">SPICT-BR | Diretivas</div>
-                    
-                    <div class="kpi-valores-duplos-divididos">
-                        <div class="kpi-valor-metade">
-                            <div class="valor">${dados.spict.elegiveis.toString().padStart(2, '0')}</div>
-                            <div class="label">SPICT-BR</div>
-                        </div>
-                        <div class="divisor-vertical"></div>
-                        <div class="kpi-valor-metade">
-                            <div class="valor">${dados.spict.diretivas.toString().padStart(2, '0')}</div>
-                            <div class="label">Diretivas</div>
-                        </div>
-                    </div>
-                    
-                    <div class="kpi-detalhes">
-                        <div class="detalhe-titulo">Diretivas Pendentes</div>
-                        ${dados.spict.listaDiretivas && dados.spict.listaDiretivas.length > 0 ? `
-                            <table class="hospitais-table">
-                                <thead>
-                                    <tr>
-                                        <th style="text-align: left !important;">Leito</th>
-                                        <th style="text-align: right !important;">Matrícula</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    ${dados.spict.listaDiretivas.map(l => `
-                                        <tr>
-                                            <td style="text-align: left !important;">${l.leito}</td>
-                                            <td style="text-align: right !important;">${l.matricula}</td>
-                                        </tr>
-                                    `).join('')}
-                                </tbody>
-                            </table>
-                        ` : '<div class="sem-dados">Nenhuma Diretiva Pendente</div>'}
-                    </div>
-                </div>
-            </div>
-            
-            <div class="graficos-verticais">
-                <div class="grafico-item">
-                    <div class="chart-header">
-                        <h4>Análise Preditiva de Altas em ${hoje}</h4>
-                    </div>
-                    <div class="chart-container">
-                        <canvas id="graficoAltas${hospitalId}"></canvas>
-                    </div>
-                </div>
-                
-                <div class="grafico-item">
-                    <div class="chart-header">
-                        <h4>Concessões Previstas em ${hoje}</h4>
-                    </div>
-                    <div id="concessoesBoxes${hospitalId}" class="timeline-boxes-container"></div>
-                </div>
-                
-                ${CONFIG_DASHBOARD.MOSTRAR_LINHAS_CUIDADO ? `
-                <div class="grafico-item">
-                    <div class="chart-header">
-                        <h4>Linhas de Cuidado Previstas em ${hoje}</h4>
-                    </div>
-                    <div id="linhasBoxes${hospitalId}" class="timeline-boxes-container"></div>
-                </div>
-                ` : ''}
-            </div>
-        </div>
-    `;
+    // V7.0: Calcular porcentagem de reservados
+    var porcentagemReservados = dados.contratuais > 0 ? (dados.reservados.total / dados.contratuais * 100) : 0;
+    
+    return '\
+        <div class="hospital-card" data-hospital="' + hospitalId + '">\
+            <div class="hospital-header">\
+                <h3 class="hospital-title">' + dados.nome + '</h3>\
+            </div>\
+            \
+            <div class="kpis-grid">\
+                <!-- V7.0: BOX OCUPACAO COM DOIS GAUGES -->\
+                <div class="kpi-box box-ocupados">\
+                    <div class="kpi-title">Ocupacao</div>\
+                    \
+                    <div class="kpi-content">\
+                        <!-- V7.0: Dois gauges lado a lado (Ocupados | Reservados) -->\
+                        <div class="dual-gauges-container">\
+                            <div class="gauge-with-label">\
+                                <div class="gauge-label">Ocupados</div>\
+                                ' + renderGaugeV5_Hosp(dados.taxaOcupacao, CORES_ARCHIPELAGO.azulPrincipal, dados.ocupados.total) + '\
+                            </div>\
+                            <div class="gauge-with-label">\
+                                <div class="gauge-label">Reservados</div>\
+                                ' + renderGaugeV5_Hosp(porcentagemReservados, CORES_ARCHIPELAGO.azulPrincipal, dados.reservados.total) + '\
+                            </div>\
+                        </div>\
+                        \
+                        <!-- V7.0: Tabela com duas colunas -->\
+                        <div class="kpi-items-lista">\
+                            <div class="kpi-subtitle">Total por Tipo de Leito</div>\
+                            <table class="tipo-leito-table">\
+                                <thead>\
+                                    <tr>\
+                                        <th></th>\
+                                        <th>Ocupados</th>\
+                                        <th>Reservados</th>\
+                                    </tr>\
+                                </thead>\
+                                <tbody>\
+                                    <tr>\
+                                        <td class="tipo-label">Apartamento</td>\
+                                        <td class="tipo-valor">' + dados.ocupados.apartamento + '</td>\
+                                        <td class="tipo-valor">' + dados.reservados.apartamento + '</td>\
+                                    </tr>\
+                                    <tr>\
+                                        <td class="tipo-label">Enfermaria Feminina</td>\
+                                        <td class="tipo-valor">' + dados.ocupados.enf_feminina + '</td>\
+                                        <td class="tipo-valor">' + dados.reservados.enf_feminina + '</td>\
+                                    </tr>\
+                                    <tr>\
+                                        <td class="tipo-label">Enfermaria Masculina</td>\
+                                        <td class="tipo-valor">' + dados.ocupados.enf_masculina + '</td>\
+                                        <td class="tipo-valor">' + dados.reservados.enf_masculina + '</td>\
+                                    </tr>\
+                                </tbody>\
+                            </table>\
+                        </div>\
+                    </div>\
+                    \
+                    <div class="kpi-detalhes">\
+                        <div class="detalhe-titulo">Total por Modalidade Contratual</div>\
+                        ' + renderModalidadeContratual_Hosp(dados.ocupados.modalidade) + '\
+                    </div>\
+                </div>\
+\
+                <div class="kpi-box box-previsao">\
+                    <div class="kpi-title">Leitos em Previsao de Alta</div>\
+                    \
+                    <div class="kpi-content">\
+                        ' + renderGaugeV5_Hosp((dados.previsao.total / dados.ocupados.total * 100) || 0, CORES_ARCHIPELAGO.previsao, dados.previsao.total) + '\
+                        \
+                        <div class="kpi-items-lista">\
+                            <div class="kpi-subtitle">Total por Tipo de Leito</div>\
+                            <div class="item-lista">\
+                                <span class="label">Apartamento</span>\
+                                <span class="valor">' + dados.previsao.apartamento + '</span>\
+                            </div>\
+                            <div class="item-lista">\
+                                <span class="label">Enfermaria Feminina</span>\
+                                <span class="valor">' + dados.previsao.enf_feminina + '</span>\
+                            </div>\
+                            <div class="item-lista">\
+                                <span class="label">Enfermaria Masculina</span>\
+                                <span class="valor">' + dados.previsao.enf_masculina + '</span>\
+                            </div>\
+                        </div>\
+                    </div>\
+                    \
+                    <div class="kpi-detalhes">\
+                        <div class="detalhe-titulo">Total por Modalidade Contratual</div>\
+                        ' + renderModalidadeContratual_Hosp(dados.previsao.modalidade) + '\
+                    </div>\
+                </div>\
+\
+                <div class="kpi-box box-disponiveis">\
+                    <div class="kpi-title">Leitos Disponiveis</div>\
+                    \
+                    <div class="kpi-content">\
+                        ' + renderGaugeV5_Hosp((dados.disponiveis.total / dados.contratuais * 100) || 0, CORES_ARCHIPELAGO.disponiveis, dados.disponiveis.total) + '\
+                        \
+                        <div class="kpi-items-lista">\
+                            <div class="kpi-subtitle">Capacidade Total por Tipo de Leito (nao Simultaneo)</div>\
+                            <div class="item-lista">\
+                                <span class="label">Apartamento</span>\
+                                <span class="valor">ate ' + dados.disponiveis.apartamento + '</span>\
+                            </div>\
+                            <div class="item-lista">\
+                                <span class="label">Enfermaria Feminina</span>\
+                                <span class="valor">ate ' + dados.disponiveis.enf_feminina + '</span>\
+                            </div>\
+                            <div class="item-lista">\
+                                <span class="label">Enfermaria Masculina</span>\
+                                <span class="valor">ate ' + dados.disponiveis.enf_masculina + '</span>\
+                            </div>\
+                        </div>\
+                    </div>\
+                    \
+                    <div class="kpi-detalhes">\
+                        <div class="detalhe-titulo">Total por Modalidade Contratual</div>\
+                        ' + renderModalidadeContratual_Hosp(dados.disponiveis.modalidade) + '\
+                    </div>\
+                </div>\
+\
+                <div class="kpi-box box-tph">\
+                    <div class="kpi-title">TPH Medio</div>\
+                    \
+                    <div class="kpi-tph-container">\
+                        <div class="kpi-tph-numero">' + dados.tph.medio + '</div>\
+                        <div class="kpi-tph-label">Dias</div>\
+                        ' + renderMiniGaugeTPH_Hosp(dados.tph.medio) + '\
+                    </div>\
+                    \
+                    <div class="kpi-detalhes">\
+                        <div class="detalhe-titulo">N Diarias >= 5</div>\
+                        ' + (dados.tph.lista && dados.tph.lista.length > 0 ? '\
+                            <table class="hospitais-table">\
+                                <thead>\
+                                    <tr>\
+                                        <th style="text-align: left !important;">Leito</th>\
+                                        <th style="text-align: center !important;">Matricula</th>\
+                                        <th style="text-align: right !important;">Dias</th>\
+                                    </tr>\
+                                </thead>\
+                                <tbody>\
+                                    ' + dados.tph.lista.map(function(l) { return '\
+                                        <tr>\
+                                            <td style="text-align: left !important;">' + l.leito + '</td>\
+                                            <td style="text-align: center !important;">' + l.matricula + '</td>\
+                                            <td style="text-align: right !important;">' + l.dias + '</td>\
+                                        </tr>\
+                                    '; }).join('') + '\
+                                </tbody>\
+                            </table>\
+                        ' : '<div class="sem-dados">Nenhum Leito com 5 ou Mais Diarias</div>') + '\
+                    </div>\
+                </div>\
+\
+                <div class="kpi-box box-pps">\
+                    <div class="kpi-title">PPS</div>\
+                    \
+                    <div class="kpi-valores-duplos-divididos">\
+                        <div class="kpi-valor-metade">\
+                            <div class="valor">' + dados.pps.medio + '</div>\
+                            <div class="label">PPS Medio</div>\
+                        </div>\
+                        <div class="divisor-vertical"></div>\
+                        <div class="kpi-valor-metade">\
+                            <div class="valor">' + (dados.pps.menor40 && dados.pps.menor40.length || 0).toString().padStart(2, '0') + '</div>\
+                            <div class="label">PPS < 40%</div>\
+                        </div>\
+                    </div>\
+                    \
+                    <div class="kpi-detalhes">\
+                        <div class="detalhe-titulo">PPS < 40%</div>\
+                        ' + (dados.pps.menor40 && dados.pps.menor40.length > 0 ? '\
+                            <table class="hospitais-table">\
+                                <thead>\
+                                    <tr>\
+                                        <th style="text-align: left !important;">Leito</th>\
+                                        <th style="text-align: right !important;">Matricula</th>\
+                                    </tr>\
+                                </thead>\
+                                <tbody>\
+                                    ' + dados.pps.menor40.map(function(l) { return '\
+                                        <tr>\
+                                            <td style="text-align: left !important;">' + l.leito + '</td>\
+                                            <td style="text-align: right !important;">' + l.matricula + '</td>\
+                                        </tr>\
+                                    '; }).join('') + '\
+                                </tbody>\
+                            </table>\
+                        ' : '<div class="sem-dados">Nenhum Leito com PPS < 40%</div>') + '\
+                    </div>\
+                </div>\
+\
+                <div class="kpi-box box-spict">\
+                    <div class="kpi-title">SPICT-BR | Diretivas</div>\
+                    \
+                    <div class="kpi-valores-duplos-divididos">\
+                        <div class="kpi-valor-metade">\
+                            <div class="valor">' + dados.spict.elegiveis.toString().padStart(2, '0') + '</div>\
+                            <div class="label">SPICT-BR</div>\
+                        </div>\
+                        <div class="divisor-vertical"></div>\
+                        <div class="kpi-valor-metade">\
+                            <div class="valor">' + dados.spict.diretivas.toString().padStart(2, '0') + '</div>\
+                            <div class="label">Diretivas</div>\
+                        </div>\
+                    </div>\
+                    \
+                    <div class="kpi-detalhes">\
+                        <div class="detalhe-titulo">Diretivas Pendentes</div>\
+                        ' + (dados.spict.listaDiretivas && dados.spict.listaDiretivas.length > 0 ? '\
+                            <table class="hospitais-table">\
+                                <thead>\
+                                    <tr>\
+                                        <th style="text-align: left !important;">Leito</th>\
+                                        <th style="text-align: right !important;">Matricula</th>\
+                                    </tr>\
+                                </thead>\
+                                <tbody>\
+                                    ' + dados.spict.listaDiretivas.map(function(l) { return '\
+                                        <tr>\
+                                            <td style="text-align: left !important;">' + l.leito + '</td>\
+                                            <td style="text-align: right !important;">' + l.matricula + '</td>\
+                                        </tr>\
+                                    '; }).join('') + '\
+                                </tbody>\
+                            </table>\
+                        ' : '<div class="sem-dados">Nenhuma Diretiva Pendente</div>') + '\
+                    </div>\
+                </div>\
+            </div>\
+            \
+            <div class="graficos-verticais">\
+                <div class="grafico-item">\
+                    <div class="chart-header">\
+                        <h4>Analise Preditiva de Altas em ' + hoje + '</h4>\
+                    </div>\
+                    <div class="chart-container">\
+                        <canvas id="graficoAltas' + hospitalId + '"></canvas>\
+                    </div>\
+                </div>\
+                \
+                <div class="grafico-item">\
+                    <div class="chart-header">\
+                        <h4>Concessoes Previstas em ' + hoje + '</h4>\
+                    </div>\
+                    <div id="concessoesBoxes' + hospitalId + '" class="timeline-boxes-container"></div>\
+                </div>\
+                \
+                ' + (CONFIG_DASHBOARD.MOSTRAR_LINHAS_CUIDADO ? '\
+                <div class="grafico-item">\
+                    <div class="chart-header">\
+                        <h4>Linhas de Cuidado Previstas em ' + hoje + '</h4>\
+                    </div>\
+                    <div id="linhasBoxes' + hospitalId + '" class="timeline-boxes-container"></div>\
+                </div>\
+                ' : '') + '\
+            </div>\
+        </div>\
+    ';
 }
 
-const backgroundPlugin = {
+// =================== GRAFICOS (COM FILTRO UTI) ===================
+var backgroundPlugin = {
     id: 'customBackground',
-    beforeDraw: (chart) => {
-        const ctx = chart.ctx;
+    beforeDraw: function(chart) {
+        var ctx = chart.ctx;
         ctx.save();
         ctx.fillStyle = window.fundoBranco ? '#ffffff' : 'transparent';
         ctx.fillRect(0, 0, chart.width, chart.height);
@@ -1384,24 +1579,27 @@ const backgroundPlugin = {
 };
 
 function renderAltasHospital(hospitalId) {
-    const canvas = document.getElementById(`graficoAltas${hospitalId}`);
+    var canvas = document.getElementById('graficoAltas' + hospitalId);
     if (!canvas || typeof Chart === 'undefined') return;
     
-    const hospital = window.hospitalData[hospitalId];
+    var hospital = window.hospitalData[hospitalId];
     if (!hospital || !hospital.leitos) return;
     
-    const chartKey = `altas${hospitalId}`;
+    // V7.0: Filtrar UTI
+    var leitos = filtrarLeitosSemUTI(hospital.leitos);
+    
+    var chartKey = 'altas' + hospitalId;
     if (window.chartInstances && window.chartInstances[chartKey]) {
         window.chartInstances[chartKey].destroy();
     }
     
     if (!window.chartInstances) window.chartInstances = {};
     
-    const categorias = CONFIG_DASHBOARD.MOSTRAR_96H ? 
+    var categorias = CONFIG_DASHBOARD.MOSTRAR_96H ? 
         ['HOJE', '24H', '48H', '72H', '96H'] : 
         ['HOJE', '24H', '48H', '72H'];
     
-    const dados = {
+    var dados = {
         'Ouro': CONFIG_DASHBOARD.MOSTRAR_96H ? [0, 0, 0, 0, 0] : [0, 0, 0, 0],
         '2R': CONFIG_DASHBOARD.MOSTRAR_96H ? [0, 0, 0, 0, 0] : [0, 0, 0, 0],
         '3R': CONFIG_DASHBOARD.MOSTRAR_96H ? [0, 0, 0, 0, 0] : [0, 0, 0, 0],
@@ -1410,15 +1608,15 @@ function renderAltasHospital(hospitalId) {
         '96H': CONFIG_DASHBOARD.MOSTRAR_96H ? [0, 0, 0, 0, 0] : []
     };
     
-    hospital.leitos.forEach(leito => {
+    leitos.forEach(function(leito) {
         if (isOcupado(leito)) {
-            const prevAlta = leito.prevAlta || (leito.paciente && leito.paciente.prevAlta);
+            var prevAlta = leito.prevAlta || (leito.paciente && leito.paciente.prevAlta);
             
             if (prevAlta) {
-                const prev = normStr(prevAlta).replace(/\s+/g, ' ');
+                var prev = normStr(prevAlta).replace(/\s+/g, ' ');
                 
-                let index = -1;
-                let tipo = '';
+                var index = -1;
+                var tipo = '';
                 
                 if (prev.includes('hoje') && prev.includes('ouro')) { index = 0; tipo = 'Ouro'; }
                 else if (prev.includes('hoje') && prev.includes('2r')) { index = 0; tipo = '2R'; }
@@ -1437,12 +1635,12 @@ function renderAltasHospital(hospitalId) {
         }
     });
     
-    const corTexto = window.fundoBranco ? CORES_ARCHIPELAGO.cinzaEscuro : '#ffffff';
-    const corGrid = window.fundoBranco ? 'rgba(60, 58, 62, 0.1)' : 'rgba(255, 255, 255, 0.1)';
+    var corTexto = window.fundoBranco ? CORES_ARCHIPELAGO.cinzaEscuro : '#ffffff';
+    var corGrid = window.fundoBranco ? 'rgba(60, 58, 62, 0.1)' : 'rgba(255, 255, 255, 0.1)';
     
-    const ctx = canvas.getContext('2d');
+    var ctx = canvas.getContext('2d');
     
-    const dadosSimplificados = CONFIG_DASHBOARD.MOSTRAR_96H ? [
+    var dadosSimplificados = CONFIG_DASHBOARD.MOSTRAR_96H ? [
         dados['Ouro'][0] + dados['2R'][0] + dados['3R'][0],
         dados['Ouro'][1] + dados['2R'][1] + dados['3R'][1],
         dados['48H'][2],
@@ -1455,15 +1653,15 @@ function renderAltasHospital(hospitalId) {
         dados['72H'][3]
     ];
     
-    const valorMaximo = Math.max(...dadosSimplificados, 0);
-    const limiteSuperior = valorMaximo + 1;
+    var valorMaximo = Math.max.apply(null, dadosSimplificados.concat([0]));
+    var limiteSuperior = valorMaximo + 1;
     
     window.chartInstances[chartKey] = new Chart(ctx, {
         type: 'bar',
         data: {
             labels: categorias,
             datasets: [{
-                label: 'Previsão de Alta',
+                label: 'Previsao de Alta',
                 data: dadosSimplificados,
                 backgroundColor: CORES_ARCHIPELAGO.azulPrincipal,
                 borderWidth: 0
@@ -1480,14 +1678,14 @@ function renderAltasHospital(hospitalId) {
                     display: false
                 },
                 tooltip: {
-                    backgroundColor: `rgba(19, 27, 46, 0.95)`,
+                    backgroundColor: 'rgba(19, 27, 46, 0.95)',
                     titleColor: '#ffffff',
                     bodyColor: '#ffffff',
                     titleFont: { family: 'Poppins', size: 13, weight: 600 },
                     bodyFont: { family: 'Poppins', size: 12 },
                     callbacks: {
                         label: function(context) {
-                            return `Beneficiários: ${context.parsed.x}`;
+                            return 'Beneficiarios: ' + context.parsed.x;
                         }
                     }
                 }
@@ -1499,27 +1697,29 @@ function renderAltasHospital(hospitalId) {
                     min: 0,
                     title: {
                         display: true,
-                        text: 'Beneficiários',
+                        text: 'Beneficiarios',
                         color: corTexto,
-                        font: { family: 'Poppins', size: 12, weight: 600 },
-                        align: 'start'
+                        font: { family: 'Poppins', size: 13, weight: 600 }
+                    },
+                    grid: {
+                        color: corGrid,
+                        drawBorder: false
                     },
                     ticks: {
-                        stepSize: 1,
                         color: corTexto,
-                        font: { family: 'Poppins', size: 11 },
-                        callback: function(value) {
-                            return Number.isInteger(value) && value >= 0 ? value : '';
-                        }
-                    },
-                    grid: { color: corGrid }
+                        font: { family: 'Poppins', size: 12 },
+                        stepSize: 1,
+                        precision: 0
+                    }
                 },
                 y: {
+                    grid: {
+                        display: false
+                    },
                     ticks: {
                         color: corTexto,
-                        font: { family: 'Poppins', size: 12, weight: 600 }
-                    },
-                    grid: { color: corGrid }
+                        font: { family: 'Poppins', size: 13, weight: 600 }
+                    }
                 }
             }
         },
@@ -1527,43 +1727,46 @@ function renderAltasHospital(hospitalId) {
     });
 }
 
+// =================== RENDER CONCESSOES HOSPITAL (COM FILTRO UTI E GRAFICO ROSCA) ===================
 function renderConcessoesHospital(hospitalId) {
-    const container = document.getElementById(`concessoesBoxes${hospitalId}`);
+    var container = document.getElementById('concessoesBoxes' + hospitalId);
     if (!container) return;
     
-    const hospital = window.hospitalData[hospitalId];
+    var hospital = window.hospitalData[hospitalId];
     if (!hospital || !hospital.leitos) return;
     
-    const concessoesPorTimeline = {
+    // V7.0: Filtrar UTI
+    var leitos = filtrarLeitosSemUTI(hospital.leitos);
+    
+    var concessoesPorTimeline = {
         'HOJE': {},
         '24H': {},
         '48H': {}
     };
     
-    hospital.leitos.forEach(leito => {
+    leitos.forEach(function(leito) {
         if (isOcupado(leito)) {
-            const concessoes = leito.concessoes || (leito.paciente && leito.paciente.concessoes);
-            const prevAlta = leito.prevAlta || (leito.paciente && leito.paciente.prevAlta);
-            const matricula = leito.matricula || 'S/N';
+            var concessoes = leito.concessoes || (leito.paciente && leito.paciente.concessoes);
+            var prevAlta = leito.prevAlta || (leito.paciente && leito.paciente.prevAlta);
+            var matricula = leito.matricula || 'S/N';
             
             if (concessoes) {
-                const concessoesList = Array.isArray(concessoes) ? 
+                var concessoesList = Array.isArray(concessoes) ? 
                     concessoes : 
                     String(concessoes).split('|');
                 
-                let timeline = null;
+                var timeline = null;
                 if (prevAlta) {
-                    const prev = normStr(prevAlta).replace(/\s+/g, ' ');
+                    var prev = normStr(prevAlta).replace(/\s+/g, ' ');
                     if (prev.includes('hoje')) timeline = 'HOJE';
                     else if (prev.includes('24h') || prev.includes('24 h')) timeline = '24H';
                     else if (prev.includes('48h')) timeline = '48H';
                 }
                 
                 if (timeline) {
-                    concessoesList.forEach(concessao => {
+                    concessoesList.forEach(function(concessao) {
                         if (concessao && concessao.trim()) {
-                            // ✅ APLICAR DESNORMALIZAÇÃO AQUI
-                            const nome = desnormalizarTexto(concessao.trim());
+                            var nome = window.desnormalizarTexto ? window.desnormalizarTexto(concessao.trim()) : concessao.trim();
                             if (!concessoesPorTimeline[timeline][nome]) {
                                 concessoesPorTimeline[timeline][nome] = [];
                             }
@@ -1575,70 +1778,72 @@ function renderConcessoesHospital(hospitalId) {
         }
     });
     
-    let html = '<div class="timeline-boxes-grid">';
+    var html = '<div class="timeline-boxes-grid">';
     
-    ['HOJE', '24H', '48H'].forEach(timeline => {
-        const concessoes = Object.entries(concessoesPorTimeline[timeline])
-            .sort((a, b) => b[1].length - a[1].length);
+    ['HOJE', '24H', '48H'].forEach(function(timeline) {
+        var concessoes = Object.entries(concessoesPorTimeline[timeline])
+            .sort(function(a, b) { return b[1].length - a[1].length; });
         
-        html += `<div class="timeline-box">`;
-        html += `<div class="timeline-box-header">${timeline}</div>`;
+        html += '<div class="timeline-box">';
+        html += '<div class="timeline-box-header">' + timeline + '</div>';
         
-        html += `<div class="timeline-chart-container">`;
-        html += `<canvas id="graficoConcessoes${hospitalId}_${timeline}" class="timeline-chart"></canvas>`;
-        html += `</div>`;
+        html += '<div class="timeline-chart-container">';
+        html += '<canvas id="graficoConcessoes' + hospitalId + '_' + timeline + '" class="timeline-chart"></canvas>';
+        html += '</div>';
         
-        html += `<div class="timeline-box-content">`;
+        html += '<div class="timeline-box-content">';
         
         if (concessoes.length === 0) {
-            html += `<div style="text-align: center; padding: 20px; color: ${CORES_ARCHIPELAGO.cinzaMedio}; font-style: italic; font-size: 12px;">Sem Concessões</div>`;
+            html += '<div style="text-align: center; padding: 20px; color: ' + CORES_ARCHIPELAGO.cinzaMedio + '; font-style: italic; font-size: 12px;">Sem Concessoes</div>';
         } else {
-            concessoes.forEach(([nome, mats]) => {
-                const cor = getCorExata(nome, 'concessao');
-                html += `<div class="timeline-item" style="border-left-color: ${cor};">`;
-                html += `<div class="timeline-item-name">${nome}</div>`;
-                html += `<div class="timeline-item-mats">${mats.join(', ')}</div>`;
-                html += `</div>`;
+            concessoes.forEach(function(entry) {
+                var nome = entry[0];
+                var mats = entry[1];
+                var cor = getCorExata(nome, 'concessao');
+                html += '<div class="timeline-item" style="border-left-color: ' + cor + ';">';
+                html += '<div class="timeline-item-name">' + nome + '</div>';
+                html += '<div class="timeline-item-mats">' + mats.join(', ') + '</div>';
+                html += '</div>';
             });
         }
         
-        html += `</div></div>`;
+        html += '</div></div>';
     });
     
     html += '</div>';
     
     container.innerHTML = html;
     
-    setTimeout(() => {
-        ['HOJE', '24H', '48H'].forEach(timeline => {
+    setTimeout(function() {
+        ['HOJE', '24H', '48H'].forEach(function(timeline) {
             renderDoughnutConcessoes(hospitalId, timeline, concessoesPorTimeline[timeline]);
         });
     }, 100);
 }
 
 function renderDoughnutConcessoes(hospitalId, timeline, dados) {
-    const canvas = document.getElementById(`graficoConcessoes${hospitalId}_${timeline}`);
+    var canvas = document.getElementById('graficoConcessoes' + hospitalId + '_' + timeline);
     if (!canvas || typeof Chart === 'undefined') return;
     
-    const chartKey = `concessoes${hospitalId}_${timeline}`;
+    var chartKey = 'concessoes' + hospitalId + '_' + timeline;
     if (window.chartInstances && window.chartInstances[chartKey]) {
         window.chartInstances[chartKey].destroy();
     }
     
     if (!window.chartInstances) window.chartInstances = {};
     
-    const concessoes = Object.entries(dados)
-        .sort((a, b) => b[1].length - a[1].length);
+    var concessoes = Object.entries(dados)
+        .sort(function(a, b) { return b[1].length - a[1].length; });
     
     if (concessoes.length === 0) return;
     
-    const labels = concessoes.map(([nome]) => nome);
-    const values = concessoes.map(([, mats]) => mats.length);
-    const colors = labels.map(label => getCorExata(label, 'concessao'));
+    var labels = concessoes.map(function(entry) { return entry[0]; });
+    var values = concessoes.map(function(entry) { return entry[1].length; });
+    var colors = labels.map(function(label) { return getCorExata(label, 'concessao'); });
     
-    const ctx = canvas.getContext('2d');
+    var ctx = canvas.getContext('2d');
     
-    const chartOptions = {
+    var chartOptions = {
         responsive: true,
         maintainAspectRatio: false,
         plugins: {
@@ -1646,33 +1851,33 @@ function renderDoughnutConcessoes(hospitalId, timeline, dados) {
                 display: false
             },
             tooltip: {
-                backgroundColor: `rgba(19, 27, 46, 0.95)`,
+                backgroundColor: 'rgba(19, 27, 46, 0.95)',
                 titleColor: '#ffffff',
                 bodyColor: '#ffffff',
                 titleFont: { family: 'Poppins', size: 13, weight: 600 },
                 bodyFont: { family: 'Poppins', size: 12 },
                 callbacks: {
                     label: function(context) {
-                        const value = context.parsed;
-                        const total = context.dataset.data.reduce((a, b) => a + b, 0);
-                        const percent = ((value / total) * 100).toFixed(1);
-                        return `${context.label}: ${value} (${percent}%)`;
+                        var value = context.parsed;
+                        var total = context.dataset.data.reduce(function(a, b) { return a + b; }, 0);
+                        var percent = ((value / total) * 100).toFixed(1);
+                        return context.label + ': ' + value + ' (' + percent + '%)';
                     }
                 }
             }
         }
     };
     
-    const chartPlugins = [backgroundPlugin];
+    var chartPlugins = [backgroundPlugin];
     
     if (hasDataLabels) {
         chartOptions.plugins.datalabels = {
             color: '#ffffff',
             font: { family: 'Poppins', size: 14, weight: 'bold' },
-            formatter: (value, context) => {
-                const total = context.dataset.data.reduce((a, b) => a + b, 0);
-                const porcentagem = ((value / total) * 100).toFixed(0);
-                return `${value}\n(${porcentagem}%)`;
+            formatter: function(value, context) {
+                var total = context.dataset.data.reduce(function(a, b) { return a + b; }, 0);
+                var porcentagem = ((value / total) * 100).toFixed(0);
+                return value + '\n(' + porcentagem + '%)';
             }
         };
         chartPlugins.push(ChartDataLabels);
@@ -1694,43 +1899,46 @@ function renderDoughnutConcessoes(hospitalId, timeline, dados) {
     });
 }
 
+// =================== RENDER LINHAS HOSPITAL (COM FILTRO UTI E GRAFICO ROSCA) ===================
 function renderLinhasHospital(hospitalId) {
-    const container = document.getElementById(`linhasBoxes${hospitalId}`);
+    var container = document.getElementById('linhasBoxes' + hospitalId);
     if (!container) return;
     
-    const hospital = window.hospitalData[hospitalId];
+    var hospital = window.hospitalData[hospitalId];
     if (!hospital || !hospital.leitos) return;
     
-    const linhasPorTimeline = {
+    // V7.0: Filtrar UTI
+    var leitos = filtrarLeitosSemUTI(hospital.leitos);
+    
+    var linhasPorTimeline = {
         'HOJE': {},
         '24H': {},
         '48H': {}
     };
     
-    hospital.leitos.forEach(leito => {
+    leitos.forEach(function(leito) {
         if (isOcupado(leito)) {
-            const linhas = leito.linhas || (leito.paciente && leito.paciente.linhas);
-            const prevAlta = leito.prevAlta || (leito.paciente && leito.paciente.prevAlta);
-            const matricula = leito.matricula || 'S/N';
+            var linhas = leito.linhasCuidado || leito.linhas || (leito.paciente && leito.paciente.linhasCuidado) || (leito.paciente && leito.paciente.linhas);
+            var prevAlta = leito.prevAlta || (leito.paciente && leito.paciente.prevAlta);
+            var matricula = leito.matricula || 'S/N';
             
             if (linhas) {
-                const linhasList = Array.isArray(linhas) ? 
+                var linhasList = Array.isArray(linhas) ? 
                     linhas : 
                     String(linhas).split('|');
                 
-                let timeline = null;
+                var timeline = null;
                 if (prevAlta) {
-                    const prev = normStr(prevAlta).replace(/\s+/g, ' ');
+                    var prev = normStr(prevAlta).replace(/\s+/g, ' ');
                     if (prev.includes('hoje')) timeline = 'HOJE';
                     else if (prev.includes('24h') || prev.includes('24 h')) timeline = '24H';
                     else if (prev.includes('48h')) timeline = '48H';
                 }
                 
                 if (timeline) {
-                    linhasList.forEach(linha => {
+                    linhasList.forEach(function(linha) {
                         if (linha && linha.trim()) {
-                            // ✅ APLICAR DESNORMALIZAÇÃO AQUI
-                            const nome = desnormalizarTexto(linha.trim());
+                            var nome = window.desnormalizarTexto ? window.desnormalizarTexto(linha.trim()) : linha.trim();
                             if (!linhasPorTimeline[timeline][nome]) {
                                 linhasPorTimeline[timeline][nome] = [];
                             }
@@ -1742,70 +1950,72 @@ function renderLinhasHospital(hospitalId) {
         }
     });
     
-    let html = '<div class="timeline-boxes-grid">';
+    var html = '<div class="timeline-boxes-grid">';
     
-    ['HOJE', '24H', '48H'].forEach(timeline => {
-        const linhas = Object.entries(linhasPorTimeline[timeline])
-            .sort((a, b) => b[1].length - a[1].length);
+    ['HOJE', '24H', '48H'].forEach(function(timeline) {
+        var linhas = Object.entries(linhasPorTimeline[timeline])
+            .sort(function(a, b) { return b[1].length - a[1].length; });
         
-        html += `<div class="timeline-box">`;
-        html += `<div class="timeline-box-header">${timeline}</div>`;
+        html += '<div class="timeline-box">';
+        html += '<div class="timeline-box-header">' + timeline + '</div>';
         
-        html += `<div class="timeline-chart-container">`;
-        html += `<canvas id="graficoLinhas${hospitalId}_${timeline}" class="timeline-chart"></canvas>`;
-        html += `</div>`;
+        html += '<div class="timeline-chart-container">';
+        html += '<canvas id="graficoLinhas' + hospitalId + '_' + timeline + '" class="timeline-chart"></canvas>';
+        html += '</div>';
         
-        html += `<div class="timeline-box-content">`;
+        html += '<div class="timeline-box-content">';
         
         if (linhas.length === 0) {
-            html += `<div style="text-align: center; padding: 20px; color: ${CORES_ARCHIPELAGO.cinzaMedio}; font-style: italic; font-size: 12px;">Sem Linhas de Cuidado</div>`;
+            html += '<div style="text-align: center; padding: 20px; color: ' + CORES_ARCHIPELAGO.cinzaMedio + '; font-style: italic; font-size: 12px;">Sem Linhas de Cuidado</div>';
         } else {
-            linhas.forEach(([nome, mats]) => {
-                const cor = getCorExata(nome, 'linha');
-                html += `<div class="timeline-item" style="border-left-color: ${cor};">`;
-                html += `<div class="timeline-item-name">${nome}</div>`;
-                html += `<div class="timeline-item-mats">${mats.join(', ')}</div>`;
-                html += `</div>`;
+            linhas.forEach(function(entry) {
+                var nome = entry[0];
+                var mats = entry[1];
+                var cor = getCorExata(nome, 'linha');
+                html += '<div class="timeline-item" style="border-left-color: ' + cor + ';">';
+                html += '<div class="timeline-item-name">' + nome + '</div>';
+                html += '<div class="timeline-item-mats">' + mats.join(', ') + '</div>';
+                html += '</div>';
             });
         }
         
-        html += `</div></div>`;
+        html += '</div></div>';
     });
     
     html += '</div>';
     
     container.innerHTML = html;
     
-    setTimeout(() => {
-        ['HOJE', '24H', '48H'].forEach(timeline => {
+    setTimeout(function() {
+        ['HOJE', '24H', '48H'].forEach(function(timeline) {
             renderDoughnutLinhas(hospitalId, timeline, linhasPorTimeline[timeline]);
         });
     }, 100);
 }
 
 function renderDoughnutLinhas(hospitalId, timeline, dados) {
-    const canvas = document.getElementById(`graficoLinhas${hospitalId}_${timeline}`);
+    var canvas = document.getElementById('graficoLinhas' + hospitalId + '_' + timeline);
     if (!canvas || typeof Chart === 'undefined') return;
     
-    const chartKey = `linhas${hospitalId}_${timeline}`;
+    var chartKey = 'linhas' + hospitalId + '_' + timeline;
     if (window.chartInstances && window.chartInstances[chartKey]) {
         window.chartInstances[chartKey].destroy();
     }
     
     if (!window.chartInstances) window.chartInstances = {};
     
-    const linhas = Object.entries(dados)
-        .sort((a, b) => b[1].length - a[1].length);
+    var linhas = Object.entries(dados)
+        .sort(function(a, b) { return b[1].length - a[1].length; });
     
     if (linhas.length === 0) return;
     
-    const labels = linhas.map(([nome]) => nome);
-    const values = linhas.map(([, mats]) => mats.length);
-    const colors = labels.map(label => getCorExata(label, 'linha'));
+    var labels = linhas.map(function(entry) { return entry[0]; });
+    var values = linhas.map(function(entry) { return entry[1].length; });
+    var colors = labels.map(function(label) { return getCorExata(label, 'linha'); });
     
-    const ctx = canvas.getContext('2d');
+    var ctx = canvas.getContext('2d');
     
-    const chartOptions = {
+    var chartOptions = {
         responsive: true,
         maintainAspectRatio: false,
         plugins: {
@@ -1813,33 +2023,33 @@ function renderDoughnutLinhas(hospitalId, timeline, dados) {
                 display: false
             },
             tooltip: {
-                backgroundColor: `rgba(19, 27, 46, 0.95)`,
+                backgroundColor: 'rgba(19, 27, 46, 0.95)',
                 titleColor: '#ffffff',
                 bodyColor: '#ffffff',
                 titleFont: { family: 'Poppins', size: 13, weight: 600 },
                 bodyFont: { family: 'Poppins', size: 12 },
                 callbacks: {
                     label: function(context) {
-                        const value = context.parsed;
-                        const total = context.dataset.data.reduce((a, b) => a + b, 0);
-                        const percent = ((value / total) * 100).toFixed(1);
-                        return `${context.label}: ${value} (${percent}%)`;
+                        var value = context.parsed;
+                        var total = context.dataset.data.reduce(function(a, b) { return a + b; }, 0);
+                        var percent = ((value / total) * 100).toFixed(1);
+                        return context.label + ': ' + value + ' (' + percent + '%)';
                     }
                 }
             }
         }
     };
     
-    const chartPlugins = [backgroundPlugin];
+    var chartPlugins = [backgroundPlugin];
     
     if (hasDataLabels) {
         chartOptions.plugins.datalabels = {
             color: '#ffffff',
             font: { family: 'Poppins', size: 14, weight: 'bold' },
-            formatter: (value, context) => {
-                const total = context.dataset.data.reduce((a, b) => a + b, 0);
-                const porcentagem = ((value / total) * 100).toFixed(0);
-                return `${value}\n(${porcentagem}%)`;
+            formatter: function(value, context) {
+                var total = context.dataset.data.reduce(function(a, b) { return a + b; }, 0);
+                var porcentagem = ((value / total) * 100).toFixed(0);
+                return value + '\n(' + porcentagem + '%)';
             }
         };
         chartPlugins.push(ChartDataLabels);
@@ -1861,671 +2071,723 @@ function renderDoughnutLinhas(hospitalId, timeline, dados) {
     });
 }
 
+// =================== CSS DO DASHBOARD ENFERMARIAS V7.0 ===================
 function getHospitalConsolidadoCSS() {
-    return `
-        <style id="hospitalConsolidadoCSS">
-            @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap');
-            
-            * {
-                font-family: 'Poppins', sans-serif;
-                text-transform: none !important;
-            }
-            
-            @keyframes fadeIn {
-                from { opacity: 0; transform: translateY(10px); }
-                to { opacity: 1; transform: translateY(0); }
-            }
-            
-            #dashHospitalarContent,
-            #dash1 {
-                background: transparent !important;
-            }
-            
-            .dashboard-hospitalar-wrapper {
-                border-radius: 0;
-                box-shadow: none;
-            }
-            
-            /* =================== HEADER COM FILTRO =================== */
-            .dashboard-header-filtro {
-                background: rgba(255, 255, 255, 0.05);
-                border-radius: 12px;
-                padding: 25px;
-                border: 1px solid rgba(255, 255, 255, 0.8);
-                border-top: 3px solid #ffffff;
-                margin-bottom: 30px;
-            }
-            
-            .dashboard-title-central {
-                color: #60a5fa !important;
-                font-size: 24px !important;
-                margin-bottom: 20px !important;
-                font-family: 'Poppins', sans-serif !important;
-                font-weight: 700 !important;
-                text-align: center !important;
-                text-transform: none !important;
-            }
-            
-            /* =================== DROPDOWN DE FILTRO =================== */
-            .hospital-filter-selector {
-                display: flex;
-                justify-content: center;
-                margin-bottom: 20px;
-            }
-            
-            .hospital-filter-select {
-                background-color: #60a5fa;
-                color: #ffffff;
-                border: none;
-                padding: 14px 28px;
-                border-radius: 8px;
-                cursor: pointer;
-                font-size: 16px;
-                font-weight: 700;
-                font-family: 'Poppins', sans-serif;
-                min-width: 345px;
-                transition: all 0.3s ease;
-                text-align: center;
-            }
-            
-            .hospital-filter-select:hover {
-                background-color: #3b82f6;
-                transform: translateY(-2px);
-                box-shadow: 0 4px 12px rgba(96, 165, 250, 0.4);
-            }
-            
-            .hospital-filter-select:focus {
-                outline: none;
-                box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.3);
-            }
-            
-            .hospital-filter-select option {
-                background-color: #131b2e;
-                color: #ffffff;
-                padding: 10px;
-            }
-            
-            /* =================== BOTÃO WHATSAPP =================== */
-            .btn-whatsapp-dashboard {
-                display: block;
-                margin: 0 auto;
-                padding: 12px 24px;
-                background: #25D366;
-                border: none;
-                border-radius: 8px;
-                color: white;
-                font-size: 14px;
-                cursor: pointer;
-                font-weight: 700;
-                transition: all 0.3s ease;
-                font-family: 'Poppins', sans-serif;
-            }
-            
-            .btn-whatsapp-dashboard:hover {
-                background: #128C7E;
-                transform: translateY(-2px);
-                box-shadow: 0 4px 12px rgba(37, 211, 102, 0.4);
-            }
-            
-            .hospitais-container {
-                display: flex;
-                flex-direction: column;
-                gap: 30px;
-            }
-            
-            .hospital-card {
-                background: ${CORES_ARCHIPELAGO.azulMarinhoEscuro};
-                border-radius: 16px;
-                padding: 25px;
-                box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-                border: 1px solid rgba(255, 255, 255, 0.8);
-                border-top: 3px solid #ffffff;
-                transition: all 0.3s ease;
-            }
-            
-            .hospital-card:hover {
-                transform: translateY(-2px);
-                box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4);
-            }
-            
-            .hospital-header {
-                margin-bottom: 25px;
-            }
-            
-            .hospital-title {
-                color: #60a5fa;
-                font-size: 20px;
-                font-weight: 700;
-                margin: 0 0 20px 0;
-                letter-spacing: 0.5px;
-                text-transform: none !important;
-            }
-            
-            .kpis-grid {
-                display: grid;
-                grid-template-columns: repeat(3, 1fr);
-                gap: 20px;
-                margin-bottom: 30px;
-            }
-            
-            .kpi-box {
-                background: rgba(255, 255, 255, 0.05);
-                border-radius: 12px;
-                padding: 20px;
-                border: 1px solid rgba(255, 255, 255, 0.8);
-                border-top: 3px solid #ffffff !important;
-                min-height: 350px;
-                display: flex;
-                flex-direction: column;
-                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
-            }
-            
-            .kpi-title {
-                font-size: 14px;
-                font-weight: 700;
-                color: #ffffff;
-                letter-spacing: 0.5px;
-                margin-bottom: 15px;
-                text-align: center;
-                text-transform: none !important;
-            }
-            
-            .v5-gauge-container {
-                display: flex;
-                flex-direction: column;
-                align-items: center;
-                gap: 8px;
-                margin: 15px 0;
-            }
-            
-            .v5-gauge {
-                width: 100px;
-                height: 60px;
-            }
-            
-            .v5-number-inside {
-                position: absolute;
-                top: 50%;
-                left: 50%;
-                transform: translate(-50%, -50%);
-                font-size: 32px;
-                font-weight: 700;
-                color: white;
-                line-height: 1;
-                margin-top: 8px;
-            }
-            
-            .v5-badge-below {
-                font-size: 13px;
-                font-weight: 700;
-                padding: 4px 10px;
-                border-radius: 10px;
-                border: 1px solid;
-                background: rgba(96, 165, 250, 0.2) !important;
-                color: ${CORES_ARCHIPELAGO.azulPrincipal} !important;
-                border-color: ${CORES_ARCHIPELAGO.azulPrincipal} !important;
-            }
-            
-            .kpi-content {
-                display: flex;
-                flex-direction: column;
-                align-items: center;
-                gap: 15px;
-                margin-bottom: 15px;
-                flex: 1;
-            }
-            
-            .kpi-items-lista {
-                width: 100%;
-                display: flex;
-                flex-direction: column;
-                gap: 6px;
-                padding-top: 10px;
-                border-top: 1px solid rgba(255, 255, 255, 0.1);
-            }
-            
-            .item-lista {
-                display: flex;
-                justify-content: space-between;
-                align-items: center;
-                padding: 6px 10px;
-                border-radius: 6px;
-                background: rgba(255, 255, 255, 0.02);
-                transition: background 0.2s ease;
-            }
-            
-            .item-lista:hover {
-                background: rgba(255, 255, 255, 0.05);
-            }
-            
-            .item-lista .label {
-                font-size: 12px;
-                color: ${CORES_ARCHIPELAGO.cinzaMedio};
-                text-transform: none !important;
-            }
-            
-            .item-lista .valor {
-                font-size: 14px;
-                font-weight: 600;
-                color: #ffffff;
-            }
-            
-            .kpi-subtitle {
-                font-size: 10px;
-                color: #60a5fa;
-                font-style: italic;
-                text-align: center;
-                margin-bottom: 8px;
-                text-transform: none !important;
-            }
-            
-            .kpi-detalhes {
-                border-top: 1px solid rgba(255, 255, 255, 0.1);
-                padding-top: 12px;
-            }
-            
-            .detalhe-titulo {
-                font-size: 10px;
-                font-weight: 600;
-                color: #60a5fa;
-                letter-spacing: 0.5px;
-                margin-bottom: 8px;
-                text-transform: none !important;
-            }
-            
-            .lista-simples-compacta {
-                display: flex;
-                flex-direction: column;
-                gap: 3px;
-            }
-            
-            .lista-item-compacto {
-                display: flex;
-                justify-content: space-between;
-                align-items: center;
-                padding: 3px 8px;
-                border-radius: 5px;
-                background: rgba(255, 255, 255, 0.02);
-                transition: background 0.2s ease;
-            }
-            
-            .lista-item-compacto:hover {
-                background: rgba(255, 255, 255, 0.05);
-            }
-            
-            .lista-item-compacto .label {
-                font-size: 11px;
-                color: ${CORES_ARCHIPELAGO.cinzaMedio};
-                text-transform: none !important;
-            }
-            
-            .lista-item-compacto .valor {
-                font-size: 11px;
-                font-weight: 600;
-                color: #ffffff;
-            }
-            
-            .kpi-valores-duplos-divididos {
-                display: flex;
-                align-items: center;
-                gap: 20px;
-                margin-bottom: 15px;
-            }
-            
-            .kpi-valor-metade {
-                flex: 1;
-                text-align: center;
-            }
-            
-            .kpi-valor-metade .valor {
-                font-size: 32px;
-                font-weight: 700;
-                color: white;
-                line-height: 1;
-                margin-bottom: 6px;
-            }
-            
-            .kpi-valor-metade .label {
-                font-size: 11px;
-                color: ${CORES_ARCHIPELAGO.cinzaMedio};
-                letter-spacing: 0.5px;
-                text-transform: none !important;
-            }
-            
-            .divisor-vertical {
-                width: 1px;
-                height: 60px;
-                background: rgba(255, 255, 255, 0.2);
-            }
-            
-            .kpi-tph-container {
-                text-align: center;
-                margin-bottom: 15px;
-            }
-            
-            .kpi-tph-numero {
-                font-size: 32px;
-                font-weight: 700;
-                color: white;
-                line-height: 1;
-            }
-            
-            .kpi-tph-label {
-                font-size: 13px;
-                color: ${CORES_ARCHIPELAGO.cinzaMedio};
-                margin-top: 6px;
-                text-transform: none !important;
-            }
-            
-            .tph-mini-gauge {
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                gap: 8px;
-                margin-top: 12px;
-            }
-            
-            .tph-gauge-bar {
-                display: flex;
-                align-items: center;
-                gap: 2px;
-                height: 16px;
-            }
-            
-            .tph-gauge-block {
-                width: 6px;
-                height: 16px;
-                border-radius: 2px;
-                transition: all 0.3s ease;
-            }
-            
-            .tph-gauge-block.filled {
-                background: currentColor;
-            }
-            
-            .tph-gauge-block.empty {
-                background: rgba(255, 255, 255, 0.1);
-            }
-            
-            .tph-gauge-label {
-                font-size: 11px;
-                font-weight: 600;
-                color: ${CORES_ARCHIPELAGO.cinzaMedio};
-                text-transform: none !important;
-            }
-            
-            .tph-gauge-bar.green { color: ${CORES_ARCHIPELAGO.verde}; }
-            .tph-gauge-bar.yellow { color: ${CORES_ARCHIPELAGO.amarelo}; }
-            .tph-gauge-bar.red { color: ${CORES_ARCHIPELAGO.laranja}; }
-            
-            .hospitais-table {
-                width: 100%;
-                border-collapse: collapse;
-                font-size: 11px;
-            }
-            
-            .hospitais-table thead {
-                border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-            }
-            
-            .hospitais-table th {
-                padding: 6px;
-                color: ${CORES_ARCHIPELAGO.azulPrincipal};
-                font-weight: 600;
-                font-size: 9px;
-                letter-spacing: 0.5px;
-                text-transform: none !important;
-            }
-            
-            .hospitais-table td {
-                padding: 6px;
-                color: #e5e7eb;
-                border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-            }
-            
-            .box-tph .hospitais-table thead th:nth-child(1),
-            .box-tph .hospitais-table tbody td:nth-child(1) {
-                text-align: left !important;
-            }
-            .box-tph .hospitais-table thead th:nth-child(2),
-            .box-tph .hospitais-table tbody td:nth-child(2) {
-                text-align: center !important;
-            }
-            .box-tph .hospitais-table thead th:nth-child(3),
-            .box-tph .hospitais-table tbody td:nth-child(3) {
-                text-align: right !important;
-            }
-            
-            .box-pps .hospitais-table thead th:nth-child(1),
-            .box-pps .hospitais-table tbody td:nth-child(1),
-            .box-spict .hospitais-table thead th:nth-child(1),
-            .box-spict .hospitais-table tbody td:nth-child(1) {
-                text-align: left !important;
-            }
-            .box-pps .hospitais-table thead th:nth-child(2),
-            .box-pps .hospitais-table tbody td:nth-child(2),
-            .box-spict .hospitais-table thead th:nth-child(2),
-            .box-spict .hospitais-table tbody td:nth-child(2) {
-                text-align: right !important;
-            }
-            
-            .hospitais-table tbody tr:last-child td {
-                border-bottom: none;
-            }
-            
-            .hospitais-table tbody tr:hover {
-                background: rgba(255, 255, 255, 0.03);
-            }
-            
-            .sem-dados {
-                text-align: center;
-                padding: 15px;
-                color: ${CORES_ARCHIPELAGO.azulAcinzentado};
-                font-style: italic;
-                font-size: 11px;
-                text-transform: none !important;
-            }
-            
-            .graficos-verticais {
-                display: flex;
-                flex-direction: column;
-                gap: 25px;
-                width: 100%;
-            }
-            
-            .grafico-item {
-                width: 100%;
-                background: rgba(255, 255, 255, 0.03);
-                border-radius: 12px;
-                padding: 20px;
-                border: 1px solid rgba(255, 255, 255, 0.8);
-                border-top: 3px solid #ffffff;
-                box-sizing: border-box;
-            }
-            
-            .chart-header {
-                display: flex;
-                justify-content: space-between;
-                align-items: center;
-                margin-bottom: 15px;
-                flex-wrap: wrap;
-                gap: 10px;
-            }
-            
-            .chart-header h4 {
-                margin: 0;
-                color: #e2e8f0;
-                font-size: 16px;
-                font-weight: 600;
-                letter-spacing: 0.5px;
-                text-align: center;
-                width: 100%;
-                text-transform: none !important;
-            }
-            
-            .chart-container {
-                position: relative;
-                height: 400px;
-                width: 100%;
-                background: rgba(156, 163, 175, 0.3);
-                border-radius: 8px;
-                padding: 15px;
-                box-sizing: border-box;
-            }
-            
-            .chart-container canvas {
-                width: 100% !important;
-                height: 100% !important;
-                max-height: 370px !important;
-            }
-            
-            .timeline-boxes-container {
-                width: 100%;
-                margin-top: 15px;
-            }
-            
-            .timeline-boxes-grid {
-                display: grid;
-                grid-template-columns: repeat(3, 1fr);
-                gap: 15px;
-                width: 100%;
-            }
-            
-            .timeline-box {
-                background: rgba(255, 255, 255, 0.05);
-                border-radius: 8px;
-                border: 1px solid rgba(255, 255, 255, 0.1);
-                overflow: hidden;
-                min-height: 400px;
-                display: flex;
-                flex-direction: column;
-            }
-            
-            .timeline-box-header {
-                background: rgba(96, 165, 250, 0.2);
-                padding: 12px;
-                text-align: center;
-                font-size: 14px;
-                font-weight: 700;
-                letter-spacing: 0.5px;
-                color: ${CORES_ARCHIPELAGO.azulPrincipal};
-                border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-                text-transform: none !important;
-            }
-            
-            .timeline-chart-container {
-                height: 200px;
-                padding: 15px;
-                background: rgba(0, 0, 0, 0.1);
-                display: flex;
-                align-items: center;
-                justify-content: center;
-            }
-            
-            .timeline-chart {
-                max-height: 180px !important;
-            }
-            
-            .timeline-box-content {
-                padding: 12px;
-                flex: 1;
-                overflow-y: auto;
-                max-height: 250px;
-            }
-            
-            .timeline-item {
-                background: rgba(255, 255, 255, 0.03);
-                border-radius: 6px;
-                padding: 10px;
-                margin-bottom: 8px;
-                border-left: 3px solid;
-                transition: all 0.2s ease;
-            }
-            
-            .timeline-item:hover {
-                background: rgba(255, 255, 255, 0.07);
-                transform: translateX(2px);
-            }
-            
-            .timeline-item:last-child {
-                margin-bottom: 0;
-            }
-            
-            .timeline-item-name {
-                font-size: 13px;
-                font-weight: 600;
-                margin-bottom: 6px;
-                color: #ffffff;
-                text-transform: none !important;
-            }
-            
-            .timeline-item-mats {
-                font-size: 11px;
-                color: #ffffff;
-                line-height: 1.4;
-            }
-            
-            /* =================== RESPONSIVIDADE MOBILE =================== */
-            @media (max-width: 768px) {
-                .hospital-filter-selector {
-                    padding: 0 10px;
-                }
-                
-                .hospital-filter-select {
-                    width: 100%;
-                    min-width: auto;
-                    max-width: 100%;
-                    padding: 12px 16px;
-                    font-size: 14px;
-                }
-                
-                .dashboard-title-central {
-                    font-size: 20px !important;
-                }
-                
-                .btn-whatsapp-dashboard {
-                    width: 100%;
-                }
-                
-                .kpis-grid {
-                    grid-template-columns: 1fr;
-                    padding: 0 10px !important;
-                    margin: 0 auto !important;
-                }
-                
-                .kpi-box {
-                    margin-left: auto !important;
-                    margin-right: auto !important;
-                    max-width: 100% !important;
-                }
-                
-                .hospital-card {
-                    padding: 15px !important;
-                    margin: 0 auto 20px auto !important;
-                    max-width: calc(100vw - 20px) !important;
-                }
-                
-                .timeline-boxes-grid {
-                    grid-template-columns: 1fr;
-                }
-                
-                .dashboard-hospitalar-wrapper {
-                    padding: 10px !important;
-                }
-                
-                .hospitais-container {
-                    padding: 0 !important;
-                }
-            }
-        </style>
-    `;
+    return '\
+        <style>\
+            /* V7.4: HEADER STICKY MOBILE */\
+            .sticky-hospital-header {\
+                display: none;\
+                position: fixed;\
+                top: 75px;\
+                left: 0;\
+                right: 0;\
+                background: linear-gradient(135deg, #131b2e 0%, #1a2744 100%);\
+                padding: 12px 20px;\
+                z-index: 999;\
+                border-bottom: 2px solid #60a5fa;\
+                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);\
+                transform: translateY(-100%);\
+                transition: transform 0.3s ease;\
+            }\
+            \
+            .sticky-hospital-header.visible {\
+                transform: translateY(0);\
+            }\
+            \
+            .sticky-hospital-header span {\
+                color: #60a5fa;\
+                font-size: 16px;\
+                font-weight: 700;\
+                font-family: \'Poppins\', sans-serif;\
+                text-align: center;\
+                display: block;\
+            }\
+            \
+            @media (max-width: 768px) {\
+                .sticky-hospital-header {\
+                    display: block;\
+                }\
+            }\
+            \
+            @keyframes fadeIn {\
+                from { opacity: 0; transform: translateY(10px); }\
+                to { opacity: 1; transform: translateY(0); }\
+            }\
+            \
+            .dashboard-hospitalar-wrapper {\
+                max-width: 1600px;\
+                margin: 0 auto;\
+            }\
+            \
+            .dashboard-header-filtro {\
+                display: flex;\
+                flex-direction: column;\
+                align-items: center;\
+                gap: 20px;\
+                margin-bottom: 30px;\
+                padding: 20px;\
+            }\
+            \
+            .dashboard-title-central {\
+                font-size: 28px;\
+                font-weight: 700;\
+                color: #ffffff;\
+                margin: 0;\
+                text-align: center;\
+                letter-spacing: 0.5px;\
+                text-transform: none !important;\
+            }\
+            \
+            .hospital-filter-selector {\
+                display: flex;\
+                justify-content: center;\
+                width: 100%;\
+                max-width: 400px;\
+            }\
+            \
+            .hospital-filter-select {\
+                width: 100%;\
+                min-width: 280px;\
+                max-width: 400px;\
+                padding: 14px 20px;\
+                font-size: 15px;\
+                font-weight: 600;\
+                color: #ffffff;\
+                background: ' + CORES_ARCHIPELAGO.azulEscuro + ';\
+                border: 2px solid ' + CORES_ARCHIPELAGO.azulPrincipal + ';\
+                border-radius: 10px;\
+                cursor: pointer;\
+                appearance: none;\
+                -webkit-appearance: none;\
+                -moz-appearance: none;\
+                background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 24 24\' fill=\'none\' stroke=\'%2360a5fa\' stroke-width=\'2\' stroke-linecap=\'round\' stroke-linejoin=\'round\'%3e%3cpolyline points=\'6 9 12 15 18 9\'%3e%3c/polyline%3e%3c/svg%3e");\
+                background-repeat: no-repeat;\
+                background-position: right 15px center;\
+                background-size: 20px;\
+                transition: all 0.3s ease;\
+                font-family: \'Poppins\', sans-serif;\
+            }\
+            \
+            .hospital-filter-select:hover {\
+                border-color: #93c5fd;\
+                background-color: rgba(96, 165, 250, 0.1);\
+            }\
+            \
+            .hospital-filter-select:focus {\
+                outline: none;\
+                border-color: #93c5fd;\
+                box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.2);\
+            }\
+            \
+            .hospital-filter-select option {\
+                background: ' + CORES_ARCHIPELAGO.azulMarinhoEscuro + ';\
+                color: #ffffff;\
+                padding: 12px;\
+            }\
+            \
+            .btn-whatsapp-dashboard {\
+                background: ' + CORES_ARCHIPELAGO.azulPrincipal + ';\
+                color: white;\
+                border: none;\
+                padding: 14px 28px;\
+                border-radius: 10px;\
+                font-size: 14px;\
+                font-weight: 600;\
+                cursor: pointer;\
+                transition: all 0.3s ease;\
+                font-family: \'Poppins\', sans-serif;\
+                box-shadow: 0 4px 15px rgba(96, 165, 250, 0.3);\
+            }\
+            \
+            .btn-whatsapp-dashboard:hover {\
+                transform: translateY(-2px);\
+                box-shadow: 0 6px 20px rgba(96, 165, 250, 0.4);\
+                background: #93c5fd;\
+            }\
+            \
+            .hospitais-container {\
+                display: flex;\
+                flex-direction: column;\
+                gap: 40px;\
+            }\
+            \
+            .hospital-card {\
+                background: rgba(255, 255, 255, 0.03);\
+                border-radius: 16px;\
+                padding: 25px;\
+                border: 1px solid rgba(255, 255, 255, 0.08);\
+                animation: fadeIn 0.4s ease;\
+            }\
+            \
+            .hospital-header {\
+                margin-bottom: 25px;\
+                padding-bottom: 15px;\
+                border-bottom: 2px solid ' + CORES_ARCHIPELAGO.azulPrincipal + ';\
+            }\
+            \
+            .hospital-title {\
+                font-size: 22px;\
+                font-weight: 700;\
+                color: ' + CORES_ARCHIPELAGO.azulPrincipal + ';\
+                margin: 0;\
+                text-transform: none !important;\
+            }\
+            \
+            .kpis-grid {\
+                display: grid;\
+                grid-template-columns: repeat(3, 1fr);\
+                gap: 20px;\
+                margin-bottom: 30px;\
+            }\
+            \
+            .kpi-box {\
+                background: rgba(255, 255, 255, 0.05);\
+                border-radius: 12px;\
+                padding: 20px;\
+                border: 1px solid rgba(255, 255, 255, 0.1);\
+                min-height: 280px;\
+                display: flex;\
+                flex-direction: column;\
+            }\
+            \
+            .kpi-title {\
+                font-size: 14px;\
+                font-weight: 700;\
+                color: ' + CORES_ARCHIPELAGO.azulPrincipal + ';\
+                margin-bottom: 15px;\
+                text-align: center;\
+                letter-spacing: 0.5px;\
+                text-transform: none !important;\
+            }\
+            \
+            .kpi-content {\
+                display: flex;\
+                flex-direction: column;\
+                align-items: center;\
+                gap: 15px;\
+                margin-bottom: 15px;\
+            }\
+            \
+            /* V7.0: Estilos para dois gauges lado a lado */\
+            .dual-gauges-container {\
+                display: flex;\
+                justify-content: center;\
+                gap: 50px;\
+                width: 100%;\
+            }\
+            \
+            .gauge-with-label {\
+                display: flex;\
+                flex-direction: column;\
+                align-items: center;\
+            }\
+            \
+            .gauge-label {\
+                font-size: 11px;\
+                font-weight: 600;\
+                color: ' + CORES_ARCHIPELAGO.azulPrincipal + ';\
+                margin-bottom: 5px;\
+                text-transform: none;\
+            }\
+            \
+            /* V7.0: Tabela de tipos de leito com duas colunas */\
+            .tipo-leito-table {\
+                width: 100%;\
+                border-collapse: collapse;\
+                font-size: 11px;\
+                margin-top: 10px;\
+            }\
+            \
+            .tipo-leito-table thead th {\
+                color: ' + CORES_ARCHIPELAGO.azulPrincipal + ';\
+                font-weight: 600;\
+                padding: 6px 4px;\
+                border-bottom: 1px solid rgba(255, 255, 255, 0.1);\
+                font-size: 10px;\
+                text-transform: none !important;\
+            }\
+            \
+            .tipo-leito-table thead th:first-child {\
+                text-align: left;\
+            }\
+            \
+            .tipo-leito-table thead th:not(:first-child) {\
+                text-align: center;\
+            }\
+            \
+            .tipo-leito-table tbody td {\
+                padding: 6px 4px;\
+                border-bottom: 1px solid rgba(255, 255, 255, 0.05);\
+            }\
+            \
+            .tipo-leito-table tbody td.tipo-label {\
+                color: ' + CORES_ARCHIPELAGO.cinzaClaro + ';\
+                text-align: left;\
+            }\
+            \
+            .tipo-leito-table tbody td.tipo-valor {\
+                color: #ffffff;\
+                font-weight: 600;\
+                text-align: center;\
+            }\
+            \
+            .v5-gauge-container {\
+                display: flex;\
+                flex-direction: column;\
+                align-items: center;\
+                min-width: 96px;\
+            }\
+            \
+            .v5-gauge {\
+                width: 96px;\
+                height: 60px;\
+            }\
+            \
+            .v5-number-inside {\
+                position: absolute;\
+                bottom: 6px;\
+                left: 50%;\
+                transform: translateX(-50%);\
+                font-size: 26px;\
+                font-weight: 800;\
+                color: #ffffff;\
+            }\
+            \
+            .v5-badge-below {\
+                margin-top: 8px;\
+                padding: 4px 12px;\
+                border-radius: 12px;\
+                font-size: 11px;\
+                font-weight: 700;\
+            }\
+            \
+            .v5-badge-below.blue {\
+                background: ' + CORES_ARCHIPELAGO.azulPrincipal + ';\
+                color: ' + CORES_ARCHIPELAGO.azulMarinhoEscuro + ';\
+            }\
+            \
+            .kpi-items-lista {\
+                width: 100%;\
+            }\
+            \
+            .kpi-subtitle {\
+                font-size: 11px;\
+                color: ' + CORES_ARCHIPELAGO.cinzaMedio + ';\
+                margin-bottom: 10px;\
+                text-transform: none !important;\
+            }\
+            \
+            .item-lista {\
+                display: flex;\
+                justify-content: space-between;\
+                padding: 6px 0;\
+                border-bottom: 1px solid rgba(255, 255, 255, 0.05);\
+            }\
+            \
+            .item-lista .label {\
+                color: ' + CORES_ARCHIPELAGO.cinzaClaro + ';\
+                font-size: 12px;\
+            }\
+            \
+            .item-lista .valor {\
+                color: #ffffff;\
+                font-weight: 600;\
+                font-size: 13px;\
+            }\
+            \
+            .kpi-detalhes {\
+                margin-top: auto;\
+                padding-top: 15px;\
+                border-top: 1px solid rgba(255, 255, 255, 0.1);\
+            }\
+            \
+            .detalhe-titulo {\
+                font-size: 11px;\
+                color: ' + CORES_ARCHIPELAGO.cinzaMedio + ';\
+                margin-bottom: 10px;\
+                text-transform: none !important;\
+            }\
+            \
+            .lista-simples-compacta {\
+                display: flex;\
+                flex-direction: column;\
+                gap: 4px;\
+            }\
+            \
+            .lista-item-compacto {\
+                display: flex;\
+                justify-content: space-between;\
+                font-size: 11px;\
+            }\
+            \
+            .lista-item-compacto .label {\
+                color: ' + CORES_ARCHIPELAGO.azulClaro + ';\
+            }\
+            \
+            .lista-item-compacto .valor {\
+                color: #ffffff;\
+                font-weight: 600;\
+            }\
+            \
+            .kpi-tph-container {\
+                text-align: center;\
+                padding: 20px 0;\
+            }\
+            \
+            .kpi-tph-numero {\
+                font-size: 48px;\
+                font-weight: 800;\
+                color: #ffffff;\
+                line-height: 1;\
+            }\
+            \
+            .kpi-tph-label {\
+                font-size: 14px;\
+                color: ' + CORES_ARCHIPELAGO.cinzaMedio + ';\
+                margin-top: 5px;\
+            }\
+            \
+            .tph-mini-gauge {\
+                margin-top: 15px;\
+            }\
+            \
+            .tph-gauge-bar {\
+                display: flex;\
+                gap: 2px;\
+                justify-content: center;\
+            }\
+            \
+            .tph-gauge-block {\
+                width: 8px;\
+                height: 20px;\
+                border-radius: 2px;\
+                background: rgba(255, 255, 255, 0.1);\
+            }\
+            \
+            .tph-gauge-bar.green .tph-gauge-block.filled {\
+                background: ' + CORES_ARCHIPELAGO.verde + ';\
+            }\
+            \
+            .tph-gauge-bar.yellow .tph-gauge-block.filled {\
+                background: ' + CORES_ARCHIPELAGO.amarelo + ';\
+            }\
+            \
+            .tph-gauge-bar.red .tph-gauge-block.filled {\
+                background: #ef4444;\
+            }\
+            \
+            .tph-gauge-label {\
+                font-size: 11px;\
+                color: ' + CORES_ARCHIPELAGO.cinzaMedio + ';\
+                margin-left: 10px;\
+            }\
+            \
+            .kpi-valores-duplos-divididos {\
+                display: flex;\
+                align-items: center;\
+                justify-content: center;\
+                gap: 20px;\
+                padding: 20px 0;\
+            }\
+            \
+            .kpi-valor-metade {\
+                text-align: center;\
+                flex: 1;\
+            }\
+            \
+            .kpi-valor-metade .valor {\
+                font-size: 36px;\
+                font-weight: 800;\
+                color: #ffffff;\
+            }\
+            \
+            .kpi-valor-metade .label {\
+                font-size: 12px;\
+                color: ' + CORES_ARCHIPELAGO.cinzaMedio + ';\
+                margin-top: 5px;\
+            }\
+            \
+            .divisor-vertical {\
+                width: 1px;\
+                height: 60px;\
+                background: rgba(255, 255, 255, 0.2);\
+            }\
+            \
+            .hospitais-table {\
+                width: 100%;\
+                border-collapse: collapse;\
+                font-size: 11px;\
+            }\
+            \
+            .hospitais-table thead th {\
+                color: ' + CORES_ARCHIPELAGO.azulPrincipal + ';\
+                font-weight: 600;\
+                padding: 8px 4px;\
+                border-bottom: 1px solid rgba(255, 255, 255, 0.1);\
+                font-size: 10px;\
+                text-transform: none !important;\
+            }\
+            \
+            .hospitais-table tbody td {\
+                color: #ffffff;\
+                padding: 6px 4px;\
+                border-bottom: 1px solid rgba(255, 255, 255, 0.05);\
+            }\
+            \
+            .box-tph .hospitais-table thead th:nth-child(1),\
+            .box-tph .hospitais-table tbody td:nth-child(1) {\
+                text-align: left !important;\
+            }\
+            .box-tph .hospitais-table thead th:nth-child(2),\
+            .box-tph .hospitais-table tbody td:nth-child(2) {\
+                text-align: center !important;\
+            }\
+            .box-tph .hospitais-table thead th:nth-child(3),\
+            .box-tph .hospitais-table tbody td:nth-child(3) {\
+                text-align: right !important;\
+            }\
+            \
+            .box-pps .hospitais-table thead th:nth-child(1),\
+            .box-pps .hospitais-table tbody td:nth-child(1),\
+            .box-spict .hospitais-table thead th:nth-child(1),\
+            .box-spict .hospitais-table tbody td:nth-child(1) {\
+                text-align: left !important;\
+            }\
+            .box-pps .hospitais-table thead th:nth-child(2),\
+            .box-pps .hospitais-table tbody td:nth-child(2),\
+            .box-spict .hospitais-table thead th:nth-child(2),\
+            .box-spict .hospitais-table tbody td:nth-child(2) {\
+                text-align: right !important;\
+            }\
+            \
+            .hospitais-table tbody tr:last-child td {\
+                border-bottom: none;\
+            }\
+            \
+            .hospitais-table tbody tr:hover {\
+                background: rgba(255, 255, 255, 0.03);\
+            }\
+            \
+            .sem-dados {\
+                text-align: center;\
+                padding: 15px;\
+                color: ' + CORES_ARCHIPELAGO.azulAcinzentado + ';\
+                font-style: italic;\
+                font-size: 11px;\
+                text-transform: none !important;\
+            }\
+            \
+            .graficos-verticais {\
+                display: flex;\
+                flex-direction: column;\
+                gap: 25px;\
+                width: 100%;\
+            }\
+            \
+            .grafico-item {\
+                width: 100%;\
+                background: rgba(255, 255, 255, 0.03);\
+                border-radius: 12px;\
+                padding: 20px;\
+                border: 1px solid rgba(255, 255, 255, 0.8);\
+                border-top: 3px solid #ffffff;\
+                box-sizing: border-box;\
+            }\
+            \
+            .chart-header {\
+                display: flex;\
+                justify-content: space-between;\
+                align-items: center;\
+                margin-bottom: 15px;\
+                flex-wrap: wrap;\
+                gap: 10px;\
+            }\
+            \
+            .chart-header h4 {\
+                margin: 0;\
+                color: #e2e8f0;\
+                font-size: 16px;\
+                font-weight: 600;\
+                letter-spacing: 0.5px;\
+                text-align: center;\
+                width: 100%;\
+                text-transform: none !important;\
+            }\
+            \
+            .chart-container {\
+                position: relative;\
+                height: 400px;\
+                width: 100%;\
+                background: rgba(156, 163, 175, 0.3);\
+                border-radius: 8px;\
+                padding: 15px;\
+                box-sizing: border-box;\
+            }\
+            \
+            .chart-container canvas {\
+                width: 100% !important;\
+                height: 100% !important;\
+                max-height: 370px !important;\
+            }\
+            \
+            .timeline-boxes-container {\
+                width: 100%;\
+                margin-top: 15px;\
+            }\
+            \
+            .timeline-boxes-grid {\
+                display: grid;\
+                grid-template-columns: repeat(3, 1fr);\
+                gap: 15px;\
+                width: 100%;\
+            }\
+            \
+            .timeline-box {\
+                background: rgba(255, 255, 255, 0.05);\
+                border-radius: 8px;\
+                border: 1px solid rgba(255, 255, 255, 0.1);\
+                overflow: hidden;\
+                min-height: 400px;\
+                display: flex;\
+                flex-direction: column;\
+            }\
+            \
+            .timeline-box-header {\
+                background: rgba(96, 165, 250, 0.2);\
+                padding: 12px;\
+                text-align: center;\
+                font-size: 14px;\
+                font-weight: 700;\
+                letter-spacing: 0.5px;\
+                color: ' + CORES_ARCHIPELAGO.azulPrincipal + ';\
+                border-bottom: 1px solid rgba(255, 255, 255, 0.1);\
+                text-transform: none !important;\
+            }\
+            \
+            .timeline-chart-container {\
+                height: 200px;\
+                padding: 15px;\
+                background: rgba(0, 0, 0, 0.1);\
+                display: flex;\
+                align-items: center;\
+                justify-content: center;\
+            }\
+            \
+            .timeline-chart {\
+                max-height: 180px !important;\
+            }\
+            \
+            .timeline-box-content {\
+                padding: 12px;\
+                flex: 1;\
+                overflow-y: auto;\
+                max-height: 250px;\
+            }\
+            \
+            .timeline-item {\
+                background: rgba(255, 255, 255, 0.03);\
+                border-radius: 6px;\
+                padding: 10px;\
+                margin-bottom: 8px;\
+                border-left: 3px solid;\
+                transition: all 0.2s ease;\
+            }\
+            \
+            .timeline-item:hover {\
+                background: rgba(255, 255, 255, 0.07);\
+                transform: translateX(2px);\
+            }\
+            \
+            .timeline-item:last-child {\
+                margin-bottom: 0;\
+            }\
+            \
+            .timeline-item-name {\
+                font-size: 13px;\
+                font-weight: 600;\
+                margin-bottom: 6px;\
+                color: #ffffff;\
+                text-transform: none !important;\
+            }\
+            \
+            .timeline-item-mats {\
+                font-size: 11px;\
+                color: #ffffff;\
+                line-height: 1.4;\
+            }\
+            \
+            /* =================== RESPONSIVIDADE MOBILE =================== */\
+            @media (max-width: 768px) {\
+                .hospital-filter-selector {\
+                    padding: 0 10px;\
+                }\
+                \
+                .hospital-filter-select {\
+                    width: 100%;\
+                    min-width: auto;\
+                    max-width: 100%;\
+                    padding: 12px 16px;\
+                    font-size: 14px;\
+                }\
+                \
+                .dashboard-title-central {\
+                    font-size: 20px !important;\
+                }\
+                \
+                .btn-whatsapp-dashboard {\
+                    width: 100%;\
+                }\
+                \
+                .kpis-grid {\
+                    grid-template-columns: 1fr;\
+                    padding: 0 10px !important;\
+                    margin: 0 auto !important;\
+                }\
+                \
+                .kpi-box {\
+                    margin-left: auto !important;\
+                    margin-right: auto !important;\
+                    max-width: 100% !important;\
+                }\
+                \
+                .hospital-card {\
+                    padding: 15px !important;\
+                    margin: 0 auto 20px auto !important;\
+                    max-width: calc(100vw - 20px) !important;\
+                }\
+                \
+                .timeline-boxes-grid {\
+                    grid-template-columns: 1fr;\
+                }\
+                \
+                .dashboard-hospitalar-wrapper {\
+                    padding: 10px !important;\
+                }\
+                \
+                .hospitais-container {\
+                    padding: 0 !important;\
+                }\
+                \
+                .dual-gauges-container {\
+                    flex-direction: column;\
+                    gap: 15px;\
+                }\
+            }\
+        </style>\
+    ';
 }
 
+// =================== ALIASES E EXPORTS V7.0 ===================
 window.renderizarDashboard = window.renderDashboardHospitalar;
 window.renderDashboard = window.renderDashboardHospitalar;
+
+// V7.0: Exportar funcoes de reservas
+window.getReservasHospital = getReservasHospital;
+window.filtrarLeitosSemUTI = filtrarLeitosSemUTI;
 
 window.forceDataRefresh = function() {
     window.location.reload();
 };
 
-console.log('Dashboard Hospitalar V6.0 - Carregado com Sucesso!');
+console.log('Dashboard Enfermarias V7.0 - Carregado com Sucesso!');
