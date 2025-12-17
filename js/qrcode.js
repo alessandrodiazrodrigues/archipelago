@@ -10,8 +10,8 @@
 //   - Total: 356 leitos (293 enfermaria + 63 UTI)
 // ==================================================================================
 
-// *** AMBIENTE DE Produção ***
-// Para teste, altere BASE_URL para: 'https://qr-code-systelos.vercel.app'
+// *** AMBIENTE DE TESTE ***
+// Para PRODUCAO, altere BASE_URL para: 'https://qr-code-systelos.vercel.app'
 const QR_API = {
     BASE_URL: 'https://qrcode-seven-gamma.vercel.app',
     API_URL: 'https://api.qrserver.com/v1/create-qr-code/',
@@ -99,9 +99,13 @@ function getTipoLeitoQR(hospitalId, numeroLeito, isUTI) {
     if (isUTI) return 'UTI';
     
     // H2 - CRUZ AZUL
+    // 1-20: Apartamentos contratuais
+    // 21-46: Enfermarias (13 pares de irmaos)
+    // 47-67: Apartamentos extras
     if (hospitalId === 'H2') {
         if (numeroLeito >= 1 && numeroLeito <= 20) return 'Apartamento';
-        if (numeroLeito >= 21 && numeroLeito <= 67) return 'Enfermaria';
+        if (numeroLeito >= 21 && numeroLeito <= 46) return 'Enfermaria';
+        if (numeroLeito >= 47 && numeroLeito <= 67) return 'Apartamento';
     }
     
     // H4 - SANTA CLARA
@@ -122,11 +126,16 @@ function getNomeLeitoFormatado(hospitalId, numeroLeito, isUTI) {
     }
     
     // H2 - CRUZ AZUL
+    // 1-20: Apartamentos contratuais
+    // 21-46: Enfermarias (13 pares de irmaos)
+    // 47-67: Apartamentos extras
     if (hospitalId === 'H2') {
         if (numeroLeito >= 1 && numeroLeito <= 20) {
             return `Apartamento ID ${String(numeroLeito).padStart(2, '0')}`;
-        } else if (numeroLeito >= 21 && numeroLeito <= 67) {
+        } else if (numeroLeito >= 21 && numeroLeito <= 46) {
             return `Enfermaria ID ${String(numeroLeito).padStart(2, '0')}`;
+        } else if (numeroLeito >= 47 && numeroLeito <= 67) {
+            return `Apartamento ID ${String(numeroLeito).padStart(2, '0')}`;
         }
     }
     
