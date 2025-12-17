@@ -1,11 +1,11 @@
-// =================== CARDS.JS - GESTAO DE LEITOS HOSPITALARES ===================
-// Versao: 7.6 - 14/Dezembro/2025
+// =================== CARDS.JS - GESTÃO DE LEITOS HOSPITALARES ===================
+// Versão: 7.6 - 14/Dezembro/2025
 // Depende de: cards-config.js (carregar ANTES)
 // 
-// V7.6 - CORRECAO FLAG EXTRA H2/H4 + AUTO-SUFIXO IRMAO:
+// V7.6 - CORREÇÃO FLAG EXTRA H2/H4 + AUTO-SUFIXO IRMÃO:
 // - Tratar tipo "Hibrido" em H2/H4 corretamente (usar contratuais totais)
-// - Quando irmao ocupado/reservado com identificacao, auto-definir sufixo alternativo
-// - Dropdown de sufixo desabilitado quando herdado do irmao
+// - Quando irmão ocupado/reservado com identificação, auto-definir sufixo alternativo
+// - Dropdown de sufixo desabilitado quando herdado do irmão
 // V7.4 - BLOQUEIO ADMISSÃO + AUTO-COMPLETAR MATRÍCULA:
 // 1. Botão ADMITIR bloqueado nos cards (só via QR Code)
 // 2. Botão ADMITIR RESERVA bloqueado (só via QR Code)
@@ -13,29 +13,29 @@
 // 4. Auto-completar zeros à esquerda na matrícula (onblur)
 // 5. Placeholder matrícula: Ex: 0000000123-4
 //
-// V7.0 - SISTEMA DE RESERVAS + CAMPO IDENTIFICACAO DINAMICO:
+// V7.0 - SISTEMA DE RESERVAS + CAMPO IDENTIFICAÇÃO DINÂMICO:
 // 1. Filtro tipo !== 'UTI' (apenas Enfermarias)
 // 2. Botao RESERVAR nos cards vagos
 // 3. Modal de reserva igual ao de admissao (campos bloqueados)
-// 4. Ordenacao: Ocupados > Reservados > Vagos
-// 5. Campo Identificacao dinamico para HIBRIDOS (Enfermaria: numero+digito)
+// 4. Ordenação: Ocupados > Reservados > Vagos
+// 5. Campo Identificação dinâmico para HIBRIDOS (Enfermaria: número+dígito)
 
-console.log('CARDS.JS V7.6 - Correcao Flag EXTRA H2/H4...');
+console.log('CARDS.JS V7.6 - Correção Flag EXTRA H2/H4...');
 
 // =================== VALIDAR DEPENDENCIAS ===================
 if (typeof window.CONCESSOES_DISPLAY_MAP === 'undefined') {
-    console.error('ERRO CRITICO: cards-config.js NAO foi carregado!');
+    console.error('ERRO CRÍTICO: cards-config.js NÃO foi carregado!');
     throw new Error('cards-config.js deve ser carregado ANTES de cards.js');
 }
 
 if (typeof window.desnormalizarTexto === 'undefined') {
-    console.error('ERRO CRITICO: desnormalizarTexto() nao encontrada!');
-    throw new Error('cards-config.js nao carregou corretamente');
+    console.error('ERRO CRÍTICO: desnormalizarTexto() não encontrada!');
+    throw new Error('cards-config.js não carregou corretamente');
 }
 
-console.log('Dependencias validadas - cards-config.js OK');
+console.log('Dependências validadas - cards-config.js OK');
 
-// =================== V7.4: CONFIGURACAO DE SUFIXOS POR HOSPITAL ===================
+// =================== V7.4: CONFIGURAÇÃO DE SUFIXOS POR HOSPITAL ===================
 // Sufixos para Enfermaria por hospital (híbridos)
 window.SUFIXOS_ENFERMARIA = {
     H1: ['A', 'B'],
@@ -70,7 +70,7 @@ window.MAXLENGTH_IDENTIFICACAO = {
 };
 
 // =================== V7.4: LOADING OVERLAY ===================
-// Bloqueia toda a interface durante operacoes assincronas
+// Bloqueia toda a interface durante operações assíncronas
 
 window.showLoadingOverlay = function(mensagem = 'Processando...') {
     // Remover overlay existente se houver
@@ -125,7 +125,7 @@ window.showLoadingOverlay = function(mensagem = 'Processando...') {
         color: #e2e8f0;
     `;
     
-    // Adicionar keyframes para animacao
+    // Adicionar keyframes para animação
     if (!document.getElementById('loadingSpinnerStyle')) {
         const style = document.createElement('style');
         style.id = 'loadingSpinnerStyle';
@@ -150,9 +150,9 @@ window.hideLoadingOverlay = function() {
     }
 };
 
-// =================== V7.0: FUNCOES DE RESERVA ===================
+// =================== V7.0: FUNÇÕES DE RESERVA ===================
 
-// Retorna TODAS as reservas do hospital (incluindo bloqueios de irmao)
+// Retorna TODAS as reservas do hospital (incluindo bloqueios de irmão)
 window.getTodasReservasHospital = function(hospitalId) {
     const todasReservas = window.reservasData || [];
     return todasReservas.filter(r => r.hospital === hospitalId && r.tipo !== 'UTI');
@@ -164,7 +164,7 @@ window.getReservasHospital = function(hospitalId) {
     return todasReservas.filter(r => {
         if (r.hospital !== hospitalId) return false;
         if (r.tipo === 'UTI') return false;
-        // V7.0: Apenas reservas COM matricula sao reservas reais
+        // V7.0: Apenas reservas COM matrícula são reservas reais
         const temMatricula = r.matricula && String(r.matricula).trim();
         return temMatricula;
     });
@@ -176,7 +176,7 @@ window.getBloqueiosHospital = function(hospitalId) {
     return todasReservas.filter(r => {
         if (r.hospital !== hospitalId) return false;
         if (r.tipo === 'UTI') return false;
-        // V7.0: Bloqueios NAO tem matricula
+        // V7.0: Bloqueios NÃO têm matrícula
         const temMatricula = r.matricula && String(r.matricula).trim();
         return !temMatricula;
     });
@@ -338,7 +338,7 @@ window.renderFlagOcupacao = function(hospitalId, status, posicaoOcupacao, tipoLe
             }
             textoTipo = 'ENFERMARIA';
         } else {
-            // V7.6: Fallback de seguranca - se tipo vier vazio/invalido
+            // V7.6: Fallback de segurança - se tipo vier vazio/inválido
             totalContratuaisPorTipo = capacidade.contratuais;
             textoTipo = '';
         }
@@ -384,7 +384,7 @@ window.renderFlagOcupacao = function(hospitalId, status, posicaoOcupacao, tipoLe
                 margin-top: 8px;
                 font-family: 'Poppins', sans-serif;
             ">
-                OCUPACAO ${textoTipo} ${posicaoOcupacao}/${totalContratuaisPorTipo}
+                OCUPAÇÃO ${textoTipo} ${posicaoOcupacao}/${totalContratuaisPorTipo}
             </div>
         `;
     }
@@ -400,7 +400,7 @@ window.renderCards = function() {
     
     const container = document.getElementById('cardsContainer');
     if (!container) {
-        logError('Container cardsContainer nao encontrado');
+        logError('Container cardsContainer não encontrado');
         return;
     }
 
@@ -475,7 +475,7 @@ window.renderCards = function() {
             return String(idA).localeCompare(String(idB), undefined, {numeric: true});
         });
     } else {
-        // HIBRIDOS: ordenacao padrao por identificacaoLeito
+        // HÍBRIDOS: ordenação padrão por identificacaoLeito
         leitosOcupados.sort((a, b) => {
             const idA = String(a.identificacaoLeito || a.identificacao_leito || '');
             const idB = String(b.identificacaoLeito || b.identificacao_leito || '');
@@ -614,7 +614,7 @@ window.renderCards = function() {
             const leitoReservado = {
                 leito: reserva.leito,
                 status: 'Reservado',
-                tipo: reserva.tipo || 'Hibrido',
+                tipo: reserva.tipo || 'Híbrido',
                 identificacaoLeito: String(reserva.identificacaoLeito || ''),
                 identificacao_leito: String(reserva.identificacaoLeito || ''),
                 isolamento: reserva.isolamento || '',
@@ -626,13 +626,13 @@ window.renderCards = function() {
                 regiao: '', diretivas: '', anotacoes: '', admAt: '',
                 _isReserva: true,
                 _reservaId: reserva.linha || reserva.id,
-                _identificacaoIrmao: reserva.identificacaoIrmao || ''
+                _identificacaoIrmão: reserva.identificacaoIrmao || ''
             };
             const card = createCard(leitoReservado, hospitalNome, hospitalId, 0);
             container.appendChild(card);
         } else {
             // BLOQUEIO DO IRMAO - mostrar como Disponivel restrito por genero
-            // Nao eh reserva real, eh apenas uma vaga que precisa respeitar o genero do irmao
+            // Não é reserva real, é apenas uma vaga que precisa respeitar o gênero do irmão
             const leitoRestrito = {
                 leito: reserva.leito,
                 status: 'Vago',  // Mostra como vago
@@ -640,16 +640,16 @@ window.renderCards = function() {
                 identificacaoLeito: String(reserva.identificacaoLeito || ''),
                 identificacao_leito: String(reserva.identificacaoLeito || ''),
                 isolamento: 'Nao Isolamento',
-                genero: '',  // Genero nao definido ainda
+                genero: '',  // Gênero não definido ainda
                 nome: '',
                 matricula: '',
                 idade: '',
                 pps: '', spict: '', complexidade: '', prevAlta: '',
                 regiao: '', diretivas: '', anotacoes: '', admAt: '',
-                _isBloqueioIrmao: true,
+                _isBloqueioIrmão: true,
                 _generoRestrito: reserva.genero || '',  // Genero que DEVE ser usado
-                _identificacaoIrmao: reserva.identificacaoIrmao || '',
-                _reservaLinhaIrmao: reserva.linha  // Para poder cancelar quando irmao for cancelado
+                _identificacaoIrmão: reserva.identificacaoIrmao || '',
+                _reservaLinhaIrmão: reserva.linha  // Para poder cancelar quando irmao for cancelado
             };
             const card = createCard(leitoRestrito, hospitalNome, hospitalId, 0);
             container.appendChild(card);
@@ -663,12 +663,12 @@ window.renderCards = function() {
     });
     
     const total = leitosOcupados.length + todasReservas.length + vagosParaMostrar.length;
-    logInfo(total + ' cards renderizados para ' + hospitalNome + ' (incluindo ' + bloqueiosCount + ' bloqueios de irmao)');
+    logInfo(total + ' cards renderizados para ' + hospitalNome + ' (incluindo ' + bloqueiosCount + ' bloqueios de irmão)');
 };
 
 // =================== FUNÇÃO: BADGE DE ISOLAMENTO ===================
 function getBadgeIsolamento(isolamento) {
-    if (!isolamento || isolamento === 'Não Isolamento') {
+    if (!isolamento || isolamento === 'Não Isolamento' || isolamento === 'Nao Isolamento') {
         return { cor: '#b2adaa', texto: 'Não Isol', textoCor: '#ffffff' };
     } else if (isolamento === 'Isolamento de Contato') {
         return { cor: '#f59a1d', texto: 'Contato', textoCor: '#131b2e' };
@@ -732,16 +732,16 @@ function getTipoLeito(leito, hospitalId) {
     // VAGOS de hibridos: "Hibrido"
     const isVago = leito.status === 'Vago' || leito.status === 'vago';
     if (window.HOSPITAIS_HIBRIDOS.includes(hospitalId) && isVago) {
-        return 'Hibrido';
+        return 'Híbrido';
     }
     
     // OCUPADOS de hibridos: usar categoria
     const isOcupado = leito.status === 'Em uso' || leito.status === 'ocupado' || leito.status === 'Ocupado';
     if (window.HOSPITAIS_HIBRIDOS.includes(hospitalId) && isOcupado) {
-        if (categoriaValue && categoriaValue.trim() !== '' && categoriaValue !== 'Hibrido') {
+        if (categoriaValue && categoriaValue.trim() !== '' && categoriaValue !== 'Híbrido') {
             return categoriaValue;
         }
-        if (leito.tipo && leito.tipo !== 'Hibrido') return leito.tipo;
+        if (leito.tipo && leito.tipo !== 'Híbrido') return leito.tipo;
         return 'Apartamento';
     }
     
@@ -802,7 +802,7 @@ function validarAdmissaoCruzAzul(leitoNumero, generoNovo) {
     }
     
     const isolamentoIrmao = dadosLeitoIrmao.isolamento || '';
-    if (isolamentoIrmao && isolamentoIrmao !== 'Não Isolamento' && isolamentoIrmao !== '') {
+    if (isolamentoIrmao && isolamentoIrmao !== 'Não Isolamento' && isolamentoIrmao !== 'Nao Isolamento' && isolamentoIrmao !== '') {
         return {
             permitido: false,
             motivo: `Leito bloqueado! O leito ${leitoIrmao} está com isolamento: ${isolamentoIrmao}`,
@@ -865,14 +865,14 @@ function createCard(leito, hospitalNome, hospitalId, posicaoOcupacao) {
         const leitoIrmao = mapaIrmaos[numeroLeito];
         
         if (leitoIrmao) {
-            // Buscar dados do leito irmao OCUPADO
+            // Buscar dados do leito irmão OCUPADO
             const leitosHospital = window.hospitalData[hospitalId]?.leitos || [];
             const dadosLeitoIrmao = leitosHospital.find(l => l.leito == leitoIrmao);
             
-            // V7.0: TAMBEM buscar RESERVA do leito irmao
+            // V7.0: TAMBÉM buscar RESERVA do leito irmao
             const reservasHospital = (window.reservasData || []).filter(r => r.hospital === hospitalId);
             const reservaLeitoIrmao = reservasHospital.find(r => {
-                // Verificar pelo numero do leito OU pela identificacao do leito
+                // Verificar pelo número do leito OU pela identificação do leito
                 const identificacaoReserva = String(r.identificacaoLeito || '').toUpperCase();
                 // Para H2: sufixos 1 e 3 (ex: 100-1 e 100-3)
                 // Para H4: sufixos A e C (ex: 201-A e 201-C)
@@ -891,19 +891,19 @@ function createCard(leito, hospitalNome, hospitalId, posicaoOcupacao) {
                     }
                 }
                 
-                // Verificar pelo numero do leito na planilha
+                // Verificar pelo número do leito na planilha
                 return parseInt(r.leito) === parseInt(leitoIrmao);
             });
             
-            console.log('[V7.0 IRMAO] Leito:', numeroLeito, 'Irmao:', leitoIrmao);
-            console.log('[V7.0 IRMAO] Irmao ocupado?', dadosLeitoIrmao?.status);
-            console.log('[V7.0 IRMAO] Irmao tem reserva?', reservaLeitoIrmao ? 'SIM' : 'NAO');
+            console.log('[V7.0 IRMAO] Leito:', numeroLeito, 'Irmão:', leitoIrmao);
+            console.log('[V7.0 IRMAO] Irmão ocupado?', dadosLeitoIrmao?.status);
+            console.log('[V7.0 IRMAO] Irmão tem reserva?', reservaLeitoIrmao ? 'SIM' : 'NAO');
             
             // PRIMEIRO: Verificar se irmao esta OCUPADO
             if (dadosLeitoIrmao && (dadosLeitoIrmao.status === 'Em uso' || dadosLeitoIrmao.status === 'ocupado' || dadosLeitoIrmao.status === 'Ocupado')) {
                 const isolamentoIrmao = String(dadosLeitoIrmao.isolamento || '').trim();
                 
-                // V7.0: Verificar se NAO eh isolamento (todas as variacoes)
+                // V7.0: Verificar se NÃO é isolamento (todas as variacoes)
                 const ehNaoIsolamento = !isolamentoIrmao || 
                                         isolamentoIrmao === 'Não Isolamento' ||
                                         isolamentoIrmao === 'Nao Isolamento' ||
@@ -919,17 +919,17 @@ function createCard(leito, hospitalNome, hospitalId, posicaoOcupacao) {
                     motivoBloqueio = `Isolamento no ${identificacaoIrmao}`;
                     console.log('[V7.0 IRMAO] BLOQUEADO por isolamento do OCUPADO:', motivoBloqueio);
                 } else if (dadosLeitoIrmao.genero) {
-                    // NAO tem isolamento - apenas restringir genero
+                    // NÃO tem isolamento - apenas restringir gênero
                     bloqueadoPorGenero = true;
                     generoPermitido = dadosLeitoIrmao.genero;
-                    console.log('[V7.0 IRMAO] Restrito por genero do OCUPADO:', generoPermitido);
+                    console.log('[V7.0 IRMAO] Restrito por gênero do OCUPADO:', generoPermitido);
                 }
             }
             // SEGUNDO: V7.0 - Verificar se irmao tem RESERVA (mesmo que nao esteja ocupado)
             else if (reservaLeitoIrmao) {
                 const isolamentoReserva = String(reservaLeitoIrmao.isolamento || '').trim();
                 
-                // V7.0: Verificar se NAO eh isolamento (todas as variacoes)
+                // V7.0: Verificar se NÃO é isolamento (todas as variacoes)
                 const ehNaoIsolamentoReserva = !isolamentoReserva || 
                                                isolamentoReserva === 'Não Isolamento' ||
                                                isolamentoReserva === 'Nao Isolamento' ||
@@ -943,10 +943,10 @@ function createCard(leito, hospitalNome, hospitalId, posicaoOcupacao) {
                     motivoBloqueio = `Isolamento na reserva ${identificacaoReserva}`;
                     console.log('[V7.0 IRMAO] BLOQUEADO por isolamento da RESERVA:', motivoBloqueio);
                 } else if (reservaLeitoIrmao.genero) {
-                    // NAO tem isolamento - apenas restringir genero
+                    // NÃO tem isolamento - apenas restringir gênero
                     bloqueadoPorGenero = true;
                     generoPermitido = reservaLeitoIrmao.genero;
-                    console.log('[V7.0 IRMAO] Restrito por genero da RESERVA:', generoPermitido);
+                    console.log('[V7.0 IRMAO] Restrito por gênero da RESERVA:', generoPermitido);
                 }
             }
         }
@@ -960,13 +960,13 @@ function createCard(leito, hospitalNome, hospitalId, posicaoOcupacao) {
     let statusTextColor = '#ffffff';
     let statusTexto = 'Disponível';
     
-    // V7.0: Se eh bloqueio de irmao (vaga restrita por genero)
+    // V7.0: Se é bloqueio de irmão (vaga restrita por gênero)
     if (isBloqueioIrmao && leito._generoRestrito) {
         isVago = true;
         bloqueadoPorGenero = true;
         generoPermitido = leito._generoRestrito;
         statusTexto = `Disp. ${generoPermitido === 'Masculino' ? 'Masc' : 'Fem'}`;
-        console.log('[V7.0 BLOQUEIO IRMAO] Vaga restrita por genero:', generoPermitido);
+        console.log('[V7.0 BLOQUEIO IRMÃO] Vaga restrita por genero:', generoPermitido);
     } else if (bloqueadoPorIsolamento) {
         statusBgColor = '#c86420';
         statusTextColor = '#ffffff';
@@ -1045,8 +1045,8 @@ function createCard(leito, hospitalNome, hospitalId, posicaoOcupacao) {
         ppsFormatado = `${pps}%`;
     }
     
-    const spictFormatado = spict === 'elegivel' ? 'Elegível' : 
-                          (spict === 'nao_elegivel' ? 'Não elegível' : '—');
+    const spictFormatado = (spict === 'elegivel' || spict === 'elegível') ? 'Elegível' : 
+                          ((spict === 'nao_elegivel' || spict === 'não_elegível') ? 'Não elegível' : '—');
     
     const idSequencial = String(numeroLeito).padStart(2, '0');
     
@@ -1605,7 +1605,7 @@ function createAdmissaoForm(hospitalNome, leitoNumero, hospitalId) {
             else if (reservaLeitoIrmao) {
                 const isolamentoReserva = reservaLeitoIrmao.isolamento || '';
                 
-                // Se reserva do irmao NÃO tem isolamento → forçar "Não Isolamento" no leito atual
+                // Se reserva do irmão NÃO tem isolamento → forçar "Não Isolamento" no leito atual
                 if (!isolamentoReserva || isolamentoReserva === 'Não Isolamento' || isolamentoReserva === 'Nao Isolamento' || isolamentoReserva.includes('Nao Isol')) {
                     isolamentoPreDefinido = 'Não Isolamento';
                     isolamentoDisabled = true;
@@ -1613,7 +1613,7 @@ function createAdmissaoForm(hospitalNome, leitoNumero, hospitalId) {
                     if (reservaLeitoIrmao.genero) {
                         generoPreDefinido = reservaLeitoIrmao.genero;
                         generoDisabled = true;
-                        console.log('[V7.0 ADMISSAO IRMAO H2] Genero herdado da reserva do irmao:', generoPreDefinido);
+                        console.log('[V7.0 ADMISSÃO IRMAO H2] Genero herdado da reserva do irmão:', generoPreDefinido);
                     }
                 }
                 
@@ -1672,7 +1672,7 @@ function createAdmissaoForm(hospitalNome, leitoNumero, hospitalId) {
             else if (reservaLeitoIrmao) {
                 const isolamentoReserva = reservaLeitoIrmao.isolamento || '';
                 
-                // Se reserva do irmao NÃO tem isolamento → forçar "Não Isolamento" no leito atual
+                // Se reserva do irmão NÃO tem isolamento → forçar "Não Isolamento" no leito atual
                 if (!isolamentoReserva || isolamentoReserva === 'Não Isolamento' || isolamentoReserva === 'Nao Isolamento' || isolamentoReserva.includes('Nao Isol')) {
                     isolamentoPreDefinido = 'Não Isolamento';
                     isolamentoDisabled = true;
@@ -1680,7 +1680,7 @@ function createAdmissaoForm(hospitalNome, leitoNumero, hospitalId) {
                     if (reservaLeitoIrmao.genero) {
                         generoPreDefinido = reservaLeitoIrmao.genero;
                         generoDisabled = true;
-                        console.log('[V7.0 ADMISSAO IRMAO H4] Genero herdado da reserva do irmao:', generoPreDefinido);
+                        console.log('[V7.0 ADMISSÃO IRMAO H4] Genero herdado da reserva do irmão:', generoPreDefinido);
                     }
                 }
                 
@@ -2016,11 +2016,11 @@ function createReservaForm(hospitalNome, leitoNumero, hospitalId, dadosLeito) {
                 if (identificacaoIrmao && identificacaoIrmao.includes('-')) {
                     const partes = identificacaoIrmao.split('-');
                     numeroBasePreenchido = partes[0];
-                    // V7.6: Definir sufixo alternativo ao do irmao ocupado
+                    // V7.6: Definir sufixo alternativo ao do irmão ocupado
                     if (partes[1]) {
                         sufixoPreDefinido = (partes[1] === '1') ? '3' : '1';
                         sufixoDisabled = true;
-                        console.log('[V7.6 SUFIXO H2] Irmao ocupado com sufixo ' + partes[1] + ', definindo ' + sufixoPreDefinido);
+                        console.log('[V7.6 SUFIXO H2] Irmão ocupado com sufixo ' + partes[1] + ', definindo ' + sufixoPreDefinido);
                     }
                 }
             }
@@ -2033,14 +2033,14 @@ function createReservaForm(hospitalNome, leitoNumero, hospitalId, dadosLeito) {
                     if (reservaLeitoIrmao.genero) {
                         generoPreDefinido = reservaLeitoIrmao.genero;
                         generoDisabled = true;
-                        console.log('[V7.0 RESERVA IRMAO H2] Genero herdado da reserva do irmao:', generoPreDefinido);
+                        console.log('[V7.0 RESERVA IRMAO H2] Genero herdado da reserva do irmão:', generoPreDefinido);
                     }
                 }
                 const identificacaoReserva = String(reservaLeitoIrmao.identificacaoLeito || '');
                 if (identificacaoReserva && identificacaoReserva.includes('-')) {
                     const partes = identificacaoReserva.split('-');
                     numeroBasePreenchido = partes[0];
-                    // V7.6: Definir sufixo alternativo ao da reserva do irmao
+                    // V7.6: Definir sufixo alternativo ao da reserva do irmão
                     if (partes[1]) {
                         sufixoPreDefinido = (partes[1] === '1') ? '3' : '1';
                         sufixoDisabled = true;
@@ -2081,11 +2081,11 @@ function createReservaForm(hospitalNome, leitoNumero, hospitalId, dadosLeito) {
                 if (identificacaoIrmao2 && identificacaoIrmao2.includes('-')) {
                     const partes = identificacaoIrmao2.split('-');
                     numeroBasePreenchido = partes[0];
-                    // V7.6: Definir sufixo alternativo ao do irmao ocupado
+                    // V7.6: Definir sufixo alternativo ao do irmão ocupado
                     if (partes[1]) {
                         sufixoPreDefinido = (partes[1] === 'A') ? 'C' : 'A';
                         sufixoDisabled = true;
-                        console.log('[V7.6 SUFIXO H4] Irmao ocupado com sufixo ' + partes[1] + ', definindo ' + sufixoPreDefinido);
+                        console.log('[V7.6 SUFIXO H4] Irmão ocupado com sufixo ' + partes[1] + ', definindo ' + sufixoPreDefinido);
                     }
                 }
             }
@@ -2098,14 +2098,14 @@ function createReservaForm(hospitalNome, leitoNumero, hospitalId, dadosLeito) {
                     if (reservaLeitoIrmao.genero) {
                         generoPreDefinido = reservaLeitoIrmao.genero;
                         generoDisabled = true;
-                        console.log('[V7.0 RESERVA IRMAO H4] Genero herdado da reserva do irmao:', generoPreDefinido);
+                        console.log('[V7.0 RESERVA IRMAO H4] Genero herdado da reserva do irmão:', generoPreDefinido);
                     }
                 }
                 const identificacaoReserva = String(reservaLeitoIrmao.identificacaoLeito || '');
                 if (identificacaoReserva && identificacaoReserva.includes('-')) {
                     const partes = identificacaoReserva.split('-');
                     numeroBasePreenchido = partes[0];
-                    // V7.6: Definir sufixo alternativo ao da reserva do irmao
+                    // V7.6: Definir sufixo alternativo ao da reserva do irmão
                     if (partes[1]) {
                         sufixoPreDefinido = (partes[1] === 'A') ? 'C' : 'A';
                         sufixoDisabled = true;
@@ -2514,8 +2514,8 @@ function setupReservaModalEventListeners(modal) {
                     matricula: matricula,
                     idade: idade || '',
                     // V7.4: Dados do leito irmao (para criar segunda linha)
-                    leitoIrmao: leitoIrmao || '',
-                    identificacaoIrmao: identificacaoIrmao || ''
+                    leitoIrmão: leitoIrmao || '',
+                    identificacaoIrmão: identificacaoIrmao || ''
                 });
                 
                 const urlCompleta = window.API_URL + '?' + params.toString();
@@ -2534,8 +2534,8 @@ function setupReservaModalEventListeners(modal) {
                     modal.remove();
                     showSuccessMessage('Leito reservado com sucesso!');
                     
-                    // V7.0: Forcar atualizacao completa dos cards
-                    console.log('[V7.0 RESERVA] Reserva salva, forcando atualizacao...');
+                    // V7.0: Forçar atualização completa dos cards
+                    console.log('[V7.0 RESERVA] Reserva salva, forçando atualização...');
                     
                     // Guardar reserva local antes de recarregar
                     const reservaLocal = {
@@ -2583,7 +2583,7 @@ function setupReservaModalEventListeners(modal) {
             }
         });
     } else {
-        console.error('[V7.0 RESERVA] ERRO: Botao .btn-salvar-reserva NAO encontrado no modal!');
+        console.error('[V7.0 RESERVA] ERRO: Botão .btn-salvar-reserva NÃO encontrado no modal!');
     }
 }
 
@@ -2946,7 +2946,7 @@ function setupModalEventListeners(modal, tipo) {
     const hospitalId = window.currentHospital;
     const maxLen = window.MAXLENGTH_IDENTIFICACAO[hospitalId] || 3;
     
-    // V7.0: CAMPO IDENTIFICACAO DINAMICO PARA HIBRIDOS
+    // V7.0: CAMPO IDENTIFICAÇÃO DINÂMICO PARA HIBRIDOS
     const tipoQuartoSelect = modal.querySelector('#admTipoQuarto');
     const identificacaoContainer = modal.querySelector('#admIdentificacaoContainer');
     const identificacaoHint = modal.querySelector('#admIdentificacaoHint');
@@ -3041,7 +3041,7 @@ function setupModalEventListeners(modal, tipo) {
                     }
                 }
             } else if (isHibrido && tipo === 'admissao') {
-                // V7.0: Hibridos - verificar se tem numero+digito ou campo simples
+                // V7.0: Hibridos - verificar se tem número+dígito ou campo simples
                 const tipoQuartoField = modal.querySelector('#admTipoQuarto');
                 const tipoQuarto = tipoQuartoField ? tipoQuartoField.value : '';
                 
@@ -3183,7 +3183,7 @@ function setupModalEventListeners(modal, tipo) {
                                 if (cancelado) {
                                     console.log('[V7.0] Reserva cancelada com sucesso!');
                                 } else {
-                                    console.warn('[V7.0] Reserva nao foi cancelada, mas continuando admissao...');
+                                    console.warn('[V7.0] Reserva não foi cancelada, mas continuando admissão...');
                                 }
                             } catch (err) {
                                 console.error('[V7.0] ERRO ao cancelar reserva:', err);
@@ -3328,7 +3328,7 @@ function closeModal(modal) {
 
 // =================== COLETAR DADOS DO FORMULÁRIO ===================
 
-// =================== V7.0: FUNCOES DE RESERVA NA ADMISSAO ===================
+// =================== V7.0: FUNÇÕES DE RESERVA NA ADMISSÃO ===================
 
 // Buscar reserva para admissao (por leito ou matricula)
 function buscarReservaParaAdmissao(hospitalId, identificacaoLeito, matricula) {
@@ -3633,13 +3633,13 @@ function coletarDadosFormulario(modal, tipo) {
         dados.prevAlta = modal.querySelector('#admPrevAlta')?.value || 'Sem Previsão';
         dados.isolamento = modal.querySelector('#admIsolamento')?.value || '';
         
-        // IDENTIFICAÇÃO DO LEITO - V7.0: suporte a hibridos com numero+digito
+        // IDENTIFICAÇÃO DO LEITO - V7.0: suporte a hibridos com número+dígito
         if (isCruzAzulEnfermaria || isSantaClaraEnfermaria) {
             const numero = modal.querySelector('#admIdentificacaoNumero')?.value?.trim() || '';
             const sufixo = modal.querySelector('#admIdentificacaoSufixo')?.value || '';
             dados.identificacaoLeito = numero && sufixo ? `${numero}-${sufixo}` : numero;
         } else if (isHibrido) {
-            // V7.0: Hibridos - verificar se é enfermaria (numero+digito) ou apartamento
+            // V7.0: Hibridos - verificar se é enfermaria (número+dígito) ou apartamento
             const tipoQuarto = modal.querySelector('#admTipoQuarto')?.value || '';
             if (tipoQuarto === 'Enfermaria') {
                 const numero = modal.querySelector('#admIdentificacaoNumero')?.value?.trim() || '';
@@ -4136,4 +4136,4 @@ window.formatarMatriculaExibicao = formatarMatriculaExibicao;
 window.setupSearchFilter = setupSearchFilter;
 window.searchLeitos = searchLeitos;
 
-console.log('CARDS.JS V7.0 COMPLETO - SISTEMA DE RESERVAS + CAMPO IDENTIFICACAO DINAMICO!');
+console.log('CARDS.JS V7.0 COMPLETO - SISTEMA DE RESERVAS + CAMPO IDENTIFICAÇÃO DINÂMICO!');
