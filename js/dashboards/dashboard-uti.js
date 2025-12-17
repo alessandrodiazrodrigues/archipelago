@@ -1,11 +1,11 @@
 // =================== DASHBOARD UTI V7.5 ===================
 // =================== LEITOS UTI - INICIAL: H2 CRUZ AZUL ===================
 // =================== 20 CONTRATUAIS + 10 EXTRAS = 30 TOTAL ===================
-// V7.5: SPICT-BR reativado, relatorio WhatsApp simplificado
+// V7.5: SPICT-BR reativado, relatório WhatsApp simplificado
 
 console.log('Dashboard UTI V7.5 - Carregando...');
 
-// =================== CONFIGURACAO UTI POR HOSPITAL ===================
+// =================== CONFIGURAÇÃO UTI POR HOSPITAL ===================
 const UTI_CAPACIDADE = {
     H1: { contratuais: 3, extras: 2, total: 5 },
     H2: { contratuais: 20, extras: 10, total: 30 },
@@ -19,7 +19,7 @@ const UTI_CAPACIDADE = {
 };
 
 // Hospitais com UTI (para dropdown)
-const HOSPITAIS_COM_UTI = ['H2']; // Por enquanto so H2
+const HOSPITAIS_COM_UTI = ['H2']; // Por enquanto só H2
 
 // Cores do sistema
 const CORES_UTI = {
@@ -36,7 +36,7 @@ const CORES_UTI = {
     bloqueadoFundo: 'rgba(75, 85, 99, 0.3)'
 };
 
-// =================== FUNCOES AUXILIARES ===================
+// =================== FUNÇÕES AUXILIARES ===================
 function isOcupadoUTI(leito) {
     if (!leito || !leito.status) return false;
     const s = (leito.status || '').toString().toLowerCase().trim();
@@ -65,7 +65,7 @@ function getReservasUTI(hospitalId) {
     );
 }
 
-// Parse data de admissao
+// Parse data de admissão
 function parseAdmDateUTI(admAt) {
     if (!admAt) return null;
     const d = new Date(admAt);
@@ -121,13 +121,13 @@ function processarDadosUTI(hospitalId) {
         leitos = [];
     }
     
-    // Nao precisa filtrar - window.leitosUTI ja contem apenas UTI
+    // Não precisa filtrar - window.leitosUTI ja contem apenas UTI
     console.log('[UTI] Hospital ' + hospitalId + ' - Leitos encontrados: ' + leitos.length);
     
     // Buscar capacidade UTI
     const capacidade = UTI_CAPACIDADE[hospitalId];
     if (!capacidade) {
-        console.error('[UTI] Capacidade nao encontrada para ' + hospitalId);
+        console.error('[UTI] Capacidade não encontrada para ' + hospitalId);
         return null;
     }
     
@@ -145,14 +145,14 @@ function processarDadosUTI(hospitalId) {
         l.categoriaEscolhida === 'Enfermaria'
     ).length;
     
-    // Previsao de Alta (Hoje)
+    // Previsão de Alta (Hoje)
     const previsaoAlta = ocupados.filter(l => {
         if (!l.prevAlta || String(l.prevAlta).trim() === '') return false;
         const prev = String(l.prevAlta).toLowerCase();
         return prev.includes('hoje');
     });
     
-    // Lista de previsao de alta com leito e matricula
+    // Lista de previsão de alta com leito e matricula
     const previsaoAltaLista = previsaoAlta.map(l => ({
         leito: l.identificacaoLeito || l.leito || '---',
         matricula: l.matricula || '---'
@@ -181,7 +181,7 @@ function processarDadosUTI(hospitalId) {
     // Vagos
     const vagos = leitos.filter(l => isVagoUTI(l));
     
-    // Disponiveis = contratuais - ocupados - reservados
+    // Disponíveis = contratuais - ocupados - reservados
     const disponiveisTotal = Math.max(capacidade.contratuais - ocupados.length - reservas.length, 0);
     
     // TPH
@@ -200,7 +200,7 @@ function processarDadosUTI(hospitalId) {
         ? (tphValues.reduce((a, b) => a + b, 0) / tphValues.length).toFixed(2)
         : '0.00';
     
-    // Leitos com mais de 5 diarias (>= 120 horas)
+    // Leitos com mais de 5 diárias (>= 120 horas)
     const leitosMais5Diarias = ocupados.filter(l => {
         if (!l.admAt) return false;
         const admData = parseAdmDateUTI(l.admAt);
@@ -217,7 +217,7 @@ function processarDadosUTI(hospitalId) {
         };
     }).sort((a, b) => b.dias - a.dias); // Ordenar por dias decrescente
     
-    // Taxa de ocupacao
+    // Taxa de ocupação
     const base = Math.max(capacidade.contratuais, ocupados.length);
     const taxaOcupacao = base > 0 ? Math.min((ocupados.length / base) * 100, 100) : 0;
     
@@ -233,17 +233,17 @@ function processarDadosUTI(hospitalId) {
                          hospitalId === 'H4' ? 'Santa Clara' :
                          hospitalId === 'H5' ? 'Adventista' :
                          hospitalId === 'H6' ? 'Santa Cruz' :
-                         hospitalId === 'H7' ? 'Santa Virginia' :
-                         hospitalId === 'H8' ? 'Sao Camilo Ipiranga' :
-                         hospitalId === 'H9' ? 'Sao Camilo Pompeia' : hospitalId;
+                         hospitalId === 'H7' ? 'Santa Virgínia' :
+                         hospitalId === 'H8' ? 'São Camilo Ipiranga' :
+                         hospitalId === 'H9' ? 'São Camilo Pompeia' : hospitalId;
     
-    // V7.5: SPICT-BR - Contar elegiveis
+    // V7.5: SPICT-BR - Contar elegíveis
     const spictElegiveis = ocupados.filter(l => {
         const spict = (l.spict || '').toLowerCase().trim();
-        return spict === 'elegivel';
+        return spict === 'elegivel' || spict === 'elegível';
     });
     
-    // Lista de SPICT elegiveis
+    // Lista de SPICT elegíveis
     const spictLista = spictElegiveis.map(l => ({
         leito: l.identificacaoLeito || l.leito || '---',
         matricula: l.matricula || '---'
@@ -308,7 +308,7 @@ function copiarParaWhatsAppUTI(hospitalId) {
     let texto = `UTI - Hospital ${dados.nome} - ${data} ${hora}\n`;
     texto += `Leitos Ocupados: ${dados.ocupados.total}\n`;
     
-    // Altas Sinalizadas (Previsao Hoje) com matricula
+    // Altas Sinalizadas (Previsão Hoje) com matricula
     texto += `Altas Sinalizadas: ${dados.previsao.total}\n`;
     if (dados.previsao.lista && dados.previsao.lista.length > 0) {
         dados.previsao.lista.forEach(l => {
@@ -334,8 +334,8 @@ function copiarParaWhatsAppUTI(hospitalId) {
         texto += `  -\n`;
     }
     
-    // SPICT-BR Elegiveis com matricula
-    texto += `SPICT-BR Elegiveis: ${dados.spict.total}\n`;
+    // SPICT-BR Elegíveis com matricula
+    texto += `SPICT-BR Elegíveis: ${dados.spict.total}\n`;
     if (dados.spict.lista && dados.spict.lista.length > 0) {
         dados.spict.lista.forEach(l => {
             const mat = l.matricula ? ` | Mat: ${l.matricula}` : '';
@@ -346,7 +346,7 @@ function copiarParaWhatsAppUTI(hospitalId) {
     }
     
     navigator.clipboard.writeText(texto).then(() => {
-        alert('Texto copiado para a area de transferencia!\n\nCole no WhatsApp e envie.');
+        alert('Texto copiado para a área de transferência!\n\nCole no WhatsApp e envie.');
     }).catch(err => {
         console.error('Erro ao copiar:', err);
         alert('Erro ao copiar. Tente novamente.');
@@ -402,7 +402,7 @@ window.renderDashboardUTI = function(hospitalId) {
     }
     
     if (!container) {
-        console.error('[UTI] Container nao encontrado');
+        console.error('[UTI] Container não encontrado');
         return;
     }
     
@@ -410,8 +410,8 @@ window.renderDashboardUTI = function(hospitalId) {
     if (!window.leitosUTI || !window.leitosUTI[hospitalId]) {
         container.innerHTML = `
             <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 400px; text-align: center; color: white; background: linear-gradient(135deg, #1a1f2e 0%, #2d3748 100%); border-radius: 12px; margin: 20px; padding: 40px;">
-                <h2 style="color: #ef4444; margin-bottom: 10px;">Dados UTI nao disponiveis</h2>
-                <p style="color: #9ca3af;">Aguardando sincronizacao com a planilha</p>
+                <h2 style="color: #ef4444; margin-bottom: 10px;">Dados UTI não disponíveis</h2>
+                <p style="color: #9ca3af;">Aguardando sincronização com a planilha</p>
                 <button onclick="window.location.reload()" style="margin-top: 20px; padding: 12px 24px; background: #3b82f6; color: white; border: none; border-radius: 8px; cursor: pointer;">Recarregar</button>
             </div>
         `;
@@ -461,7 +461,7 @@ window.renderDashboardUTI = function(hospitalId) {
                 
                 <!-- BOX 1: OCUPACAO -->
                 <div class="kpi-box-uti box-ocupacao-uti">
-                    <div class="kpi-title-uti">Ocupacao</div>
+                    <div class="kpi-title-uti">Ocupação</div>
                     
                     <div class="kpi-content-uti">
                         <div class="dual-gauges-container-uti">
@@ -502,7 +502,7 @@ window.renderDashboardUTI = function(hospitalId) {
                 
                 <!-- BOX 2: PREVISAO DE ALTA -->
                 <div class="kpi-box-uti box-previsao-uti">
-                    <div class="kpi-title-uti">Leitos em Previsao de Alta</div>
+                    <div class="kpi-title-uti">Leitos em Previsão de Alta</div>
                     
                     <div class="kpi-content-uti">
                         ${renderGaugeUTI(
@@ -517,7 +517,7 @@ window.renderDashboardUTI = function(hospitalId) {
                                     <thead>
                                         <tr>
                                             <th style="text-align: left;">Leito</th>
-                                            <th style="text-align: right;">Matricula</th>
+                                            <th style="text-align: right;">Matrícula</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -529,14 +529,14 @@ window.renderDashboardUTI = function(hospitalId) {
                                         `).join('')}
                                     </tbody>
                                 </table>
-                            ` : '<div class="sem-dados-uti">Nenhum Leito com Previsao de Alta Hoje</div>'}
+                            ` : '<div class="sem-dados-uti">Nenhum Leito com Previsão de Alta Hoje</div>'}
                         </div>
                     </div>
                 </div>
                 
                 <!-- BOX 3: DISPONIVEIS -->
                 <div class="kpi-box-uti box-disponiveis-uti">
-                    <div class="kpi-title-uti">Leitos Disponiveis</div>
+                    <div class="kpi-title-uti">Leitos Disponíveis</div>
                     
                     <div class="kpi-content-uti">
                         ${renderGaugeUTI(
@@ -558,7 +558,7 @@ window.renderDashboardUTI = function(hospitalId) {
                 
                 <!-- BOX 4: TPH MEDIO -->
                 <div class="kpi-box-uti box-tph-uti">
-                    <div class="kpi-title-uti">TPH Medio</div>
+                    <div class="kpi-title-uti">TPH Médio</div>
                     
                     <div class="kpi-content-uti">
                         <div class="tph-display-uti">
@@ -567,13 +567,13 @@ window.renderDashboardUTI = function(hospitalId) {
                         </div>
                         
                         <div class="tph-detalhes-uti">
-                            <div class="detalhe-titulo-uti">N Diarias > 5</div>
+                            <div class="detalhe-titulo-uti">N Diárias > 5</div>
                             ${dados.tph.lista && dados.tph.lista.length > 0 ? `
                                 <table class="tph-table-uti">
                                     <thead>
                                         <tr>
                                             <th style="text-align: left;">Leito</th>
-                                            <th style="text-align: center;">Matricula</th>
+                                            <th style="text-align: center;">Matrícula</th>
                                             <th style="text-align: right;">Dias</th>
                                         </tr>
                                     </thead>
@@ -587,14 +587,14 @@ window.renderDashboardUTI = function(hospitalId) {
                                         `).join('')}
                                     </tbody>
                                 </table>
-                            ` : '<div class="sem-dados-uti">Nenhum Leito com Mais de 5 Diarias</div>'}
+                            ` : '<div class="sem-dados-uti">Nenhum Leito com Mais de 5 Diárias</div>'}
                         </div>
                     </div>
                 </div>
                 
                 <!-- BOX 5: PPS MEDIO (BLOQUEADO) -->
                 <div class="kpi-box-uti box-bloqueado-uti">
-                    <div class="kpi-title-uti titulo-bloqueado">PPS Medio</div>
+                    <div class="kpi-title-uti titulo-bloqueado">PPS Médio</div>
                     
                     <div class="kpi-content-uti content-bloqueado">
                         <div class="bloqueado-icon">
@@ -603,13 +603,13 @@ window.renderDashboardUTI = function(hospitalId) {
                                 <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
                             </svg>
                         </div>
-                        <div class="bloqueado-texto">Nao aplicavel para UTI</div>
+                        <div class="bloqueado-texto">Não aplicável para UTI</div>
                     </div>
                 </div>
                 
                 <!-- BOX 6: SPICT-BR ELEGIVEIS (V7.5: Reativado) -->
                 <div class="kpi-box-uti box-spict-uti">
-                    <div class="kpi-title-uti">SPICT-BR Elegiveis</div>
+                    <div class="kpi-title-uti">SPICT-BR Elegíveis</div>
                     
                     <div class="kpi-content-uti">
                         <div class="spict-display-uti">
@@ -618,13 +618,13 @@ window.renderDashboardUTI = function(hospitalId) {
                         </div>
                         
                         <div class="spict-detalhes-uti">
-                            <div class="detalhe-titulo-uti">Lista de Elegiveis</div>
+                            <div class="detalhe-titulo-uti">Lista de Elegíveis</div>
                             ${dados.spict.lista && dados.spict.lista.length > 0 ? `
                                 <table class="spict-table-uti">
                                     <thead>
                                         <tr>
                                             <th style="text-align: left;">Leito</th>
-                                            <th style="text-align: right;">Matricula</th>
+                                            <th style="text-align: right;">Matrícula</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -636,7 +636,7 @@ window.renderDashboardUTI = function(hospitalId) {
                                         `).join('')}
                                     </tbody>
                                 </table>
-                            ` : '<div class="sem-dados-uti">Nenhum Paciente Elegivel</div>'}
+                            ` : '<div class="sem-dados-uti">Nenhum Paciente Elegível</div>'}
                         </div>
                     </div>
                 </div>
@@ -884,7 +884,7 @@ function getUTIDashboardCSS() {
                 margin-top: 10px;
             }
             
-            /* Previsao de Alta - Lista */
+            /* Previsão de Alta - Lista */
             .previsao-detalhes-uti {
                 width: 100%;
                 margin-top: 15px;
@@ -1057,6 +1057,6 @@ function getUTIDashboardCSS() {
 }
 
 console.log('Dashboard UTI V7.5 - Carregado com sucesso');
-console.log('V7.5: SPICT-BR reativado, relatorio WhatsApp simplificado');
+console.log('V7.5: SPICT-BR reativado, relatório WhatsApp simplificado');
 console.log('V7.5 Hospitais com UTI: ' + HOSPITAIS_COM_UTI.join(', '));
 console.log('V7.5 H2 Cruz Azul: 20 contratuais + 10 extras = 30 total');
