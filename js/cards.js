@@ -1,7 +1,10 @@
 // =================== CARDS.JS - GESTÃO DE LEITOS HOSPITALARES ===================
-// Versão: 7.6 - 14/Dezembro/2025
+// Versão: 7.7 - 19/Dezembro/2025
 // Depende de: cards-config.js (carregar ANTES)
 // 
+// V7.7 - CORREÇÃO PREVISÃO DE ALTA (SP):
+// - Normalizar valor "SP" para "Sem Previsão" ao abrir modal de atualização
+// - Normalizar valor "Sem Previsao" (sem acento) para "Sem Previsão"
 // V7.6 - CORREÇÃO FLAG EXTRA H2/H4 + AUTO-SUFIXO IRMÃO:
 // - Tratar tipo "Hibrido" em H2/H4 corretamente (usar contratuais totais)
 // - Quando irmão ocupado/reservado com identificação, auto-definir sufixo alternativo
@@ -20,7 +23,7 @@
 // 4. Ordenação: Ocupados > Reservados > Vagos
 // 5. Campo Identificação dinâmico para HIBRIDOS (Enfermaria: número+dígito)
 
-console.log('CARDS.JS V7.6 - Correção Flag EXTRA H2/H4...');
+console.log('CARDS.JS V7.7 - Correção Previsão de Alta (SP)...');
 
 // =================== VALIDAR DEPENDENCIAS ===================
 if (typeof window.CONCESSOES_DISPLAY_MAP === 'undefined') {
@@ -2638,7 +2641,14 @@ function createAtualizacaoForm(hospitalNome, leitoNumero, dadosLeito) {
     const idadeAtual = dadosLeito?.idade || '';
     const ppsAtual = dadosLeito?.pps || '';
     const spictAtual = dadosLeito?.spict || 'nao_elegivel';
-    const prevAltaAtual = dadosLeito?.prevAlta || 'Sem Previsão';
+    
+    // V7.7: Normalizar valor de Previsão de Alta (valores legados)
+    let prevAltaAtual = dadosLeito?.prevAlta || 'Sem Previsão';
+    if (prevAltaAtual === 'SP' || prevAltaAtual.toLowerCase() === 'sp') {
+        prevAltaAtual = 'Sem Previsão';
+    } else if (prevAltaAtual === 'Sem Previsao') {
+        prevAltaAtual = 'Sem Previsão';
+    }
     
     const anotacoesAtual = dadosLeito?.anotacoes || '';
     
