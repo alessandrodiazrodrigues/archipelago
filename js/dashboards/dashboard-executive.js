@@ -3,8 +3,8 @@
 // =================== V7.0: + Coluna Reservados + Filtro UTI ===================
 
 // =================== CONSTANTES GLOBAIS V7.0 ===================
-const TOTAL_CONTRATUAIS = 138; // 9 hospitais ativos (H1-H9): 10+36+13+26+13+13+13+7+7
-const TOTAL_LEITOS = 293; // 126 contratuais + 167 extras
+const TOTAL_CONTRATUAIS = 150; // 9 hospitais ativos (H1-H9): 10+36+13+26+13+13+13+13+13
+const TOTAL_LEITOS = 293; // 150 contratuais + 143 extras
 
 // Estado global para fundo branco (compartilhado com dashboard hospitalar)
 if (typeof window.fundoBranco === 'undefined') {
@@ -2665,7 +2665,7 @@ function logError(message) {
 }
 
 console.log('Dashboard Executivo V7.0 - CORRIGIDO COMPLETO + RESERVADOS + FILTRO UTI');
-console.log('V7.0 9 Hospitais (H1-H9) | 293 Leitos (126 Contratuais + 167 Extras)');
+console.log('V7.0 9 Hospitais (H1-H9) | 293 Leitos (150 Contratuais + 143 Extras)');
 console.log('V7.0 Coluna Reservados adicionada na tabela de ocupacao');
 console.log('V7.0 Filtro UTI aplicado em todos os calculos');
 console.log('V7.0 Disponíveis = contratuais - ocupados - reservados');

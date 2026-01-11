@@ -122,8 +122,8 @@ window.HOSPITAL_CAPACIDADE = {
     H5: { contratuais: 13, extras: 15, total: 28 },
     H6: { contratuais: 13, extras: 9, total: 22 },   // ✅ CORRIGIDO 03/DEZ/2025
     H7: { contratuais: 13, extras: 9, total: 22 },   // ✅ CORRIGIDO 03/DEZ/2025
-    H8: { contratuais: 7, extras: 15, total: 22 },
-    H9: { contratuais: 7, extras: 15, total: 22 }
+    H8: { contratuais: 13, extras: 9, total: 22 },   // ✅ CORRIGIDO 11/JAN/2026
+    H9: { contratuais: 13, extras: 9, total: 22 }    // ✅ CORRIGIDO 11/JAN/2026
 };
 
 // =================== ✅ NOVO V7.0: SISTEMA DE UTI (63 LEITOS) ===================
