@@ -2399,9 +2399,9 @@ function getExecutiveCSS() {
             }
 
             #btnWhatsAppExec:hover {
-                background: #1da851 !important;
+                background: #3b82f6 !important;
                 transform: translateY(-1px);
-                box-shadow: 0 4px 12px rgba(37, 211, 102, 0.3);
+                box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
             }
             
             @media (min-width: 768px) and (max-width: 1024px) {
