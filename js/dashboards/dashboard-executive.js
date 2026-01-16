@@ -832,6 +832,7 @@ function copiarRelatorioDisponiveisWhatsApp() {
     texto += `${dataFormatada}\n`;
     texto += `━━━━━━━━━━━━━━━━━\n`;
     texto += `*REDE EXTERNA (9 HOSPITAIS)*\n`;
+    texto += `━━━━━━━━━━━━━━━━━\n`;
     
     // Totais para resumo
     let totalFlexiveis = 0;
@@ -864,10 +865,9 @@ function copiarRelatorioDisponiveisWhatsApp() {
             }
         }
         
-        texto += `━━━━━━━━━━━━━━━━━\n`;
         texto += `*${index + 1}. ${h.nome}*\n`;
         texto += `━━━━━━━━━━━━━━━━━\n`;
-        texto += `*Disponíveis:*\n`;
+        texto += `• Disponíveis:\n`;
         
         // Híbridos (H1, H3, H5, H6, H7, H8, H9)
         if (hospitalId === 'H1' || hospitalId === 'H3' || hospitalId === 'H5' || hospitalId === 'H6' || hospitalId === 'H7' || hospitalId === 'H8' || hospitalId === 'H9') {
@@ -898,13 +898,15 @@ function copiarRelatorioDisponiveisWhatsApp() {
             totalUTI += utiDisponivel;
         }
         
-        texto += `\n`;
+        if (index < hospitais.length - 1) {
+            texto += `\n`;
+        }
     });
     
     // Resumo final
     const totalEnfApto = totalFlexiveis + totalExclusApto + totalExclusEnfSemRestricao + totalExclusEnfFem + totalExclusEnfMasc;
     
-    texto += `━━━━━━━━━━━━━━━━━\n`;
+    texto += `\n━━━━━━━━━━━━━━━━━\n`;
     texto += `*Resumo de Leitos Disponíveis:*\n`;
     texto += `Enf/Apto (Flexíveis): ${String(totalFlexiveis).padStart(2, '0')}\n`;
     texto += `Exclus. Apto: ${String(totalExclusApto).padStart(2, '0')}\n`;
@@ -1133,12 +1135,8 @@ window.renderDashboardExecutivo = function() {
                     <h2 style="margin: 0; color: #60a5fa; font-size: 24px; font-weight: 700; text-align: center; text-transform: none !important;">Rede Hospitalar Externa - Dashboard Geral</h2>
                 </div>
                 <div style="display: flex; justify-content: center; gap: 15px; flex-wrap: wrap;">
-                    <button id="btnWhatsAppExec" style="padding: 8px 16px; background: #60a5fa; border: 1px solid #60a5fa; border-radius: 8px; color: white; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.3s ease; display: flex; align-items: center; gap: 8px; text-transform: none !important;">
-                        Relatório 1
-                    </button>
-                    <button id="btnRelatorioDisponiveis" style="padding: 8px 16px; background: #60a5fa; border: 1px solid #60a5fa; border-radius: 8px; color: white; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.3s ease; display: flex; align-items: center; gap: 8px; text-transform: none !important;">
-                        Relatório 2
-                    </button>
+                    <button id="btnWhatsAppExec" style="padding: 8px 16px; background: #60a5fa; border: 1px solid #60a5fa; border-radius: 8px; color: white; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.3s ease; display: flex; align-items: center; justify-content: center; gap: 8px; text-transform: none !important;">Relatório 1</button>
+                    <button id="btnRelatorioDisponiveis" style="padding: 8px 16px; background: #60a5fa; border: 1px solid #60a5fa; border-radius: 8px; color: white; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.3s ease; display: flex; align-items: center; justify-content: center; gap: 8px; text-transform: none !important;">Relatório 2</button>
                     <button id="toggleFundoBtnExec" class="toggle-fundo-btn" style="padding: 8px 16px; background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 8px; color: #e2e8f0; font-size: 14px; cursor: pointer; transition: all 0.3s ease; display: none; align-items: center; gap: 8px; text-transform: none !important;">
                         <span id="toggleTextExec">Tema Escuro</span>
                     </button>
