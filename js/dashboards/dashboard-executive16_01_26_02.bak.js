@@ -845,7 +845,7 @@ function copiarRelatorioDisponiveisWhatsApp() {
         const hospitalId = h.id;
         const modalidade = h.disponiveis.modalidade;
         
-        // Calcular UTI disponível
+        // Calcular UTI disponivel
         let utiDisponivel = 0;
         if (window.UTI_CAPACIDADE && window.UTI_CAPACIDADE[hospitalId]) {
             const utiCap = window.UTI_CAPACIDADE[hospitalId];
@@ -867,12 +867,12 @@ function copiarRelatorioDisponiveisWhatsApp() {
         texto += `━━━━━━━━━━━━━━━━━\n`;
         texto += `*${index + 1}. ${h.nome}*\n`;
         texto += `━━━━━━━━━━━━━━━━━\n`;
-        texto += `*Disponíveis:*\n`;
+        texto += `*Disponiveis:*\n`;
         
-        // Híbridos (H1, H3, H5, H6, H7, H8, H9)
+        // Hibridos (H1, H3, H5, H6, H7, H8, H9)
         if (hospitalId === 'H1' || hospitalId === 'H3' || hospitalId === 'H5' || hospitalId === 'H6' || hospitalId === 'H7' || hospitalId === 'H8' || hospitalId === 'H9') {
             const flexiveis = modalidade.flexiveis || 0;
-            texto += `  Flexíveis (Enf/Apto): ${String(flexiveis).padStart(2, '0')}\n`;
+            texto += `  Flexiveis (Enf/Apto): ${String(flexiveis).padStart(2, '0')}\n`;
             totalFlexiveis += flexiveis;
         } else {
             // H2 e H4 - tipos fixos
@@ -882,7 +882,7 @@ function copiarRelatorioDisponiveisWhatsApp() {
             const exclusEnfMasc = modalidade.exclusivo_enf_masc || 0;
             
             texto += `  Exclus. Apto: ${String(exclusApto).padStart(2, '0')}\n`;
-            texto += `  Exclus. Enf sem Restrição de Gênero: ${String(exclusEnfSemRestricao).padStart(2, '0')}\n`;
+            texto += `  Exclus. Enf sem Restricao de Genero: ${String(exclusEnfSemRestricao).padStart(2, '0')}\n`;
             texto += `  Exclus. Enf Feminina: ${String(exclusEnfFem).padStart(2, '0')}\n`;
             texto += `  Exclus. Enf Masculina: ${String(exclusEnfMasc).padStart(2, '0')}\n`;
             
@@ -905,17 +905,17 @@ function copiarRelatorioDisponiveisWhatsApp() {
     const totalEnfApto = totalFlexiveis + totalExclusApto + totalExclusEnfSemRestricao + totalExclusEnfFem + totalExclusEnfMasc;
     
     texto += `━━━━━━━━━━━━━━━━━\n`;
-    texto += `*Resumo de Leitos Disponíveis:*\n`;
-    texto += `Enf/Apto (Flexíveis): ${String(totalFlexiveis).padStart(2, '0')}\n`;
+    texto += `*Resumo de Leitos Disponiveis:*\n`;
+    texto += `Enf/Apto (Flexiveis): ${String(totalFlexiveis).padStart(2, '0')}\n`;
     texto += `Exclus. Apto: ${String(totalExclusApto).padStart(2, '0')}\n`;
-    texto += `Exclus. Enf sem Restrição: ${String(totalExclusEnfSemRestricao).padStart(2, '0')}\n`;
+    texto += `Exclus. Enf sem Restricao: ${String(totalExclusEnfSemRestricao).padStart(2, '0')}\n`;
     texto += `Exclus. Enf Fem: ${String(totalExclusEnfFem).padStart(2, '0')}\n`;
     texto += `Exclus. Enf Masc: ${String(totalExclusEnfMasc).padStart(2, '0')}\n`;
     texto += `*Total Enfermaria:* ${String(totalEnfApto).padStart(2, '0')}\n`;
     texto += `*UTI:* ${String(totalUTI).padStart(2, '0')}\n`;
     
     navigator.clipboard.writeText(texto).then(() => {
-        alert('Relatório de Disponíveis copiado!\n\nCole no WhatsApp e envie.');
+        alert('Relatorio de Disponiveis copiado!\n\nCole no WhatsApp e envie.');
     }).catch(err => {
         console.error('Erro ao copiar:', err);
         alert('Erro ao copiar. Tente novamente.');
@@ -1134,10 +1134,10 @@ window.renderDashboardExecutivo = function() {
                 </div>
                 <div style="display: flex; justify-content: center; gap: 15px; flex-wrap: wrap;">
                     <button id="btnWhatsAppExec" style="padding: 8px 16px; background: #60a5fa; border: 1px solid #60a5fa; border-radius: 8px; color: white; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.3s ease; display: flex; align-items: center; gap: 8px; text-transform: none !important;">
-                        Relatório 1
+                        Copiar para WhatsApp
                     </button>
-                    <button id="btnRelatorioDisponiveis" style="padding: 8px 16px; background: #60a5fa; border: 1px solid #60a5fa; border-radius: 8px; color: white; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.3s ease; display: flex; align-items: center; gap: 8px; text-transform: none !important;">
-                        Relatório 2
+                    <button id="btnRelatorioDisponiveis" style="padding: 8px 16px; background: #22c55e; border: 1px solid #22c55e; border-radius: 8px; color: white; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.3s ease; display: flex; align-items: center; gap: 8px; text-transform: none !important;">
+                        Relatorio Disponiveis
                     </button>
                     <button id="toggleFundoBtnExec" class="toggle-fundo-btn" style="padding: 8px 16px; background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 8px; color: #e2e8f0; font-size: 14px; cursor: pointer; transition: all 0.3s ease; display: none; align-items: center; gap: 8px; text-transform: none !important;">
                         <span id="toggleTextExec">Tema Escuro</span>
