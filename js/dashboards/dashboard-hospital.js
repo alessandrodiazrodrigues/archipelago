@@ -1,4 +1,4 @@
-// js/dashboards/dashboard-hospital.js
+﻿// js/dashboards/dashboard-hospital.js
 // Dashboard Enfermarias - Archipelago V7.0
 // Versão: 7.0 - Dezembro/2025
 // Alterações V7.0:
@@ -2104,7 +2104,7 @@ function getHospitalConsolidadoCSS() {
                 display: block;\
             }\
             \
-            @média (max-width: 768px) {\
+            @media (max-width: 768px) {\
                 .sticky-hospital-header {\
                     display: block;\
                 }\
@@ -2718,7 +2718,7 @@ function getHospitalConsolidadoCSS() {
             }\
             \
             /* =================== RESPONSIVIDADE MOBILE =================== */\
-            @média (max-width: 768px) {\
+            @media (max-width: 768px) {\
                 .hospital-filter-selector {\
                     padding: 0 10px;\
                 }\
@@ -2791,3 +2791,4 @@ window.forceDataRefresh = function() {
 };
 
 console.log('Dashboard Enfermarias V7.0 - Carregado com Sucesso!');
+
