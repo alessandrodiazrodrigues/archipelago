@@ -2394,7 +2394,7 @@ function getHospitalConsolidadoCSS() {
             }\
             \
             .kpi-detalhes {\
-                margin-top: auto;\
+                margin-top: 15px;\
                 padding-top: 15px;\
                 border-top: 1px solid rgba(255, 255, 255, 0.1);\
             }\
