@@ -1,7 +1,12 @@
-// =================== APP.JS V7.0 - COMPLETO E OTIMIZADO ===================
-// Versão: V7.0 - Dezembro/2025
+// =================== APP.JS V8.0 - COMPLETO E OTIMIZADO ===================
+// Versão: V8.0 - Marco/2026
+// NOVIDADES V8.0:
+//    - authenticate() agora chama backend ?action=login
+//    - setAuthenticated() salva perfil e hospital na sessão
+//    - getPerfil() e getHospitalPerfil() helpers de sessão
+//    - logout() limpa perfil e hospital
+//    - Fallback local para erro de rede
 // 9 Hospitais - 356 Leitos Totais (293 Enfermaria + 63 UTI)
-// Sistema otimizado para carregamento ultrarrápido
 
 // =================== CONFIGURAÇÕES GLOBAIS V7.0 ===================
 window.CONFIG = {
@@ -284,44 +289,86 @@ window.checkAuthentication = function() {
     return isAuth;
 };
 
-window.setAuthenticated = function(value) {
+// V8.0: Helpers de perfil e hospital da sessão
+window.getPerfil = function() {
+    return sessionStorage.getItem('archipelago_perfil') || null;
+};
+
+window.getHospitalPerfil = function() {
+    return sessionStorage.getItem('archipelago_hospital') || null;
+};
+
+window.setAuthenticated = function(value, perfil, hospital) {
     window.isAuthenticated = value;
     if (value) {
         sessionStorage.setItem('archipelago_authenticated', 'true');
+        sessionStorage.setItem('archipelago_perfil', perfil || 'admin');
+        sessionStorage.setItem('archipelago_hospital', hospital || '');
     } else {
         sessionStorage.removeItem('archipelago_authenticated');
+        sessionStorage.removeItem('archipelago_perfil');
+        sessionStorage.removeItem('archipelago_hospital');
     }
 };
 
-// =================== AUTENTICAÇÃO ===================
-window.authenticate = function() {
+// =================== AUTENTICAÇÃO V8.0 ===================
+window.authenticate = async function() {
     const password = document.getElementById('authPassword').value;
     const errorMsg = document.getElementById('authError');
-    
-    if (password === CONFIG.AUTH_PASSWORD) {
-        // Autenticação bem-sucedida
-        window.setAuthenticated(true);
-        
-        // Ocultar modal de autenticação
-        document.getElementById('authModal').style.display = 'none';
-        
-        // Mostrar sistema
-        document.getElementById('mainHeader').classList.remove('hidden');
-        document.getElementById('mainContent').classList.remove('hidden');
-        document.getElementById('mainFooter').classList.remove('hidden');
-        
-        // Inicializar sistema
-        window.initSystem();
-        
-        logSuccess('Autenticação bem-sucedida - Sistema iniciado');
-    } else {
-        // Senha incorreta
-        errorMsg.classList.remove('hidden');
-        setTimeout(() => {
-            errorMsg.classList.add('hidden');
-        }, 3000);
-        
-        logError('Tentativa de autenticação falhou');
+    const btnEntrar = document.querySelector('#authModal button');
+
+    if (!password) return;
+
+    // Bloquear botão durante a requisição
+    if (btnEntrar) btnEntrar.disabled = true;
+
+    try {
+        // Chamar backend para validar senha e obter perfil
+        const url = window.API_URL + '?action=login&senha=' + encodeURIComponent(password);
+        const response = await fetch(url);
+        const result = await response.json();
+
+        if (result.ok) {
+            // Autenticação bem-sucedida — salvar perfil e hospital
+            window.setAuthenticated(true, result.perfil, result.hospital);
+
+            // Ocultar modal de autenticação
+            document.getElementById('authModal').style.display = 'none';
+
+            // Mostrar sistema
+            document.getElementById('mainHeader').classList.remove('hidden');
+            document.getElementById('mainContent').classList.remove('hidden');
+            document.getElementById('mainFooter').classList.remove('hidden');
+
+            // Inicializar sistema (main.js detectará o perfil para rotear)
+            window.initSystem();
+
+            logSuccess('Autenticação V8.0 bem-sucedida - Perfil: ' + result.perfil + ' | Hospital: ' + (result.hospital || 'todos'));
+        } else {
+            // Senha incorreta
+            errorMsg.classList.remove('hidden');
+            setTimeout(() => {
+                errorMsg.classList.add('hidden');
+            }, 3000);
+            logError('Tentativa de autenticação falhou');
+        }
+    } catch (error) {
+        // Erro de rede — fallback para senha local admin
+        logWarn('Erro ao contactar backend, tentando fallback local: ' + error.toString());
+        if (password === CONFIG.AUTH_PASSWORD) {
+            window.setAuthenticated(true, 'admin', null);
+            document.getElementById('authModal').style.display = 'none';
+            document.getElementById('mainHeader').classList.remove('hidden');
+            document.getElementById('mainContent').classList.remove('hidden');
+            document.getElementById('mainFooter').classList.remove('hidden');
+            window.initSystem();
+            logSuccess('Autenticação via fallback local');
+        } else {
+            errorMsg.classList.remove('hidden');
+            setTimeout(() => { errorMsg.classList.add('hidden'); }, 3000);
+        }
+    } finally {
+        if (btnEntrar) btnEntrar.disabled = false;
     }
 };
 
@@ -342,6 +389,7 @@ window.logout = function() {
     if (window.isLoading) return;
     
     if (confirm('Deseja sair do sistema?')) {
+        // V8.0: limpa autenticação, perfil e hospital
         window.setAuthenticated(false);
         
         // Limpar timers
@@ -370,95 +418,88 @@ window.logout = function() {
     }
 };
 
-// =================== INICIALIZAÇÃO DO SISTEMA V7.0 OTIMIZADA ===================
+// =================== INICIALIZAÇÃO DO SISTEMA V8.0 ===================
 window.initSystem = async function() {
     try {
-        logInfo('🏥 Inicializando Sistema Archipelago V7.0...');
-        logInfo('📊 Carregando 93 leitos (7 hospitais)');
-        
-        // Mostrar loading IMEDIATAMENTE
-        showLoading(null, 'Sincronizando com Google Apps Script V7.0...');
-        
-        // CRÍTICO: AGUARDAR carregamento dos dados
+        logInfo('Inicializando Sistema Archipelago V8.0...');
+
+        showLoading(null, 'Sincronizando com Google Apps Script V8.0...');
+
         if (typeof window.loadHospitalData !== 'function') {
             throw new Error('loadHospitalData não está disponível');
         }
-        
-        logInfo('📡 Carregando dados da API...');
-        
-        // AGUARDAR conclusão do carregamento
+
         await window.loadHospitalData();
-        
-        // Verificar se os dados foram carregados
+
         if (!window.hospitalData || Object.keys(window.hospitalData).length === 0) {
             throw new Error('Dados não foram carregados corretamente');
         }
-        
-        logSuccess(`✅ Dados carregados: ${Object.keys(window.hospitalData).length} hospitais`);
-        
-        // Configurar tab inicial (Dashboard Executivo)
-        window.currentView = 'dash2';
-        
-        // Mostrar Dashboard Executivo
-        const dash2 = document.getElementById('dash2');
-        if (dash2) {
-            dash2.classList.remove('hidden');
+
+        logSuccess('Dados carregados: ' + Object.keys(window.hospitalData).length + ' hospitais');
+
+        // V8.0: Detectar perfil e rotear
+        const perfil  = window.getPerfil ? window.getPerfil() : 'admin';
+        const hospital = window.getHospitalPerfil ? window.getHospitalPerfil() : null;
+
+        // Montar menu conforme perfil
+        if (window.montarMenu) {
+            window.montarMenu(perfil, hospital);
         }
-        
-        // Esconder outras tabs
-        const dash1 = document.getElementById('dash1');
-        const leitosView = document.getElementById('leitosView');
-        if (dash1) dash1.classList.add('hidden');
-        if (leitosView) leitosView.classList.add('hidden');
-        
-        // Atualizar menu lateral
-        document.querySelectorAll('.side-menu-item').forEach(item => {
-            if (item.getAttribute('data-tab') === 'dash2') {
-                item.classList.add('active');
-            } else {
-                item.classList.remove('active');
-            }
+
+        // Ocultar todas as sections
+        ['dash1', 'dash2', 'dash3', 'leitosView', 'leitosUTIView', 'viewEnfermeiro'].forEach(id => {
+            document.getElementById(id)?.classList.add('hidden');
         });
-        
-        // Pequeno delay para garantir DOM pronto
+
         await new Promise(resolve => setTimeout(resolve, 100));
-        
-        // Renderizar Dashboard Executivo
-        if (typeof window.renderDashboardExecutivo === 'function') {
-            logInfo('📊 Renderizando Dashboard Executivo...');
-            window.renderDashboardExecutivo();
-            logSuccess('✅ Dashboard Executivo renderizado!');
+
+        if (perfil === 'enfermeiro' && hospital) {
+            // ENFERMEIRO: abrir direto a view de reservas do hospital
+            window.currentView = 'viewEnfermeiro';
+            window.currentHospital = hospital;
+
+            document.getElementById('viewEnfermeiro')?.classList.remove('hidden');
+
+            if (typeof window.renderViewEnfermeiro === 'function') {
+                window.renderViewEnfermeiro(hospital);
+            } else {
+                logWarn('renderViewEnfermeiro ainda nao disponivel');
+            }
+
         } else {
-            logWarn('⚠️ renderDashboardExecutivo não disponível');
+            // ADMIN: comportamento atual — Dashboard Executivo
+            window.currentView = 'dash2';
+            document.getElementById('dash2')?.classList.remove('hidden');
+
+            document.querySelectorAll('.side-menu-item').forEach(item => {
+                item.classList.toggle('active', item.getAttribute('data-tab') === 'dash2');
+            });
+
+            if (typeof window.renderDashboardExecutivo === 'function') {
+                window.renderDashboardExecutivo();
+            }
         }
-        
-        // Iniciar timer de atualização
+
         window.startTimer();
-        
-        // Delay mínimo antes de remover loading (para suavidade)
+
         await new Promise(resolve => setTimeout(resolve, 300));
-        
-        // Remover loading
         hideLoading();
-        
-        logSuccess('🎉 Sistema V7.0 inicializado com sucesso!');
-        
+
+        logSuccess('Sistema V8.0 inicializado - Perfil: ' + perfil);
+
     } catch (error) {
-        logError('❌ Erro ao inicializar sistema:', error);
-        
-        // Mostrar erro para o usuário
+        logError('Erro ao inicializar sistema:', error);
         hideLoading();
-        
+
         const mainContent = document.getElementById('mainContent');
         if (mainContent) {
             mainContent.innerHTML = `
                 <div style="display: flex; align-items: center; justify-content: center; min-height: 60vh;">
                     <div style="text-align: center; max-width: 500px; padding: 40px; background: rgba(239, 68, 68, 0.1); border: 2px solid #ef4444; border-radius: 16px;">
-                        <div style="font-size: 64px; margin-bottom: 20px;">❌</div>
                         <h2 style="color: #ef4444; margin-bottom: 15px; font-size: 24px; font-family: 'Poppins', sans-serif; font-weight: 700;">Erro ao Carregar Dados</h2>
                         <p style="color: rgba(255, 255, 255, 0.8); margin-bottom: 25px; font-family: 'Poppins', sans-serif;">${error.message}</p>
-                        <button onclick="location.reload()" style="padding: 12px 32px; background: #60a5fa; color: white; border: none; border-radius: 8px; font-weight: 700; cursor: pointer; font-family: 'Poppins', sans-serif; font-size: 16px; transition: all 0.3s;">
-                            🔄 Recarregar Página
+                        <button onclick="location.reload()" style="padding: 12px 32px; background: #60a5fa; color: white; border: none; border-radius: 8px; font-weight: 700; cursor: pointer; font-family: 'Poppins', sans-serif; font-size: 16px;">
+                            Recarregar Página
                         </button>
                     </div>
                 </div>
