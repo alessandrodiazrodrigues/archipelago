@@ -282,6 +282,9 @@ window.refreshAfterAction = async function() {
             window.renderDashboardUTI();
         } else if (window.currentView === 'leitosUTI' && window.renderCardsUTI) { // V7.0: Mapa UTI
             window.renderCardsUTI(window.currentHospitalUTI || 'H2');
+        } else if (window.currentView === 'viewEnfermeiro' && window.renderViewEnfermeiro) { // V8.0
+            const h = window.getHospitalPerfil ? window.getHospitalPerfil() : window.currentHospital;
+            window.renderViewEnfermeiro(h);
         }
         
         logSuccess('Dados atualizados com sucesso');
@@ -801,6 +804,51 @@ window.testeRapido = function() {
     return resultado;
 };
 
+// =================== V8.0: MONTAR MENU POR PERFIL ===================
+window.montarMenu = function(perfil, hospital) {
+    const nav = document.getElementById('menuItems');
+    if (!nav) return;
+
+    if (perfil === 'enfermeiro' && hospital) {
+        const nomeHospital = (window.CONFIG && window.CONFIG.HOSPITAIS && window.CONFIG.HOSPITAIS[hospital])
+            ? window.CONFIG.HOSPITAIS[hospital].nome
+            : hospital;
+
+        nav.innerHTML = `
+            <a href="#" class="side-menu-item active" data-tab="viewEnfermeiro"
+               onclick="window.setActiveTab('viewEnfermeiro'); return false;">
+                Reservas — ${nomeHospital}
+            </a>
+        `;
+    } else {
+        // Admin: menu completo
+        nav.innerHTML = `
+            <a href="#" class="side-menu-item" data-tab="dash2"
+               onclick="setActiveTabAndCloseMenu('dash2'); return false;">
+                Dashboard Executivo
+            </a>
+            <a href="#" class="side-menu-item" data-tab="dash1"
+               onclick="setActiveTabAndCloseMenu('dash1'); return false;">
+                Dashboard Enfermarias
+            </a>
+            <a href="#" class="side-menu-item" data-tab="dash3"
+               onclick="setActiveTabAndCloseMenu('dash3'); return false;">
+                Dashboard UTIs
+            </a>
+            <a href="#" class="side-menu-item" data-tab="leitos"
+               onclick="setActiveTabAndCloseMenu('leitos'); return false;">
+                Mapa de Leitos
+            </a>
+            <a href="#" class="side-menu-item" data-tab="leitosUTI"
+               onclick="setActiveTabAndCloseMenu('leitosUTI'); return false;">
+                Mapa de Leitos UTI
+            </a>
+        `;
+    }
+
+    logInfo('Menu montado para perfil: ' + perfil);
+};
+
 // =================== HOOK NO SISTEMA DE NAVEGACAO ===================
 const setActiveTabOriginal = window.setActiveTab;
 window.setActiveTab = function(tab) {
@@ -808,13 +856,21 @@ window.setActiveTab = function(tab) {
         logInfo('Navegacao bloqueada durante carregamento');
         return;
     }
-    
+
+    // V8.0: Bloquear tabs restritas para enfermeiro
+    const perfil = window.getPerfil ? window.getPerfil() : null;
+    const tabsRestritas = ['dash2', 'dash3', 'uti', 'leitosUTI'];
+    if (perfil === 'enfermeiro' && tabsRestritas.includes(tab)) {
+        logWarn('Acesso negado: perfil enfermeiro nao pode acessar ' + tab);
+        return;
+    }
+
     verificarContainersDashboard();
-    
+
     if (setActiveTabOriginal) {
         setActiveTabOriginal(tab);
     }
-    
+
     // REDUZIDO: de 500ms para 200ms
     setTimeout(() => {
         if (tab === 'dash1' && window.renderDashboardHospitalar) {
@@ -825,6 +881,9 @@ window.setActiveTab = function(tab) {
             window.renderDashboardUTI();
         } else if (tab === 'leitosUTI' && window.renderCardsUTI) { // V7.0: Mapa de Leitos UTI
             window.renderCardsUTI(window.currentHospitalUTI || 'H2');
+        } else if (tab === 'viewEnfermeiro' && window.renderViewEnfermeiro) { // V8.0
+            const h = window.getHospitalPerfil ? window.getHospitalPerfil() : null;
+            window.renderViewEnfermeiro(h);
         }
     }, 200);
 };
