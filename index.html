@@ -32,7 +32,19 @@
     <div id="authModal" class="modal-auth">
         <div class="auth-container">
             <h1>Archipelago Dashboard</h1>
-            <p>Digite a senha de acesso:</p>
+            <p>Selecione o perfil e digite a senha:</p>
+            <select id="authPerfil" class="auth-select">
+                <option value="">Administrador</option>
+                <option value="H1">Neomater</option>
+                <option value="H2">Cruz Azul</option>
+                <option value="H3">Santa Marcelina</option>
+                <option value="H4">Santa Clara</option>
+                <option value="H5">Adventista</option>
+                <option value="H6">Santa Cruz</option>
+                <option value="H7">Santa Virgínia</option>
+                <option value="H8">São Camilo Ipiranga</option>
+                <option value="H9">São Camilo Pompeia</option>
+            </select>
             <input type="password" id="authPassword" placeholder="Senha" maxlength="6">
             <button onclick="authenticate()">Entrar</button>
             <div id="authError" class="error-msg hidden">Senha incorreta</div>
@@ -417,6 +429,34 @@
             font-weight: 400;
         }
         
+        .auth-select {
+            width: 100%;
+            padding: 12px;
+            background: #0f172a;
+            border: 2px solid #334155;
+            border-radius: 8px;
+            color: #9ca3af;
+            font-size: 14px;
+            margin-bottom: 14px;
+            font-family: 'Poppins', sans-serif;
+            cursor: pointer;
+            appearance: none;
+            -webkit-appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%239ca3af' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 14px center;
+        }
+
+        .auth-select:focus {
+            outline: none;
+            border-color: #60a5fa;
+        }
+
+        .auth-select option {
+            background: #1e293b;
+            color: white;
+        }
+
         .auth-container input {
             width: 100%;
             padding: 12px;
