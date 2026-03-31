@@ -35,7 +35,7 @@ window.renderViewEnfermeiro = function(hospitalId) {
     const reservasHospital = obterReservasEnfermaria(hospitalId);
 
     // KPIs
-    const kpis = calcularKPIs(leitosHospital, reservasHospital);
+    const kpis = calcularKPIs(hospitalId, leitosHospital, reservasHospital);
 
     container.innerHTML = `
         <div style="padding: 16px; font-family: 'Poppins', sans-serif; max-width: 1400px; margin: 0 auto; box-sizing: border-box; width: 100%;">
@@ -840,13 +840,14 @@ function obterReservasEnfermaria(hospitalId) {
     return window.reservasData.filter(r => r.hospital === hospitalId && r.tipo !== 'UTI');
 }
 
-function calcularKPIs(leitos, reservas) {
-    const total      = leitos.length;
-    const ocupados   = leitos.filter(l => String(l.status || '').toLowerCase() === 'ocupado').length;
-    const reservados = reservas.filter(r => r.matricula && String(r.matricula).trim()).length;
-    const disponiveis = Math.max(0, total - ocupados - reservados);
+function calcularKPIs(hospitalId, leitos, reservas) {
+    const capacidade  = window.HOSPITAL_CAPACIDADE && window.HOSPITAL_CAPACIDADE[hospitalId];
+    const contratuais = capacidade ? capacidade.contratuais : leitos.length;
+    const ocupados    = leitos.filter(l => String(l.status || '').toLowerCase() === 'ocupado').length;
+    const reservados  = reservas.filter(r => r.matricula && String(r.matricula).trim()).length;
+    const disponiveis = Math.max(0, contratuais - ocupados - reservados);
 
-    return { total, ocupados, reservados, disponiveis };
+    return { total: contratuais, ocupados, reservados, disponiveis };
 }
 
 // =================== ESTILO PADRAO DOS INPUTS ===================
