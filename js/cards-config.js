@@ -132,7 +132,7 @@ window.UTI_CAPACIDADE = {
     H2: { contratuais: 20, extras: 10, total: 30 },
     H3: { contratuais: 2, extras: 2, total: 4 },
     H4: { contratuais: 4, extras: 2, total: 6 },
-    H5: { contratuais: 4, extras: 2, total: 6 },
+    H5: { contratuais: 2, extras: 4, total: 6 },
     H6: { contratuais: 2, extras: 2, total: 4 },
     H7: { contratuais: 0, extras: 0, total: 0 },     // ✅ SEM UTI
     H8: { contratuais: 2, extras: 2, total: 4 },
