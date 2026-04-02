@@ -225,6 +225,11 @@ window.filtrarHospitalDashboard = function(hospitalId) {
 };
 
 window.copiarDashboardParaWhatsApp = function() {
+    // =================== V7.7: SYS-95 - Novo formato: somente Altas Previstas 24H ===================
+    // Cabeçalho: *ARCHIPELAGO* DD/MM/AAAA, HH:MM
+    // Por hospital: *Altas Previstas 24H: NN* + breakdown Ouro / 2R / 3R
+    // Se zero: *Altas Previstas 24H: 00* sem linhas abaixo
+    // Removido: HOJE, 48H, Concessões, Diretivas Pendentes
     const hospitaisIds = ['H5', 'H2', 'H1', 'H4', 'H6', 'H3', 'H7', 'H8', 'H9'];
     const hospitaisNomes = {
         'H1': 'NEOMATER',
@@ -237,200 +242,67 @@ window.copiarDashboardParaWhatsApp = function() {
         'H8': 'SÃO CAMILO IPIRANGA',
         'H9': 'SÃO CAMILO POMPEIA'
     };
-    
-    // Verificar qual hospital está selecionado
+
     const filtroAtual = window.hospitalFiltroAtual || 'todos';
     const hospitaisParaRelatorio = filtroAtual === 'todos' ? hospitaisIds : [filtroAtual];
-    
-    let texto = filtroAtual === 'todos' ? 
-        '*DASHBOARD ENFERMARIAS*\n' : 
-        '*DASHBOARD ENFERMARIAS - ' + hospitaisNomes[filtroAtual] + '*\n';
-    
-    texto += new Date().toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }) + '\n\n';
-    
+
+    // Cabeçalho
+    const agora = new Date();
+    const dia = String(agora.getDate()).padStart(2, '0');
+    const mes = String(agora.getMonth() + 1).padStart(2, '0');
+    const ano = agora.getFullYear();
+    const hora = String(agora.getHours()).padStart(2, '0');
+    const min = String(agora.getMinutes()).padStart(2, '0');
+    let texto = '*ARCHIPELAGO* ' + dia + '/' + mes + '/' + ano + ', ' + hora + ':' + min + '\n';
+
     hospitaisParaRelatorio.forEach(function(hospitalId, index) {
         const hospital = window.hospitalData[hospitalId];
         if (!hospital || !hospital.leitos) return;
-        
+
         const nome = hospitaisNomes[hospitalId];
-        
-        // V7.0: Filtrar UTI
         const leitos = filtrarLeitosSemUTI(hospital.leitos);
-        
-        // V7.0: Buscar reservas
-        const reservas = getReservasHospital(hospitalId);
-        
-        if (filtroAtual === 'todos') {
-            texto += '━━━━━━━━━━━━━━━━━\n';
-            texto += '*' + (index + 1) + '. ' + nome + '*\n';
-            texto += '━━━━━━━━━━━━━━━━━\n\n';
-        }
-        
-        // V7.0: Adicionar info de reservas
-        const ocupados = leitos.filter(function(l) { return isOcupado(l); }).length;
-        const totalReservados = reservas.length;
-        if (totalReservados > 0) {
-            texto += '*Ocupados:* ' + ocupados + ' | *Reservados:* ' + totalReservados + '\n\n';
-        }
-        
-        // ========== ALTAS PREVISTAS ==========
-        var altasTimeline = {
-            'HOJE': { 'Ouro': [], '2R': [], '3R': [] },
-            '24H': { 'Ouro': [], '2R': [], '3R': [] },
-            '48H': []
-        };
-        
+
+        texto += '━━━━━━━━━━━━━━━━━\n';
+        texto += '*' + (index + 1) + '. ' + nome + '*\n';
+        texto += '━━━━━━━━━━━━━━━━━\n';
+
+        // Coletar altas 24H por turno
+        var altas24H = { 'Ouro': [], '2R': [], '3R': [] };
+
         leitos.forEach(function(leito) {
-            if (isOcupado(leito)) {
-                var prevAlta = leito.prevAlta || (leito.paciente && leito.paciente.prevAlta);
-                var matricula = leito.matricula || 'S/N';
-                
-                if (prevAlta) {
-                    var prev = normStr(prevAlta).replace(/\s+/g, ' ');
-                    
-                    if (prev.includes('hoje') && prev.includes('ouro')) altasTimeline['HOJE']['Ouro'].push(matricula);
-                    else if (prev.includes('hoje') && prev.includes('2r')) altasTimeline['HOJE']['2R'].push(matricula);
-                    else if (prev.includes('hoje') && prev.includes('3r')) altasTimeline['HOJE']['3R'].push(matricula);
-                    else if ((prev.includes('24h') || prev.includes('24 h')) && prev.includes('ouro')) altasTimeline['24H']['Ouro'].push(matricula);
-                    else if ((prev.includes('24h') || prev.includes('24 h')) && prev.includes('2r')) altasTimeline['24H']['2R'].push(matricula);
-                    else if ((prev.includes('24h') || prev.includes('24 h')) && prev.includes('3r')) altasTimeline['24H']['3R'].push(matricula);
-                    else if (prev.includes('48h')) altasTimeline['48H'].push(matricula);
-                }
+            if (!isOcupado(leito)) return;
+            var prevAlta = leito.prevAlta || (leito.paciente && leito.paciente.prevAlta);
+            if (!prevAlta) return;
+            var prev = normStr(prevAlta).replace(/\s+/g, ' ');
+            var matricula = leito.matricula || 'S/N';
+
+            if ((prev.includes('24h') || prev.includes('24 h')) && prev.includes('ouro')) {
+                altas24H['Ouro'].push(matricula);
+            } else if ((prev.includes('24h') || prev.includes('24 h')) && prev.includes('2r')) {
+                altas24H['2R'].push(matricula);
+            } else if ((prev.includes('24h') || prev.includes('24 h')) && prev.includes('3r')) {
+                altas24H['3R'].push(matricula);
             }
         });
-        
-        var temAltasHoje = altasTimeline['HOJE']['Ouro'].length > 0 || altasTimeline['HOJE']['2R'].length > 0 || altasTimeline['HOJE']['3R'].length > 0;
-        var temAltas24h = altasTimeline['24H']['Ouro'].length > 0 || altasTimeline['24H']['2R'].length > 0 || altasTimeline['24H']['3R'].length > 0;
-        var temAltas48h = altasTimeline['48H'].length > 0;
-        
-        if (temAltasHoje) {
-            texto += '*Altas Previstas HOJE:*\n';
-            if (altasTimeline['HOJE']['Ouro'].length > 0) {
-                texto += 'Hoje Ouro: ' + altasTimeline['HOJE']['Ouro'].join(', ') + '\n';
+
+        var total24H = altas24H['Ouro'].length + altas24H['2R'].length + altas24H['3R'].length;
+        var totalStr = String(total24H).padStart(2, '0');
+
+        texto += '*Altas Previstas 24H: ' + totalStr + '*\n';
+
+        if (total24H > 0) {
+            if (altas24H['Ouro'].length > 0) {
+                texto += '24h Ouro: ' + altas24H['Ouro'].join(', ') + '\n';
             }
-            if (altasTimeline['HOJE']['2R'].length > 0) {
-                texto += 'Hoje 2R: ' + altasTimeline['HOJE']['2R'].join(', ') + '\n';
+            if (altas24H['2R'].length > 0) {
+                texto += '24h 2R: ' + altas24H['2R'].join(', ') + '\n';
             }
-            if (altasTimeline['HOJE']['3R'].length > 0) {
-                texto += 'Hoje 3R: ' + altasTimeline['HOJE']['3R'].join(', ') + '\n';
+            if (altas24H['3R'].length > 0) {
+                texto += '24h 3R: ' + altas24H['3R'].join(', ') + '\n';
             }
-            texto += '\n';
-        }
-        
-        if (temAltas24h) {
-            texto += '*Altas Previstas 24H:*\n';
-            if (altasTimeline['24H']['Ouro'].length > 0) {
-                texto += '24h Ouro: ' + altasTimeline['24H']['Ouro'].join(', ') + '\n';
-            }
-            if (altasTimeline['24H']['2R'].length > 0) {
-                texto += '24h 2R: ' + altasTimeline['24H']['2R'].join(', ') + '\n';
-            }
-            if (altasTimeline['24H']['3R'].length > 0) {
-                texto += '24h 3R: ' + altasTimeline['24H']['3R'].join(', ') + '\n';
-            }
-            texto += '\n';
-        }
-        
-        if (temAltas48h) {
-            texto += '*Altas Previstas 48H:*\n';
-            texto += '48h: ' + altasTimeline['48H'].join(', ') + '\n\n';
-        }
-        
-        // ========== CONCESSÕES PREVISTAS ==========
-        var concessoesTimeline = {
-            'HOJE': {},
-            '24H': {}
-        };
-        
-        leitos.forEach(function(leito) {
-            if (isOcupado(leito)) {
-                var concessoes = leito.concessoes || (leito.paciente && leito.paciente.concessoes);
-                var prevAlta = leito.prevAlta || (leito.paciente && leito.paciente.prevAlta);
-                var matricula = leito.matricula || 'S/N';
-                
-                if (concessoes && prevAlta) {
-                    var concessoesList = Array.isArray(concessoes) ? 
-                        concessoes : 
-                        String(concessoes).split('|');
-                    
-                    var prev = normStr(prevAlta).replace(/\s+/g, ' ');
-                    var timeline = null;
-                    
-                    if (prev.includes('hoje')) timeline = 'HOJE';
-                    else if (prev.includes('24h') || prev.includes('24 h')) timeline = '24H';
-                    
-                    if (timeline) {
-                        concessoesList.forEach(function(concessao) {
-                            if (concessao && concessao.trim()) {
-                                var nomeConc = window.desnormalizarTexto ? window.desnormalizarTexto(concessao.trim()) : concessao.trim();
-                                if (!concessoesTimeline[timeline][nomeConc]) {
-                                    concessoesTimeline[timeline][nomeConc] = [];
-                                }
-                                concessoesTimeline[timeline][nomeConc].push(matricula);
-                            }
-                        });
-                    }
-                }
-            }
-        });
-        
-        var temConcessoesHoje = Object.keys(concessoesTimeline['HOJE']).length > 0;
-        var temConcessoes24h = Object.keys(concessoesTimeline['24H']).length > 0;
-        
-        if (temConcessoesHoje) {
-            texto += '*Concessões Previstas HOJE:*\n';
-            Object.entries(concessoesTimeline['HOJE']).forEach(function(entry) {
-                var nomeC = entry[0];
-                var matsC = entry[1];
-                var nomeFinal = window.desnormalizarTexto ? window.desnormalizarTexto(nomeC) : nomeC;
-                texto += nomeFinal + ': ' + matsC.join(', ') + '\n';
-            });
-            texto += '\n';
-        }
-        
-        if (temConcessoes24h) {
-            texto += '*Concessões Previstas 24H:*\n';
-            Object.entries(concessoesTimeline['24H']).forEach(function(entry) {
-                var nomeC = entry[0];
-                var matsC = entry[1];
-                var nomeFinal = window.desnormalizarTexto ? window.desnormalizarTexto(nomeC) : nomeC;
-                texto += nomeFinal + ': ' + matsC.join(', ') + '\n';
-            });
-            texto += '\n';
-        }
-        
-        // ========== DIRETIVAS PENDENTES ==========
-        // V7.2: Campo retornado pela API como 'Diretivas' (D maiúsculo)
-        var diretivasPendentes = leitos.filter(function(l) {
-            if (!isOcupado(l)) return false;
-            
-            var spict = l.spict;
-            if (!spict) return false;
-            
-            var spictNorm = normStr(spict);
-            if (spictNorm !== 'elegivel') return false;
-            
-            var dirVal = l.diretivas || l.Diretivas;
-            var dirNorm = normStr(dirVal);
-            return dirNorm === 'nao';
-        });
-        
-        if (diretivasPendentes.length > 0) {
-            texto += '*Diretivas Pendentes:*\n';
-            diretivasPendentes.forEach(function(l) {
-                var leitoId = l.identificacaoLeito || l.leito || '---';
-                var mat = l.matricula || '---';
-                texto += 'Leito ' + leitoId + ' - Mat. ' + mat + '\n';
-            });
-            texto += '\n';
-        }
-        
-        // Se não tem nada
-        if (!temAltasHoje && !temAltas24h && !temAltas48h && !temConcessoesHoje && !temConcessoes24h && diretivasPendentes.length === 0) {
-            texto += '_Nenhuma atividade prevista_\n\n';
         }
     });
-    
+
     navigator.clipboard.writeText(texto).then(function() {
         alert('Dados copiados para o WhatsApp!\n\nCole e envie.');
     }).catch(function(err) {
@@ -2857,8 +2729,8 @@ window.forceDataRefresh = function() {
     window.location.reload();
 };
 
-console.log('Dashboard Enfermarias V7.6 - Carregado com Sucesso!');
-console.log('V7.6 Fix: tph-gauge-block width 6px no iPad — barra TPH não transborda o box');
+console.log('Dashboard Enfermarias V7.7 - SYS-95: relatório somente Altas Previstas 24H');
+console.log('V7.7 SYS-95: relatório reformatado — cabeçalho *ARCHIPELAGO* DD/MM, somente Altas 24H com contagem e breakdown Ouro/2R/3R');
 console.log('V7.5 Fix: tipo-leito-table adicionada à media query 768-1024px — coluna Reservados visível no iPad');
 console.log('V7.4 Fix: dual-gauges reduzidos no iPad (76px, gap 20px) — evita estouro lateral do box Ocupação');
 console.log('V7.3 Fix: media query 768-1024px adicionada (iPad) — tabelas font 10px, white-space normal');

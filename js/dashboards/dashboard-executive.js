@@ -772,6 +772,14 @@ function processarDadosHospitalExecutivo(hospitalId) {
             }
         });
     }
+
+    // =================== V7.9: DESCONTAR RESERVADOS DE FLEXIVEIS (HÍBRIDOS) ===================
+    // calcularModalidadesVagosExecutivo computa flexiveis = contratuais - ocupados, sem descontar reservados.
+    // Para híbridos (H1, H3, H5, H6, H7, H8, H9), subtrair reservas.length aqui,
+    // alinhando modalidade.flexiveis com disponiveisTotal (que já desconta corretamente).
+    if (hospitalId !== 'H2' && hospitalId !== 'H4') {
+        modalidadeDisponiveis.flexiveis = Math.max(0, modalidadeDisponiveis.flexiveis - reservas.length);
+    }
     
     // =================== V7.0: CALCULAR RESERVADOS POR TIPO ===================
     let reservadosApto = 0;
@@ -2905,8 +2913,8 @@ function logError(message) {
     console.error('[DASHBOARD EXECUTIVO V7.7] ' + message);
 }
 
-console.log('Dashboard Executivo V7.8 - CORREÇÃO tabela iPad + gauge top fixo');
-console.log('V7.8 Fix: gauge-largo-info top: 90px nos 3 lugares (principal, tablet, mobile)');
+console.log('Dashboard Executivo V7.9 - CORREÇÃO flexiveis híbridos desconta reservados');
+console.log('V7.9 Fix: modalidade.flexiveis híbridos agora desconta reservados (alinhado com disponiveisTotal)');
 console.log('V7.8 Fix: tabela exec adicionada à media query 768-1024px (iPad Air) — font 10px, padding 5px 3px, white-space normal');
 console.log('V7.7 Fix: gauge-largo-info top fixo (30px) em vez de top:50% — compatível Safari');
 console.log('V7.7 Fix: v5-number-inside bottom:8px em vez de top:50% — compatível Safari');
