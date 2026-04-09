@@ -359,7 +359,7 @@ function jsonpRequest(url, params = {}) {
                 }
                 reject(new Error('JSONP request timeout'));
             }
-        }, 20000);
+        }, 35000);
         
         setTimeout(() => {
             document.head.appendChild(script);
@@ -420,35 +420,24 @@ async function apiRequest(action, params = {}, method = 'GET') {
             }
             
         } else {
-            try {
-                const response = await fetch(window.API_URL, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Accept': 'application/json'
-                    },
-                    body: JSON.stringify({ action, ...params })
-                });
-                
-                if (!response.ok) {
-                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+            // =================== V7.2: POST direto via JSONP ===================
+            // POST nativo sempre falha por CORS no GAS — vai direto para JSONP
+            // Retry automático: se timeout, tenta uma vez mais antes de mostrar erro
+            const tentarJSONP = async (tentativa) => {
+                try {
+                    const data = await jsonpRequest(window.API_URL, { action, ...params });
+                    if (!data || !data.ok) throw new Error(data?.error || 'Erro no POST via JSONP');
+                    logAPISuccess(`${method} ${action} concluido (JSONP tentativa ${tentativa})`, 'dados salvos');
+                    return data;
+                } catch (err) {
+                    if (err.message === 'JSONP request timeout' && tentativa === 1) {
+                        logAPI(`JSONP timeout na tentativa 1, tentando novamente...`);
+                        return await tentarJSONP(2);
+                    }
+                    throw err;
                 }
-                
-                const data = await response.json();
-                if (!data.ok) throw new Error(data.error || 'Erro no POST');
-                
-                logAPISuccess(`${method} ${action} concluido (POST)`, 'dados salvos');
-                return data;
-                
-            } catch (postError) {
-                logAPI(`POST falhou (${postError.message}), tentando via GET com JSONP...`);
-                
-                const data = await jsonpRequest(window.API_URL, { action, ...params });
-                if (!data || !data.ok) throw new Error(data?.error || 'Erro no POST via JSONP');
-                
-                logAPISuccess(`${method} ${action} concluido (POST via JSONP)`, 'dados salvos');
-                return data;
-            }
+            };
+            return await tentarJSONP(1);
         }
         
     } catch (error) {
@@ -1650,3 +1639,4 @@ logAPISuccess('Suporte a UTI implementado');
 logAPISuccess('NOVIDADE V7.1: Separacao hospitalData + leitosUTI');
 logAPISuccess('NOVIDADE V7.1: admitirPacienteUTI, atualizarPacienteUTI, darAltaPacienteUTI');
 logAPISuccess('NOVIDADE V7.1: Timeline UTI corrigida (Hoje, 24h, 48h, 72h, 96h, Sem Previsao)');
+logAPISuccess('SYS-259 V7.2: POST direto via JSONP + retry automatico em timeout + timeout 35s');
